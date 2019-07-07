@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		FD79323622D20FE600E7D336 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD79323522D20FE600E7D336 /* AppDelegate.swift */; };
 		FD79323822D20FE600E7D336 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = FD79323722D20FE600E7D336 /* GameScene.sks */; };
-		FD79323A22D20FE600E7D336 /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = FD79323922D20FE600E7D336 /* Actions.sks */; };
 		FD79323C22D20FE600E7D336 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD79323B22D20FE600E7D336 /* GameScene.swift */; };
 		FD79323E22D20FE600E7D336 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD79323D22D20FE600E7D336 /* GameViewController.swift */; };
 		FD79324122D20FE600E7D336 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FD79323F22D20FE600E7D336 /* Main.storyboard */; };
@@ -21,7 +20,6 @@
 		FD79323222D20FE600E7D336 /* Asteroids.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Asteroids.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD79323522D20FE600E7D336 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		FD79323722D20FE600E7D336 /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
-		FD79323922D20FE600E7D336 /* Actions.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Actions.sks; sourceTree = "<group>"; };
 		FD79323B22D20FE600E7D336 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
 		FD79323D22D20FE600E7D336 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		FD79324022D20FE600E7D336 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -62,7 +60,6 @@
 			children = (
 				FD79323522D20FE600E7D336 /* AppDelegate.swift */,
 				FD79323722D20FE600E7D336 /* GameScene.sks */,
-				FD79323922D20FE600E7D336 /* Actions.sks */,
 				FD79323B22D20FE600E7D336 /* GameScene.swift */,
 				FD79323D22D20FE600E7D336 /* GameViewController.swift */,
 				FD79323F22D20FE600E7D336 /* Main.storyboard */,
@@ -135,7 +132,6 @@
 				FD79323822D20FE600E7D336 /* GameScene.sks in Resources */,
 				FD79324322D20FE700E7D336 /* Assets.xcassets in Resources */,
 				FD79324622D20FE700E7D336 /* LaunchScreen.storyboard in Resources */,
-				FD79323A22D20FE600E7D336 /* Actions.sks in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -304,7 +300,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.davidlong.Asteroids;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Debug;
 		};
@@ -322,7 +318,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.davidlong.Asteroids;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Release;
 		};
