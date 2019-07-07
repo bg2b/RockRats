@@ -9,10 +9,18 @@
 import SpriteKit
 import GameplayKit
 
+class Ship: SKSpriteNode {
+  convenience init() {
+    self.init(imageNamed: "playerShip_blue")
+  }
+}
+
 class GameScene: SKScene {
 
   override func didMove(to view: SKView) {
-
+    let ship = Ship()
+    ship.position = CGPoint(x: 0.0, y: 0.0)
+    addChild(ship)
   }
 
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
