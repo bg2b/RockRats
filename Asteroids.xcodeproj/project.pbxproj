@@ -15,6 +15,7 @@
 		FD79324322D20FE700E7D336 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FD79324222D20FE700E7D336 /* Assets.xcassets */; };
 		FD79324622D20FE700E7D336 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FD79324422D20FE700E7D336 /* LaunchScreen.storyboard */; };
 		FD79325222D21B6E00E7D336 /* playerShip_blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD79325122D21B6E00E7D336 /* playerShip_blue@2x.png */; };
+		FDDF488722D2A700006FB86F /* SpriteCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDDF488622D2A700006FB86F /* SpriteCache.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		FD79324522D20FE700E7D336 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FD79324722D20FE700E7D336 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FD79325122D21B6E00E7D336 /* playerShip_blue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "playerShip_blue@2x.png"; sourceTree = "<group>"; };
+		FDDF488622D2A700006FB86F /* SpriteCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteCache.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +66,7 @@
 				FD79323522D20FE600E7D336 /* AppDelegate.swift */,
 				FD79323722D20FE600E7D336 /* GameScene.sks */,
 				FD79323B22D20FE600E7D336 /* GameScene.swift */,
+				FDDF488622D2A700006FB86F /* SpriteCache.swift */,
 				FD79323D22D20FE600E7D336 /* GameViewController.swift */,
 				FD79323F22D20FE600E7D336 /* Main.storyboard */,
 				FD79324222D20FE700E7D336 /* Assets.xcassets */,
@@ -157,6 +160,7 @@
 				FD79323C22D20FE600E7D336 /* GameScene.swift in Sources */,
 				FD79323E22D20FE600E7D336 /* GameViewController.swift in Sources */,
 				FD79323622D20FE600E7D336 /* AppDelegate.swift in Sources */,
+				FDDF488722D2A700006FB86F /* SpriteCache.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
