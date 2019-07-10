@@ -8,61 +8,94 @@
 
 import SpriteKit
 
-enum TeamColor: String {
-  case blue = "blue"
-  case green = "green"
-  case orange = "orange"
-  case red = "red"
-}
+let teamColors = ["blue", "green", "red", "orange"]
+let numColors = teamColors.count
 
-extension SKSpriteNode {
-  convenience init(physicsImageName: String) {
-    self.init(imageNamed: physicsImageName)
-    self.physicsBody = SKPhysicsBody(texture: self.texture!, size: self.texture!.size())
-  }
-
+extension SKNode {
   func wrapCoordinates() {
     guard let frame = self.parent?.frame else { return }
-    if position.x < frame.minX {
+    // We wrap only after going past the edge a little bit so that an object that's
+    // moving just along the edge won't stutter back and forth.
+    let hysteresis = CGFloat(3)
+    if position.x < frame.minX - hysteresis {
       position.x += frame.width
-    } else if position.x > frame.maxX {
+    } else if position.x > frame.maxX + hysteresis {
       position.x -= frame.width
     }
-    if position.y < frame.minY {
+    if position.y < frame.minY - hysteresis {
       position.y += frame.height
-    } else if position.y > frame.maxY {
+    } else if position.y > frame.maxY + hysteresis {
       position.y -= frame.height
     }
   }
 }
 
 class GameScene: SKScene {
-
-  var spriteCache = SpriteCache()
-  var sprites = [SKSpriteNode]()
+  var spriteCache = SpriteCache<SKSpriteNode>()
+  var stars: SKNode!
+  var playfield: SKShapeNode!
 
   func makeSprite(imageNamed name: String) -> SKSpriteNode {
-    let sprite = spriteCache.findSprite(imageNamed: name)
-    addChild(sprite)
-    sprites.append(sprite)
-    return sprite
+    return spriteCache.findSprite(imageNamed: name)
   }
 
   func recycleSprite(_ sprite: SKSpriteNode) {
-    if let index = sprites.firstIndex(of: sprite) {
-      sprites.remove(at: index)
-    }
     spriteCache.recycleSprite(sprite)
   }
 
-  func makeShip(color: TeamColor) -> SKSpriteNode {
-    return makeSprite(imageNamed: "playerShip_" + color.rawValue)
+  func makeShip() -> SKSpriteNode {
+    let ship = makeSprite(imageNamed: "playerShip_" + teamColors[0])
+    ship.physicsBody?.linearDamping = 0.05
+    playfield.addChild(ship)
+    return ship
+  }
+
+  func makeStar() -> SKSpriteNode {
+    let starType = Int.random(in: 1...3)
+    let star = SKSpriteNode(imageNamed: "star\(starType)")
+    star.setScale(CGFloat.random(in: 0.5...1.0))
+    star.alpha = CGFloat.random(in: 0.5...1.0)
+    return star
+  }
+
+  func initStars() {
+    stars = SKNode()
+    stars.zPosition = -1
+    addChild(stars)
+    var twinkleActions = [SKAction]()
+    for _ in 0..<5 {
+      let angle = CGFloat(2 * Int.random(in: 0...1) - 1) * CGFloat.pi
+      let rot = SKAction.repeatForever(SKAction.rotate(byAngle: angle,
+                                                       duration: Double.random(in: 2.0...8.0)))
+      let duration = Double.random(in: 2.0...8.0)
+      let brighten = SKAction.fadeAlpha(to: 1.0, duration: 0.5 * duration)
+      let dim = SKAction.fadeAlpha(to: 0.5, duration: 0.5 * duration)
+      let brightenAndDim = SKAction.repeatForever(SKAction.sequence([brighten, dim]))
+      twinkleActions.append(SKAction.group([rot, brightenAndDim]))
+    }
+    for _ in 0..<100 {
+      let star = makeStar()
+      star.position = CGPoint(x: CGFloat.random(in: frame.minX...frame.maxX),
+                              y: CGFloat.random(in: frame.minY...frame.maxY))
+      star.run(twinkleActions.randomElement()!)
+      stars.addChild(star)
+    }
   }
 
   override func didMove(to view: SKView) {
-    let ship1 = makeShip(color: .blue)
+    initStars()
+    playfield = SKShapeNode(rect: frame)
+    playfield.zPosition = 0
+    playfield.blendMode = .replace
+    playfield.fillColor = .clear
+    playfield.strokeColor = .clear
+    print(playfield.frame)
+    addChild(playfield)
+    let ship1 = makeShip()
+    ship1["player"] = "player1"
     ship1.position = CGPoint(x: 500.0, y: -25.0)
-    let ship = makeShip(color: .blue)
+    let ship = makeShip()
+    ship["player"] = "player2"
     ship.position = CGPoint(x: 0.0, y: 0.0)
     ship1.physicsBody?.applyImpulse(CGVector(dx: -10.0, dy: 1.0))
     ship.physicsBody?.applyImpulse(CGVector(dx: 10.0, dy: -1.0))
@@ -78,8 +111,6 @@ class GameScene: SKScene {
   }
 
   override func update(_ currentTime: TimeInterval) {
-    for sprite in sprites {
-      sprite.wrapCoordinates()
-    }
+    playfield.children.forEach { $0.wrapCoordinates() }
   }
 }
