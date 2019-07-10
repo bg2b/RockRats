@@ -8,23 +8,22 @@
 
 import SpriteKit
 
-class SpriteCache {
-  var sprites = [String: [SKSpriteNode]]()
+class SpriteCache<T: SKSpriteNode> {
+  var sprites = [String: [T]]()
   var created = 0
   var recycled = 0
 
-  func makeSprite(imageNamed name: String) -> SKSpriteNode {
-    let sprite = SKSpriteNode(imageNamed: name)
+  func makeSprite(imageNamed name: String) -> T {
+    let sprite = T(imageNamed: name)
     sprite.physicsBody = SKPhysicsBody(texture: sprite.texture!, size: sprite.texture!.size())
-    sprite.userData = NSMutableDictionary()
-    sprite.userData!["imageName"] = name
+    sprite.name = name
     created += 1
     return sprite
   }
 
-  func findSprite(imageNamed name: String) -> SKSpriteNode {
+  func findSprite(imageNamed name: String) -> T {
     if sprites[name] == nil {
-      sprites[name] = [SKSpriteNode]()
+      sprites[name] = [T]()
     }
     if sprites[name]!.isEmpty {
       return makeSprite(imageNamed: name)
@@ -33,12 +32,11 @@ class SpriteCache {
     return sprites[name]!.popLast()!
   }
 
-  func recycleSprite(_ sprite: SKSpriteNode) {
+  func recycleSprite(_ sprite: T) {
     if let _ = sprite.parent {
       sprite.removeFromParent()
     }
-    guard let name = sprite.userData?["imageName"] as? String else { fatalError() }
-    sprites[name]!.append(sprite)
+    sprites[sprite.name!]!.append(sprite)
     recycled += 1
   }
 
