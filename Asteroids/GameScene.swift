@@ -50,12 +50,33 @@ class GameScene: SKScene {
     return ship
   }
 
-  func makeStar() -> SKSpriteNode {
-    let starType = Int.random(in: 1...3)
-    let star = SKSpriteNode(imageNamed: "star\(starType)")
-    star.setScale(CGFloat.random(in: 0.5...1.0))
-    star.alpha = CGFloat.random(in: 0.5...1.0)
-    return star
+  func RGB(_ red: Int, _ green: Int, _ blue: Int) -> UIColor {
+    return UIColor(red: CGFloat(red)/255.0, green: CGFloat(green)/255.0, blue: CGFloat(blue)/255.0, alpha: 1.0)
+  }
+
+  func makeStar() -> SKNode {
+    let starType = Int.random(in: 1...5)
+    let tints = [RGB(202, 215, 255),
+                 RGB(248, 247, 255),
+                 RGB(255, 244, 234),
+                 RGB(255, 210, 161),
+                 RGB(255, 204, 111)]
+    let tint = tints.randomElement()!
+    let alpha = CGFloat.random(in: 0.5...1.0)
+    if starType <= 3 {
+      let star = SKSpriteNode(imageNamed: "star\(starType)")
+      star.setScale(CGFloat.random(in: 0.5...1.0))
+      star.color = tint
+      star.colorBlendFactor = 1.0
+      star.alpha = alpha
+      return star
+    } else {
+      let star = SKShapeNode(circleOfRadius: CGFloat.random(in: 1.0...5.0))
+      star.fillColor = tint
+      star.strokeColor = .clear
+      star.alpha = alpha
+      return star
+    }
   }
 
   func initStars() {
