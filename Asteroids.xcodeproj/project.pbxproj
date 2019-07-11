@@ -20,6 +20,8 @@
 		FDE04B2722D5FEA30011A529 /* star1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FDE04B2422D5FEA30011A529 /* star1@2x.png */; };
 		FDE04B2822D5FEA30011A529 /* star3@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FDE04B2522D5FEA30011A529 /* star3@2x.png */; };
 		FDE04B2922D5FEA30011A529 /* star2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FDE04B2622D5FEA30011A529 /* star2@2x.png */; };
+		FDE04B2B22D745470011A529 /* Joystick.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE04B2A22D745470011A529 /* Joystick.swift */; };
+		FDE04B2D22D753240011A529 /* TextureCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE04B2C22D753240011A529 /* TextureCache.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +40,8 @@
 		FDE04B2422D5FEA30011A529 /* star1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "star1@2x.png"; sourceTree = "<group>"; };
 		FDE04B2522D5FEA30011A529 /* star3@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "star3@2x.png"; sourceTree = "<group>"; };
 		FDE04B2622D5FEA30011A529 /* star2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "star2@2x.png"; sourceTree = "<group>"; };
+		FDE04B2A22D745470011A529 /* Joystick.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Joystick.swift; sourceTree = "<group>"; };
+		FDE04B2C22D753240011A529 /* TextureCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureCache.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,7 +78,9 @@
 				FD79323522D20FE600E7D336 /* AppDelegate.swift */,
 				FD79323722D20FE600E7D336 /* GameScene.sks */,
 				FD79323B22D20FE600E7D336 /* GameScene.swift */,
+				FDE04B2A22D745470011A529 /* Joystick.swift */,
 				FDDF488622D2A700006FB86F /* SpriteCache.swift */,
+				FDE04B2C22D753240011A529 /* TextureCache.swift */,
 				FDDF488822D2D864006FB86F /* NodeData.swift */,
 				FD79323D22D20FE600E7D336 /* GameViewController.swift */,
 				FD79323F22D20FE600E7D336 /* Main.storyboard */,
@@ -172,9 +178,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FDE04B2D22D753240011A529 /* TextureCache.swift in Sources */,
 				FD79323C22D20FE600E7D336 /* GameScene.swift in Sources */,
 				FD79323E22D20FE600E7D336 /* GameViewController.swift in Sources */,
 				FD79323622D20FE600E7D336 /* AppDelegate.swift in Sources */,
+				FDE04B2B22D745470011A529 /* Joystick.swift in Sources */,
 				FDDF488722D2A700006FB86F /* SpriteCache.swift in Sources */,
 				FDDF488922D2D864006FB86F /* NodeData.swift in Sources */,
 			);

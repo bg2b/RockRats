@@ -9,12 +9,17 @@
 import SpriteKit
 
 class SpriteCache<T: SKSpriteNode> {
+  let textureCache: TextureCache
   var sprites = [String: [T]]()
   var created = 0
   var recycled = 0
 
+  init(textureCache: TextureCache) {
+    self.textureCache = textureCache
+  }
+
   func makeSprite(imageNamed name: String) -> T {
-    let sprite = T(imageNamed: name)
+    let sprite = T(texture: textureCache.findTexture(imageNamed: name))
     sprite.physicsBody = SKPhysicsBody(texture: sprite.texture!, size: sprite.texture!.size())
     sprite.name = name
     created += 1

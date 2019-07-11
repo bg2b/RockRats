@@ -30,12 +30,30 @@ extension SKNode {
   }
 }
 
+extension CGSize {
+  func scale(by amount: CGFloat) -> CGSize {
+    return CGSize(width: width * amount, height: height * amount)
+  }
+
+  func scale(to size: CGFloat) -> CGSize {
+    if width > height {
+      return scale(by: size / width)
+    } else {
+      return scale(by: size / height)
+    }
+  }
+}
+
 class GameScene: SKScene {
-  var spriteCache = SpriteCache<SKSpriteNode>()
+  var textureCache = TextureCache()
+  var spriteCache: SpriteCache<SKSpriteNode>!
   var stars: SKNode!
   var playfield: SKShapeNode!
 
   func makeSprite(imageNamed name: String) -> SKSpriteNode {
+    if spriteCache == nil {
+      spriteCache = SpriteCache<SKSpriteNode>(textureCache: textureCache)
+    }
     return spriteCache.findSprite(imageNamed: name)
   }
 
@@ -64,8 +82,9 @@ class GameScene: SKScene {
     let tint = tints.randomElement()!
     let alpha = CGFloat.random(in: 0.5...1.0)
     if starType <= 3 {
-      let star = SKSpriteNode(imageNamed: "star\(starType)")
-      star.setScale(CGFloat.random(in: 0.5...1.0))
+      let scale = CGFloat.random(in: 0.5...1.0)
+      let texture = textureCache.findTexture(imageNamed: "star\(starType)")
+      let star = SKSpriteNode(texture: texture, size: texture.size().scale(by: scale))
       star.color = tint
       star.colorBlendFactor = 1.0
       star.alpha = alpha
