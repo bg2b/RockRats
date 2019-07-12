@@ -67,6 +67,34 @@ class GameScene: SKScene {
     return ship
   }
 
+  func tilingShader() -> SKShader {
+    let shaderSource = """
+    void main() {
+      v_tex_coord = fract(v_tex_coord * a_repetitions);
+      gl_FragColor = SKDefaultShading();
+    }
+    """
+    let shader = SKShader(source: shaderSource)
+    shader.attributes = [SKAttribute(name: "a_repetitions", type: .vectorFloat2)]
+    return shader
+  }
+
+  func initBackground() {
+    let background = SKShapeNode(rect: frame)
+    background.strokeColor = .clear
+    background.blendMode = .replace
+    background.zPosition = -2
+    let stars = textureCache.findTexture(imageNamed: "starfield_blue")
+    let tsize = stars.size()
+    background.fillTexture = stars
+    background.fillColor = .white
+    background.fillShader = tilingShader()
+    let reps = vector_float2([Float(frame.width / tsize.width), Float(frame.height / tsize.height)])
+    print(reps)
+    background.setValue(SKAttributeValue(vectorFloat2: reps), forAttribute: "a_repetitions")
+    addChild(background)
+  }
+
   func RGB(_ red: Int, _ green: Int, _ blue: Int) -> UIColor {
     return UIColor(red: CGFloat(red)/255.0, green: CGFloat(green)/255.0, blue: CGFloat(blue)/255.0, alpha: 1.0)
   }
@@ -122,10 +150,10 @@ class GameScene: SKScene {
   }
 
   override func didMove(to view: SKView) {
+    initBackground()
     initStars()
     playfield = SKShapeNode(rect: frame)
     playfield.zPosition = 0
-    playfield.blendMode = .replace
     playfield.fillColor = .clear
     playfield.strokeColor = .clear
     print(playfield.frame)
