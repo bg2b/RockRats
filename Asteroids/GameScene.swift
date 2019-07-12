@@ -47,7 +47,6 @@ extension CGSize {
 class GameScene: SKScene {
   var textureCache = TextureCache()
   var spriteCache: SpriteCache<SKSpriteNode>!
-  var stars: SKNode!
   var playfield: SKShapeNode!
 
   func makeSprite(imageNamed name: String) -> SKSpriteNode {
@@ -99,7 +98,7 @@ class GameScene: SKScene {
   }
 
   func initStars() {
-    stars = SKNode()
+    let stars = SKNode()
     stars.zPosition = -1
     addChild(stars)
     var twinkleActions = [SKAction]()
@@ -139,6 +138,10 @@ class GameScene: SKScene {
     ship.position = CGPoint(x: 0.0, y: 0.0)
     ship1.physicsBody?.applyImpulse(CGVector(dx: -10.0, dy: 1.0))
     ship.physicsBody?.applyImpulse(CGVector(dx: 10.0, dy: -1.0))
+    let joystick = Joystick(size: 100.0, fgColor: .lightGray, bgColor: .darkGray, texture: textureCache.findTexture(imageNamed: "ship_blue"))
+    joystick.position = CGPoint(x: frame.minX + 100.0, y: frame.minY + 100.0)
+    joystick.zPosition = 2.0
+    addChild(joystick)
   }
 
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
