@@ -62,7 +62,7 @@ class GameScene: SKScene {
   }
 
   func makeShip() -> SKSpriteNode {
-    let ship = makeSprite(imageNamed: "playerShip_" + teamColors[0])
+    let ship = makeSprite(imageNamed: "ship_" + teamColors[0])
     ship.physicsBody?.linearDamping = 0.05
     playfield.addChild(ship)
     return ship
