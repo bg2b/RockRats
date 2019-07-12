@@ -99,52 +99,47 @@ class GameScene: SKScene {
     return UIColor(red: CGFloat(red)/255.0, green: CGFloat(green)/255.0, blue: CGFloat(blue)/255.0, alpha: 1.0)
   }
 
-  func makeStar() -> SKNode {
-    let starType = Int.random(in: 1...5)
+  func twinkleAction(period: Double, from dim: CGFloat, to bright: CGFloat) -> SKAction {
+    let twinkleDuration = 0.4
+    let delay = SKAction.wait(forDuration: period - twinkleDuration)
+    let brighten = SKAction.fadeAlpha(to: bright, duration: 0.5 * twinkleDuration)
+    brighten.timingMode = .easeIn
+    let fade = SKAction.fadeAlpha(to: dim, duration: 0.5 * twinkleDuration)
+    fade.timingMode = .easeOut
+    return SKAction.repeatForever(SKAction.sequence([brighten, fade, delay]))
+  }
+
+  func makeStar() -> SKSpriteNode {
     let tints = [RGB(202, 215, 255),
                  RGB(248, 247, 255),
                  RGB(255, 244, 234),
                  RGB(255, 210, 161),
                  RGB(255, 204, 111)]
     let tint = tints.randomElement()!
-    let alpha = CGFloat.random(in: 0.5...1.0)
-    if starType <= 3 {
-      let scale = CGFloat.random(in: 0.5...1.0)
-      let texture = textureCache.findTexture(imageNamed: "star\(starType)")
-      let star = SKSpriteNode(texture: texture, size: texture.size().scale(by: scale))
-      star.color = tint
-      star.colorBlendFactor = 1.0
-      star.alpha = alpha
-      return star
-    } else {
-      let star = SKShapeNode(circleOfRadius: CGFloat.random(in: 1.0...5.0))
-      star.fillColor = tint
-      star.strokeColor = .clear
-      star.alpha = alpha
-      return star
-    }
+    let scale = CGFloat.random(in: 0.5...1.0)
+    let texture = textureCache.findTexture(imageNamed: "star1")
+    let star = SKSpriteNode(texture: texture, size: texture.size().scale(by: scale))
+    star.color = tint
+    star.colorBlendFactor = 1.0
+    return star
   }
 
   func initStars() {
     let stars = SKNode()
     stars.zPosition = -1
     addChild(stars)
-    var twinkleActions = [SKAction]()
-    for _ in 0..<5 {
-      let angle = CGFloat(2 * Int.random(in: 0...1) - 1) * CGFloat.pi
-      let rot = SKAction.repeatForever(SKAction.rotate(byAngle: angle,
-                                                       duration: Double.random(in: 2.0...8.0)))
-      let duration = Double.random(in: 2.0...8.0)
-      let brighten = SKAction.fadeAlpha(to: 1.0, duration: 0.5 * duration)
-      let dim = SKAction.fadeAlpha(to: 0.5, duration: 0.5 * duration)
-      let brightenAndDim = SKAction.repeatForever(SKAction.sequence([brighten, dim]))
-      twinkleActions.append(SKAction.group([rot, brightenAndDim]))
-    }
-    for _ in 0..<100 {
+    let dim = CGFloat(0.1)
+    let bright = CGFloat(0.2)
+    let period = 8.0
+    let twinkle = twinkleAction(period: period, from: dim, to: bright)
+    for _ in 0..<50 {
       let star = makeStar()
+      star.alpha = dim
       star.position = CGPoint(x: CGFloat.random(in: frame.minX...frame.maxX),
                               y: CGFloat.random(in: frame.minY...frame.maxY))
-      star.run(twinkleActions.randomElement()!)
+      let initialWait = SKAction.wait(forDuration: Double.random(in: 0.0...period))
+      star.run(SKAction.sequence([initialWait, twinkle]))
+      star.speed = CGFloat.random(in: 0.75...1.5)
       stars.addChild(star)
     }
   }
