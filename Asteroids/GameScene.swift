@@ -42,6 +42,9 @@ class GameScene: SKScene {
   var textureCache = TextureCache()
   var spriteCache: SpriteCache<SKSpriteNode>!
   var playfield: SKNode!
+  var ship: SKNode!
+  var info: SKLabelNode!
+  var joystick: Joystick!
 
   func makeSprite(imageNamed name: String) -> SKSpriteNode {
     if spriteCache == nil {
@@ -154,11 +157,19 @@ class GameScene: SKScene {
     addChild(controls)
     let controlSize = CGFloat(100)
     let offset = controlSize
-    let joystick = Joystick(size: controlSize, borderColor: .lightGray, fillColor: UIColor(white: 0.33, alpha: 0.33),
-                            texture: textureCache.findTexture(imageNamed: "ship_blue"))
+    joystick = Joystick(size: controlSize, borderColor: .lightGray, fillColor: UIColor(white: 0.33, alpha: 0.33),
+                        texture: textureCache.findTexture(imageNamed: "ship_blue"))
     joystick.position = CGPoint(x: frame.minX + offset, y: frame.minY + offset)
     joystick.zRotation = CGFloat.pi / 2
     controls.addChild(joystick)
+  }
+
+  func initInfo() {
+    info = SKLabelNode(text: nil)
+    info.name = "info"
+    info.zPosition = LevelZs.info.rawValue
+    addChild(info)
+    info.position = CGPoint(x: frame.midX, y: frame.maxY - 50.0)
   }
 
   override func didMove(to view: SKView) {
@@ -166,17 +177,29 @@ class GameScene: SKScene {
     initStars()
     initPlayfield()
     initControls()
-    let ship1 = makeShip()
-    ship1["player"] = "player1"
-    ship1.position = CGPoint(x: 500.0, y: -25.0)
-    let ship = makeShip()
-    ship["player"] = "player2"
+    initInfo()
+    ship = makeShip()
     ship.position = CGPoint(x: 0.0, y: 0.0)
-    ship1.physicsBody?.applyImpulse(CGVector(dx: -10.0, dy: 1.0))
-    ship.physicsBody?.applyImpulse(CGVector(dx: 10.0, dy: -1.0))
+    print("mass is \(ship.physicsBody!.mass)")
+    ship.physicsBody?.angularDamping = 0.95
+    ship.physicsBody?.linearDamping = 0.1
   }
 
   override func update(_ currentTime: TimeInterval) {
+    guard let shipPhysicsBody = ship.physicsBody else { return }
+    let angle = ship.zRotation
+    let delta = joystick.getDirection()
+    shipPhysicsBody.linearDamping = max(0.1 - 0.4 * delta.dx, 0.1)
+    if delta.dx > 0.0 {
+      shipPhysicsBody.applyForce(CGVector(dx: cos(angle), dy: sin(angle)).scale(by: delta.dx))
+    }
+    if delta.dy != 0.0 {
+      shipPhysicsBody.angularVelocity = 2.0 * delta.dy
+    }
+//    if delta.dy != 0.0 {
+//      shipPhysicsBody.applyTorque(delta.dy)
+//    }
+    info.text = String(format: "Stick is % .3f,% .3f", delta.dx, delta.dy)
     playfield.children.forEach { $0.wrapCoordinates() }
   }
 }
