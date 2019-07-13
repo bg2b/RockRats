@@ -43,9 +43,49 @@ extension Globals {
   static var spriteCache = SpriteCache()
 }
 
+class Ship: SKNode {
+  required init(color: String) {
+    super.init()
+    self.name = "ship"
+    let shipTexture = Globals.textureCache.findTexture(imageNamed: "ship_\(color)")
+    let ship = SKSpriteNode(texture: shipTexture)
+    ship.name = "shipImage"
+    addChild(ship)
+    let body = SKPhysicsBody(texture: shipTexture, size: shipTexture.size())
+    body.linearDamping = 0.05
+    physicsBody = body
+  }
+
+  required init(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented by Ship")
+  }
+
+  func fly(stickPosition stick: CGVector) {
+    guard let body = physicsBody else { fatalError("Where did Ship's physicsBody go?") }
+    let angle = stick.angle()
+    if abs(angle) >= 3 * .pi / 4 {
+      // Joystick is pointing backwards, put on the brakes
+      body.linearDamping = min(-stick.dx, 0.7)
+    } else {
+      body.linearDamping = 0.05
+    }
+    if abs(angle) <= .pi / 4 {
+      // Pointing forwards, thrusters active
+      let thrust = CGVector(angle: zRotation).scale(by: 3 * min(stick.dx, 0.7))
+      body.applyForce(thrust)
+    }
+    if abs(abs(angle) - .pi / 2) <= .pi / 4 {
+      // Left or right rotation, set an absolute angular speed
+      body.angularVelocity = copysign(.pi * min(abs(stick.dy), 0.7), angle)
+    } else {
+      body.angularVelocity = 0.0
+    }
+  }
+}
+
 class GameScene: SKScene {
   var playfield: SKNode!
-  var ship: SKNode!
+  var player: Ship!
   var info: SKLabelNode!
   var joystick: Joystick!
 
@@ -57,9 +97,8 @@ class GameScene: SKScene {
     Globals.spriteCache.recycleSprite(sprite)
   }
 
-  func makeShip() -> SKSpriteNode {
-    let ship = makeSprite(imageNamed: "ship_" + teamColors[0])
-    ship.physicsBody?.linearDamping = 0.05
+  func makeShip() -> Ship {
+    let ship = Ship(color: teamColors[0])
     playfield.addChild(ship)
     return ship
   }
@@ -160,7 +199,7 @@ class GameScene: SKScene {
     joystick = Joystick(size: controlSize, borderColor: .lightGray, fillColor: UIColor(white: 0.33, alpha: 0.33),
                         texture: Globals.textureCache.findTexture(imageNamed: "ship_blue"))
     joystick.position = CGPoint(x: frame.minX + offset, y: frame.minY + offset)
-    joystick.zRotation = CGFloat.pi / 2
+    joystick.zRotation = .pi / 2
     controls.addChild(joystick)
   }
 
@@ -178,28 +217,12 @@ class GameScene: SKScene {
     initPlayfield()
     initControls()
     initInfo()
-    ship = makeShip()
-    ship.position = CGPoint(x: 0.0, y: 0.0)
-    print("mass is \(ship.physicsBody!.mass)")
-    ship.physicsBody?.angularDamping = 0.95
-    ship.physicsBody?.linearDamping = 0.1
+    player = makeShip()
+    player.position = CGPoint.zero
   }
 
   override func update(_ currentTime: TimeInterval) {
-    guard let shipPhysicsBody = ship.physicsBody else { return }
-    let angle = ship.zRotation
-    let delta = joystick.getDirection()
-    shipPhysicsBody.linearDamping = max(0.1 - 0.4 * delta.dx, 0.1)
-    if delta.dx > 0.0 {
-      shipPhysicsBody.applyForce(CGVector(dx: cos(angle), dy: sin(angle)).scale(by: delta.dx))
-    }
-    if delta.dy != 0.0 {
-      shipPhysicsBody.angularVelocity = 2.0 * delta.dy
-    }
-//    if delta.dy != 0.0 {
-//      shipPhysicsBody.applyTorque(delta.dy)
-//    }
-    info.text = String(format: "Stick is % .3f,% .3f", delta.dx, delta.dy)
+    player.fly(stickPosition: joystick.getDirection())
     playfield.children.forEach { $0.wrapCoordinates() }
   }
 }
