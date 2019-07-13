@@ -8,6 +8,14 @@
 
 import SpriteKit
 
+enum LevelZs: CGFloat {
+  case background = -200
+  case stars = -100
+  case playfield = 0
+  case controls = 100
+  case info = 200
+}
+
 let teamColors = ["blue", "green", "red", "orange"]
 let numColors = teamColors.count
 
@@ -83,7 +91,7 @@ class GameScene: SKScene {
     let background = SKShapeNode(rect: frame)
     background.strokeColor = .clear
     background.blendMode = .replace
-    background.zPosition = -2
+    background.zPosition = LevelZs.background.rawValue
     let stars = textureCache.findTexture(imageNamed: "starfield_blue")
     let tsize = stars.size()
     background.fillTexture = stars
@@ -126,7 +134,7 @@ class GameScene: SKScene {
 
   func initStars() {
     let stars = SKNode()
-    stars.zPosition = -1
+    stars.zPosition = LevelZs.stars.rawValue
     addChild(stars)
     let dim = CGFloat(0.1)
     let bright = CGFloat(0.2)
@@ -148,7 +156,7 @@ class GameScene: SKScene {
     initBackground()
     initStars()
     playfield = SKShapeNode(rect: frame)
-    playfield.zPosition = 0
+    playfield.zPosition = LevelZs.playfield.rawValue
     playfield.fillColor = .clear
     playfield.strokeColor = .clear
     print(playfield.frame)
