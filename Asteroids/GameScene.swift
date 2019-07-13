@@ -21,7 +21,7 @@ let numColors = teamColors.count
 
 extension SKNode {
   func wrapCoordinates() {
-    guard let frame = self.parent?.frame else { return }
+    guard let frame = self.scene?.frame else { return }
     // We wrap only after going past the edge a little bit so that an object that's
     // moving just along the edge won't stutter back and forth.
     let hysteresis = CGFloat(3)
@@ -55,7 +55,7 @@ extension CGSize {
 class GameScene: SKScene {
   var textureCache = TextureCache()
   var spriteCache: SpriteCache<SKSpriteNode>!
-  var playfield: SKShapeNode!
+  var playfield: SKNode!
 
   func makeSprite(imageNamed name: String) -> SKSpriteNode {
     if spriteCache == nil {
@@ -155,20 +155,16 @@ class GameScene: SKScene {
   }
 
   func initPlayfield() {
-    playfield = SKShapeNode(rect: frame)
+    playfield = SKNode()
     playfield.name = "playfield"
     playfield.zPosition = LevelZs.playfield.rawValue
-    playfield.fillColor = .clear
-    playfield.strokeColor = .clear
     addChild(playfield)
   }
 
   func initControls() {
-    let controls = SKShapeNode(rect: frame)
+    let controls = SKNode()
     controls.name = "controls"
     controls.zPosition = LevelZs.controls.rawValue
-    controls.fillColor = .clear
-    controls.strokeColor = .clear
     addChild(controls)
     let controlSize = CGFloat(100)
     let offset = controlSize
