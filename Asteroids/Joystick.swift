@@ -13,6 +13,7 @@ class Joystick: SKNode {
   let borderColor: UIColor
   let fillColor: UIColor
   let stick: SKNode
+  var touchOffset: CGPoint!
 
   func createBase() {
     let ring = SKShapeNode(circleOfRadius: 0.5 * size)
@@ -61,7 +62,7 @@ class Joystick: SKNode {
   }
 
   func touched(at position: CGPoint) {
-    var newStickPos = position
+    var newStickPos = position - touchOffset
     let distMoved = newStickPos.norm2()
     if distMoved > 0.5 * size {
       newStickPos = newStickPos.scale(by: 0.5 * size / distMoved)
@@ -75,11 +76,14 @@ class Joystick: SKNode {
 
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     guard let touch = touches.first else { return }
-    touched(at: touch.location(in: self))
+    let position = touch.location(in: self)
+    touchOffset = position
+    touched(at: position)
   }
 
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-    touchesBegan(touches, with: event)
+    guard let touch = touches.first else { return }
+    touched(at: touch.location(in: self))
   }
 
   override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {

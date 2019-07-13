@@ -31,3 +31,7 @@ extension CGPoint {
     return CGPoint(x: x * amount, y: y * amount)
   }
 }
+
+func -(left: CGPoint, right: CGPoint) -> CGPoint {
+  return CGPoint(x: left.x - right.x, y: left.y - right.y)
+}
