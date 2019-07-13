@@ -23,12 +23,20 @@ extension CGSize {
 }
 
 extension CGVector {
+  init(angle: CGFloat) {
+    self.init(dx: cos(angle), dy: sin(angle))
+  }
+
   func norm2() -> CGFloat {
     return sqrt(dx * dx + dy * dy)
   }
 
   func scale(by amount: CGFloat) -> CGVector {
     return CGVector(dx: dx * amount, dy: dy * amount)
+  }
+
+  func angle() -> CGFloat {
+    return atan2(dy, dx)
   }
 }
 
