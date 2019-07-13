@@ -38,20 +38,6 @@ extension SKNode {
   }
 }
 
-extension CGSize {
-  func scale(by amount: CGFloat) -> CGSize {
-    return CGSize(width: width * amount, height: height * amount)
-  }
-
-  func scale(to size: CGFloat) -> CGSize {
-    if width > height {
-      return scale(by: size / width)
-    } else {
-      return scale(by: size / height)
-    }
-  }
-}
-
 class GameScene: SKScene {
   var textureCache = TextureCache()
   var spriteCache: SpriteCache<SKSpriteNode>!
