@@ -176,15 +176,6 @@ class GameScene: SKScene {
     ship.physicsBody?.applyImpulse(CGVector(dx: 10.0, dy: -1.0))
   }
 
-  override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-  }
-    
-  override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-  }
-    
-  override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-  }
-
   override func update(_ currentTime: TimeInterval) {
     playfield.children.forEach { $0.wrapCoordinates() }
   }
