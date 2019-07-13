@@ -89,6 +89,7 @@ class GameScene: SKScene {
 
   func initBackground() {
     let background = SKShapeNode(rect: frame)
+    background.name = "background"
     background.strokeColor = .clear
     background.blendMode = .replace
     background.zPosition = LevelZs.background.rawValue
@@ -127,6 +128,7 @@ class GameScene: SKScene {
     let scale = CGFloat.random(in: 0.5...1.0)
     let texture = textureCache.findTexture(imageNamed: "star1")
     let star = SKSpriteNode(texture: texture, size: texture.size().scale(by: scale))
+    star.name = "star"
     star.color = tint
     star.colorBlendFactor = 1.0
     return star
@@ -134,6 +136,7 @@ class GameScene: SKScene {
 
   func initStars() {
     let stars = SKNode()
+    stars.name = "stars"
     stars.zPosition = LevelZs.stars.rawValue
     addChild(stars)
     let dim = CGFloat(0.1)
@@ -152,15 +155,19 @@ class GameScene: SKScene {
     }
   }
 
-  override func didMove(to view: SKView) {
-    initBackground()
-    initStars()
+  func initPlayfield() {
     playfield = SKShapeNode(rect: frame)
+    playfield.name = "playfield"
     playfield.zPosition = LevelZs.playfield.rawValue
     playfield.fillColor = .clear
     playfield.strokeColor = .clear
-    print(playfield.frame)
     addChild(playfield)
+  }
+
+  override func didMove(to view: SKView) {
+    initBackground()
+    initStars()
+    initPlayfield()
     let ship1 = makeShip()
     ship1["player"] = "player1"
     ship1.position = CGPoint(x: 500.0, y: -25.0)
