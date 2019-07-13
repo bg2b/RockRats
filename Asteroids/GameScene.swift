@@ -154,7 +154,7 @@ class GameScene: SKScene {
     addChild(controls)
     let controlSize = CGFloat(100)
     let offset = controlSize
-    let joystick = Joystick(size: controlSize, borderColor: .lightGray, fillColor: .darkGray,
+    let joystick = Joystick(size: controlSize, borderColor: .lightGray, fillColor: UIColor(white: 0.33, alpha: 0.33),
                             texture: textureCache.findTexture(imageNamed: "ship_blue"))
     joystick.position = CGPoint(x: frame.minX + offset, y: frame.minY + offset)
     joystick.zRotation = CGFloat.pi / 2
