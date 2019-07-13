@@ -10,6 +10,7 @@ import SpriteKit
 
 class Joystick: SKNode {
   let size: CGFloat
+  let deadZone: CGFloat
   let borderColor: UIColor
   let fillColor: UIColor
   let stick: SKNode
@@ -47,6 +48,8 @@ class Joystick: SKNode {
 
   required init(size: CGFloat, borderColor: UIColor, fillColor: UIColor, texture: SKTexture?) {
     self.size = size
+    // If the stick is within deadZone of the origin, it's treated as inactive for queries
+    self.deadZone = 0.5 * 0.33 * size
     self.borderColor = borderColor
     self.fillColor = fillColor
     self.stick = SKNode()
@@ -59,6 +62,15 @@ class Joystick: SKNode {
 
   required init(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented by Joystick")
+  }
+
+  func getDirection() -> CGVector {
+    let delta = CGVector(dx: stick.position.x, dy: stick.position.y)
+    let offset = delta.norm2()
+    if offset <= deadZone {
+      return CGVector.zero
+    }
+    return delta.scale(by: min((offset - deadZone) / (0.5 * size - deadZone), 1.0) / offset)
   }
 
   func touched(at position: CGPoint) {

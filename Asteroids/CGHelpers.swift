@@ -22,6 +22,16 @@ extension CGSize {
   }
 }
 
+extension CGVector {
+  func norm2() -> CGFloat {
+    return sqrt(dx * dx + dy * dy)
+  }
+
+  func scale(by amount: CGFloat) -> CGVector {
+    return CGVector(dx: dx * amount, dy: dy * amount)
+  }
+}
+
 extension CGPoint {
   func norm2() -> CGFloat {
     return sqrt(x * x + y * y)
