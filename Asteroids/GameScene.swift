@@ -99,7 +99,6 @@ class GameScene: SKScene {
     background.fillColor = .white
     background.fillShader = tilingShader()
     let reps = vector_float2([Float(frame.width / tsize.width), Float(frame.height / tsize.height)])
-    print(reps)
     background.setValue(SKAttributeValue(vectorFloat2: reps), forAttribute: "a_repetitions")
     addChild(background)
   }
@@ -164,10 +163,27 @@ class GameScene: SKScene {
     addChild(playfield)
   }
 
+  func initControls() {
+    let controls = SKShapeNode(rect: frame)
+    controls.name = "controls"
+    controls.zPosition = LevelZs.controls.rawValue
+    controls.fillColor = .clear
+    controls.strokeColor = .clear
+    addChild(controls)
+    let controlSize = CGFloat(100)
+    let offset = controlSize
+    let joystick = Joystick(size: controlSize, borderColor: .lightGray, fillColor: .darkGray,
+                            texture: textureCache.findTexture(imageNamed: "ship_blue"))
+    joystick.position = CGPoint(x: frame.minX + offset, y: frame.minY + offset)
+    joystick.zRotation = CGFloat.pi / 2
+    controls.addChild(joystick)
+  }
+
   override func didMove(to view: SKView) {
     initBackground()
     initStars()
     initPlayfield()
+    initControls()
     let ship1 = makeShip()
     ship1["player"] = "player1"
     ship1.position = CGPoint(x: 500.0, y: -25.0)
@@ -176,10 +192,6 @@ class GameScene: SKScene {
     ship.position = CGPoint(x: 0.0, y: 0.0)
     ship1.physicsBody?.applyImpulse(CGVector(dx: -10.0, dy: 1.0))
     ship.physicsBody?.applyImpulse(CGVector(dx: 10.0, dy: -1.0))
-    let joystick = Joystick(size: 100.0, fgColor: .lightGray, bgColor: .darkGray, texture: textureCache.findTexture(imageNamed: "ship_blue"))
-    joystick.position = CGPoint(x: frame.minX + 100.0, y: frame.minY + 100.0)
-    joystick.zPosition = 2.0
-    addChild(joystick)
   }
 
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
