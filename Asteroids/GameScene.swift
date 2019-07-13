@@ -38,23 +38,23 @@ extension SKNode {
   }
 }
 
+extension Globals {
+  static var textureCache = TextureCache()
+  static var spriteCache = SpriteCache()
+}
+
 class GameScene: SKScene {
-  var textureCache = TextureCache()
-  var spriteCache: SpriteCache<SKSpriteNode>!
   var playfield: SKNode!
   var ship: SKNode!
   var info: SKLabelNode!
   var joystick: Joystick!
 
   func makeSprite(imageNamed name: String) -> SKSpriteNode {
-    if spriteCache == nil {
-      spriteCache = SpriteCache<SKSpriteNode>(textureCache: textureCache)
-    }
-    return spriteCache.findSprite(imageNamed: name)
+    return Globals.spriteCache.findSprite(imageNamed: name)
   }
 
   func recycleSprite(_ sprite: SKSpriteNode) {
-    spriteCache.recycleSprite(sprite)
+    Globals.spriteCache.recycleSprite(sprite)
   }
 
   func makeShip() -> SKSpriteNode {
@@ -82,7 +82,7 @@ class GameScene: SKScene {
     background.strokeColor = .clear
     background.blendMode = .replace
     background.zPosition = LevelZs.background.rawValue
-    let stars = textureCache.findTexture(imageNamed: "starfield_blue")
+    let stars = Globals.textureCache.findTexture(imageNamed: "starfield_blue")
     let tsize = stars.size()
     background.fillTexture = stars
     background.fillColor = .white
@@ -114,7 +114,7 @@ class GameScene: SKScene {
                  RGB(255, 204, 111)]
     let tint = tints.randomElement()!
     let scale = CGFloat.random(in: 0.5...1.0)
-    let texture = textureCache.findTexture(imageNamed: "star1")
+    let texture = Globals.textureCache.findTexture(imageNamed: "star1")
     let star = SKSpriteNode(texture: texture, size: texture.size().scale(by: scale))
     star.name = "star"
     star.color = tint
@@ -158,7 +158,7 @@ class GameScene: SKScene {
     let controlSize = CGFloat(100)
     let offset = controlSize
     joystick = Joystick(size: controlSize, borderColor: .lightGray, fillColor: UIColor(white: 0.33, alpha: 0.33),
-                        texture: textureCache.findTexture(imageNamed: "ship_blue"))
+                        texture: Globals.textureCache.findTexture(imageNamed: "ship_blue"))
     joystick.position = CGPoint(x: frame.minX + offset, y: frame.minY + offset)
     joystick.zRotation = CGFloat.pi / 2
     controls.addChild(joystick)
