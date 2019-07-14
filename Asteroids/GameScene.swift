@@ -66,7 +66,14 @@ class GameScene: SKScene {
   func tilingShader() -> SKShader {
     let shaderSource = """
     void main() {
-      v_tex_coord = fract(v_tex_coord * a_repetitions);
+      vec2 scaled = v_tex_coord * a_repetitions;
+      // rot is 0...3 and a repetion is rotated 90*rot degrees.  That
+      // helps avoid any obvious patterning in this case.
+      int rot = (int(scaled.x) + int(scaled.y)) & 0x3;
+      v_tex_coord = fract(scaled);
+      if (rot == 1) v_tex_coord = vec2(1.0 - v_tex_coord.y, v_tex_coord.x);
+      else if (rot == 2) v_tex_coord = vec2(1.0) - v_tex_coord;
+      else if (rot == 3) v_tex_coord = vec2(v_tex_coord.y, 1.0 - v_tex_coord.x);
       gl_FragColor = SKDefaultShading();
     }
     """
