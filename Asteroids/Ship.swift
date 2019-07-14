@@ -23,7 +23,7 @@ class Ship: SKNode {
       sprite.run(fireAnimation)
       sprite.scale(to: CGSize(width: CGFloat(scale) * fireSize.width, height: fireSize.height))
       sprite.position = exhaustPos
-      sprite.alpha = 0.0
+      sprite.isHidden = true
       flames.append(sprite)
       addChild(sprite)
     }
@@ -47,12 +47,12 @@ class Ship: SKNode {
   }
 
   func flamesOff() {
-    flames.forEach { $0.alpha = 0 }
+    flames.forEach { $0.isHidden = true }
   }
 
   func flamesOn(_ amount: CGFloat) {
     let flameIndex = Int(0.99 * amount * CGFloat(flames.count))
-    flames[flameIndex].alpha = 1
+    flames[flameIndex].isHidden = false
   }
 
   // Sets the ship to the standard coasting configuration
