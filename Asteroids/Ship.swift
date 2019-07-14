@@ -23,7 +23,6 @@ class Ship: SKNode {
       sprite.run(fireAnimation)
       sprite.scale(to: CGSize(width: CGFloat(scale) * fireSize.width, height: fireSize.height))
       sprite.position = exhaustPos
-      sprite.isHidden = true
       flames.append(sprite)
       addChild(sprite)
     }
@@ -37,9 +36,8 @@ class Ship: SKNode {
     ship.name = "shipImage"
     addChild(ship)
     buildFlames(at: CGPoint(x: -shipTexture.size().width / 2, y: 0.0))
-    let body = SKPhysicsBody(texture: shipTexture, size: shipTexture.size())
-    body.linearDamping = 0.05
-    physicsBody = body
+    physicsBody = SKPhysicsBody(texture: shipTexture, size: shipTexture.size())
+    _ = coastingConfiguration()
   }
 
   required init(coder aDecoder: NSCoder) {
