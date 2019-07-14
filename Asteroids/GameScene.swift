@@ -104,18 +104,19 @@ class Ship: SKNode {
     let body = coastingConfiguration()
     guard stick != CGVector.zero else { return }
     let angle = stick.angle()
-    if abs(angle) >= 3 * .pi / 4 {
+    let halfSectorSize = (120 * CGFloat.pi / 180) / 2
+    if abs(angle) >= .pi - halfSectorSize {
       // Joystick is pointing backwards, put on the brakes
       body.linearDamping = max(min(-stick.dx, 0.7), 0.05)
     }
-    if abs(angle) <= .pi / 4 {
+    if abs(angle) <= halfSectorSize {
       // Pointing forwards, thrusters active
       let thrustAmount = min(stick.dx, 0.7) / 0.7
       let thrust = CGVector(angle: zRotation).scale(by: 2 * thrustAmount)
       body.applyForce(thrust)
       flamesOn(thrustAmount)
     }
-    if abs(abs(angle) - .pi / 2) <= .pi / 4 {
+    if abs(abs(angle) - .pi / 2) <= halfSectorSize {
       // Left or right rotation, set an absolute angular speed
       body.angularVelocity = copysign(.pi * min(abs(stick.dy), 0.7), angle)
     }
