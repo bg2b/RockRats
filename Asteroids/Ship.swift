@@ -9,6 +9,7 @@
 import SpriteKit
 
 class Ship: SKNode {
+  let joystick: Joystick
   var flames = [SKSpriteNode]()
 
   func buildFlames(at exhaustPos: CGPoint) {
@@ -28,7 +29,8 @@ class Ship: SKNode {
     }
   }
 
-  required init(color: String) {
+  required init(color: String, joystick: Joystick) {
+    self.joystick = joystick
     super.init()
     self.name = "ship"
     let shipTexture = Globals.textureCache.findTexture(imageNamed: "ship_\(color)")
@@ -62,8 +64,9 @@ class Ship: SKNode {
     return body
   }
 
-  func fly(stickPosition stick: CGVector) {
+  func fly() {
     let body = coastingConfiguration()
+    let stick = joystick.getDirection()
     guard stick != CGVector.zero else { return }
     let angle = stick.angle()
     let halfSectorSize = (120 * CGFloat.pi / 180) / 2

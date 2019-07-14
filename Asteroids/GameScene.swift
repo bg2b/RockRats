@@ -57,12 +57,6 @@ class GameScene: SKScene {
     Globals.spriteCache.recycleSprite(sprite)
   }
 
-  func makeShip() -> Ship {
-    let ship = Ship(color: teamColors[0])
-    playfield.addChild(ship)
-    return ship
-  }
-
   func tilingShader() -> SKShader {
     let shaderSource = """
     void main() {
@@ -177,6 +171,12 @@ class GameScene: SKScene {
     info.position = CGPoint(x: frame.midX, y: frame.maxY - 50.0)
   }
 
+  func makeShip() -> Ship {
+    let ship = Ship(color: teamColors[0], joystick: joystick)
+    playfield.addChild(ship)
+    return ship
+  }
+
   override func didMove(to view: SKView) {
     initBackground()
     initStars()
@@ -188,7 +188,7 @@ class GameScene: SKScene {
   }
 
   override func update(_ currentTime: TimeInterval) {
-    player.fly(stickPosition: joystick.getDirection())
+    player.fly()
     playfield.children.forEach { $0.wrapCoordinates() }
   }
 }
