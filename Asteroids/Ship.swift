@@ -22,7 +22,6 @@ class Ship: SKNode {
       sprite.anchorPoint = CGPoint(x: 1.0, y: 0.5)
       sprite.run(fireAnimation)
       sprite.scale(to: CGSize(width: CGFloat(scale) * fireSize.width, height: fireSize.height))
-      sprite.zPosition = -1
       sprite.position = exhaustPos
       sprite.alpha = 0.0
       flames.append(sprite)

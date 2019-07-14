@@ -23,7 +23,6 @@ class Joystick: SKNode {
     ring.strokeColor = borderColor
     ring.lineWidth = 0.05 * size
     ring.isAntialiased = true
-    ring.zPosition = -1
     addChild(ring)
   }
 
@@ -41,7 +40,7 @@ class Joystick: SKNode {
     if let texture = texture {
       let sprite = SKSpriteNode(texture: texture, size: texture.size().scale(to: 0.5 * size))
       sprite.name = "joystickKnobDecoration"
-      sprite.zPosition = 2
+      sprite.zPosition = 1
       stick.addChild(sprite)
     }
   }
