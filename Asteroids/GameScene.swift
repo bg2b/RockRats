@@ -49,8 +49,8 @@ class GameScene: SKScene {
   var info: SKLabelNode!
   var joystick: Joystick!
 
-  func makeSprite(imageNamed name: String) -> SKSpriteNode {
-    return Globals.spriteCache.findSprite(imageNamed: name)
+  func makeSprite(imageNamed name: String, initializer: ((SKSpriteNode) -> Void)? = nil) -> SKSpriteNode {
+    return Globals.spriteCache.findSprite(imageNamed: name, initializer: initializer)
   }
 
   func recycleSprite(_ sprite: SKSpriteNode) {
