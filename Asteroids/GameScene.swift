@@ -16,6 +16,12 @@ enum LevelZs: CGFloat {
   case info = 200
 }
 
+enum ObjectCategories: UInt32 {
+  case player = 1
+  case asteroid = 2
+  case ufo = 4
+}
+
 let teamColors = ["blue", "green", "red", "orange"]
 let numColors = teamColors.count
 

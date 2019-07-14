@@ -39,7 +39,12 @@ class Ship: SKNode {
     addChild(ship)
     buildFlames(at: CGPoint(x: -shipTexture.size().width / 2, y: 0.0))
     physicsBody = SKPhysicsBody(texture: shipTexture, size: shipTexture.size())
-    _ = coastingConfiguration()
+    let body = coastingConfiguration()
+    body.categoryBitMask = ObjectCategories.player.rawValue
+    body.collisionBitMask =
+      ObjectCategories.player.rawValue |
+      ObjectCategories.asteroid.rawValue
+    body.contactTestBitMask = ObjectCategories.asteroid.rawValue
   }
 
   required init(coder aDecoder: NSCoder) {
