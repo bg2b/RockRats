@@ -119,9 +119,8 @@ class GameScene: SKScene {
                  RGB(255, 210, 161),
                  RGB(255, 204, 111)]
     let tint = tints.randomElement()!
-    let scale = CGFloat.random(in: 0.5...1.0)
     let texture = Globals.textureCache.findTexture(imageNamed: "star1")
-    let star = SKSpriteNode(texture: texture, size: texture.size().scale(by: scale))
+    let star = SKSpriteNode(texture: texture, size: texture.size().scale(by: .random(in: 0.5...1.0)))
     star.name = "star"
     star.color = tint
     star.colorBlendFactor = 1.0
@@ -140,11 +139,11 @@ class GameScene: SKScene {
     for _ in 0..<50 {
       let star = makeStar()
       star.alpha = dim
-      star.position = CGPoint(x: CGFloat.random(in: frame.minX...frame.maxX),
-                              y: CGFloat.random(in: frame.minY...frame.maxY))
-      let initialWait = SKAction.wait(forDuration: Double.random(in: 0.0...period))
+      star.position = CGPoint(x: .random(in: frame.minX...frame.maxX),
+                              y: .random(in: frame.minY...frame.maxY))
+      let initialWait = SKAction.wait(forDuration: .random(in: 0.0...period))
       star.run(SKAction.sequence([initialWait, twinkle]))
-      star.speed = CGFloat.random(in: 0.75...1.5)
+      star.speed = .random(in: 0.75...1.5)
       stars.addChild(star)
     }
   }
@@ -185,7 +184,7 @@ class GameScene: SKScene {
     initControls()
     initInfo()
     player = makeShip()
-    player.position = CGPoint.zero
+    player.position = .zero
   }
 
   override func update(_ currentTime: TimeInterval) {
