@@ -163,11 +163,16 @@ class GameScene: SKScene {
     addChild(controls)
     let controlSize = CGFloat(100)
     let offset = controlSize
-    joystick = Joystick(size: controlSize, borderColor: .lightGray, fillColor: UIColor(white: 0.33, alpha: 0.33),
+    let controlFill: UIColor = UIColor(white: 0.33, alpha: 0.33)
+    joystick = Joystick(size: controlSize, borderColor: .lightGray, fillColor: controlFill,
                         texture: Globals.textureCache.findTexture(imageNamed: "ship_blue"))
     joystick.position = CGPoint(x: frame.minX + offset, y: frame.minY + offset)
     joystick.zRotation = .pi / 2
     controls.addChild(joystick)
+    let fireButton = Button(size: controlSize, borderColor: .lightGray, fillColor: controlFill, texture: nil)
+    fireButton.position = CGPoint(x: frame.maxX - offset, y: frame.minY + offset)
+    fireButton.zRotation = .pi / 2
+    controls.addChild(fireButton)
   }
 
   func initInfo() {
