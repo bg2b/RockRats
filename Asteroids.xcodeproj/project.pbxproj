@@ -383,13 +383,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 4NCA37UMUQ;
+				DEVELOPMENT_TEAM = 5F4YN5P6D8;
 				INFOPLIST_FILE = Asteroids/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.davidlong.Asteroids;
+				PRODUCT_BUNDLE_IDENTIFIER = org.daniellong.Asteroids;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 2;
@@ -401,13 +401,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 4NCA37UMUQ;
+				DEVELOPMENT_TEAM = 5F4YN5P6D8;
 				INFOPLIST_FILE = Asteroids/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.davidlong.Asteroids;
+				PRODUCT_BUNDLE_IDENTIFIER = org.daniellong.Asteroids;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 2;

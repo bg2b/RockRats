@@ -134,10 +134,10 @@ class GameScene: SKScene {
     stars.zPosition = LevelZs.stars.rawValue
     addChild(stars)
     let dim = CGFloat(0.1)
-    let bright = CGFloat(0.2)
+    let bright = CGFloat(0.3)
     let period = 8.0
     let twinkle = twinkleAction(period: period, from: dim, to: bright)
-    for _ in 0..<50 {
+    for _ in 0..<100 {
       let star = makeStar()
       star.alpha = dim
       star.position = CGPoint(x: CGFloat.random(in: frame.minX...frame.maxX),
