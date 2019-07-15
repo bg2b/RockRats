@@ -50,6 +50,14 @@ extension CGPoint {
   }
 }
 
-func -(left: CGPoint, right: CGPoint) -> CGPoint {
-  return CGPoint(x: left.x - right.x, y: left.y - right.y)
+func +(left: CGPoint, right: CGVector) -> CGPoint {
+  return CGPoint(x: left.x + right.dx, y: left.y + right.dy)
+}
+
+func -(left: CGPoint, right: CGVector) -> CGPoint {
+  return CGPoint(x: left.x - right.dx, y: left.y - right.dy)
+}
+
+func -(left: CGPoint, right: CGPoint) -> CGVector {
+  return CGVector(dx: left.x - right.x, dy: left.y - right.y)
 }

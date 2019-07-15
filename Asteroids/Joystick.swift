@@ -14,7 +14,7 @@ class Joystick: SKNode {
   let borderColor: UIColor
   let fillColor: UIColor
   let stick: SKNode
-  var touchOffset: CGPoint!
+  var touchOffset: CGVector!
 
   func createBase() {
     let ring = SKShapeNode(circleOfRadius: 0.5 * size)
@@ -88,7 +88,7 @@ class Joystick: SKNode {
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     guard let touch = touches.first else { return }
     let position = touch.location(in: self)
-    touchOffset = position
+    touchOffset = position - CGPoint.zero
     touched(at: position)
   }
 
