@@ -192,6 +192,7 @@ class GameScene: SKScene {
   }
 
   func fireLaser() {
+    guard player.canShoot() else { return }
     let laser = Globals.spriteCache.findSprite(imageNamed: "lasersmall_green") { sprite in
       guard let texture = sprite.texture else { fatalError("Where is the laser texture?") }
       let body = SKPhysicsBody(texture: texture, size: texture.size())
@@ -204,9 +205,14 @@ class GameScene: SKScene {
       sprite.zPosition = -1
     }
     let travel = SKAction.wait(forDuration: 1.0)
-    laser.run(travel, completion: { self.recycleSprite(laser) })
+    laser.run(travel) { self.removeLaser(laser) }
     playfield.addChild(laser)
     player.shoot(laser: laser)
+  }
+  
+  func removeLaser(_ laser: SKSpriteNode) {
+    recycleSprite(laser)
+    player.laserDestroyed()
   }
 
   func makeExplosion(at position: CGPoint, color: UIColor) {

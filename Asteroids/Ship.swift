@@ -12,6 +12,7 @@ class Ship: SKNode {
   let joystick: Joystick
   let shipTexture: SKTexture
   var flames = [SKSpriteNode]()
+  var lasersRemaining = 3
 
   func buildFlames(at exhaustPos: CGPoint) {
     var fire = (1...3).compactMap { Globals.textureCache.findTexture(imageNamed: "fire\($0)") }
@@ -98,12 +99,21 @@ class Ship: SKNode {
       body.angularVelocity = copysign(.pi * min(abs(stick.dy), 0.7), angle)
     }
   }
+  
+  func canShoot() -> Bool {
+    return lasersRemaining > 0
+  }
 
   func shoot(laser shot: SKNode) {
     shot.zRotation = zRotation
     let shotDirection = CGVector(angle: zRotation)
     shot.position = position + shotDirection.scale(by: 0.5 * shipTexture.size().width)
     shot.physicsBody?.velocity = shotDirection.scale(by: 700)
+    lasersRemaining -= 1
+  }
+  
+  func laserDestroyed() {
+    lasersRemaining += 1
   }
 
   // Reset the ship (typically because the player died)
