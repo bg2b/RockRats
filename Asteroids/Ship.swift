@@ -82,7 +82,13 @@ class Ship: SKNode {
     if abs(angle) <= halfSectorSize {
       // Pointing forwards, thrusters active
       let thrustAmount = min(stick.dx, 0.7) / 0.7
-      let thrust = CGVector(angle: zRotation).scale(by: 2 * thrustAmount)
+      var thrustForce = 2 * thrustAmount
+      let maxSpeed = CGFloat(350)
+      let currentSpeed = body.velocity.norm2()
+      if currentSpeed > 0.5 * maxSpeed {
+        thrustForce *= (maxSpeed - currentSpeed) / (0.5 * maxSpeed)
+      }
+      let thrust = CGVector(angle: zRotation).scale(by: thrustForce)
       body.applyForce(thrust)
       flamesOn(thrustAmount)
     }
@@ -100,4 +106,3 @@ class Ship: SKNode {
     zRotation = .pi / 2
   }
 }
-
