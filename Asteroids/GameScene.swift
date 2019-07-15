@@ -183,6 +183,20 @@ class GameScene: SKScene {
     return ship
   }
 
+  func makeExplosion(at position: CGPoint, color: UIColor) {
+    guard let explosion = SKEmitterNode(fileNamed: "BlueExplosion.sks") else { fatalError("Could not load emitter node") }
+    let maxParticleLifetime = explosion.particleLifetime + 0.5 * explosion.particleLifetimeRange
+    let maxEmissionTime = CGFloat(explosion.numParticlesToEmit) / explosion.particleBirthRate
+    let maxExplosionTime = Double(maxEmissionTime + maxParticleLifetime)
+    let waitAndRemove = SKAction.sequence([
+      SKAction.wait(forDuration: maxExplosionTime),
+      SKAction.removeFromParent()])
+    explosion.position = position
+    explosion.zPosition = 1
+    explosion.run(waitAndRemove)
+    playfield.addChild(explosion)
+  }
+
   override func didMove(to view: SKView) {
     initBackground()
     initStars()

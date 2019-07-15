@@ -27,6 +27,7 @@
 		FD53168322DB445100F09E57 /* meteorbig4@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53167B22DB445100F09E57 /* meteorbig4@2x.png */; };
 		FD53168422DB445100F09E57 /* meteorbig3@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53167C22DB445100F09E57 /* meteorbig3@2x.png */; };
 		FD53168522DB445100F09E57 /* meteorbig2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53167D22DB445100F09E57 /* meteorbig2@2x.png */; };
+		FD53168722DBCDBF00F09E57 /* BlueExplosion.sks in Resources */ = {isa = PBXBuildFile; fileRef = FD53168622DBCDBF00F09E57 /* BlueExplosion.sks */; };
 		FD79323622D20FE600E7D336 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD79323522D20FE600E7D336 /* AppDelegate.swift */; };
 		FD79323822D20FE600E7D336 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = FD79323722D20FE600E7D336 /* GameScene.sks */; };
 		FD79323C22D20FE600E7D336 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD79323B22D20FE600E7D336 /* GameScene.swift */; };
@@ -66,6 +67,7 @@
 		FD53167B22DB445100F09E57 /* meteorbig4@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "meteorbig4@2x.png"; sourceTree = "<group>"; };
 		FD53167C22DB445100F09E57 /* meteorbig3@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "meteorbig3@2x.png"; sourceTree = "<group>"; };
 		FD53167D22DB445100F09E57 /* meteorbig2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "meteorbig2@2x.png"; sourceTree = "<group>"; };
+		FD53168622DBCDBF00F09E57 /* BlueExplosion.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = BlueExplosion.sks; sourceTree = "<group>"; };
 		FD79323222D20FE600E7D336 /* Asteroids.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Asteroids.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD79323522D20FE600E7D336 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		FD79323722D20FE600E7D336 /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
@@ -120,6 +122,7 @@
 				FD79323522D20FE600E7D336 /* AppDelegate.swift */,
 				FD79323722D20FE600E7D336 /* GameScene.sks */,
 				FD79323B22D20FE600E7D336 /* GameScene.swift */,
+				FD53168622DBCDBF00F09E57 /* BlueExplosion.sks */,
 				FD53167422DB24EC00F09E57 /* Ship.swift */,
 				FDCF8CA222DA175F008EDFD1 /* CGHelpers.swift */,
 				FDE04B2A22D745470011A529 /* Joystick.swift */,
@@ -227,6 +230,7 @@
 				FD79324122D20FE600E7D336 /* Main.storyboard in Resources */,
 				FD0C070F22D8925E00F19A55 /* ship_red@2x.png in Resources */,
 				FD0C070B22D8925E00F19A55 /* starfield_black@2x.png in Resources */,
+				FD53168722DBCDBF00F09E57 /* BlueExplosion.sks in Resources */,
 				FD53168422DB445100F09E57 /* meteorbig3@2x.png in Resources */,
 				FD53168222DB445100F09E57 /* meteorsmall1@2x.png in Resources */,
 				FD79323822D20FE600E7D336 /* GameScene.sks in Resources */,
