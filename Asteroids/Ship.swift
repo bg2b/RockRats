@@ -10,6 +10,7 @@ import SpriteKit
 
 class Ship: SKNode {
   let joystick: Joystick
+  let shipTexture: SKTexture
   var flames = [SKSpriteNode]()
 
   func buildFlames(at exhaustPos: CGPoint) {
@@ -31,9 +32,9 @@ class Ship: SKNode {
 
   required init(color: String, joystick: Joystick) {
     self.joystick = joystick
+    self.shipTexture = Globals.textureCache.findTexture(imageNamed: "ship_\(color)")
     super.init()
     self.name = "ship"
-    let shipTexture = Globals.textureCache.findTexture(imageNamed: "ship_\(color)")
     let ship = SKSpriteNode(texture: shipTexture)
     ship.name = "shipImage"
     addChild(ship)
@@ -96,6 +97,13 @@ class Ship: SKNode {
       // Left or right rotation, set an absolute angular speed
       body.angularVelocity = copysign(.pi * min(abs(stick.dy), 0.7), angle)
     }
+  }
+
+  func shoot(laser shot: SKNode) {
+    shot.zRotation = zRotation
+    let shotDirection = CGVector(angle: zRotation)
+    shot.position = position + shotDirection.scale(by: 0.5 * shipTexture.size().width)
+    shot.physicsBody?.velocity = shotDirection.scale(by: 700)
   }
 
   // Reset the ship (typically because the player died)

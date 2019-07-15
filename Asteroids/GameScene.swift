@@ -18,8 +18,9 @@ enum LevelZs: CGFloat {
 
 enum ObjectCategories: UInt32 {
   case player = 1
-  case asteroid = 2
-  case ufo = 4
+  case playerShot = 2
+  case asteroid = 4
+  case ufo = 8
 }
 
 let teamColors = ["blue", "green", "red", "orange"]
@@ -172,6 +173,7 @@ class GameScene: SKScene {
                             texture: Globals.textureCache.findTexture(imageNamed: "laserbig_green"))
     fireButton.position = CGPoint(x: frame.maxX - offset, y: frame.minY + offset)
     fireButton.zRotation = .pi / 2
+    fireButton.action = { self.fireLaser() }
     controls.addChild(fireButton)
   }
 
@@ -187,6 +189,24 @@ class GameScene: SKScene {
     let ship = Ship(color: teamColors[0], joystick: joystick)
     playfield.addChild(ship)
     return ship
+  }
+
+  func fireLaser() {
+    let laser = Globals.spriteCache.findSprite(imageNamed: "lasersmall_green") { sprite in
+      guard let texture = sprite.texture else { fatalError("Where is the laser texture?") }
+      let body = SKPhysicsBody(texture: texture, size: texture.size())
+      body.allowsRotation = false
+      body.linearDamping = 0
+      body.categoryBitMask = ObjectCategories.playerShot.rawValue
+      body.collisionBitMask = 0
+      body.contactTestBitMask = ObjectCategories.asteroid.rawValue | ObjectCategories.ufo.rawValue
+      sprite.physicsBody = body
+      sprite.zPosition = -1
+    }
+    let travel = SKAction.wait(forDuration: 1.0)
+    laser.run(travel, completion: { self.recycleSprite(laser) })
+    playfield.addChild(laser)
+    player.shoot(laser: laser)
   }
 
   func makeExplosion(at position: CGPoint, color: UIColor) {
