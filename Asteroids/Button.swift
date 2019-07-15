@@ -12,6 +12,7 @@ class Button: SKNode {
   let size: CGFloat
   let borderColor: UIColor
   let fillColor: UIColor
+  var action: (() -> Void)?
 
   func createButton(texture: SKTexture?) {
     let button = SKShapeNode(circleOfRadius: 0.5 * size)
@@ -33,6 +34,7 @@ class Button: SKNode {
     self.size = size
     self.borderColor = borderColor
     self.fillColor = fillColor
+    self.action = nil
     super.init()
     self.isUserInteractionEnabled = true
     self.name = "button"
@@ -44,9 +46,8 @@ class Button: SKNode {
   }
 
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-    guard let touch = touches.first else { return }
-    let position = touch.location(in: self)
-    print("Button touched at \(position)")
+    guard let _ = touches.first else { return }
+    action?()
   }
 
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
