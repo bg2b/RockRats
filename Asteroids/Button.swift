@@ -22,7 +22,7 @@ class Button: SKNode {
     button.isAntialiased = true
     addChild(button)
     if let texture = texture {
-      let sprite = SKSpriteNode(texture: texture, size: texture.size().scale(to: 0.75 * size))
+      let sprite = SKSpriteNode(texture: texture, size: texture.size().scale(to: 0.6 * size))
       sprite.name = "buttonTexture"
       sprite.zPosition = 1
       button.addChild(sprite)

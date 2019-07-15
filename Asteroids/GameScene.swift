@@ -168,7 +168,8 @@ class GameScene: SKScene {
     joystick.position = CGPoint(x: frame.minX + offset, y: frame.minY + offset)
     joystick.zRotation = .pi / 2
     controls.addChild(joystick)
-    let fireButton = Button(size: controlSize, borderColor: .lightGray, fillColor: controlFill, texture: nil)
+    let fireButton = Button(size: controlSize, borderColor: .lightGray, fillColor: controlFill,
+                            texture: Globals.textureCache.findTexture(imageNamed: "laserbig_green"))
     fireButton.position = CGPoint(x: frame.maxX - offset, y: frame.minY + offset)
     fireButton.zRotation = .pi / 2
     controls.addChild(fireButton)
