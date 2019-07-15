@@ -190,7 +190,7 @@ class GameScene: SKScene {
     initControls()
     initInfo()
     player = makeShip()
-    player.position = .zero
+    player.reset()
   }
 
   override func update(_ currentTime: TimeInterval) {

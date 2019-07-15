@@ -91,5 +91,13 @@ class Ship: SKNode {
       body.angularVelocity = copysign(.pi * min(abs(stick.dy), 0.7), angle)
     }
   }
+
+  // Reset the ship (typically because the player died)
+  func reset() {
+    let body = coastingConfiguration()
+    body.velocity = .zero
+    position = .zero
+    zRotation = .pi / 2
+  }
 }
 
