@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6513D66C22DC0B4E00B4BD57 /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6513D66B22DC0B4E00B4BD57 /* Button.swift */; };
 		FD0C070822D8925E00F19A55 /* ship_green@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD0C070022D8925E00F19A55 /* ship_green@2x.png */; };
 		FD0C070922D8925E00F19A55 /* ship_blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD0C070122D8925E00F19A55 /* ship_blue@2x.png */; };
 		FD0C070A22D8925E00F19A55 /* starfield_violet@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD0C070222D8925E00F19A55 /* starfield_violet@2x.png */; };
@@ -47,6 +48,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		6513D66B22DC0B4E00B4BD57 /* Button.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Button.swift; sourceTree = "<group>"; };
 		FD0C070022D8925E00F19A55 /* ship_green@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ship_green@2x.png"; sourceTree = "<group>"; };
 		FD0C070122D8925E00F19A55 /* ship_blue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ship_blue@2x.png"; sourceTree = "<group>"; };
 		FD0C070222D8925E00F19A55 /* starfield_violet@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "starfield_violet@2x.png"; sourceTree = "<group>"; };
@@ -126,6 +128,7 @@
 				FD53167422DB24EC00F09E57 /* Ship.swift */,
 				FDCF8CA222DA175F008EDFD1 /* CGHelpers.swift */,
 				FDE04B2A22D745470011A529 /* Joystick.swift */,
+				6513D66B22DC0B4E00B4BD57 /* Button.swift */,
 				FDDF488622D2A700006FB86F /* SpriteCache.swift */,
 				FDE04B2C22D753240011A529 /* TextureCache.swift */,
 				FDCF8CA422DA7296008EDFD1 /* Globals.swift */,
@@ -273,6 +276,7 @@
 				FDCF8CA322DA175F008EDFD1 /* CGHelpers.swift in Sources */,
 				FDCF8CA522DA7296008EDFD1 /* Globals.swift in Sources */,
 				FD53167522DB24EC00F09E57 /* Ship.swift in Sources */,
+				6513D66C22DC0B4E00B4BD57 /* Button.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -419,13 +423,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 4NCA37UMUQ;
+				DEVELOPMENT_TEAM = 5F4YN5P6D8;
 				INFOPLIST_FILE = Asteroids/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.davidlong.Asteroids;
+				PRODUCT_BUNDLE_IDENTIFIER = org.daniellong.Asteroids;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 2;
@@ -437,13 +441,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 4NCA37UMUQ;
+				DEVELOPMENT_TEAM = 5F4YN5P6D8;
 				INFOPLIST_FILE = Asteroids/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.davidlong.Asteroids;
+				PRODUCT_BUNDLE_IDENTIFIER = org.daniellong.Asteroids;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 2;
