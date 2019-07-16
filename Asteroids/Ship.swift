@@ -43,9 +43,7 @@ class Ship: SKNode {
     physicsBody = SKPhysicsBody(texture: shipTexture, size: shipTexture.size())
     let body = coastingConfiguration()
     body.categoryBitMask = ObjectCategories.player.rawValue
-    body.collisionBitMask =
-      ObjectCategories.player.rawValue |
-      ObjectCategories.asteroid.rawValue
+    body.collisionBitMask = 0
     body.contactTestBitMask = ObjectCategories.asteroid.rawValue
   }
 
