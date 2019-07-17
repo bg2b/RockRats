@@ -23,6 +23,12 @@ enum ObjectCategories: UInt32 {
   case ufo = 8
 }
 
+extension SKPhysicsBody {
+  func isA(_ category: ObjectCategories) -> Bool {
+    return categoryBitMask == category.rawValue
+  }
+}
+
 let teamColors = ["blue", "green", "red", "orange"]
 let numColors = teamColors.count
 
@@ -56,7 +62,7 @@ extension Globals {
   static var spriteCache = SpriteCache()
 }
 
-class GameScene: SKScene {
+class GameScene: SKScene, SKPhysicsContactDelegate {
   var playfield: SKNode!
   var player: Ship!
   var info: SKLabelNode!
@@ -217,15 +223,20 @@ class GameScene: SKScene {
   }
   
   func removeLaser(_ laser: SKSpriteNode) {
+    laser.removeAllActions()
     recycleSprite(laser)
     player.laserDestroyed()
+  }
+  
+  func removeAsteroid(_ asteroid: SKSpriteNode) {
+    recycleSprite(asteroid)
   }
   
   func spawnAsteroid(position pos: CGPoint, size: Int) {
     let asteroid = Globals.spriteCache.findSprite(imageNamed: "meteorbig\(Int.random(in: 1...4))") { sprite in
       guard let texture = sprite.texture else { fatalError("Where is the asteroid texture?") }
       let body = SKPhysicsBody(texture: texture, size: texture.size())
-      body.allowsRotation = false
+      body.angularDamping = 0
       body.linearDamping = 0
       body.categoryBitMask = ObjectCategories.asteroid.rawValue
       body.collisionBitMask = 0
@@ -234,8 +245,9 @@ class GameScene: SKScene {
       sprite.zPosition = -1
     }
     asteroid.position = pos
-    let a = Double(atan2(frame.midY - pos.y, frame.midX - pos.x)) + Double.random(in: -0.5...0.5)
-    asteroid.physicsBody?.velocity = CGVector(dx: cos(a)*50, dy: sin(a)*50) // 50 to global var asteroidSpeed
+    let a = atan2(frame.midY - pos.y, frame.midX - pos.x) + .random(in: -0.5...0.5)
+    asteroid.physicsBody?.velocity = CGVector(angle: a).scale(by: 50) // 50 to global var asteroidSpeed
+    asteroid.physicsBody?.angularVelocity = .random(in: -.pi ... .pi)
     playfield.addChild(asteroid)
   }
 
@@ -252,8 +264,27 @@ class GameScene: SKScene {
     explosion.run(waitAndRemove)
     playfield.addChild(explosion)
   }
-
+  
+  func laserHitAsteroid(laser: SKNode, asteroid: SKNode) {
+    removeLaser(laser as! SKSpriteNode)
+    removeAsteroid(asteroid as! SKSpriteNode)
+  }
+  
+  func didBegin(_ contact: SKPhysicsContact) {
+    let b1 = contact.bodyA
+    let b2 = contact.bodyB
+    guard let node1 = contact.bodyA.node else { return }
+    guard let node2 = contact.bodyB.node else { return }
+    if b1.isA(.asteroid) && b2.isA(.playerShot) {
+      laserHitAsteroid(laser: node2, asteroid: node1)
+    }
+    if b2.isA(.asteroid) && b1.isA(.playerShot) {
+      laserHitAsteroid(laser: node1, asteroid: node2)
+    }
+  }
+  
   override func didMove(to view: SKView) {
+    physicsWorld.contactDelegate = self
     initBackground()
     initStars()
     initPlayfield()
@@ -261,7 +292,7 @@ class GameScene: SKScene {
     initInfo()
     player = makeShip()
     player.reset()
-    spawnAsteroid(position: CGPoint(x: 50, y: 50), size: 3)
+    spawnAsteroid(position: CGPoint(x: -800, y: -500), size: 3)
   }
 
   override func update(_ currentTime: TimeInterval) {
