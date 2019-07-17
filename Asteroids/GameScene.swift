@@ -214,6 +214,24 @@ class GameScene: SKScene {
     recycleSprite(laser)
     player.laserDestroyed()
   }
+  
+  func spawnAsteroid(position pos: CGPoint, size: Int) {
+    let asteroid = Globals.spriteCache.findSprite(imageNamed: "meteorbig\(Int.random(in: 1...4))") { sprite in
+      guard let texture = sprite.texture else { fatalError("Where is the asteroid texture?") }
+      let body = SKPhysicsBody(texture: texture, size: texture.size())
+      body.allowsRotation = false
+      body.linearDamping = 0
+      body.categoryBitMask = ObjectCategories.asteroid.rawValue
+      body.collisionBitMask = 0
+      body.contactTestBitMask = ObjectCategories.player.rawValue | ObjectCategories.ufo.rawValue | ObjectCategories.playerShot.rawValue
+      sprite.physicsBody = body
+      sprite.zPosition = -1
+    }
+    asteroid.position = pos
+    let a = Double(atan2(frame.midY - pos.y, frame.midX - pos.x)) + Double.random(in: -0.5...0.5)
+    asteroid.physicsBody?.velocity = CGVector(dx: cos(a)*50, dy: sin(a)*50) // 50 to global var asteroidSpeed
+    playfield.addChild(asteroid)
+  }
 
   func makeExplosion(at position: CGPoint, color: UIColor) {
     guard let explosion = SKEmitterNode(fileNamed: "BlueExplosion.sks") else { fatalError("Could not load emitter node") }
@@ -237,6 +255,7 @@ class GameScene: SKScene {
     initInfo()
     player = makeShip()
     player.reset()
+    spawnAsteroid(position: CGPoint(x: 50, y: 50), size: 3)
   }
 
   override func update(_ currentTime: TimeInterval) {
