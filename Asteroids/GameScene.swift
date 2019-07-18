@@ -215,7 +215,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       body.linearDamping = 0
       body.categoryBitMask = ObjectCategories.playerShot.rawValue
       body.collisionBitMask = 0
-      body.contactTestBitMask = ObjectCategories.asteroid.rawValue | ObjectCategories.ufo.rawValue
+      body.contactTestBitMask = setOf([.asteroid, .ufo])
       sprite.physicsBody = body
       sprite.zPosition = -1
     }
