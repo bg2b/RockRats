@@ -40,12 +40,10 @@ let numColors = teamColors.count
 extension SKNode {
   func wrapCoordinates() {
     guard let frame = self.scene?.frame else { return }
-    guard let _: Bool = self["wasOnScreen"] else {
-      if frame.contains(position) {
-        self["wasOnScreen"] = true
-      }
-      return
+    if frame.contains(position) {
+      self["wasOnScreen"] = true
     }
+    guard let wasOnScreen: Bool = self["wasOnScreen"], wasOnScreen else { return }
     // We wrap only after going past the edge a little bit so that an object that's
     // moving just along the edge won't stutter back and forth.
     let hysteresis = CGFloat(3)
