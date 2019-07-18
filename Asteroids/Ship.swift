@@ -44,7 +44,7 @@ class Ship: SKNode {
     let body = coastingConfiguration()
     body.categoryBitMask = ObjectCategories.player.rawValue
     body.collisionBitMask = 0
-    body.contactTestBitMask = ObjectCategories.asteroid.rawValue
+    body.contactTestBitMask = setOf([.asteroid, .ufo, .ufoShot])
   }
 
   required init(coder aDecoder: NSCoder) {

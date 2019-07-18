@@ -21,12 +21,17 @@ enum ObjectCategories: UInt32 {
   case playerShot = 2
   case asteroid = 4
   case ufo = 8
+  case ufoShot = 16
 }
 
 extension SKPhysicsBody {
   func isA(_ category: ObjectCategories) -> Bool {
     return categoryBitMask == category.rawValue
   }
+}
+
+func setOf(_ categories: [ObjectCategories]) -> UInt32 {
+  return categories.reduce(0) { $0 | $1.rawValue }
 }
 
 let teamColors = ["blue", "green", "red", "orange"]
@@ -240,7 +245,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       body.linearDamping = 0
       body.categoryBitMask = ObjectCategories.asteroid.rawValue
       body.collisionBitMask = 0
-      body.contactTestBitMask = ObjectCategories.player.rawValue | ObjectCategories.ufo.rawValue | ObjectCategories.playerShot.rawValue
+      body.contactTestBitMask = setOf([.player, .playerShot, .ufo, .ufoShot])
       sprite.physicsBody = body
       sprite.zPosition = -1
     }
