@@ -248,6 +248,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       sprite.zPosition = -1
     }
     asteroid.position = pos
+    asteroid["wasOnScreen"] = false
     let a = atan2(frame.midY - pos.y, frame.midX - pos.x) + .random(in: -0.5...0.5)
     asteroid.physicsBody?.velocity = CGVector(angle: a).scale(by: 50) // 50 to global var asteroidSpeed
     asteroid.physicsBody?.angularVelocity = .random(in: -.pi ... .pi)
@@ -272,18 +273,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     removeLaser(laser as! SKSpriteNode)
     removeAsteroid(asteroid as! SKSpriteNode)
   }
-  
-  func didBegin(_ contact: SKPhysicsContact) {
+
+  func when(_ contact: SKPhysicsContact,
+            isBetween type1: ObjectCategories, and type2: ObjectCategories,
+            action: (SKNode, SKNode) -> Void) {
     let b1 = contact.bodyA
     let b2 = contact.bodyB
-    guard let node1 = contact.bodyA.node else { return }
-    guard let node2 = contact.bodyB.node else { return }
-    if b1.isA(.asteroid) && b2.isA(.playerShot) {
-      laserHitAsteroid(laser: node2, asteroid: node1)
+    guard let node1 = contact.bodyA.node, node1.parent != nil else { return }
+    guard let node2 = contact.bodyB.node, node2.parent != nil else { return }
+    if b1.isA(type1) && b2.isA(type2) {
+      action(node1, node2)
+    } else if b2.isA(type1) && b1.isA(type2) {
+      action(node2, node1)
     }
-    if b2.isA(.asteroid) && b1.isA(.playerShot) {
-      laserHitAsteroid(laser: node1, asteroid: node2)
-    }
+  }
+
+  func didBegin(_ contact: SKPhysicsContact) {
+    when(contact, isBetween: .asteroid, and: .playerShot) { laserHitAsteroid(laser: $0, asteroid: $1) }
   }
   
   override func didMove(to view: SKView) {
@@ -295,7 +301,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     initInfo()
     player = makeShip()
     player.reset()
-    spawnAsteroid(position: CGPoint(x: -800, y: -500), size: 3)
+    spawnAsteroid(position: CGPoint(x: -0.5 * frame.width - 1, y: -0.5 * frame.height - 1), size: 3)
   }
 
   override func update(_ currentTime: TimeInterval) {
