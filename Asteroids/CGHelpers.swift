@@ -38,6 +38,18 @@ extension CGVector {
   func angle() -> CGFloat {
     return atan2(dy, dx)
   }
+
+  func dotProd(_ vec2: CGVector) -> CGFloat {
+    return dx * vec2.dx + dy * vec2.dy
+  }
+
+  func project(unitVector: CGVector) -> CGVector {
+    return unitVector.scale(by: self.dotProd(unitVector))
+  }
+}
+
+func -(left: CGVector, right: CGVector) -> CGVector {
+  return CGVector(dx: left.dx - right.dx, dy: left.dy - right.dy)
 }
 
 extension CGPoint {

@@ -231,12 +231,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     player.laserDestroyed()
   }
   
-  func removeAsteroid(_ asteroid: SKSpriteNode) {
-    recycleSprite(asteroid)
-  }
-  
-  func spawnAsteroid(position pos: CGPoint, size: Int) {
-    let asteroid = Globals.spriteCache.findSprite(imageNamed: "meteorbig\(Int.random(in: 1...4))") { sprite in
+  func makeAsteroid(position pos: CGPoint, size: String, velocity: CGVector, onScreen: Bool) {
+    let typesForSize = ["small": 2, "med": 2, "big": 4, "huge": 3]
+    guard let numTypes = typesForSize[size] else { fatalError("Incorrect asteroid size") }
+    let name = "meteor\(size)\(Int.random(in: 1...numTypes))"
+    let asteroid = Globals.spriteCache.findSprite(imageNamed: name) { sprite in
       guard let texture = sprite.texture else { fatalError("Where is the asteroid texture?") }
       let body = SKPhysicsBody(texture: texture, size: texture.size())
       body.angularDamping = 0
@@ -245,13 +244,49 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       body.collisionBitMask = 0
       body.contactTestBitMask = setOf([.player, .playerShot, .ufo, .ufoShot])
       sprite.physicsBody = body
-      sprite.zPosition = -1
     }
     asteroid.position = pos
-    let a = atan2(frame.midY - pos.y, frame.midX - pos.x) + .random(in: -0.5...0.5)
-    asteroid.physicsBody?.velocity = CGVector(angle: a).scale(by: 50) // 50 to global var asteroidSpeed
+    asteroid.physicsBody?.velocity = velocity
+    asteroid["wasOnScreen"] = onScreen
     asteroid.physicsBody?.angularVelocity = .random(in: -.pi ... .pi)
     playfield.addChild(asteroid)
+  }
+
+  func spawnAsteroid(size: String) {
+    // Initial direction of the asteroid from the center of the screen
+    let dir = CGVector(angle: .random(in: -.pi ... .pi))
+    // Traveling towards the center at a random speed
+    let velocity = dir.scale(by: -.random(in: 50...100))
+    // Offset from the center by some random amount
+    let offset = CGPoint(x: .random(in: 0.75 * frame.minX...0.75 * frame.maxX),
+                         y: .random(in: 0.75 * frame.minY...0.75 * frame.maxY))
+    // Find a random distance that places us beyond the screen by a reasonable amount
+    var dist = .random(in: 0.25...0.5) * frame.height
+    while frame.insetBy(dx: -125, dy: -125).contains(offset + dir.scale(by: dist)) {
+      dist *= 1.25
+    }
+    makeAsteroid(position: offset + dir.scale(by: dist), size: size, velocity: velocity, onScreen: false)
+  }
+
+  func splitAsteroid(_ asteroid: SKSpriteNode) {
+    let sizes = ["small", "med", "big", "huge"]
+    guard let size = (sizes.firstIndex { asteroid.name!.contains($0) }) else {
+      fatalError("Asteroid not of recognized size")
+    }
+    guard let velocity = asteroid.physicsBody?.velocity else { fatalError("Asteroid had no velocity") }
+    let pos = asteroid.position
+    recycleSprite(asteroid)
+    // Don't split med or small asteroids.  Size progression should go huge -> big -> med,
+    // but we include small just for completeness in case we change our minds later.
+    guard size >= 2 else { return }
+    // Choose a random direction for the first child and project to get that child's velocity
+    let velocity1 = velocity.project(unitVector: CGVector(angle: .random(in: -0.75 * .pi...0.75 * .pi)))
+    // The second child's velocity is chosen from momentum conservation
+    let velocity2 = velocity - velocity1
+    // Add a bit of extra spice just to keep the player on their toes
+    let oomph = CGFloat(1.5)
+    makeAsteroid(position: pos, size: sizes[size - 1], velocity: velocity1.scale(by: oomph), onScreen: true)
+    makeAsteroid(position: pos, size: sizes[size - 1], velocity: velocity2.scale(by: oomph), onScreen: true)
   }
 
   func makeExplosion(at position: CGPoint, color: UIColor) {
@@ -270,7 +305,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   
   func laserHitAsteroid(laser: SKNode, asteroid: SKNode) {
     removeLaser(laser as! SKSpriteNode)
-    removeAsteroid(asteroid as! SKSpriteNode)
+    splitAsteroid(asteroid as! SKSpriteNode)
   }
 
   func when(_ contact: SKPhysicsContact,
@@ -300,7 +335,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     initInfo()
     player = makeShip()
     player.reset()
-    spawnAsteroid(position: CGPoint(x: -800, y: -500), size: 3)
+    spawnAsteroid(size: "huge")
+    spawnAsteroid(size: "huge")
+    spawnAsteroid(size: "huge")
+    spawnAsteroid(size: "huge")
   }
 
   override func update(_ currentTime: TimeInterval) {
