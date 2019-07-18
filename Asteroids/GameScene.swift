@@ -248,7 +248,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       sprite.zPosition = -1
     }
     asteroid.position = pos
-    asteroid["wasOnScreen"] = false
     let a = atan2(frame.midY - pos.y, frame.midX - pos.x) + .random(in: -0.5...0.5)
     asteroid.physicsBody?.velocity = CGVector(angle: a).scale(by: 50) // 50 to global var asteroidSpeed
     asteroid.physicsBody?.angularVelocity = .random(in: -.pi ... .pi)
@@ -301,7 +300,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     initInfo()
     player = makeShip()
     player.reset()
-    spawnAsteroid(position: CGPoint(x: -0.5 * frame.width - 1, y: -0.5 * frame.height - 1), size: 3)
+    spawnAsteroid(position: CGPoint(x: -800, y: -500), size: 3)
   }
 
   override func update(_ currentTime: TimeInterval) {
