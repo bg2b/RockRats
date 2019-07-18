@@ -288,7 +288,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func didBegin(_ contact: SKPhysicsContact) {
-    when(contact, isBetween: .asteroid, and: .playerShot) { laserHitAsteroid(laser: $0, asteroid: $1) }
+    when(contact, isBetween: .playerShot, and: .asteroid) { laserHitAsteroid(laser: $0, asteroid: $1) }
   }
   
   override func didMove(to view: SKView) {
