@@ -76,7 +76,8 @@ extension Globals {
 class GameScene: SKScene, SKPhysicsContactDelegate {
   var playfield: SKNode!
   var player: Ship!
-  var info: SKLabelNode!
+  var score = 0
+  var scoreDisplay: SKLabelNode!
   var joystick: Joystick!
   var safezone: CGRect!
   var asteroids = Set<SKSpriteNode>()
@@ -205,11 +206,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func initInfo() {
-    info = SKLabelNode(text: nil)
-    info.name = "info"
-    info.zPosition = LevelZs.info.rawValue
-    addChild(info)
-    info.position = CGPoint(x: frame.midX, y: frame.maxY - 50.0)
+    scoreDisplay = SKLabelNode(fontNamed: "KenVector Future")
+    scoreDisplay.fontSize = 50
+    scoreDisplay.text = "0"
+    scoreDisplay.name = "score"
+    scoreDisplay.zPosition = LevelZs.info.rawValue
+    addChild(scoreDisplay)
+    scoreDisplay.position = CGPoint(x: frame.midX, y: frame.maxY - 50.0)
+  }
+
+  func addToScore(_ amount: Int) {
+    score += amount
+    scoreDisplay.text = "\(score)"
   }
 
   func spawnPlayer() {
@@ -336,6 +344,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
   func splitAsteroid(_ asteroid: SKSpriteNode) {
     let sizes = ["small", "med", "big", "huge"]
+    let pointValues = [23, 11, 5, 2]
     guard let size = (sizes.firstIndex { asteroid.name!.contains($0) }) else {
       fatalError("Asteroid not of recognized size")
     }
@@ -357,6 +366,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       makeAsteroid(position: pos, size: sizes[size - 1], velocity: velocity2.scale(by: oomph), onScreen: true)
     }
     removeAsteroid(asteroid)
+    addToScore(pointValues[size])
   }
 
   func laserHitAsteroid(laser: SKNode, asteroid: SKNode) {
