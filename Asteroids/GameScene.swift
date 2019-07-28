@@ -79,6 +79,7 @@ extension Globals {
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
   let textColor = RGB(101, 185, 240)
+  let highlightTextColor = RGB(246, 205, 68)
   var playfield: SKNode!
   var player: Ship!
   var score = 0
@@ -87,6 +88,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   var safezone: CGRect!
   var asteroids = Set<SKSpriteNode>()
   var waveNumber = 0
+  var waveDisplay: SKLabelNode!
 
   func makeSprite(imageNamed name: String, initializer: ((SKSpriteNode) -> Void)? = nil) -> SKSpriteNode {
     return Globals.spriteCache.findSprite(imageNamed: name, initializer: initializer)
@@ -214,8 +216,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     scoreDisplay.text = "0"
     scoreDisplay.name = "score"
     scoreDisplay.zPosition = LevelZs.info.rawValue
-    addChild(scoreDisplay)
     scoreDisplay.position = CGPoint(x: frame.midX, y: frame.maxY - 50.0)
+    addChild(scoreDisplay)
+    waveDisplay = SKLabelNode(fontNamed: "KenVector Future")
+    waveDisplay.fontSize = 100
+    waveDisplay.fontColor = highlightTextColor
+    waveDisplay.text = "WAVE 1"
+    waveDisplay.name = "wave"
+    waveDisplay.isHidden = true
+    waveDisplay.zPosition = LevelZs.info.rawValue
+    waveDisplay.position = CGPoint(x: frame.midX, y: frame.midY)
+    addChild(waveDisplay)
   }
 
   func addToScore(_ amount: Int) {
@@ -296,8 +307,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     makeAsteroid(position: offset + dir.scale(by: dist), size: size, velocity: velocity, onScreen: false)
   }
 
+  func showWave() {
+    waveDisplay.text = "WAVE \(waveNumber)"
+    waveDisplay.setScale(0.0)
+    waveDisplay.alpha = 1.0
+    waveDisplay.isHidden = false
+    let zoomAndHide = SKAction.sequence([
+      SKAction.scale(to: 1.0, duration: 0.25),
+      SKAction.wait(forDuration: 1.5),
+      SKAction.fadeOut(withDuration: 0.5),
+      SKAction.hide()
+      ])
+    waveDisplay.run(zoomAndHide)
+  }
+
   func nextWave() {
     waveNumber += 1
+    showWave()
     for _ in 0 ..< waveNumber + 2 {
       spawnAsteroid(size: "huge")
     }
@@ -416,8 +442,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     initControls()
     initInfo()
     player = Ship(color: teamColors[0], joystick: joystick)
-    spawnPlayer()
     nextWave()
+    wait(for: 3.0) { self.spawnPlayer() }
   }
 
   override func update(_ currentTime: TimeInterval) {
