@@ -28,7 +28,7 @@ extension CGVector {
   }
 
   func norm2() -> CGFloat {
-    return sqrt(dx * dx + dy * dy)
+    return hypot(dx, dy)
   }
 
   func scale(by amount: CGFloat) -> CGVector {
