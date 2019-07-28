@@ -67,7 +67,7 @@ class Joystick: SKNode {
     let delta = CGVector(dx: stick.position.x, dy: stick.position.y)
     let offset = delta.norm2()
     if offset <= deadZone {
-      return CGVector.zero
+      return .zero
     }
     return delta.scale(by: min((offset - deadZone) / (0.5 * size - deadZone), 1.0) / offset)
   }
@@ -82,13 +82,13 @@ class Joystick: SKNode {
   }
 
   func released() {
-    stick.position = CGPoint.zero
+    stick.position = .zero
   }
 
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     guard let touch = touches.first else { return }
     let position = touch.location(in: self)
-    touchOffset = position - CGPoint.zero
+    touchOffset = position - .zero
     touched(at: position)
   }
 
