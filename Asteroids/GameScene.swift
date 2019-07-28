@@ -34,6 +34,10 @@ func setOf(_ categories: [ObjectCategories]) -> UInt32 {
   return categories.reduce(0) { $0 | $1.rawValue }
 }
 
+func RGB(_ red: Int, _ green: Int, _ blue: Int) -> UIColor {
+  return UIColor(red: CGFloat(red)/255.0, green: CGFloat(green)/255.0, blue: CGFloat(blue)/255.0, alpha: 1.0)
+}
+
 let teamColors = ["blue", "green", "red", "orange"]
 let numColors = teamColors.count
 
@@ -74,6 +78,7 @@ extension Globals {
 }
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
+  let textColor = RGB(101, 185, 240)
   var playfield: SKNode!
   var player: Ship!
   var score = 0
@@ -126,9 +131,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     addChild(background)
   }
 
-  func RGB(_ red: Int, _ green: Int, _ blue: Int) -> UIColor {
-    return UIColor(red: CGFloat(red)/255.0, green: CGFloat(green)/255.0, blue: CGFloat(blue)/255.0, alpha: 1.0)
-  }
 
   func twinkleAction(period: Double, from dim: CGFloat, to bright: CGFloat) -> SKAction {
     let twinkleDuration = 0.4
@@ -180,7 +182,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     playfield.name = "playfield"
     playfield.zPosition = LevelZs.playfield.rawValue
     addChild(playfield)
-    let safezoneSize = CGFloat(200)
+    let safezoneSize = CGFloat(300)
     safezone = frame.insetBy(dx: 0.5 * (frame.width - safezoneSize), dy: 0.5 * (frame.height - safezoneSize))
   }
 
@@ -208,6 +210,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   func initInfo() {
     scoreDisplay = SKLabelNode(fontNamed: "KenVector Future")
     scoreDisplay.fontSize = 50
+    scoreDisplay.fontColor = textColor
     scoreDisplay.text = "0"
     scoreDisplay.name = "score"
     scoreDisplay.zPosition = LevelZs.info.rawValue
@@ -286,8 +289,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                          y: .random(in: 0.75 * frame.minY...0.75 * frame.maxY))
     // Find a random distance that places us beyond the screen by a reasonable amount
     var dist = .random(in: 0.25...0.5) * frame.height
-    while frame.insetBy(dx: -125, dy: -125).contains(offset + dir.scale(by: dist)) {
-      dist *= 1.25
+    let exclusion = -CGFloat.random(in: 200...500)
+    while frame.insetBy(dx: exclusion, dy: exclusion).contains(offset + dir.scale(by: dist)) {
+      dist *= 1.5
     }
     makeAsteroid(position: offset + dir.scale(by: dist), size: size, velocity: velocity, onScreen: false)
   }
@@ -369,7 +373,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     addToScore(pointValues[size])
   }
 
-  func laserHitAsteroid(laser: SKNode, asteroid: SKNode) {
+  func laserHit(laser: SKNode, asteroid: SKNode) {
     removeLaser(laser as! SKSpriteNode)
     splitAsteroid(asteroid as! SKSpriteNode)
   }
@@ -379,7 +383,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     wait(for: 5.0) { self.spawnPlayer() }
   }
 
-  func playerHit(asteroid: SKNode) {
+  func playerCollided(asteroid: SKNode) {
     destroyPlayer()
     splitAsteroid(asteroid as! SKSpriteNode)
   }
@@ -399,8 +403,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func didBegin(_ contact: SKPhysicsContact) {
-    when(contact, isBetween: .playerShot, and: .asteroid) { laserHitAsteroid(laser: $0, asteroid: $1) }
-    when(contact, isBetween: .player, and: .asteroid) { playerHit(asteroid: $1) }
+    when(contact, isBetween: .playerShot, and: .asteroid) { laserHit(laser: $0, asteroid: $1) }
+    when(contact, isBetween: .player, and: .asteroid) { playerCollided(asteroid: $1) }
   }
   
   override func didMove(to view: SKView) {
