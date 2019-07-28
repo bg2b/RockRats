@@ -38,7 +38,7 @@ let explosionShader = SKShader(source :
   }
   """)
 
-func makeExplosion(texture: SKTexture) -> SKEmitterNode {
+func makeExplosion(texture: SKTexture, at position: CGPoint) -> SKEmitterNode {
   let emitter = SKEmitterNode()
   emitter.particleTexture = texture
   let textureSize = hypot(texture.size().width, texture.size().height)
@@ -46,7 +46,7 @@ func makeExplosion(texture: SKTexture) -> SKEmitterNode {
   // Since fragments are chosen randomly, do some extra to mostly cover everything
   emitter.numParticlesToEmit = explosionSplits * explosionSplits * 4 / 3
   // Desired size of the final explosion
-  let radius = 1.5 * textureSize
+  let radius = 2.5 * textureSize
   emitter.particleLifetime = explosionDuration
   emitter.particleLifetimeRange = 0.75 * explosionDuration
   emitter.particleScale = 1.0 / CGFloat(explosionSplits)
@@ -68,5 +68,6 @@ func makeExplosion(texture: SKTexture) -> SKEmitterNode {
   // appropriately for the shader.
   emitter.particleColorBlendFactor = 1.0
   emitter.shader = explosionShader
+  emitter.position = position
   return emitter
 }

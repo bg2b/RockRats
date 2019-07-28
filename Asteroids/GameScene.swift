@@ -26,7 +26,7 @@ enum ObjectCategories: UInt32 {
 
 extension SKPhysicsBody {
   func isA(_ category: ObjectCategories) -> Bool {
-    return categoryBitMask == category.rawValue
+    return (categoryBitMask & category.rawValue) != 0
   }
 }
 
@@ -58,6 +58,14 @@ extension SKNode {
       position.y -= frame.height
     }
   }
+
+  func wait(for time: Double, then action: SKAction) {
+    run(SKAction.sequence([SKAction.wait(forDuration: time), action]))
+  }
+
+  func wait(for time: Double, then action: @escaping (() -> Void)) {
+    wait(for: time, then: SKAction.run(action))
+  }
 }
 
 extension Globals {
@@ -70,7 +78,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   var player: Ship!
   var info: SKLabelNode!
   var joystick: Joystick!
-  var exploded = false
+  var safezone: CGRect!
+  var asteroids = Set<SKSpriteNode>()
+  var waveNumber = 0
 
   func makeSprite(imageNamed name: String, initializer: ((SKSpriteNode) -> Void)? = nil) -> SKSpriteNode {
     return Globals.spriteCache.findSprite(imageNamed: name, initializer: initializer)
@@ -158,8 +168,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       star.alpha = dim
       star.position = CGPoint(x: .random(in: frame.minX...frame.maxX),
                               y: .random(in: frame.minY...frame.maxY))
-      let initialWait = SKAction.wait(forDuration: .random(in: 0.0...period))
-      star.run(SKAction.sequence([initialWait, twinkle]))
+      star.wait(for: .random(in: 0.0...period), then: twinkle)
       star.speed = .random(in: 0.75...1.5)
       stars.addChild(star)
     }
@@ -170,6 +179,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     playfield.name = "playfield"
     playfield.zPosition = LevelZs.playfield.rawValue
     addChild(playfield)
+    let safezoneSize = CGFloat(200)
+    safezone = frame.insetBy(dx: 0.5 * (frame.width - safezoneSize), dy: 0.5 * (frame.height - safezoneSize))
   }
 
   func initControls() {
@@ -201,10 +212,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     info.position = CGPoint(x: frame.midX, y: frame.maxY - 50.0)
   }
 
-  func makeShip() -> Ship {
-    let ship = Ship(color: teamColors[0], joystick: joystick)
-    playfield.addChild(ship)
-    return ship
+  func spawnPlayer() {
+    let emptySafezone = asteroids.allSatisfy { !safezone.contains($0.position) }
+    if emptySafezone {
+      player.reset()
+      playfield.addChild(player)
+    } else {
+      wait(for: 0.25) { self.spawnPlayer() }
+    }
   }
 
   func fireLaser() {
@@ -220,8 +235,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       sprite.physicsBody = body
       sprite.zPosition = -1
     }
-    let travel = SKAction.wait(forDuration: 1.0)
-    laser.run(travel) { self.removeLaser(laser) }
+    laser.wait(for: 1.0) { self.removeLaser(laser) }
     playfield.addChild(laser)
     player.shoot(laser: laser)
   }
@@ -250,6 +264,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     asteroid.physicsBody?.velocity = velocity
     asteroid["wasOnScreen"] = onScreen
     asteroid.physicsBody?.angularVelocity = .random(in: -.pi ... .pi)
+    asteroids.insert(asteroid)
     playfield.addChild(asteroid)
   }
 
@@ -269,16 +284,28 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     makeAsteroid(position: offset + dir.scale(by: dist), size: size, velocity: velocity, onScreen: false)
   }
 
-  func addEmitter(_ emitter: SKEmitterNode, _ position: CGPoint) {
+  func nextWave() {
+    waveNumber += 1
+    for _ in 0 ..< waveNumber + 2 {
+      spawnAsteroid(size: "huge")
+    }
+  }
+
+  func removeAsteroid(_ asteroid: SKSpriteNode) {
+    recycleSprite(asteroid)
+    asteroids.remove(asteroid)
+    if asteroids.isEmpty {
+      wait(for: 4.0) { self.nextWave() }
+    }
+  }
+
+  func addEmitter(_ emitter: SKEmitterNode) {
+    emitter.name = "emitter"
     let maxParticleLifetime = emitter.particleLifetime + 0.5 * emitter.particleLifetimeRange
     let maxEmissionTime = CGFloat(emitter.numParticlesToEmit) / emitter.particleBirthRate
-    let maxExplosionTime = Double(maxEmissionTime + maxParticleLifetime)
-    let waitAndRemove = SKAction.sequence([
-      SKAction.wait(forDuration: maxExplosionTime),
-      SKAction.removeFromParent()])
-    emitter.position = position
+    let maxTotalTime = Double(maxEmissionTime + maxParticleLifetime)
     emitter.zPosition = 1
-    emitter.run(waitAndRemove)
+    emitter.wait(for: maxTotalTime, then: SKAction.removeFromParent())
     emitter.isPaused = false
     playfield.addChild(emitter)
   }
@@ -303,7 +330,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     emitter.particleRotation = 0
     emitter.particleRotationRange = .pi
     emitter.particleRotationSpeed = 2 * .pi / effectDuration
-    addEmitter(emitter, asteroid.position)
+    emitter.position = asteroid.position
+    addEmitter(emitter)
   }
 
   func splitAsteroid(_ asteroid: SKSpriteNode) {
@@ -314,30 +342,35 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     guard let velocity = asteroid.physicsBody?.velocity else { fatalError("Asteroid had no velocity") }
     let pos = asteroid.position
     makeAsteroidSplitEffect(asteroid, ofSize: size)
-    recycleSprite(asteroid)
     // Don't split med or small asteroids.  Size progression should go huge -> big -> med,
     // but we include small just for completeness in case we change our minds later.
-    guard size >= 2 else { return }
-    // Choose a random direction for the first child and project to get that child's velocity
-    let velocity1Angle = CGVector(angle: velocity.angle() + .random(in: -0.4 * .pi...0.4 * .pi))
-    // Throw in a random scaling just to keep it from being too uniform
-    let velocity1 = velocity.project(unitVector: velocity1Angle).scale(by: .random(in: 0.75 ... 1.25))
-    // The second child's velocity is chosen from momentum conservation
-    let velocity2 = velocity.scale(by: 2) - velocity1
-    // Add a bit of extra spice just to keep the player on their toes
-    let oomph = CGFloat(1.1)
-    makeAsteroid(position: pos, size: sizes[size - 1], velocity: velocity1.scale(by: oomph), onScreen: true)
-    makeAsteroid(position: pos, size: sizes[size - 1], velocity: velocity2.scale(by: oomph), onScreen: true)
+    if size >= 2 {
+      // Choose a random direction for the first child and project to get that child's velocity
+      let velocity1Angle = CGVector(angle: velocity.angle() + .random(in: -0.4 * .pi...0.4 * .pi))
+      // Throw in a random scaling just to keep it from being too uniform
+      let velocity1 = velocity.project(unitVector: velocity1Angle).scale(by: .random(in: 0.75 ... 1.25))
+      // The second child's velocity is chosen from momentum conservation
+      let velocity2 = velocity.scale(by: 2) - velocity1
+      // Add a bit of extra spice just to keep the player on their toes
+      let oomph = CGFloat(1.1)
+      makeAsteroid(position: pos, size: sizes[size - 1], velocity: velocity1.scale(by: oomph), onScreen: true)
+      makeAsteroid(position: pos, size: sizes[size - 1], velocity: velocity2.scale(by: oomph), onScreen: true)
+    }
+    removeAsteroid(asteroid)
   }
 
-  func makeShipExplosion(_ currentTime: TimeInterval) {
-    guard !exploded else { return }
-    exploded = true
-    addEmitter(makeExplosion(texture: player.shipTexture), player.position)
-  }
-  
   func laserHitAsteroid(laser: SKNode, asteroid: SKNode) {
     removeLaser(laser as! SKSpriteNode)
+    splitAsteroid(asteroid as! SKSpriteNode)
+  }
+
+  func destroyPlayer() {
+    addEmitter(player.explode())
+    wait(for: 5.0) { self.spawnPlayer() }
+  }
+
+  func playerHit(asteroid: SKNode) {
+    destroyPlayer()
     splitAsteroid(asteroid as! SKSpriteNode)
   }
 
@@ -357,21 +390,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
   func didBegin(_ contact: SKPhysicsContact) {
     when(contact, isBetween: .playerShot, and: .asteroid) { laserHitAsteroid(laser: $0, asteroid: $1) }
+    when(contact, isBetween: .player, and: .asteroid) { playerHit(asteroid: $1) }
   }
   
   override func didMove(to view: SKView) {
+    name = "scene"
     physicsWorld.contactDelegate = self
     initBackground()
     initStars()
     initPlayfield()
     initControls()
     initInfo()
-    player = makeShip()
-    player.reset()
-    spawnAsteroid(size: "huge")
-    spawnAsteroid(size: "huge")
-    spawnAsteroid(size: "huge")
-    spawnAsteroid(size: "huge")
+    player = Ship(color: teamColors[0], joystick: joystick)
+    spawnPlayer()
+    nextWave()
   }
 
   override func update(_ currentTime: TimeInterval) {

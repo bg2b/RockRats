@@ -22,6 +22,7 @@ class Ship: SKNode {
     fireAnimation = SKAction.repeatForever(fireAnimation)
     for scale in [0.5, 1.0, 1.5, 2.0] {
       let sprite = SKSpriteNode(texture: fire[0], size: fireSize)
+      sprite.name = "shipExhaust"
       sprite.anchorPoint = CGPoint(x: 1.0, y: 0.5)
       sprite.run(fireAnimation)
       sprite.scale(to: CGSize(width: CGFloat(scale) * fireSize.width, height: fireSize.height))
@@ -70,6 +71,7 @@ class Ship: SKNode {
   }
 
   func fly() {
+    guard parent != nil else { return }
     let body = coastingConfiguration()
     let stick = joystick.getDirection()
     guard stick != CGVector.zero else { return }
@@ -120,5 +122,11 @@ class Ship: SKNode {
     body.velocity = .zero
     position = .zero
     zRotation = .pi / 2
+    lasersRemaining = 3
+  }
+
+  func explode() -> SKEmitterNode {
+    removeFromParent()
+    return makeExplosion(texture: shipTexture, at: position)
   }
 }
