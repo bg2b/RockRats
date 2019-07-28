@@ -268,7 +268,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     makeAsteroid(position: offset + dir.scale(by: dist), size: size, velocity: velocity, onScreen: false)
   }
 
-  func setEmitterLifetime(_ emitter: SKEmitterNode, _ position: CGPoint) {
+  func addEmitter(_ emitter: SKEmitterNode, _ position: CGPoint) {
     let maxParticleLifetime = emitter.particleLifetime + 0.5 * emitter.particleLifetimeRange
     let maxEmissionTime = CGFloat(emitter.numParticlesToEmit) / emitter.particleBirthRate
     let maxExplosionTime = Double(maxEmissionTime + maxParticleLifetime)
@@ -285,15 +285,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   func makeAsteroidSplitEffect(_ asteroid: SKSpriteNode, ofSize size: Int) {
     let emitter = SKEmitterNode()
     emitter.particleTexture = Globals.textureCache.findTexture(imageNamed: "meteorsmall1")
-    let explosionTime = CGFloat(0.25)
-    emitter.particleLifetime = explosionTime
-    emitter.particleLifetimeRange = 0.15 * explosionTime
+    let effectDuration = CGFloat(0.25)
+    emitter.particleLifetime = effectDuration
+    emitter.particleLifetimeRange = 0.15 * effectDuration
     emitter.particleScale = 0.75
     emitter.particleScaleRange = 0.25
     emitter.numParticlesToEmit = 4 * size
-    emitter.particleBirthRate = CGFloat(emitter.numParticlesToEmit) / (0.25 * explosionTime)
+    emitter.particleBirthRate = CGFloat(emitter.numParticlesToEmit) / (0.25 * effectDuration)
     let radius = 0.75 * asteroid.texture!.size().width
-    emitter.particleSpeed = radius / explosionTime
+    emitter.particleSpeed = radius / effectDuration
     emitter.particleSpeedRange = 0.25 * emitter.particleSpeed
     emitter.particlePosition = .zero
     emitter.particlePositionRange = CGVector(dx: radius, dy: radius).scale(by: 0.25)
@@ -301,8 +301,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     emitter.emissionAngleRange = 2 * .pi
     emitter.particleRotation = 0
     emitter.particleRotationRange = .pi
-    emitter.particleRotationSpeed = 2 * .pi / explosionTime
-    setEmitterLifetime(emitter, asteroid.position)
+    emitter.particleRotationSpeed = 2 * .pi / effectDuration
+    addEmitter(emitter, asteroid.position)
   }
 
   func splitAsteroid(_ asteroid: SKSpriteNode) {
@@ -331,7 +331,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
   func makeExplosion(at position: CGPoint, color: UIColor) {
     guard let explosion = SKEmitterNode(fileNamed: "BlueExplosion.sks") else { fatalError("Could not load emitter node") }
-    setEmitterLifetime(explosion, position)
+    addEmitter(explosion, position)
   }
   
   func laserHitAsteroid(laser: SKNode, asteroid: SKNode) {
