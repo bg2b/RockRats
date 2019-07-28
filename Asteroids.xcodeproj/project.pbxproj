@@ -35,7 +35,6 @@
 		FD53168322DB445100F09E57 /* meteorbig4@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53167B22DB445100F09E57 /* meteorbig4@2x.png */; };
 		FD53168422DB445100F09E57 /* meteorbig3@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53167C22DB445100F09E57 /* meteorbig3@2x.png */; };
 		FD53168522DB445100F09E57 /* meteorbig2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53167D22DB445100F09E57 /* meteorbig2@2x.png */; };
-		FD53168722DBCDBF00F09E57 /* BlueExplosion.sks in Resources */ = {isa = PBXBuildFile; fileRef = FD53168622DBCDBF00F09E57 /* BlueExplosion.sks */; };
 		FD53168E22DC1A0600F09E57 /* laserbig_green@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53168822DC1A0500F09E57 /* laserbig_green@2x.png */; };
 		FD53168F22DC1A0600F09E57 /* laserbig_red@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53168922DC1A0500F09E57 /* laserbig_red@2x.png */; };
 		FD53169022DC1A0600F09E57 /* laserbig_blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53168A22DC1A0500F09E57 /* laserbig_blue@2x.png */; };
@@ -51,6 +50,7 @@
 		FD79324622D20FE700E7D336 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FD79324422D20FE700E7D336 /* LaunchScreen.storyboard */; };
 		FDCF8CA322DA175F008EDFD1 /* CGHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDCF8CA222DA175F008EDFD1 /* CGHelpers.swift */; };
 		FDCF8CA522DA7296008EDFD1 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDCF8CA422DA7296008EDFD1 /* Globals.swift */; };
+		FDD831F222EDB50200CA4EC6 /* Explosions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD831F122EDB50200CA4EC6 /* Explosions.swift */; };
 		FDDF488722D2A700006FB86F /* SpriteCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDDF488622D2A700006FB86F /* SpriteCache.swift */; };
 		FDDF488922D2D864006FB86F /* NodeData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDDF488822D2D864006FB86F /* NodeData.swift */; };
 		FDE04B2722D5FEA30011A529 /* star1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FDE04B2422D5FEA30011A529 /* star1@2x.png */; };
@@ -89,7 +89,6 @@
 		FD53167B22DB445100F09E57 /* meteorbig4@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "meteorbig4@2x.png"; sourceTree = "<group>"; };
 		FD53167C22DB445100F09E57 /* meteorbig3@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "meteorbig3@2x.png"; sourceTree = "<group>"; };
 		FD53167D22DB445100F09E57 /* meteorbig2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "meteorbig2@2x.png"; sourceTree = "<group>"; };
-		FD53168622DBCDBF00F09E57 /* BlueExplosion.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = BlueExplosion.sks; sourceTree = "<group>"; };
 		FD53168822DC1A0500F09E57 /* laserbig_green@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "laserbig_green@2x.png"; sourceTree = "<group>"; };
 		FD53168922DC1A0500F09E57 /* laserbig_red@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "laserbig_red@2x.png"; sourceTree = "<group>"; };
 		FD53168A22DC1A0500F09E57 /* laserbig_blue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "laserbig_blue@2x.png"; sourceTree = "<group>"; };
@@ -107,6 +106,7 @@
 		FD79324722D20FE700E7D336 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FDCF8CA222DA175F008EDFD1 /* CGHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGHelpers.swift; sourceTree = "<group>"; };
 		FDCF8CA422DA7296008EDFD1 /* Globals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
+		FDD831F122EDB50200CA4EC6 /* Explosions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Explosions.swift; sourceTree = "<group>"; };
 		FDDF488622D2A700006FB86F /* SpriteCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteCache.swift; sourceTree = "<group>"; };
 		FDDF488822D2D864006FB86F /* NodeData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeData.swift; sourceTree = "<group>"; };
 		FDE04B2422D5FEA30011A529 /* star1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "star1@2x.png"; sourceTree = "<group>"; };
@@ -150,7 +150,7 @@
 				FD79323522D20FE600E7D336 /* AppDelegate.swift */,
 				FD79323722D20FE600E7D336 /* GameScene.sks */,
 				FD79323B22D20FE600E7D336 /* GameScene.swift */,
-				FD53168622DBCDBF00F09E57 /* BlueExplosion.sks */,
+				FDD831F122EDB50200CA4EC6 /* Explosions.swift */,
 				FD53167422DB24EC00F09E57 /* Ship.swift */,
 				FDCF8CA222DA175F008EDFD1 /* CGHelpers.swift */,
 				FDE04B2A22D745470011A529 /* Joystick.swift */,
@@ -273,7 +273,6 @@
 				FD0C070F22D8925E00F19A55 /* ship_red@2x.png in Resources */,
 				FD0C070B22D8925E00F19A55 /* starfield_black@2x.png in Resources */,
 				FD53169322DC1A0600F09E57 /* lasersmall_red@2x.png in Resources */,
-				FD53168722DBCDBF00F09E57 /* BlueExplosion.sks in Resources */,
 				FD53168422DB445100F09E57 /* meteorbig3@2x.png in Resources */,
 				FD28DB5A22DFFA87009446A2 /* ufo_green@2x.png in Resources */,
 				FD53169122DC1A0600F09E57 /* lasersmall_blue@2x.png in Resources */,
@@ -325,6 +324,7 @@
 				FDE04B2B22D745470011A529 /* Joystick.swift in Sources */,
 				FDDF488722D2A700006FB86F /* SpriteCache.swift in Sources */,
 				FDDF488922D2D864006FB86F /* NodeData.swift in Sources */,
+				FDD831F222EDB50200CA4EC6 /* Explosions.swift in Sources */,
 				FDCF8CA322DA175F008EDFD1 /* CGHelpers.swift in Sources */,
 				FDCF8CA522DA7296008EDFD1 /* Globals.swift in Sources */,
 				FD53167522DB24EC00F09E57 /* Ship.swift in Sources */,

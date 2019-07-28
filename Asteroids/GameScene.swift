@@ -70,6 +70,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   var player: Ship!
   var info: SKLabelNode!
   var joystick: Joystick!
+  var exploded = false
 
   func makeSprite(imageNamed name: String, initializer: ((SKSpriteNode) -> Void)? = nil) -> SKSpriteNode {
     return Globals.spriteCache.findSprite(imageNamed: name, initializer: initializer)
@@ -329,9 +330,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     makeAsteroid(position: pos, size: sizes[size - 1], velocity: velocity2.scale(by: oomph), onScreen: true)
   }
 
-  func makeExplosion(at position: CGPoint, color: UIColor) {
-    guard let explosion = SKEmitterNode(fileNamed: "BlueExplosion.sks") else { fatalError("Could not load emitter node") }
-    addEmitter(explosion, position)
+  func makeShipExplosion(_ currentTime: TimeInterval) {
+    guard !exploded else { return }
+    exploded = true
+    addEmitter(makeExplosion(texture: player.shipTexture), player.position)
   }
   
   func laserHitAsteroid(laser: SKNode, asteroid: SKNode) {
