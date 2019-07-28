@@ -101,7 +101,7 @@ class Ship: SKNode {
   }
   
   func canShoot() -> Bool {
-    return lasersRemaining > 0
+    return parent != nil && lasersRemaining > 0
   }
 
   func shoot(laser shot: SKNode) {
