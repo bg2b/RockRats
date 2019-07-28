@@ -279,7 +279,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     emitter.zPosition = 1
     emitter.run(waitAndRemove)
     emitter.isPaused = false
-    print("Created an emitter")
     playfield.addChild(emitter)
   }
 
@@ -319,11 +318,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // but we include small just for completeness in case we change our minds later.
     guard size >= 2 else { return }
     // Choose a random direction for the first child and project to get that child's velocity
-    let velocity1 = velocity.project(unitVector: CGVector(angle: .random(in: -0.75 * .pi...0.75 * .pi)))
+    let velocity1Angle = CGVector(angle: velocity.angle() + .random(in: -0.4 * .pi...0.4 * .pi))
+    // Throw in a random scaling just to keep it from being too uniform
+    let velocity1 = velocity.project(unitVector: velocity1Angle).scale(by: .random(in: 0.75 ... 1.25))
     // The second child's velocity is chosen from momentum conservation
-    let velocity2 = velocity - velocity1
+    let velocity2 = velocity.scale(by: 2) - velocity1
     // Add a bit of extra spice just to keep the player on their toes
-    let oomph = CGFloat(1.5)
+    let oomph = CGFloat(1.1)
     makeAsteroid(position: pos, size: sizes[size - 1], velocity: velocity1.scale(by: oomph), onScreen: true)
     makeAsteroid(position: pos, size: sizes[size - 1], velocity: velocity2.scale(by: oomph), onScreen: true)
   }
