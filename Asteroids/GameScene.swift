@@ -271,7 +271,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   func makeAsteroid(position pos: CGPoint, size: String, velocity: CGVector, onScreen: Bool) {
     let typesForSize = ["small": 2, "med": 2, "big": 4, "huge": 3]
     guard let numTypes = typesForSize[size] else { fatalError("Incorrect asteroid size") }
-    let name = "meteor\(size)\(Int.random(in: 1...numTypes))"
+    var type = Int.random(in: 1...numTypes)
+    if Int.random(in: 1...4) != 1 {
+      // Prefer the last type for each size, rest just for variety
+      type = numTypes
+    }
+    let name = "meteor\(size)\(type)"
     let asteroid = Globals.spriteCache.findSprite(imageNamed: name) { sprite in
       guard let texture = sprite.texture else { fatalError("Where is the asteroid texture?") }
       let body = SKPhysicsBody(texture: texture, size: texture.size())
