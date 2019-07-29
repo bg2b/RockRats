@@ -84,7 +84,7 @@ class Ship: SKNode {
     if abs(angle) <= halfSectorSize {
       // Pointing forwards, thrusters active
       let thrustAmount = min(stick.dx, 0.7) / 0.7
-      var thrustForce = 2 * thrustAmount
+      var thrustForce = 4 * thrustAmount
       let maxSpeed = CGFloat(350)
       let currentSpeed = body.velocity.norm2()
       if currentSpeed > 0.5 * maxSpeed {
@@ -96,7 +96,7 @@ class Ship: SKNode {
     }
     if abs(abs(angle) - .pi / 2) <= halfSectorSize {
       // Left or right rotation, set an absolute angular speed
-      body.angularVelocity = copysign(.pi * min(abs(stick.dy), 0.7), angle)
+      body.angularVelocity = copysign(.pi * min(abs(stick.dy), 1.4), angle)
     }
   }
   
