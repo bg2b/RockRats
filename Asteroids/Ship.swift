@@ -11,25 +11,29 @@ import SpriteKit
 class Ship: SKNode {
   let joystick: Joystick
   let shipTexture: SKTexture
-  var flames = [SKSpriteNode]()
+  var forwardFlames = [SKSpriteNode]()
+  var reverseFlames = [[SKSpriteNode]]()
   var lasersRemaining = 3
 
-  func buildFlames(at exhaustPos: CGPoint) {
+  func buildFlames(at exhaustPos: CGPoint, scale: CGFloat = 1, direction: CGFloat = 0) -> [SKSpriteNode] {
     var fire = (1...3).compactMap { Globals.textureCache.findTexture(imageNamed: "fire\($0)") }
     fire.append(fire[1])
     let fireSize = fire[0].size()
     var fireAnimation = SKAction.animate(with: fire, timePerFrame: 0.1, resize: false, restore: true)
     fireAnimation = SKAction.repeatForever(fireAnimation)
-    for scale in [0.5, 1.0, 1.5, 2.0] {
+    var flames = [SKSpriteNode]()
+    for stretch in [0.5, 1.0, 1.5, 2.0] {
       let sprite = SKSpriteNode(texture: fire[0], size: fireSize)
       sprite.name = "shipExhaust"
       sprite.anchorPoint = CGPoint(x: 1.0, y: 0.5)
       sprite.run(fireAnimation)
-      sprite.scale(to: CGSize(width: CGFloat(scale) * fireSize.width, height: fireSize.height))
+      sprite.scale(to: CGSize(width: scale * CGFloat(stretch) * fireSize.width, height: scale * fireSize.height))
+      sprite.zRotation = direction
       sprite.position = exhaustPos
       flames.append(sprite)
       addChild(sprite)
     }
+    return flames
   }
 
   required init(color: String, joystick: Joystick) {
@@ -40,7 +44,11 @@ class Ship: SKNode {
     let ship = SKSpriteNode(texture: shipTexture)
     ship.name = "shipImage"
     addChild(ship)
-    buildFlames(at: CGPoint(x: -shipTexture.size().width / 2, y: 0.0))
+    forwardFlames = buildFlames(at: CGPoint(x: -shipTexture.size().width / 2, y: 0.0))
+    for side in [-1, 1] {
+      reverseFlames.append(buildFlames(at: CGPoint(x: 0, y: CGFloat(side) * shipTexture.size().height / 2.1),
+                                       scale: 0.5, direction: .pi))
+    }
     physicsBody = SKPhysicsBody(texture: shipTexture, size: shipTexture.size())
     let body = coastingConfiguration()
     body.categoryBitMask = ObjectCategories.player.rawValue
@@ -53,12 +61,23 @@ class Ship: SKNode {
   }
 
   func flamesOff() {
-    flames.forEach { $0.isHidden = true }
+    forwardFlames.forEach { $0.isHidden = true }
+    reverseFlames[0].forEach { $0.isHidden = true }
+    reverseFlames[1].forEach { $0.isHidden = true }
   }
 
-  func flamesOn(_ amount: CGFloat) {
+  func flamesOn(_ flames: [SKSpriteNode], amount: CGFloat) {
     let flameIndex = Int(0.99 * amount * CGFloat(flames.count))
     flames[flameIndex].isHidden = false
+  }
+
+  func forwardFlamesOn(_ amount: CGFloat) {
+    flamesOn(forwardFlames, amount: amount)
+  }
+
+  func reverseFlamesOn(_ amount: CGFloat) {
+    flamesOn(reverseFlames[0], amount: amount)
+    flamesOn(reverseFlames[1], amount: amount)
   }
 
   // Sets the ship to the standard coasting configuration
@@ -77,9 +96,19 @@ class Ship: SKNode {
     guard stick != CGVector.zero else { return }
     let angle = stick.angle()
     let halfSectorSize = (120 * CGFloat.pi / 180) / 2
+    var thrustForce = CGFloat(0.0)
     if abs(angle) >= .pi - halfSectorSize {
-      // Joystick is pointing backwards, put on the brakes
-      body.linearDamping = max(min(-stick.dx, 0.7), 0.05)
+      // Joystick is pointing backwards, apply reverse thrusters
+      let thrustAmount = min(-stick.dx, 0.7) / 0.7
+      thrustForce = 2 * thrustAmount
+      let maxSpeed = CGFloat(350)
+      let currentSpeed = body.velocity.norm2()
+      if currentSpeed > 0.5 * maxSpeed {
+        thrustForce *= (maxSpeed - currentSpeed) / (0.5 * maxSpeed)
+      }
+      let thrust = CGVector(angle: zRotation).scale(by: -thrustForce)
+      body.applyForce(thrust)
+      reverseFlamesOn(thrustAmount)
     }
     if abs(angle) <= halfSectorSize {
       // Pointing forwards, thrusters active
@@ -92,7 +121,7 @@ class Ship: SKNode {
       }
       let thrust = CGVector(angle: zRotation).scale(by: thrustForce)
       body.applyForce(thrust)
-      flamesOn(thrustAmount)
+      forwardFlamesOn(thrustAmount)
     }
     if abs(abs(angle) - .pi / 2) <= halfSectorSize {
       // Left or right rotation, set an absolute angular speed

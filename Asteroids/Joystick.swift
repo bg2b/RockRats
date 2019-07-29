@@ -94,6 +94,8 @@ class Joystick: SKNode {
 
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
     guard let touch = touches.first else { return }
+    // Gradually drop any offset
+    touchOffset = touchOffset.scale(by: 0.9)
     touched(at: touch.location(in: self))
   }
 
