@@ -307,26 +307,26 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     makeAsteroid(position: offset + dir.scale(by: dist), size: size, velocity: velocity, onScreen: false)
   }
 
-  func showWave() {
-    waveDisplay.text = "WAVE \(waveNumber)"
-    waveDisplay.setScale(0.0)
-    waveDisplay.alpha = 1.0
-    waveDisplay.isHidden = false
-    let zoomAndHide = SKAction.sequence([
-      SKAction.scale(to: 1.0, duration: 0.25),
-      SKAction.wait(forDuration: 1.5),
-      SKAction.fadeOut(withDuration: 0.5),
-      SKAction.hide()
-      ])
-    waveDisplay.run(zoomAndHide)
+  func spawnWave() {
+    for _ in 0 ..< waveNumber + 2 {
+      spawnAsteroid(size: "huge")
+    }
   }
 
   func nextWave() {
     waveNumber += 1
-    showWave()
-    for _ in 0 ..< waveNumber + 2 {
-      spawnAsteroid(size: "huge")
-    }
+    waveDisplay.text = "WAVE \(waveNumber)"
+    waveDisplay.setScale(0.0)
+    waveDisplay.alpha = 1.0
+    waveDisplay.isHidden = false
+    let displayAndSpawn = SKAction.sequence([
+      SKAction.scale(to: 1.0, duration: 0.25),
+      SKAction.wait(forDuration: 1.5),
+      SKAction.fadeOut(withDuration: 0.5),
+      SKAction.hide(),
+      SKAction.run { self.spawnWave() }
+      ])
+    waveDisplay.run(displayAndSpawn)
   }
 
   func removeAsteroid(_ asteroid: SKSpriteNode) {
