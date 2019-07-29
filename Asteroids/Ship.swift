@@ -10,6 +10,7 @@ import SpriteKit
 
 class Ship: SKNode {
   let joystick: Joystick
+  let button: Button
   let shipTexture: SKTexture
   var flames = [SKSpriteNode]()
   var lasersRemaining = 3
@@ -32,8 +33,9 @@ class Ship: SKNode {
     }
   }
 
-  required init(color: String, joystick: Joystick) {
+  required init(color: String, joystick: Joystick, button: Button) {
     self.joystick = joystick
+    self.button = button
     self.shipTexture = Globals.textureCache.findTexture(imageNamed: "ship_\(color)")
     super.init()
     self.name = "ship"
@@ -74,16 +76,32 @@ class Ship: SKNode {
     guard parent != nil else { return }
     let body = coastingConfiguration()
     let stick = joystick.getDirection()
-    guard stick != CGVector.zero else { return }
-    let angle = stick.angle()
-    let halfSectorSize = (120 * CGFloat.pi / 180) / 2
-    if abs(angle) >= .pi - halfSectorSize {
-      // Joystick is pointing backwards, put on the brakes
-      body.linearDamping = max(min(-stick.dx, 0.7), 0.05)
+    if stick != .zero {
+      while zRotation > .pi {
+        zRotation -= 2 * .pi
+      }
+      while zRotation < -.pi {
+        zRotation += 2 * .pi
+      }
+      var angle = stick.angle()
+      let shipRotationRate = 1.4 * CGFloat.pi
+      while abs(angle + 2 * .pi - zRotation) < abs(angle - zRotation) {
+        angle += 2 * .pi
+      }
+      while abs(angle - 2 * .pi - zRotation) < abs(angle - zRotation) {
+        angle -= 2 * .pi
+      }
+      let delta = angle - zRotation
+      if abs(delta) < shipRotationRate / 50 {
+        // Once we get close, just snap to the desired angle to avoid stuttering
+        zRotation = angle
+      } else {
+        // Set an absolute angular speed
+        body.angularVelocity = copysign(shipRotationRate, delta)
+      }
     }
-    if abs(angle) <= halfSectorSize {
-      // Pointing forwards, thrusters active
-      let thrustAmount = min(stick.dx, 0.7) / 0.7
+    if button.isHeld() {
+      let thrustAmount = CGFloat(1.0)
       var thrustForce = 2 * thrustAmount
       let maxSpeed = CGFloat(350)
       let currentSpeed = body.velocity.norm2()
@@ -93,10 +111,6 @@ class Ship: SKNode {
       let thrust = CGVector(angle: zRotation).scale(by: thrustForce)
       body.applyForce(thrust)
       flamesOn(thrustAmount)
-    }
-    if abs(abs(angle) - .pi / 2) <= halfSectorSize {
-      // Left or right rotation, set an absolute angular speed
-      body.angularVelocity = copysign(.pi * min(abs(stick.dy), 0.7), angle)
     }
   }
   
