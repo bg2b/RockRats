@@ -93,40 +93,76 @@ class Ship: SKNode {
     guard parent != nil else { return }
     let body = coastingConfiguration()
     let stick = joystick.getDirection()
-    guard stick != CGVector.zero else { return }
-    let angle = stick.angle()
-    let halfSectorSize = (120 * CGFloat.pi / 180) / 2
-    var thrustForce = CGFloat(0.0)
-    if abs(angle) >= .pi - halfSectorSize {
-      // Joystick is pointing backwards, apply reverse thrusters
-      let thrustAmount = min(-stick.dx, 0.7) / 0.7
-      thrustForce = 2 * thrustAmount
-      let maxSpeed = CGFloat(350)
-      let currentSpeed = body.velocity.norm2()
-      if currentSpeed > 0.5 * maxSpeed {
-        thrustForce *= (maxSpeed - currentSpeed) / (0.5 * maxSpeed)
+    guard stick != .zero else { return }
+    var thrustAmount = CGFloat(0)
+    var thrustForce = CGFloat(0)
+    let shipMaxRotationRate = CGFloat.pi
+    let shipMaxThrust = CGFloat(4)
+    if Globals.directControls {
+      while zRotation > .pi {
+        zRotation -= 2 * .pi
       }
-      let thrust = CGVector(angle: zRotation).scale(by: -thrustForce)
-      body.applyForce(thrust)
-      reverseFlamesOn(thrustAmount)
+      while zRotation < -.pi {
+        zRotation += 2 * .pi
+      }
+      var angle = stick.angle() + joystick.zRotation
+      while abs(angle + 2 * .pi - zRotation) < abs(angle - zRotation) {
+        angle += 2 * .pi
+      }
+      while abs(angle - 2 * .pi - zRotation) < abs(angle - zRotation) {
+        angle -= 2 * .pi
+      }
+      let delta = angle - zRotation
+      if abs(delta) < shipMaxRotationRate / 50 {
+        // Once we get close, just snap to the desired angle to avoid stuttering
+        zRotation = angle
+      } else {
+        // Set an absolute angular speed
+        body.angularVelocity = copysign(shipMaxRotationRate, delta)
+      }
+      thrustAmount = stick.norm2()
+      let thrustCutoff = CGFloat.pi / 2
+      if abs(delta) > thrustCutoff {
+        // Pointing too far away from the desired direction, so don't thrust.
+        thrustAmount = 0
+      } else if abs(delta) > thrustCutoff / 2 {
+        // We scale down the thrust by a factor which is 0 at thrustCutoff and 1 and
+        // thrustCutoff / 2.
+        thrustAmount *= 2 - abs(delta) / (thrustCutoff / 2)
+      }
+      thrustForce = thrustAmount
+    } else {
+      let angle = stick.angle()
+      let halfSectorSize = (120 * CGFloat.pi / 180) / 2
+      if abs(angle) >= .pi - halfSectorSize {
+        // Joystick is pointing backwards, apply reverse thrusters
+        thrustAmount = min(-stick.dx, 0.7) / 0.7
+        thrustForce = -0.5 * thrustAmount
+      } else if abs(angle) <= halfSectorSize {
+        // Pointing forwards, thrusters active
+        thrustAmount = min(stick.dx, 0.7) / 0.7
+        thrustForce = thrustAmount
+      }
+      if abs(abs(angle) - .pi / 2) <= halfSectorSize {
+        // Left or right rotation, set an absolute angular speed.  When thrusting backwards,
+        // it seems a bit more natural to reverse the direction of rotation.
+        body.angularVelocity = copysign(.pi * min(abs(stick.dy), shipMaxRotationRate), angle)
+        if thrustForce < 0 {
+          body.angularVelocity = -body.angularVelocity
+        }
+      }
     }
-    if abs(angle) <= halfSectorSize {
-      // Pointing forwards, thrusters active
-      let thrustAmount = min(stick.dx, 0.7) / 0.7
-      var thrustForce = 4 * thrustAmount
-      let maxSpeed = CGFloat(350)
-      let currentSpeed = body.velocity.norm2()
-      if currentSpeed > 0.5 * maxSpeed {
-        thrustForce *= (maxSpeed - currentSpeed) / (0.5 * maxSpeed)
-      }
-      let thrust = CGVector(angle: zRotation).scale(by: thrustForce)
-      body.applyForce(thrust)
+    thrustForce *= shipMaxThrust
+    let maxSpeed = CGFloat(350)
+    let currentSpeed = body.velocity.norm2()
+    if currentSpeed > 0.5 * maxSpeed {
+      thrustForce *= (maxSpeed - currentSpeed) / (0.5 * maxSpeed)
+    }
+    body.applyForce(CGVector(angle: zRotation).scale(by: thrustForce))
+    if thrustForce > 0 {
       forwardFlamesOn(thrustAmount)
-    }
-    if abs(abs(angle) - .pi / 2) <= halfSectorSize {
-      // Left or right rotation, set an absolute angular speed.  When thrusting backwards,
-      // it seems a bit more natural to reverse the direction of rotation.
-      body.angularVelocity = copysign(.pi * min(abs(stick.dy), 1.4), angle * stick.dx)
+    } else {
+      reverseFlamesOn(thrustAmount)
     }
   }
   

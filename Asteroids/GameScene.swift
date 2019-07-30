@@ -75,6 +75,7 @@ extension SKNode {
 extension Globals {
   static var textureCache = TextureCache()
   static var spriteCache = SpriteCache()
+  static var directControls = false
 }
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
