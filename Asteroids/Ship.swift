@@ -10,7 +10,6 @@ import SpriteKit
 
 class Ship: SKNode {
   let joystick: Joystick
-  let button: Button
   let shipTexture: SKTexture
   var flames = [SKSpriteNode]()
   var lasersRemaining = 3
@@ -33,9 +32,8 @@ class Ship: SKNode {
     }
   }
 
-  required init(color: String, joystick: Joystick, button: Button) {
+  required init(color: String, joystick: Joystick) {
     self.joystick = joystick
-    self.button = button
     self.shipTexture = Globals.textureCache.findTexture(imageNamed: "ship_\(color)")
     super.init()
     self.name = "ship"
@@ -83,7 +81,7 @@ class Ship: SKNode {
       while zRotation < -.pi {
         zRotation += 2 * .pi
       }
-      var angle = stick.angle()
+      var angle = stick.angle() + joystick.zRotation
       let shipRotationRate = 1.4 * CGFloat.pi
       while abs(angle + 2 * .pi - zRotation) < abs(angle - zRotation) {
         angle += 2 * .pi
@@ -99,9 +97,7 @@ class Ship: SKNode {
         // Set an absolute angular speed
         body.angularVelocity = copysign(shipRotationRate, delta)
       }
-    }
-    if button.isHeld() {
-      let thrustAmount = CGFloat(1.0)
+      let thrustAmount = stick.norm2()
       var thrustForce = 2 * thrustAmount
       let maxSpeed = CGFloat(350)
       let currentSpeed = body.velocity.norm2()

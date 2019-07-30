@@ -8,14 +8,10 @@
 
 import SpriteKit
 
-let buttonHeldTime = 0.1
-
 class Button: SKNode {
   let size: CGFloat
   let borderColor: UIColor
   let fillColor: UIColor
-  var touched = false
-  var held = false
   var action: (() -> Void)?
 
   func createButton(texture: SKTexture?) {
@@ -45,34 +41,22 @@ class Button: SKNode {
     createButton(texture: texture)
   }
 
-  func isActive() -> Bool { return touched }
-
-  func isHeld() -> Bool { return held }
-
   required init(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented by Button")
   }
 
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     guard let _ = touches.first else { return }
-    touched = true
-    wait(for: buttonHeldTime) { self.held = true }
+    action?()
   }
 
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
   }
 
   override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-    removeAllActions()
-    if !held {
-      action?()
-    }
-    touched = false
-    held = false
   }
 
   override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-    removeAllActions()
-    held = false
+    touchesEnded(touches, with: event)
   }
 }

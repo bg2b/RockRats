@@ -85,7 +85,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   var score = 0
   var scoreDisplay: SKLabelNode!
   var joystick: Joystick!
-  var fireButton: Button!
   var safezone: CGRect!
   var asteroids = Set<SKSpriteNode>()
   var waveNumber = 0
@@ -200,10 +199,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     joystick = Joystick(size: controlSize, borderColor: .lightGray, fillColor: controlFill,
                         texture: Globals.textureCache.findTexture(imageNamed: "ship_blue"))
     joystick.position = CGPoint(x: frame.minX + offset, y: frame.minY + offset)
-    joystick.zRotation = 0
+    joystick.zRotation = .pi / 2
     controls.addChild(joystick)
-    fireButton = Button(size: controlSize, borderColor: .lightGray, fillColor: controlFill,
-                        texture: Globals.textureCache.findTexture(imageNamed: "laserbig_green"))
+    let fireButton = Button(size: controlSize, borderColor: .lightGray, fillColor: controlFill,
+                            texture: Globals.textureCache.findTexture(imageNamed: "laserbig_green"))
     fireButton.position = CGPoint(x: frame.maxX - offset, y: frame.minY + offset)
     fireButton.zRotation = .pi / 2
     fireButton.action = { self.fireLaser() }
@@ -442,7 +441,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     initPlayfield()
     initControls()
     initInfo()
-    player = Ship(color: teamColors[0], joystick: joystick, button: fireButton)
+    player = Ship(color: teamColors[0], joystick: joystick)
     nextWave()
     wait(for: 3.0) { self.spawnPlayer() }
   }
