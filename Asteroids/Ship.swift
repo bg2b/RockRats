@@ -124,8 +124,9 @@ class Ship: SKNode {
       forwardFlamesOn(thrustAmount)
     }
     if abs(abs(angle) - .pi / 2) <= halfSectorSize {
-      // Left or right rotation, set an absolute angular speed
-      body.angularVelocity = copysign(.pi * min(abs(stick.dy), 1.4), angle)
+      // Left or right rotation, set an absolute angular speed.  When thrusting backwards,
+      // it seems a bit more natural to reverse the direction of rotation.
+      body.angularVelocity = copysign(.pi * min(abs(stick.dy), 1.4), angle * stick.dx)
     }
   }
   
