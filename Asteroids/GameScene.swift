@@ -86,7 +86,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   var score = 0
   var scoreDisplay: SKLabelNode!
   var joystick: Joystick!
-  var safezone: CGRect!
   var asteroids = Set<SKSpriteNode>()
   var waveNumber = 0
   var waveDisplay: SKLabelNode!
@@ -185,8 +184,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     playfield.name = "playfield"
     playfield.zPosition = LevelZs.playfield.rawValue
     addChild(playfield)
-    let safezoneSize = CGFloat(300)
-    safezone = frame.insetBy(dx: 0.5 * (frame.width - safezoneSize), dy: 0.5 * (frame.height - safezoneSize))
   }
 
   func initControls() {
@@ -235,13 +232,36 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     scoreDisplay.text = "\(score)"
   }
 
-  func spawnPlayer() {
-    let emptySafezone = asteroids.allSatisfy { !safezone.contains($0.position) }
-    if emptySafezone {
-      player.reset()
-      playfield.addChild(player)
+  func isSafe(point: CGPoint, forDuration time: CGFloat) -> Bool {
+    for asteroid in asteroids {
+      let asteroidRadius = 0.5 * asteroid.texture!.size().diagonal()
+      let playerRadius = 0.5 * player.shipTexture.size().diagonal()
+      let pathStart = asteroid.position
+      let pathEnd = asteroid.position + asteroid.physicsBody!.velocity.scale(by: time)
+      if distanceBetween(point: point, segment: (pathStart, pathEnd)) < asteroidRadius + playerRadius {
+        return false
+      }
+    }
+    return true
+  }
+
+  func spawnPlayer(safeTime: CGFloat = 5) {
+    var spawnPosition = CGPoint(x: frame.midX, y: frame.midY)
+    var attemptsRemaining = 5
+    while attemptsRemaining > 0 && !isSafe(point: spawnPosition, forDuration: safeTime) {
+      let spawnRegion = frame.insetBy(dx: 0.33 * frame.width, dy: 0.33 * frame.height)
+      spawnPosition = CGPoint(x: .random(in: spawnRegion.minX...spawnRegion.maxX),
+                           y: .random(in: spawnRegion.minY...spawnRegion.maxY))
+      attemptsRemaining -= 1
+    }
+    if attemptsRemaining == 0 {
+      // We didn't find a safe position so wait a bit and try again.  Be a little more
+      // aggressive about what is considered safe.
+      wait(for: 0.5) { self.spawnPlayer(safeTime: max(safeTime - 0.25, 0)) }
     } else {
-      wait(for: 0.25) { self.spawnPlayer() }
+      player.reset()
+      player.position = spawnPosition
+      playfield.addChild(player)
     }
   }
 

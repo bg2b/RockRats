@@ -20,6 +20,10 @@ extension CGSize {
       return scale(by: size / height)
     }
   }
+
+  func diagonal() -> CGFloat {
+    return hypot(width, height)
+  }
 }
 
 extension CGVector {
@@ -45,6 +49,12 @@ extension CGVector {
 
   func project(unitVector: CGVector) -> CGVector {
     return unitVector.scale(by: self.dotProd(unitVector))
+  }
+
+  func rotate(by angle: CGFloat) -> CGVector {
+    let c = cos(angle)
+    let s = sin(angle)
+    return CGVector(dx: c * dx - s * dy, dy: s * dx + c * dy)
   }
 }
 
@@ -72,4 +82,22 @@ func -(left: CGPoint, right: CGVector) -> CGPoint {
 
 func -(left: CGPoint, right: CGPoint) -> CGVector {
   return CGVector(dx: left.x - right.x, dy: left.y - right.y)
+}
+
+func distanceBetween(point: CGPoint, segment: (CGPoint, CGPoint)) -> CGFloat {
+  let delta = segment.1 - segment.0
+  let segmentLength = delta.norm2()
+  let offsetFromStart = point - segment.0
+  guard segmentLength > 0 else { return offsetFromStart.norm2() }
+  let along = offsetFromStart.dotProd(delta)
+  if along <= 0 {
+    // Closest at the starting point
+    return offsetFromStart.norm2()
+  } else if along >= delta.dotProd(delta) {
+    // Closest at the ending point
+    return (point - segment.1).norm2()
+  } else {
+    // Somewhere between starting and ending; return perpendicular distance
+    return (abs(offsetFromStart.dotProd(delta.rotate(by: .pi / 2))) / segmentLength)
+  }
 }
