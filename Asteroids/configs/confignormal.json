@@ -1,0 +1,19 @@
+{
+  "initialLives": 3,
+  "extraLifeScore": 1000,
+  "playerMaxSpeed": 350,
+  "playerMaxThrust": 100,
+  "playerMaxRotationRate": 3.14,
+  "playerShotSpeed": 700,
+  "playerMaxShots": 3,
+  "safeTime": 5,
+  "asteroidMinSpeed": 0,
+  "asteroidMaxSpeed": 250,
+  "numAsteroidCoeffs": [ 1, 1 ],
+  "waveConfigs": [
+    {
+      "waveNumber": 1,
+      "asteroidSpeedBoost": 1.1
+    }
+  ]
+}

@@ -13,7 +13,7 @@ class Ship: SKNode {
   let shipTexture: SKTexture
   var forwardFlames = [SKSpriteNode]()
   var reverseFlames = [[SKSpriteNode]]()
-  var lasersRemaining = 3
+  var lasersRemaining = Globals.gameConfig.playerMaxShots
 
   func buildFlames(at exhaustPos: CGPoint, scale: CGFloat = 1, direction: CGFloat = 0) -> [SKSpriteNode] {
     var fire = (1...3).compactMap { Globals.textureCache.findTexture(imageNamed: "fire\($0)") }
@@ -51,6 +51,7 @@ class Ship: SKNode {
     }
     physicsBody = SKPhysicsBody(texture: shipTexture, size: shipTexture.size())
     let body = coastingConfiguration()
+    body.mass = 1
     body.categoryBitMask = ObjectCategories.player.rawValue
     body.collisionBitMask = 0
     body.contactTestBitMask = setOf([.asteroid, .ufo, .ufoShot])
@@ -96,8 +97,8 @@ class Ship: SKNode {
     guard stick != .zero else { return }
     var thrustAmount = CGFloat(0)
     var thrustForce = CGFloat(0)
-    let shipMaxRotationRate = CGFloat.pi
-    let shipMaxThrust = CGFloat(4)
+    let maxOmega = Globals.gameConfig.playerMaxRotationRate
+    let maxThrust = Globals.gameConfig.playerMaxThrust
     if Globals.directControls {
       while zRotation > .pi {
         zRotation -= 2 * .pi
@@ -113,12 +114,12 @@ class Ship: SKNode {
         angle -= 2 * .pi
       }
       let delta = angle - zRotation
-      if abs(delta) < shipMaxRotationRate / 50 {
+      if abs(delta) < maxOmega / 50 {
         // Once we get close, just snap to the desired angle to avoid stuttering
         zRotation = angle
       } else {
         // Set an absolute angular speed
-        body.angularVelocity = copysign(shipMaxRotationRate, delta)
+        body.angularVelocity = copysign(maxOmega, delta)
       }
       thrustAmount = stick.norm2()
       let thrustCutoff = CGFloat.pi / 2
@@ -146,14 +147,14 @@ class Ship: SKNode {
       if abs(abs(angle) - .pi / 2) <= halfSectorSize {
         // Left or right rotation, set an absolute angular speed.  When thrusting backwards,
         // it seems a bit more natural to reverse the direction of rotation.
-        body.angularVelocity = copysign(.pi * min(abs(stick.dy), shipMaxRotationRate), angle)
+        body.angularVelocity = copysign(maxOmega * min(abs(stick.dy), 0.7) / 0.7, angle)
         if thrustForce < 0 {
           body.angularVelocity = -body.angularVelocity
         }
       }
     }
-    thrustForce *= shipMaxThrust
-    let maxSpeed = CGFloat(350)
+    thrustForce *= maxThrust
+    let maxSpeed = Globals.gameConfig.playerMaxSpeed
     let currentSpeed = body.velocity.norm2()
     if currentSpeed > 0.5 * maxSpeed {
       thrustForce *= (maxSpeed - currentSpeed) / (0.5 * maxSpeed)
@@ -174,7 +175,7 @@ class Ship: SKNode {
     shot.zRotation = zRotation
     let shotDirection = CGVector(angle: zRotation)
     shot.position = position + shotDirection.scale(by: 0.5 * shipTexture.size().width)
-    shot.physicsBody?.velocity = shotDirection.scale(by: 700)
+    shot.physicsBody?.velocity = shotDirection.scale(by: Globals.gameConfig.playerShotSpeed)
     lasersRemaining -= 1
   }
   
@@ -188,7 +189,7 @@ class Ship: SKNode {
     body.velocity = .zero
     position = .zero
     zRotation = .pi / 2
-    lasersRemaining = 3
+    lasersRemaining = Globals.gameConfig.playerMaxShots
   }
 
   func explode() -> SKEmitterNode {

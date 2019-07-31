@@ -245,7 +245,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     return true
   }
 
-  func spawnPlayer(safeTime: CGFloat = 5) {
+  func spawnPlayer(safeTime: CGFloat = Globals.gameConfig.safeTime) {
     var spawnPosition = CGPoint(x: frame.midX, y: frame.midY)
     var attemptsRemaining = 5
     while attemptsRemaining > 0 && !isSafe(point: spawnPosition, forDuration: safeTime) {
@@ -278,7 +278,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       sprite.physicsBody = body
       sprite.zPosition = -1
     }
-    laser.wait(for: 1.0) { self.removeLaser(laser) }
+    laser.wait(for: Double(0.9 * frame.height / Globals.gameConfig.playerShotSpeed)) { self.removeLaser(laser) }
     playfield.addChild(laser)
     player.shoot(laser: laser)
   }
@@ -309,7 +309,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       sprite.physicsBody = body
     }
     asteroid.position = pos
-    asteroid.physicsBody?.velocity = velocity
+    let minSpeed = Globals.gameConfig.asteroidMinSpeed
+    let maxSpeed = Globals.gameConfig.asteroidMaxSpeed
+    var finalVelocity = velocity
+    let speed = velocity.norm2()
+    if speed == 0 {
+      finalVelocity = CGVector(angle: .random(in: 0 ... 2 * .pi)).scale(by: minSpeed)
+    } else if speed < minSpeed {
+      finalVelocity = velocity.scale(by: minSpeed / speed)
+    } else if speed > maxSpeed {
+      finalVelocity = velocity.scale(by: maxSpeed / speed)
+    }
+    asteroid.physicsBody?.velocity = finalVelocity
     asteroid["wasOnScreen"] = onScreen
     asteroid.physicsBody?.angularVelocity = .random(in: -.pi ... .pi)
     asteroids.insert(asteroid)
@@ -334,7 +345,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func spawnWave() {
-    for _ in 0 ..< waveNumber + 2 {
+    let numAsteroids = Globals.gameConfig.numAsteroids(atWave: waveNumber)
+    for _ in 1...numAsteroids {
       spawnAsteroid(size: "huge")
     }
   }
@@ -417,7 +429,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       // The second child's velocity is chosen from momentum conservation
       let velocity2 = velocity.scale(by: 2) - velocity1
       // Add a bit of extra spice just to keep the player on their toes
-      let oomph = CGFloat(1.1)
+      let oomph = Globals.gameConfig.value(for: \WaveConfig.asteroidSpeedBoost, atWave: waveNumber)
       makeAsteroid(position: pos, size: sizes[size - 1], velocity: velocity1.scale(by: oomph), onScreen: true)
       makeAsteroid(position: pos, size: sizes[size - 1], velocity: velocity2.scale(by: oomph), onScreen: true)
     }

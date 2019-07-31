@@ -52,6 +52,8 @@
 		FDCF8CA522DA7296008EDFD1 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDCF8CA422DA7296008EDFD1 /* Globals.swift */; };
 		FDD831F222EDB50200CA4EC6 /* Explosions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD831F122EDB50200CA4EC6 /* Explosions.swift */; };
 		FDD831F422EE27C700CA4EC6 /* kenvector_future.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FDD831F322EE27C700CA4EC6 /* kenvector_future.ttf */; };
+		FDD831F622F187D200CA4EC6 /* GameConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD831F522F187D200CA4EC6 /* GameConfig.swift */; };
+		FDD831F922F1AE0D00CA4EC6 /* confignormal.json in Resources */ = {isa = PBXBuildFile; fileRef = FDD831F822F1AE0D00CA4EC6 /* confignormal.json */; };
 		FDDF488722D2A700006FB86F /* SpriteCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDDF488622D2A700006FB86F /* SpriteCache.swift */; };
 		FDDF488922D2D864006FB86F /* NodeData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDDF488822D2D864006FB86F /* NodeData.swift */; };
 		FDE04B2722D5FEA30011A529 /* star1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FDE04B2422D5FEA30011A529 /* star1@2x.png */; };
@@ -109,6 +111,8 @@
 		FDCF8CA422DA7296008EDFD1 /* Globals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
 		FDD831F122EDB50200CA4EC6 /* Explosions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Explosions.swift; sourceTree = "<group>"; };
 		FDD831F322EE27C700CA4EC6 /* kenvector_future.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = kenvector_future.ttf; sourceTree = "<group>"; };
+		FDD831F522F187D200CA4EC6 /* GameConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameConfig.swift; sourceTree = "<group>"; };
+		FDD831F822F1AE0D00CA4EC6 /* confignormal.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = confignormal.json; sourceTree = "<group>"; };
 		FDDF488622D2A700006FB86F /* SpriteCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteCache.swift; sourceTree = "<group>"; };
 		FDDF488822D2D864006FB86F /* NodeData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeData.swift; sourceTree = "<group>"; };
 		FDE04B2422D5FEA30011A529 /* star1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "star1@2x.png"; sourceTree = "<group>"; };
@@ -152,6 +156,7 @@
 				FD79323522D20FE600E7D336 /* AppDelegate.swift */,
 				FD79323722D20FE600E7D336 /* GameScene.sks */,
 				FD79323B22D20FE600E7D336 /* GameScene.swift */,
+				FDD831F522F187D200CA4EC6 /* GameConfig.swift */,
 				FDD831F122EDB50200CA4EC6 /* Explosions.swift */,
 				FD53167422DB24EC00F09E57 /* Ship.swift */,
 				FDCF8CA222DA175F008EDFD1 /* CGHelpers.swift */,
@@ -166,6 +171,7 @@
 				FD79323F22D20FE600E7D336 /* Main.storyboard */,
 				FD79324222D20FE700E7D336 /* Assets.xcassets */,
 				FD79324422D20FE700E7D336 /* LaunchScreen.storyboard */,
+				FDD831F722F1ADD100CA4EC6 /* configs */,
 				FD79324722D20FE700E7D336 /* Info.plist */,
 			);
 			path = Asteroids;
@@ -211,6 +217,14 @@
 				FDE04B2522D5FEA30011A529 /* star3@2x.png */,
 			);
 			path = "Asset creation";
+			sourceTree = "<group>";
+		};
+		FDD831F722F1ADD100CA4EC6 /* configs */ = {
+			isa = PBXGroup;
+			children = (
+				FDD831F822F1AE0D00CA4EC6 /* confignormal.json */,
+			);
+			path = configs;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -286,6 +300,7 @@
 				FD53168022DB445100F09E57 /* meteormed1@2x.png in Resources */,
 				FD53167F22DB445100F09E57 /* meteorbig1@2x.png in Resources */,
 				FD0C070A22D8925E00F19A55 /* starfield_violet@2x.png in Resources */,
+				FDD831F922F1AE0D00CA4EC6 /* confignormal.json in Resources */,
 				FD53169022DC1A0600F09E57 /* laserbig_blue@2x.png in Resources */,
 				FD53168F22DC1A0600F09E57 /* laserbig_red@2x.png in Resources */,
 				FD0C070822D8925E00F19A55 /* ship_green@2x.png in Resources */,
@@ -324,6 +339,7 @@
 				FDE04B2D22D753240011A529 /* TextureCache.swift in Sources */,
 				FD79323C22D20FE600E7D336 /* GameScene.swift in Sources */,
 				FD79323E22D20FE600E7D336 /* GameViewController.swift in Sources */,
+				FDD831F622F187D200CA4EC6 /* GameConfig.swift in Sources */,
 				FD79323622D20FE600E7D336 /* AppDelegate.swift in Sources */,
 				FDE04B2B22D745470011A529 /* Joystick.swift in Sources */,
 				FDDF488722D2A700006FB86F /* SpriteCache.swift in Sources */,
