@@ -89,6 +89,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   var asteroids = Set<SKSpriteNode>()
   var waveNumber = 0
   var waveDisplay: SKLabelNode!
+  var livesRemaining = 0
+  var extraLivesAwarded = 0
+  var livesDisplay: LivesDisplay!
 
   func makeSprite(imageNamed name: String, initializer: ((SKSpriteNode) -> Void)? = nil) -> SKSpriteNode {
     return Globals.spriteCache.findSprite(imageNamed: name, initializer: initializer)
@@ -208,28 +211,43 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func initInfo() {
+    let info = SKNode()
+    info.name = "info"
+    info.zPosition = LevelZs.info.rawValue
+    addChild(info)
     scoreDisplay = SKLabelNode(fontNamed: "KenVector Future")
     scoreDisplay.fontSize = 50
     scoreDisplay.fontColor = textColor
     scoreDisplay.text = "0"
     scoreDisplay.name = "score"
-    scoreDisplay.zPosition = LevelZs.info.rawValue
-    scoreDisplay.position = CGPoint(x: frame.midX, y: frame.maxY - 50.0)
-    addChild(scoreDisplay)
+    scoreDisplay.position = CGPoint(x: frame.midX, y: frame.maxY - 50)
+    info.addChild(scoreDisplay)
     waveDisplay = SKLabelNode(fontNamed: "KenVector Future")
     waveDisplay.fontSize = 100
     waveDisplay.fontColor = highlightTextColor
     waveDisplay.text = "WAVE 1"
     waveDisplay.name = "wave"
     waveDisplay.isHidden = true
-    waveDisplay.zPosition = LevelZs.info.rawValue
     waveDisplay.position = CGPoint(x: frame.midX, y: frame.midY)
-    addChild(waveDisplay)
+    info.addChild(waveDisplay)
+    livesDisplay = LivesDisplay(extraColor: textColor)
+    livesDisplay.position = CGPoint(x: frame.minX + 20, y: frame.maxY - 20)
+    info.addChild(livesDisplay)
   }
 
   func addToScore(_ amount: Int) {
     score += amount
+    let extraLivesEarned = score / Globals.gameConfig.extraLifeScore
+    if extraLivesEarned > extraLivesAwarded {
+      updateLives(+1)
+      extraLivesAwarded += 1
+    }
     scoreDisplay.text = "\(score)"
+  }
+
+  func updateLives(_ amount: Int) {
+    livesRemaining += amount
+    livesDisplay.showLives(livesRemaining)
   }
 
   func isSafe(point: CGPoint, forDuration time: CGFloat) -> Bool {
@@ -444,7 +462,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
   func destroyPlayer() {
     addEmitter(player.explode())
-    wait(for: 5.0) { self.spawnPlayer() }
+    updateLives(-1)
+    if livesRemaining > 0 {
+      wait(for: 5.0) { self.spawnPlayer() }
+    }
   }
 
   func playerCollided(asteroid: SKNode) {
@@ -479,6 +500,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     initPlayfield()
     initControls()
     initInfo()
+    livesRemaining = Globals.gameConfig.initialLives
+    extraLivesAwarded = 0
+    updateLives(0)
     player = Ship(color: teamColors[0], joystick: joystick)
     nextWave()
     wait(for: 3.0) { self.spawnPlayer() }
