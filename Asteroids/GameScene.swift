@@ -280,6 +280,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       player.reset()
       player.position = spawnPosition
       playfield.addChild(player)
+      updateLives(-1)
     }
   }
 
@@ -462,7 +463,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
   func destroyPlayer() {
     addEmitter(player.explode())
-    updateLives(-1)
     if livesRemaining > 0 {
       wait(for: 5.0) { self.spawnPlayer() }
     }
