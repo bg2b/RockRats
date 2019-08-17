@@ -17,11 +17,15 @@ enum SoundEffect: String {
   case asteroidMedHit = "meteormed_hit"
   case asteroidSmallHit = "smallAsteroidsNotImplemented"
   case extraLife = "extra_life"
+  case heartbeat = "heartbeat"
 }
 
 class Sounds: SKNode {
   var backgroundMusic: SKAudioNode!
   let backgroundDoubleTempoInterval = 60.0
+  let heartbeatRateInitial = 2.0
+  let heartbeatRateMax = 0.25
+  var currentHeartbeatRate = 0.0
 
   required init(listener: SKNode?) {
     super.init()
@@ -33,35 +37,34 @@ class Sounds: SKNode {
     preload(.playerEngines)
     preload(.asteroidHugeHit)
     preload(.asteroidBigHit)
-    preload(.asteroidMedHit)
-    guard let backgroundMusicURL = Bundle.main.url(forResource: "spacefighter", withExtension: "mp3") else {
-      fatalError("Background music file missing")
-    }
-    backgroundMusic = audioNodeFor(url: backgroundMusicURL)
-    backgroundMusic.isPositional = false
-    backgroundMusic.autoplayLooped = true
-    backgroundMusic.run(SKAction.changeVolume(to: 0.25, duration: 0))
-    addChild(backgroundMusic)
-    increaseBackgroundTempo()
+    preload(.extraLife)
+    preload(.heartbeat)
+    normalHeartbeatRate()
   }
 
   required init(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented by Sounds")
   }
 
-  func increaseBackgroundTempo() {
-    backgroundMusic.run(SKAction.changePlaybackRate(by: 1 / Float(backgroundDoubleTempoInterval),
-                                                    duration: 3 * backgroundDoubleTempoInterval))
+  func heartbeat() {
+    soundEffect(.heartbeat, withVolume: 0.5)
+    currentHeartbeatRate = max(0.99 * currentHeartbeatRate, heartbeatRateMax)
+    run(SKAction.sequence([SKAction.wait(forDuration: currentHeartbeatRate),
+                           SKAction.run { self.heartbeat() }]),
+        withKey: "heartbeat")
   }
 
-  func normalBackgroundTempo() {
-    backgroundMusic.removeAllActions()
-    backgroundMusic.run(SKAction.changePlaybackRate(to: 1, duration: 10)) { self.increaseBackgroundTempo() }
+  func stopHeartbeat() {
+    removeAction(forKey: "heartbeat")
+  }
+
+  func normalHeartbeatRate() {
+    currentHeartbeatRate = heartbeatRateInitial
   }
 
   func audioNodeFor(url: URL) -> SKAudioNode {
     let audio = SKAudioNode(url: url)
-    audio.isPositional = true
+    audio.isPositional = false
     audio.autoplayLooped = false
     return audio
   }
@@ -85,9 +88,11 @@ class Sounds: SKNode {
     playOnce(audioNodeFor(sound), atVolume: 0)
   }
 
-  func soundEffect(_ sound: SoundEffect, at position: CGPoint = .zero) {
+  func soundEffect(_ sound: SoundEffect, at position: CGPoint? = nil, withVolume volume: Float = 1.0) {
     let effect = audioNodeFor(sound)
-    effect.position = position
-    playOnce(effect, atVolume: 1)
+    if let position = position {
+      effect.position = position
+    }
+    playOnce(effect, atVolume: volume)
   }
 }

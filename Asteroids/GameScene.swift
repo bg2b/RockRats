@@ -398,7 +398,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     recycleSprite(asteroid)
     asteroids.remove(asteroid)
     if asteroids.isEmpty {
-      sounds.normalBackgroundTempo()
+      sounds.normalHeartbeatRate()
       wait(for: 4.0) { self.nextWave() }
     }
   }
@@ -477,6 +477,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     sounds.soundEffect(.playerExplosion, at: player.position)
     if livesRemaining > 0 {
       wait(for: 5.0) { self.spawnPlayer() }
+    } else {
+      sounds.stopHeartbeat()
     }
   }
 
@@ -517,6 +519,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     extraLivesAwarded = 0
     updateLives(0)
     player = Ship(color: teamColors[0], sounds: sounds, joystick: joystick)
+    sounds.heartbeat()
     nextWave()
     wait(for: 3.0) { self.spawnPlayer() }
   }
