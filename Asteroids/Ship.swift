@@ -11,6 +11,8 @@ import SpriteKit
 class Ship: SKNode {
   let joystick: Joystick
   let shipTexture: SKTexture
+  let engineSounds: SKAudioNode
+  var engineSoundLevel = 0
   var forwardFlames = [SKSpriteNode]()
   var reverseFlames = [[SKSpriteNode]]()
   var lasersRemaining = Globals.gameConfig.playerMaxShots
@@ -36,9 +38,14 @@ class Ship: SKNode {
     return flames
   }
 
-  required init(color: String, joystick: Joystick) {
+  required init(color: String, sounds: Sounds, joystick: Joystick) {
     self.joystick = joystick
     self.shipTexture = Globals.textureCache.findTexture(imageNamed: "ship_\(color)")
+    self.engineSounds = sounds.audioNodeFor(.playerEngines)
+    self.engineSounds.isPositional = false
+    self.engineSounds.autoplayLooped = true
+    self.engineSounds.run(SKAction.changeVolume(to: 0, duration: 0))
+    sounds.addChild(self.engineSounds)
     super.init()
     self.name = "ship"
     let ship = SKSpriteNode(texture: shipTexture)
@@ -74,11 +81,21 @@ class Ship: SKNode {
 
   func forwardFlamesOn(_ amount: CGFloat) {
     flamesOn(forwardFlames, amount: amount)
+    setEngineLevel(amount)
   }
 
   func reverseFlamesOn(_ amount: CGFloat) {
     flamesOn(reverseFlames[0], amount: amount)
     flamesOn(reverseFlames[1], amount: amount)
+    setEngineLevel(0.5 * amount)
+  }
+
+  func setEngineLevel(_ amount: CGFloat) {
+    let soundLevel = Int((amount + 0.24) * 4)
+    if soundLevel != engineSoundLevel {
+      engineSounds.run(SKAction.changeVolume(to: 0.25 * 0.25 * Float(soundLevel), duration: 0))
+      engineSoundLevel = soundLevel
+    }
   }
 
   // Sets the ship to the standard coasting configuration
@@ -91,10 +108,16 @@ class Ship: SKNode {
   }
 
   func fly() {
-    guard parent != nil else { return }
+    guard parent != nil else {
+      setEngineLevel(0)
+      return
+    }
     let body = coastingConfiguration()
     let stick = joystick.getDirection()
-    guard stick != .zero else { return }
+    guard stick != .zero else {
+      setEngineLevel(0)
+      return
+    }
     var thrustAmount = CGFloat(0)
     var thrustForce = CGFloat(0)
     let maxOmega = Globals.gameConfig.playerMaxRotationRate
@@ -162,7 +185,7 @@ class Ship: SKNode {
     body.applyForce(CGVector(angle: zRotation).scale(by: thrustForce))
     if thrustForce > 0 {
       forwardFlamesOn(thrustAmount)
-    } else {
+    } else if thrustForce < 0 {
       reverseFlamesOn(thrustAmount)
     }
   }
@@ -193,6 +216,7 @@ class Ship: SKNode {
   }
 
   func explode() -> SKEmitterNode {
+    setEngineLevel(0)
     removeFromParent()
     return makeExplosion(texture: shipTexture, at: position)
   }

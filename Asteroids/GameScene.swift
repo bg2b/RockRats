@@ -92,6 +92,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   var livesRemaining = 0
   var extraLivesAwarded = 0
   var livesDisplay: LivesDisplay!
+  var sounds: Sounds!
 
   func makeSprite(imageNamed name: String, initializer: ((SKSpriteNode) -> Void)? = nil) -> SKSpriteNode {
     return Globals.spriteCache.findSprite(imageNamed: name, initializer: initializer)
@@ -250,6 +251,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     livesDisplay.showLives(livesRemaining)
   }
 
+  func initSounds() {
+    sounds = Sounds(listener: player)
+    addChild(sounds)
+  }
+
   func isSafe(point: CGPoint, forDuration time: CGFloat) -> Bool {
     for asteroid in asteroids {
       let asteroidRadius = 0.5 * asteroid.texture!.size().diagonal()
@@ -300,6 +306,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     laser.wait(for: Double(0.9 * frame.height / Globals.gameConfig.playerShotSpeed)) { self.removeLaser(laser) }
     playfield.addChild(laser)
     player.shoot(laser: laser)
+    sounds.soundEffect(.playerShot, at: player.position)
   }
   
   func removeLaser(_ laser: SKSpriteNode) {
@@ -431,13 +438,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
   func splitAsteroid(_ asteroid: SKSpriteNode) {
     let sizes = ["small", "med", "big", "huge"]
-    let pointValues = [23, 11, 5, 2]
+    let pointValues = [20, 10, 5, 2]
+    let hitEffect: [SoundEffect] = [.asteroidSmallHit, .asteroidMedHit, .asteroidBigHit, .asteroidHugeHit]
     guard let size = (sizes.firstIndex { asteroid.name!.contains($0) }) else {
       fatalError("Asteroid not of recognized size")
     }
     guard let velocity = asteroid.physicsBody?.velocity else { fatalError("Asteroid had no velocity") }
     let pos = asteroid.position
     makeAsteroidSplitEffect(asteroid, ofSize: size)
+    sounds.soundEffect(hitEffect[size], at: pos)
     // Don't split med or small asteroids.  Size progression should go huge -> big -> med,
     // but we include small just for completeness in case we change our minds later.
     if size >= 2 {
@@ -463,6 +472,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
   func destroyPlayer() {
     addEmitter(player.explode())
+    sounds.soundEffect(.playerExplosion, at: player.position)
     if livesRemaining > 0 {
       wait(for: 5.0) { self.spawnPlayer() }
     }
@@ -500,10 +510,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     initPlayfield()
     initControls()
     initInfo()
+    initSounds()
     livesRemaining = Globals.gameConfig.initialLives
     extraLivesAwarded = 0
     updateLives(0)
-    player = Ship(color: teamColors[0], joystick: joystick)
+    player = Ship(color: teamColors[0], sounds: sounds, joystick: joystick)
     nextWave()
     wait(for: 3.0) { self.spawnPlayer() }
   }

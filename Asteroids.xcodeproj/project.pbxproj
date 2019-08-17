@@ -25,6 +25,13 @@
 		FD28DB5A22DFFA87009446A2 /* ufo_green@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD28DB5322DFFA87009446A2 /* ufo_green@2x.png */; };
 		FD4D53C02306B47900718938 /* LivesDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4D53BF2306B47900718938 /* LivesDisplay.swift */; };
 		FD4D53C22306B60F00718938 /* life_blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53C12306B60F00718938 /* life_blue@2x.png */; };
+		FD4D53C523080D3600718938 /* player_explosion.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53C423080D3600718938 /* player_explosion.wav */; };
+		FD4D53C723080E7300718938 /* Sounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4D53C623080E7300718938 /* Sounds.swift */; };
+		FD4D53CB2308206D00718938 /* player_laser.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53CA2308206D00718938 /* player_laser.wav */; };
+		FD4D53CF230843C900718938 /* meteorhuge_hit.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53CC230843C800718938 /* meteorhuge_hit.wav */; };
+		FD4D53D0230843C900718938 /* meteorbig_hit.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53CD230843C900718938 /* meteorbig_hit.wav */; };
+		FD4D53D1230843C900718938 /* meteormed_hit.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53CE230843C900718938 /* meteormed_hit.wav */; };
+		FD4D53D523085AF800718938 /* player_engines.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53D423085AF800718938 /* player_engines.wav */; };
 		FD53167122DAA8EA00F09E57 /* fire1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53166E22DAA8EA00F09E57 /* fire1@2x.png */; };
 		FD53167222DAA8EA00F09E57 /* fire3@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53166F22DAA8EA00F09E57 /* fire3@2x.png */; };
 		FD53167322DAA8EA00F09E57 /* fire2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53167022DAA8EA00F09E57 /* fire2@2x.png */; };
@@ -84,6 +91,13 @@
 		FD28DB5322DFFA87009446A2 /* ufo_green@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ufo_green@2x.png"; sourceTree = "<group>"; };
 		FD4D53BF2306B47900718938 /* LivesDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivesDisplay.swift; sourceTree = "<group>"; };
 		FD4D53C12306B60F00718938 /* life_blue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "life_blue@2x.png"; sourceTree = "<group>"; };
+		FD4D53C423080D3600718938 /* player_explosion.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = player_explosion.wav; sourceTree = "<group>"; };
+		FD4D53C623080E7300718938 /* Sounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sounds.swift; sourceTree = "<group>"; };
+		FD4D53CA2308206D00718938 /* player_laser.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = player_laser.wav; sourceTree = "<group>"; };
+		FD4D53CC230843C800718938 /* meteorhuge_hit.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = meteorhuge_hit.wav; sourceTree = "<group>"; };
+		FD4D53CD230843C900718938 /* meteorbig_hit.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = meteorbig_hit.wav; sourceTree = "<group>"; };
+		FD4D53CE230843C900718938 /* meteormed_hit.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = meteormed_hit.wav; sourceTree = "<group>"; };
+		FD4D53D423085AF800718938 /* player_engines.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = player_engines.wav; sourceTree = "<group>"; };
 		FD53166E22DAA8EA00F09E57 /* fire1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fire1@2x.png"; sourceTree = "<group>"; };
 		FD53166F22DAA8EA00F09E57 /* fire3@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fire3@2x.png"; sourceTree = "<group>"; };
 		FD53167022DAA8EA00F09E57 /* fire2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fire2@2x.png"; sourceTree = "<group>"; };
@@ -137,6 +151,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		FD4D53C323080BFD00718938 /* sounds */ = {
+			isa = PBXGroup;
+			children = (
+				FD4D53CC230843C800718938 /* meteorhuge_hit.wav */,
+				FD4D53CD230843C900718938 /* meteorbig_hit.wav */,
+				FD4D53CE230843C900718938 /* meteormed_hit.wav */,
+				FD4D53CA2308206D00718938 /* player_laser.wav */,
+				FD4D53D423085AF800718938 /* player_engines.wav */,
+				FD4D53C423080D3600718938 /* player_explosion.wav */,
+			);
+			path = sounds;
+			sourceTree = "<group>";
+		};
 		FD79322922D20FE600E7D336 = {
 			isa = PBXGroup;
 			children = (
@@ -165,6 +192,7 @@
 				FDD831F122EDB50200CA4EC6 /* Explosions.swift */,
 				FD53167422DB24EC00F09E57 /* Ship.swift */,
 				FDCF8CA222DA175F008EDFD1 /* CGHelpers.swift */,
+				FD4D53C623080E7300718938 /* Sounds.swift */,
 				FDE04B2A22D745470011A529 /* Joystick.swift */,
 				6513D66B22DC0B4E00B4BD57 /* Button.swift */,
 				FDDF488622D2A700006FB86F /* SpriteCache.swift */,
@@ -177,6 +205,7 @@
 				FD79324222D20FE700E7D336 /* Assets.xcassets */,
 				FD79324422D20FE700E7D336 /* LaunchScreen.storyboard */,
 				FDD831F722F1ADD100CA4EC6 /* configs */,
+				FD4D53C323080BFD00718938 /* sounds */,
 				FD79324722D20FE700E7D336 /* Info.plist */,
 			);
 			path = Asteroids;
@@ -298,6 +327,7 @@
 				FD53169322DC1A0600F09E57 /* lasersmall_red@2x.png in Resources */,
 				FD53168422DB445100F09E57 /* meteorbig3@2x.png in Resources */,
 				FD28DB5A22DFFA87009446A2 /* ufo_green@2x.png in Resources */,
+				FD4D53CB2308206D00718938 /* player_laser.wav in Resources */,
 				FD53169122DC1A0600F09E57 /* lasersmall_blue@2x.png in Resources */,
 				FD28DB5722DFFA87009446A2 /* meteorhuge1@2x.png in Resources */,
 				FD53168222DB445100F09E57 /* meteorsmall1@2x.png in Resources */,
@@ -305,10 +335,12 @@
 				FDD831F422EE27C700CA4EC6 /* kenvector_future.ttf in Resources */,
 				FD53168022DB445100F09E57 /* meteormed1@2x.png in Resources */,
 				FD53167F22DB445100F09E57 /* meteorbig1@2x.png in Resources */,
+				FD4D53CF230843C900718938 /* meteorhuge_hit.wav in Resources */,
 				FD4D53C22306B60F00718938 /* life_blue@2x.png in Resources */,
 				FD0C070A22D8925E00F19A55 /* starfield_violet@2x.png in Resources */,
 				FDD831F922F1AE0D00CA4EC6 /* confignormal.json in Resources */,
 				FD53169022DC1A0600F09E57 /* laserbig_blue@2x.png in Resources */,
+				FD4D53D1230843C900718938 /* meteormed_hit.wav in Resources */,
 				FD53168F22DC1A0600F09E57 /* laserbig_red@2x.png in Resources */,
 				FD0C070822D8925E00F19A55 /* ship_green@2x.png in Resources */,
 				FD53167322DAA8EA00F09E57 /* fire2@2x.png in Resources */,
@@ -321,9 +353,11 @@
 				FDE04B2822D5FEA30011A529 /* star3@2x.png in Resources */,
 				FD0C070C22D8925E00F19A55 /* starfield_blue@2x.png in Resources */,
 				FD28DB5422DFFA87009446A2 /* meteorhuge2@2x.png in Resources */,
+				FD4D53C523080D3600718938 /* player_explosion.wav in Resources */,
 				FD53168322DB445100F09E57 /* meteorbig4@2x.png in Resources */,
 				FD79324322D20FE700E7D336 /* Assets.xcassets in Resources */,
 				FD28DB5622DFFA87009446A2 /* meteorhuge3@2x.png in Resources */,
+				FD4D53D0230843C900718938 /* meteorbig_hit.wav in Resources */,
 				FD28DB5922DFFA87009446A2 /* ufo_blue@2x.png in Resources */,
 				FD53167222DAA8EA00F09E57 /* fire3@2x.png in Resources */,
 				FDE04B2922D5FEA30011A529 /* star2@2x.png in Resources */,
@@ -332,6 +366,7 @@
 				FD53168122DB445100F09E57 /* meteormed2@2x.png in Resources */,
 				FD28DB5522DFFA87009446A2 /* ufo_yellow@2x.png in Resources */,
 				FD0C070922D8925E00F19A55 /* ship_blue@2x.png in Resources */,
+				FD4D53D523085AF800718938 /* player_engines.wav in Resources */,
 				FD53168E22DC1A0600F09E57 /* laserbig_green@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -355,6 +390,7 @@
 				FDCF8CA322DA175F008EDFD1 /* CGHelpers.swift in Sources */,
 				FD4D53C02306B47900718938 /* LivesDisplay.swift in Sources */,
 				FDCF8CA522DA7296008EDFD1 /* Globals.swift in Sources */,
+				FD4D53C723080E7300718938 /* Sounds.swift in Sources */,
 				FD53167522DB24EC00F09E57 /* Ship.swift in Sources */,
 				6513D66C22DC0B4E00B4BD57 /* Button.swift in Sources */,
 			);
