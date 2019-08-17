@@ -19,6 +19,9 @@ enum SoundEffect: String {
 }
 
 class Sounds: SKNode {
+  var backgroundMusic: SKAudioNode!
+  let backgroundDoubleTempoInterval = 60.0
+
   required init(listener: SKNode?) {
     super.init()
     name = "sounds"
@@ -30,20 +33,43 @@ class Sounds: SKNode {
     preload(.asteroidHugeHit)
     preload(.asteroidBigHit)
     preload(.asteroidMedHit)
+    guard let backgroundMusicURL = Bundle.main.url(forResource: "spacefighter", withExtension: "mp3") else {
+      fatalError("Background music file missing")
+    }
+    backgroundMusic = audioNodeFor(url: backgroundMusicURL)
+    backgroundMusic.isPositional = false
+    backgroundMusic.autoplayLooped = true
+    backgroundMusic.run(SKAction.changeVolume(to: 0.25, duration: 0))
+    addChild(backgroundMusic)
+    increaseBackgroundTempo()
   }
 
   required init(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented by Sounds")
   }
 
-  func audioNodeFor(_ sound: SoundEffect) -> SKAudioNode {
-    guard let url = Bundle.main.url(forResource: sound.rawValue, withExtension: "wav") else {
-      fatalError("Sound effect file \(sound.rawValue) missing")
-    }
+  func increaseBackgroundTempo() {
+    backgroundMusic.run(SKAction.changePlaybackRate(by: 1 / Float(backgroundDoubleTempoInterval),
+                                                    duration: 3 * backgroundDoubleTempoInterval))
+  }
+
+  func normalBackgroundTempo() {
+    backgroundMusic.removeAllActions()
+    backgroundMusic.run(SKAction.changePlaybackRate(to: 1, duration: 10)) { self.increaseBackgroundTempo() }
+  }
+
+  func audioNodeFor(url: URL) -> SKAudioNode {
     let audio = SKAudioNode(url: url)
     audio.isPositional = true
     audio.autoplayLooped = false
     return audio
+  }
+
+  func audioNodeFor(_ sound: SoundEffect) -> SKAudioNode {
+    guard let url = Bundle.main.url(forResource: sound.rawValue, withExtension: "wav") else {
+      fatalError("Sound effect file \(sound.rawValue) missing")
+    }
+    return audioNodeFor(url: url)
   }
 
   func playOnce(_ audio: SKAudioNode, atVolume volume: Float) {

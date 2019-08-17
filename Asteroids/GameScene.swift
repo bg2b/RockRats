@@ -397,6 +397,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     recycleSprite(asteroid)
     asteroids.remove(asteroid)
     if asteroids.isEmpty {
+      sounds.normalBackgroundTempo()
       wait(for: 4.0) { self.nextWave() }
     }
   }
