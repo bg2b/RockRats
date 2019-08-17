@@ -16,6 +16,7 @@ enum SoundEffect: String {
   case asteroidBigHit = "meteorbig_hit"
   case asteroidMedHit = "meteormed_hit"
   case asteroidSmallHit = "smallAsteroidsNotImplemented"
+  case extraLife = "extra_life"
 }
 
 class Sounds: SKNode {

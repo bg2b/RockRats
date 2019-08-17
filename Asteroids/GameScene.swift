@@ -241,6 +241,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let extraLivesEarned = score / Globals.gameConfig.extraLifeScore
     if extraLivesEarned > extraLivesAwarded {
       updateLives(+1)
+      sounds.soundEffect(.extraLife)
       extraLivesAwarded += 1
     }
     scoreDisplay.text = "\(score)"
