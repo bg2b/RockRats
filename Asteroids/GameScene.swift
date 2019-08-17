@@ -479,6 +479,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       wait(for: 5.0) { self.spawnPlayer() }
     } else {
       sounds.stopHeartbeat()
+      wait(for: 2.0) { self.sounds.soundEffect(.gameOver) }
     }
   }
 

@@ -18,6 +18,7 @@ enum SoundEffect: String {
   case asteroidSmallHit = "smallAsteroidsNotImplemented"
   case extraLife = "extra_life"
   case heartbeat = "heartbeat"
+  case gameOver = "gameover"
 }
 
 class Sounds: SKNode {
@@ -39,6 +40,7 @@ class Sounds: SKNode {
     preload(.asteroidBigHit)
     preload(.extraLife)
     preload(.heartbeat)
+    preload(.gameOver)
     normalHeartbeatRate()
   }
 
