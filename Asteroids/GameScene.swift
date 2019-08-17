@@ -307,7 +307,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     laser.wait(for: Double(0.9 * frame.height / Globals.gameConfig.playerShotSpeed)) { self.removeLaser(laser) }
     playfield.addChild(laser)
     player.shoot(laser: laser)
-    sounds.soundEffect(.playerShot, at: player.position)
+    sounds.soundEffect(.playerShot)
   }
   
   func removeLaser(_ laser: SKSpriteNode) {
@@ -474,7 +474,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
   func destroyPlayer() {
     addEmitter(player.explode())
-    sounds.soundEffect(.playerExplosion, at: player.position)
+    sounds.soundEffect(.playerExplosion)
     if livesRemaining > 0 {
       wait(for: 5.0) { self.spawnPlayer() }
     } else {
