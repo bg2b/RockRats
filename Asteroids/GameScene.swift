@@ -229,6 +229,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     centralDisplay.text = ""
     centralDisplay.name = "centralDisplay"
     centralDisplay.isHidden = true
+    centralDisplay.verticalAlignmentMode = .center
     centralDisplay.position = CGPoint(x: frame.midX, y: frame.midY)
     info.addChild(centralDisplay)
     livesDisplay = LivesDisplay(extraColor: textColor)
