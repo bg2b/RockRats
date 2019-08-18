@@ -88,7 +88,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   var joystick: Joystick!
   var asteroids = Set<SKSpriteNode>()
   var waveNumber = 0
-  var waveDisplay: SKLabelNode!
+  var centralDisplay: SKLabelNode!
   var livesRemaining = 0
   var extraLivesAwarded = 0
   var livesDisplay: LivesDisplay!
@@ -223,14 +223,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     scoreDisplay.name = "score"
     scoreDisplay.position = CGPoint(x: frame.midX, y: frame.maxY - 50)
     info.addChild(scoreDisplay)
-    waveDisplay = SKLabelNode(fontNamed: "KenVector Future")
-    waveDisplay.fontSize = 100
-    waveDisplay.fontColor = highlightTextColor
-    waveDisplay.text = "WAVE 1"
-    waveDisplay.name = "wave"
-    waveDisplay.isHidden = true
-    waveDisplay.position = CGPoint(x: frame.midX, y: frame.midY)
-    info.addChild(waveDisplay)
+    centralDisplay = SKLabelNode(fontNamed: "KenVector Future")
+    centralDisplay.fontSize = 100
+    centralDisplay.fontColor = highlightTextColor
+    centralDisplay.text = ""
+    centralDisplay.name = "centralDisplay"
+    centralDisplay.isHidden = true
+    centralDisplay.position = CGPoint(x: frame.midX, y: frame.midY)
+    info.addChild(centralDisplay)
     livesDisplay = LivesDisplay(extraColor: textColor)
     livesDisplay.position = CGPoint(x: frame.minX + 20, y: frame.maxY - 20)
     info.addChild(livesDisplay)
@@ -250,6 +250,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   func updateLives(_ amount: Int) {
     livesRemaining += amount
     livesDisplay.showLives(livesRemaining)
+  }
+
+  func displayMessage(_ message: String, forTime duration: Double, then action: (() -> Void)? = nil) {
+    centralDisplay.text = message
+    centralDisplay.setScale(0.0)
+    centralDisplay.alpha = 1.0
+    centralDisplay.isHidden = false
+    let growAndFade = SKAction.sequence([
+      SKAction.scale(to: 1.0, duration: 0.25),
+      SKAction.wait(forDuration: duration),
+      SKAction.fadeOut(withDuration: 0.5),
+      SKAction.hide()
+      ])
+    if let action = action {
+      centralDisplay.run(growAndFade, completion: action)
+    } else {
+      centralDisplay.run(growAndFade)
+    }
   }
 
   func initSounds() {
@@ -380,18 +398,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
   func nextWave() {
     waveNumber += 1
-    waveDisplay.text = "WAVE \(waveNumber)"
-    waveDisplay.setScale(0.0)
-    waveDisplay.alpha = 1.0
-    waveDisplay.isHidden = false
-    let displayAndSpawn = SKAction.sequence([
-      SKAction.scale(to: 1.0, duration: 0.25),
-      SKAction.wait(forDuration: 1.5),
-      SKAction.fadeOut(withDuration: 0.5),
-      SKAction.hide(),
-      SKAction.run { self.spawnWave() }
-      ])
-    waveDisplay.run(displayAndSpawn)
+    displayMessage("WAVE \(waveNumber)", forTime: 1.5) {
+      self.spawnWave()
+    }
   }
 
   func removeAsteroid(_ asteroid: SKSpriteNode) {
@@ -479,7 +488,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       wait(for: 5.0) { self.spawnPlayer() }
     } else {
       sounds.stopHeartbeat()
-      wait(for: 2.0) { self.sounds.soundEffect(.gameOver) }
+      wait(for: 2.0) {
+        self.sounds.soundEffect(.gameOver)
+        self.displayMessage("GAME OVER", forTime: 4)
+      }
     }
   }
 
