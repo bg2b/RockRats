@@ -8,14 +8,14 @@
 
 import SpriteKit
 
-enum SoundEffect: String {
+enum SoundEffect: String, CaseIterable {
   case playerExplosion = "player_explosion"
   case playerShot = "player_laser"
   case playerEngines = "player_engines"
   case asteroidHugeHit = "meteorhuge_hit"
   case asteroidBigHit = "meteorbig_hit"
   case asteroidMedHit = "meteormed_hit"
-  case asteroidSmallHit = "smallAsteroidsNotImplemented"
+  case asteroidSmallHit = "meteorsmall_hit"
   case extraLife = "extra_life"
   case heartbeat = "heartbeat"
   case gameOver = "gameover"
@@ -33,14 +33,9 @@ class Sounds: SKNode {
     name = "sounds"
     position = .zero
     scene?.listener = listener
-    preload(.playerExplosion)
-    preload(.playerShot)
-    preload(.playerEngines)
-    preload(.asteroidHugeHit)
-    preload(.asteroidBigHit)
-    preload(.extraLife)
-    preload(.heartbeat)
-    preload(.gameOver)
+    for effect in SoundEffect.allCases {
+      preload(effect)
+    }
     normalHeartbeatRate()
   }
 

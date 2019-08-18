@@ -28,9 +28,9 @@
 		FD4D53C523080D3600718938 /* player_explosion.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53C423080D3600718938 /* player_explosion.wav */; };
 		FD4D53C723080E7300718938 /* Sounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4D53C623080E7300718938 /* Sounds.swift */; };
 		FD4D53CB2308206D00718938 /* player_laser.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53CA2308206D00718938 /* player_laser.wav */; };
-		FD4D53CF230843C900718938 /* meteorhuge_hit.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53CC230843C800718938 /* meteorhuge_hit.wav */; };
-		FD4D53D0230843C900718938 /* meteorbig_hit.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53CD230843C900718938 /* meteorbig_hit.wav */; };
-		FD4D53D1230843C900718938 /* meteormed_hit.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53CE230843C900718938 /* meteormed_hit.wav */; };
+		FD4D53CF230843C900718938 /* meteorbig_hit.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53CC230843C800718938 /* meteorbig_hit.wav */; };
+		FD4D53D0230843C900718938 /* meteormed_hit.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53CD230843C900718938 /* meteormed_hit.wav */; };
+		FD4D53D1230843C900718938 /* meteorsmall_hit.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53CE230843C900718938 /* meteorsmall_hit.wav */; };
 		FD4D53D523085AF800718938 /* player_engines.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53D423085AF800718938 /* player_engines.wav */; };
 		FD53167122DAA8EA00F09E57 /* fire1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53166E22DAA8EA00F09E57 /* fire1@2x.png */; };
 		FD53167222DAA8EA00F09E57 /* fire3@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53166F22DAA8EA00F09E57 /* fire3@2x.png */; };
@@ -60,6 +60,7 @@
 		FDA43B1E2308A1A600A29347 /* extra_life.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B1D2308A1A600A29347 /* extra_life.wav */; };
 		FDA43B202308AB9600A29347 /* heartbeat.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B1F2308AB9600A29347 /* heartbeat.wav */; };
 		FDA43B222308C11E00A29347 /* gameover.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B212308C11E00A29347 /* gameover.wav */; };
+		FDA43B24230A111D00A29347 /* meteorhuge_hit.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B23230A111D00A29347 /* meteorhuge_hit.wav */; };
 		FDCF8CA322DA175F008EDFD1 /* CGHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDCF8CA222DA175F008EDFD1 /* CGHelpers.swift */; };
 		FDCF8CA522DA7296008EDFD1 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDCF8CA422DA7296008EDFD1 /* Globals.swift */; };
 		FDD831F222EDB50200CA4EC6 /* Explosions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD831F122EDB50200CA4EC6 /* Explosions.swift */; };
@@ -97,9 +98,9 @@
 		FD4D53C423080D3600718938 /* player_explosion.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = player_explosion.wav; sourceTree = "<group>"; };
 		FD4D53C623080E7300718938 /* Sounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sounds.swift; sourceTree = "<group>"; };
 		FD4D53CA2308206D00718938 /* player_laser.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = player_laser.wav; sourceTree = "<group>"; };
-		FD4D53CC230843C800718938 /* meteorhuge_hit.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = meteorhuge_hit.wav; sourceTree = "<group>"; };
-		FD4D53CD230843C900718938 /* meteorbig_hit.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = meteorbig_hit.wav; sourceTree = "<group>"; };
-		FD4D53CE230843C900718938 /* meteormed_hit.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = meteormed_hit.wav; sourceTree = "<group>"; };
+		FD4D53CC230843C800718938 /* meteorbig_hit.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = meteorbig_hit.wav; sourceTree = "<group>"; };
+		FD4D53CD230843C900718938 /* meteormed_hit.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = meteormed_hit.wav; sourceTree = "<group>"; };
+		FD4D53CE230843C900718938 /* meteorsmall_hit.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = meteorsmall_hit.wav; sourceTree = "<group>"; };
 		FD4D53D423085AF800718938 /* player_engines.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = player_engines.wav; sourceTree = "<group>"; };
 		FD53166E22DAA8EA00F09E57 /* fire1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fire1@2x.png"; sourceTree = "<group>"; };
 		FD53166F22DAA8EA00F09E57 /* fire3@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fire3@2x.png"; sourceTree = "<group>"; };
@@ -131,6 +132,7 @@
 		FDA43B1D2308A1A600A29347 /* extra_life.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = extra_life.wav; sourceTree = "<group>"; };
 		FDA43B1F2308AB9600A29347 /* heartbeat.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = heartbeat.wav; sourceTree = "<group>"; };
 		FDA43B212308C11E00A29347 /* gameover.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = gameover.wav; sourceTree = "<group>"; };
+		FDA43B23230A111D00A29347 /* meteorhuge_hit.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = meteorhuge_hit.wav; sourceTree = "<group>"; };
 		FDCF8CA222DA175F008EDFD1 /* CGHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGHelpers.swift; sourceTree = "<group>"; };
 		FDCF8CA422DA7296008EDFD1 /* Globals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
 		FDD831F122EDB50200CA4EC6 /* Explosions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Explosions.swift; sourceTree = "<group>"; };
@@ -162,9 +164,10 @@
 			children = (
 				FDA43B212308C11E00A29347 /* gameover.wav */,
 				FDA43B1F2308AB9600A29347 /* heartbeat.wav */,
-				FD4D53CC230843C800718938 /* meteorhuge_hit.wav */,
-				FD4D53CD230843C900718938 /* meteorbig_hit.wav */,
-				FD4D53CE230843C900718938 /* meteormed_hit.wav */,
+				FDA43B23230A111D00A29347 /* meteorhuge_hit.wav */,
+				FD4D53CC230843C800718938 /* meteorbig_hit.wav */,
+				FD4D53CD230843C900718938 /* meteormed_hit.wav */,
+				FD4D53CE230843C900718938 /* meteorsmall_hit.wav */,
 				FD4D53CA2308206D00718938 /* player_laser.wav */,
 				FD4D53D423085AF800718938 /* player_engines.wav */,
 				FD4D53C423080D3600718938 /* player_explosion.wav */,
@@ -345,12 +348,12 @@
 				FDD831F422EE27C700CA4EC6 /* kenvector_future.ttf in Resources */,
 				FD53168022DB445100F09E57 /* meteormed1@2x.png in Resources */,
 				FD53167F22DB445100F09E57 /* meteorbig1@2x.png in Resources */,
-				FD4D53CF230843C900718938 /* meteorhuge_hit.wav in Resources */,
+				FD4D53CF230843C900718938 /* meteorbig_hit.wav in Resources */,
 				FD4D53C22306B60F00718938 /* life_blue@2x.png in Resources */,
 				FD0C070A22D8925E00F19A55 /* starfield_violet@2x.png in Resources */,
 				FDD831F922F1AE0D00CA4EC6 /* confignormal.json in Resources */,
 				FD53169022DC1A0600F09E57 /* laserbig_blue@2x.png in Resources */,
-				FD4D53D1230843C900718938 /* meteormed_hit.wav in Resources */,
+				FD4D53D1230843C900718938 /* meteorsmall_hit.wav in Resources */,
 				FD53168F22DC1A0600F09E57 /* laserbig_red@2x.png in Resources */,
 				FD0C070822D8925E00F19A55 /* ship_green@2x.png in Resources */,
 				FD53167322DAA8EA00F09E57 /* fire2@2x.png in Resources */,
@@ -367,7 +370,8 @@
 				FD53168322DB445100F09E57 /* meteorbig4@2x.png in Resources */,
 				FD79324322D20FE700E7D336 /* Assets.xcassets in Resources */,
 				FD28DB5622DFFA87009446A2 /* meteorhuge3@2x.png in Resources */,
-				FD4D53D0230843C900718938 /* meteorbig_hit.wav in Resources */,
+				FDA43B24230A111D00A29347 /* meteorhuge_hit.wav in Resources */,
+				FD4D53D0230843C900718938 /* meteormed_hit.wav in Resources */,
 				FD28DB5922DFFA87009446A2 /* ufo_blue@2x.png in Resources */,
 				FD53167222DAA8EA00F09E57 /* fire3@2x.png in Resources */,
 				FDE04B2922D5FEA30011A529 /* star2@2x.png in Resources */,
