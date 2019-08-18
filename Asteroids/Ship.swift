@@ -62,6 +62,7 @@ class Ship: SKNode {
     body.categoryBitMask = ObjectCategories.player.rawValue
     body.collisionBitMask = 0
     body.contactTestBitMask = setOf([.asteroid, .ufo, .ufoShot])
+    body.linearDamping = Globals.gameConfig.playerSpeedDamping[Globals.directControls]
   }
 
   required init(coder aDecoder: NSCoder) {
@@ -101,7 +102,6 @@ class Ship: SKNode {
   // Sets the ship to the standard coasting configuration
   func coastingConfiguration() -> SKPhysicsBody {
     guard let body = physicsBody else { fatalError("Where did Ship's physicsBody go?") }
-    body.linearDamping = 0.05
     body.angularVelocity = 0
     flamesOff()
     return body
@@ -120,9 +120,9 @@ class Ship: SKNode {
     }
     var thrustAmount = CGFloat(0)
     var thrustForce = CGFloat(0)
-    let maxOmega = Globals.gameConfig.playerMaxRotationRate
-    let maxThrust = Globals.gameConfig.playerMaxThrust
-    if Globals.directControls {
+    let maxOmega = Globals.gameConfig.playerMaxRotationRate[Globals.directControls]
+    let maxThrust = Globals.gameConfig.playerMaxThrust[Globals.directControls]
+    if Globals.directControls == 1 {
       while zRotation > .pi {
         zRotation -= 2 * .pi
       }
@@ -145,7 +145,10 @@ class Ship: SKNode {
         body.angularVelocity = copysign(maxOmega, delta)
       }
       thrustAmount = stick.norm2()
-      let thrustCutoff = CGFloat.pi / 2
+      if thrustAmount < 0.9 {
+        thrustAmount = 0
+      }
+      let thrustCutoff = CGFloat.pi / 10
       if abs(delta) > thrustCutoff {
         // Pointing too far away from the desired direction, so don't thrust.
         thrustAmount = 0
@@ -177,7 +180,7 @@ class Ship: SKNode {
       }
     }
     thrustForce *= maxThrust
-    let maxSpeed = Globals.gameConfig.playerMaxSpeed
+    let maxSpeed = Globals.gameConfig.playerMaxSpeed[Globals.directControls]
     let currentSpeed = body.velocity.norm2()
     if currentSpeed > 0.5 * maxSpeed {
       thrustForce *= (maxSpeed - currentSpeed) / (0.5 * maxSpeed)

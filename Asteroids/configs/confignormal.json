@@ -1,9 +1,10 @@
 {
   "initialLives": 3,
   "extraLifeScore": 1000,
-  "playerMaxSpeed": 350,
-  "playerMaxThrust": 100,
-  "playerMaxRotationRate": 3.14,
+  "playerSpeedDamping": [0.05, 0.99],
+  "playerMaxSpeed": [350, 100],
+  "playerMaxThrust": [100, 500],
+  "playerMaxRotationRate": [3.14, 15],
   "playerShotSpeed": 700,
   "playerMaxShots": 3,
   "safeTime": 5,
