@@ -38,7 +38,7 @@ let explosionShader = SKShader(source :
   }
   """)
 
-func makeExplosion(texture: SKTexture, at position: CGPoint) -> Array<SKSpriteNode> {
+func makeExplosion(texture: SKTexture, at position: CGPoint) -> Array<SKNode> {
   var pieces = [SKSpriteNode]()
   for x in 0...explosionSplits{
     for y in 0...explosionSplits{
@@ -48,5 +48,6 @@ func makeExplosion(texture: SKTexture, at position: CGPoint) -> Array<SKSpriteNo
       pieces.append(piece)
     }
   }
+  //return [SKShapeNode(rect: CGRect(x: 1, y: 1, width: 100, height: 100))]
   return pieces
 }
