@@ -218,7 +218,7 @@ class Ship: SKNode {
     lasersRemaining = Globals.gameConfig.playerMaxShots
   }
 
-  func explode() -> SKEmitterNode {
+  func explode() -> Array<SKSpriteNode> {
     setEngineLevel(0)
     removeFromParent()
     return makeExplosion(texture: shipTexture, at: position)

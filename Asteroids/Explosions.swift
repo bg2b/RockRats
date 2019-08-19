@@ -38,36 +38,15 @@ let explosionShader = SKShader(source :
   }
   """)
 
-func makeExplosion(texture: SKTexture, at position: CGPoint) -> SKEmitterNode {
-  let emitter = SKEmitterNode()
-  emitter.particleTexture = texture
-  let textureSize = hypot(texture.size().width, texture.size().height)
-  let explosionDuration = CGFloat(1.0)
-  // Since fragments are chosen randomly, do some extra to mostly cover everything
-  emitter.numParticlesToEmit = explosionSplits * explosionSplits * 4 / 3
-  // Desired size of the final explosion
-  let radius = 2.5 * textureSize
-  emitter.particleLifetime = explosionDuration
-  emitter.particleLifetimeRange = 0.75 * explosionDuration
-  emitter.particleScale = 1.0 / CGFloat(explosionSplits)
-  emitter.particleScaleRange = 0.5 * emitter.particleScale
-  emitter.particleBirthRate = CGFloat(emitter.numParticlesToEmit) / (0.25 * explosionDuration)
-  emitter.particleSpeed = radius / explosionDuration
-  emitter.particleSpeedRange = 0.25 * emitter.particleSpeed
-  emitter.particlePosition = .zero
-  emitter.particlePositionRange = CGVector(dx: textureSize, dy: textureSize).scale(by: 0.25)
-  emitter.emissionAngle = 0
-  emitter.emissionAngleRange = 2 * .pi
-  emitter.particleRotation = 0
-  emitter.particleRotationRange = 2 * .pi
-  emitter.particleRotationSpeed = 4 * .pi / explosionDuration
-  // Here's the magic part...
-  emitter.particleColor = UIColor(red: 0.5, green: 0, blue: 0, alpha: 1)
-  emitter.particleColorRedRange = 1.0
-  // The blend factor must have a nonzero value, otherwise v_color_mix doesn't get set
-  // appropriately for the shader.
-  emitter.particleColorBlendFactor = 1.0
-  emitter.shader = explosionShader
-  emitter.position = position
-  return emitter
+func makeExplosion(texture: SKTexture, at position: CGPoint) -> Array<SKSpriteNode> {
+  var pieces = [SKSpriteNode]()
+  for x in 0...explosionSplits{
+    for y in 0...explosionSplits{
+      let rect = CGRect(x: CGFloat(x), y: CGFloat(y), width: texture.size().width/CGFloat(explosionSplits), height: texture.size().height/CGFloat(explosionSplits))
+      let piece = SKSpriteNode(texture: SKTexture(rect: rect, in: texture))
+      piece.physicsBody = SKPhysicsBody(rectangleOf: rect.size)
+      pieces.append(piece)
+    }
+  }
+  return pieces
 }

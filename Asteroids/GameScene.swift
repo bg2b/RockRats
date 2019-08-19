@@ -486,7 +486,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func destroyPlayer() {
-    addEmitter(player.explode())
+    let pieces = player.explode()
+    for p in pieces {
+      playfield.addChild(p)
+    }
     sounds.soundEffect(.playerExplosion)
     if livesRemaining > 0 {
       wait(for: 5.0) { self.spawnPlayer() }
