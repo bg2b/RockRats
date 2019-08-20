@@ -280,13 +280,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func isSafe(point: CGPoint, forDuration time: CGFloat) -> Bool {
-    for asteroid in asteroids {
-      let asteroidRadius = 0.5 * asteroid.texture!.size().diagonal()
-      let playerRadius = 0.5 * player.shipTexture.size().diagonal()
-      let pathStart = asteroid.position
-      let pathEnd = asteroid.position + asteroid.physicsBody!.velocity.scale(by: time)
-      if distanceBetween(point: point, segment: (pathStart, pathEnd)) < asteroidRadius + playerRadius {
-        return false
+    if time > 0 {
+      for asteroid in asteroids {
+        let asteroidRadius = 0.5 * asteroid.texture!.size().diagonal()
+        let playerRadius = 0.5 * player.shipTexture.size().diagonal()
+        let pathStart = asteroid.position
+        let pathEnd = asteroid.position + asteroid.physicsBody!.velocity.scale(by: time)
+        if distanceBetween(point: point, segment: (pathStart, pathEnd)) < asteroidRadius + playerRadius {
+          return false
+        }
       }
     }
     return true
@@ -492,6 +494,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       wait(for: 5.0) { self.spawnPlayer() }
     } else {
       sounds.stopHeartbeat()
+      self.removeAllActions()
       wait(for: 2.0) {
         self.sounds.soundEffect(.gameOver)
         self.displayMessage("GAME OVER", forTime: 4)
@@ -500,8 +503,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func playerCollided(asteroid: SKNode) {
-    destroyPlayer()
     splitAsteroid(asteroid as! SKSpriteNode)
+    destroyPlayer()
   }
 
   func when(_ contact: SKPhysicsContact,
