@@ -75,6 +75,7 @@ extension SKNode {
 extension Globals {
   static var textureCache = TextureCache()
   static var spriteCache = SpriteCache()
+  static var lastUpdateTime = 0.0
   static var directControls = 0
 }
 
@@ -86,6 +87,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   var score = 0
   var scoreDisplay: SKLabelNode!
   var joystick: Joystick!
+  var hyperspaceButton: Button!
+  var lastJumpTime = 0.0
   var asteroids = Set<SKSpriteNode>()
   var waveNumber = 0
   var centralDisplay: SKLabelNode!
@@ -209,6 +212,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     fireButton.zRotation = .pi / 2
     fireButton.action = { self.fireLaser() }
     controls.addChild(fireButton)
+    hyperspaceButton = Button(size: controlSize, borderColor: .lightGray, fillColor: controlFill,
+                              texture: Globals.textureCache.findTexture(imageNamed: "warpedship_blue"))
+    hyperspaceButton.position = CGPoint(x: frame.maxX - offset, y: frame.minY + 2.25 * offset)
+    hyperspaceButton.zRotation = .pi / 2
+    hyperspaceButton.action = { self.hyperspaceJump() }
+    controls.addChild(hyperspaceButton)
+    enableHyperspaceJump()
   }
 
   func initInfo() {
@@ -291,13 +301,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     return true
   }
 
+  func enableHyperspaceJump() {
+    // Ensure that the button stays enabled
+    lastJumpTime = -Globals.gameConfig.hyperspaceCooldown
+    hyperspaceButton.enable()
+  }
+
   func spawnPlayer(safeTime: CGFloat = Globals.gameConfig.safeTime) {
     var spawnPosition = CGPoint(x: frame.midX, y: frame.midY)
     var attemptsRemaining = 5
     while attemptsRemaining > 0 && !isSafe(point: spawnPosition, forDuration: safeTime) {
       let spawnRegion = frame.insetBy(dx: 0.33 * frame.width, dy: 0.33 * frame.height)
       spawnPosition = CGPoint(x: .random(in: spawnRegion.minX...spawnRegion.maxX),
-                           y: .random(in: spawnRegion.minY...spawnRegion.maxY))
+                              y: .random(in: spawnRegion.minY...spawnRegion.maxY))
       attemptsRemaining -= 1
     }
     if attemptsRemaining == 0 {
@@ -305,9 +321,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       // aggressive about what is considered safe.
       wait(for: 0.5) { self.spawnPlayer(safeTime: max(safeTime - 0.25, 0)) }
     } else {
+      enableHyperspaceJump()
+      sounds.soundEffect(.warpIn)
       player.reset()
-      player.position = spawnPosition
-      playfield.addChild(player)
+      player.warpIn(to: spawnPosition, atAngle: player.zRotation, addTo: playfield)
       updateLives(-1)
     }
   }
@@ -335,6 +352,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     laser.removeAllActions()
     recycleSprite(laser)
     player.laserDestroyed()
+  }
+
+  func hyperspaceJump() {
+    guard player.canJump() else { return }
+    lastJumpTime = Globals.lastUpdateTime
+    playfield.addChild(player.warpOut())
+    sounds.soundEffect(.warpOut)
+    let jumpRegion = frame.insetBy(dx: 0.05 * frame.width, dy: 0.05 * frame.height)
+    let jumpPosition = CGPoint(x: .random(in: jumpRegion.minX...jumpRegion.maxX),
+                               y: .random(in: jumpRegion.minY...jumpRegion.maxY))
+    wait(for: 1) {
+      self.sounds.soundEffect(.warpIn)
+      self.player.warpIn(to: jumpPosition, atAngle: .random(in: 0 ... 2 * .pi), addTo: self.playfield)
+    }
   }
   
   func makeAsteroid(position pos: CGPoint, size: String, velocity: CGVector, onScreen: Bool) {
@@ -485,6 +516,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func destroyPlayer() {
+    enableHyperspaceJump()
     addEmitter(player.explode())
     sounds.soundEffect(.playerExplosion)
     if livesRemaining > 0 {
@@ -542,6 +574,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   override func update(_ currentTime: TimeInterval) {
+    Globals.lastUpdateTime = currentTime
+    if currentTime >= lastJumpTime + Globals.gameConfig.hyperspaceCooldown {
+      hyperspaceButton.enable()
+    } else {
+      hyperspaceButton.disable()
+    }
     player.fly()
     playfield.children.forEach { $0.wrapCoordinates() }
   }

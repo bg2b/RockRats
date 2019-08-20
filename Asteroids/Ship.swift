@@ -8,30 +8,35 @@
 
 import SpriteKit
 
-func hyperspaceShader() -> SKShader {
+func hyperspaceShader(inward: Bool, warpTime: Double) -> SKShader {
+  // The a_start_time ugliness is because u_time starts from 0 when a shader is first
+  // used, but after that it just keeps counting up.  We have to be able to shift it
+  // so that it effectively starts from 0 each time we use the shader.
   let shaderSource = """
-    void main() {
-      float dt = fract(0.02 * u_time);
-      float size = 1.0 - dt;
-      float max_rot = 6.0 * (1.0 - size);
-      float p = min(distance(v_tex_coord, vec2(0.5, 0.5)) * 2.0, 1.0);
-      if (p > size) {
-        gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
-      } else {
-        v_tex_coord -= 0.5;
-        v_tex_coord *= 2.0;
-        v_tex_coord /= size + 0.001;
-        float rot = max_rot * (1.0 - p);
-        float c = cos(rot);
-        float s = sin(rot);
-        v_tex_coord = vec2(c * v_tex_coord.x + s * v_tex_coord.y, -s * v_tex_coord.x + c * v_tex_coord.y);
-        v_tex_coord /= 2.0;
-        v_tex_coord += 0.5;
-        gl_FragColor = texture2D(u_texture, v_tex_coord);
-      }
+  void main() {
+    float dt = min((u_time - a_start_time) / \(warpTime), 1.0);
+    float size = \(inward ? "1.0 - " : "")dt;
+    float max_rot = \(inward ? 6.0 : -6.0) * (1.0 - size);
+    float p = min(distance(v_tex_coord, vec2(0.5, 0.5)) * 2.0, 1.0);
+    if (p > size) {
+      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
+    } else {
+      v_tex_coord -= 0.5;
+      v_tex_coord *= 2.0;
+      v_tex_coord /= size + 0.001;
+      float rot = max_rot * (1.0 - p);
+      float c = cos(rot);
+      float s = sin(rot);
+      v_tex_coord = vec2(c * v_tex_coord.x + s * v_tex_coord.y, -s * v_tex_coord.x + c * v_tex_coord.y);
+      v_tex_coord /= 2.0;
+      v_tex_coord += 0.5;
+      gl_FragColor = texture2D(u_texture, v_tex_coord);
     }
-"""
-  return SKShader(source: shaderSource)
+  }
+  """
+  let shader = SKShader(source: shaderSource)
+  shader.attributes = [SKAttribute(name: "a_start_time", type: .float)]
+  return shader
 }
 
 class Ship: SKNode {
@@ -42,6 +47,10 @@ class Ship: SKNode {
   var forwardFlames = [SKSpriteNode]()
   var reverseFlames = [[SKSpriteNode]]()
   var lasersRemaining = Globals.gameConfig.playerMaxShots
+  let warpTime = 0.25
+  var warpOutShader: SKShader
+  var warpInShader: SKShader
+  var firstWarpTime: Double?
 
   func buildFlames(at exhaustPos: CGPoint, scale: CGFloat = 1, direction: CGFloat = 0) -> [SKSpriteNode] {
     var fire = (1...3).compactMap { Globals.textureCache.findTexture(imageNamed: "fire\($0)") }
@@ -72,6 +81,8 @@ class Ship: SKNode {
     self.engineSounds.autoplayLooped = true
     self.engineSounds.run(SKAction.changeVolume(to: 0, duration: 0))
     sounds.addChild(self.engineSounds)
+    warpOutShader = hyperspaceShader(inward: true, warpTime: warpTime)
+    warpInShader = hyperspaceShader(inward: false, warpTime: warpTime)
     super.init()
     self.name = "ship"
     let ship = SKSpriteNode(texture: shipTexture)
@@ -221,6 +232,48 @@ class Ship: SKNode {
   
   func canShoot() -> Bool {
     return parent != nil && lasersRemaining > 0
+  }
+
+  func canJump() -> Bool {
+    return parent != nil
+  }
+
+  func warpEffect(shader: SKShader) -> SKNode {
+    let effect = SKSpriteNode(texture: shipTexture)
+    effect.position = position
+    effect.zRotation = zRotation
+    effect.shader = shader
+    if let firstWarpTime = firstWarpTime {
+      // u_time in the shader started at 0 when the global time was firstWarpOutTime.
+      // The global time is now Globals.lastUpdateTime.
+      // Therefore u_time now is Globals.lastUpdateTime - firstWarpOutTime.
+      // We want set the offset a_start_time to this to shift the effective u_time to 0.
+      effect.setValue(SKAttributeValue(float: Float(Globals.lastUpdateTime - firstWarpTime)), forAttribute: "a_start_time")
+    } else {
+      effect.setValue(SKAttributeValue(float: 0), forAttribute: "a_start_time")
+      firstWarpTime = Globals.lastUpdateTime
+    }
+    return effect
+  }
+
+  func warpOut() -> SKNode {
+    let effect = warpEffect(shader: warpOutShader)
+    effect.run(SKAction.sequence([SKAction.wait(forDuration: warpTime), SKAction.removeFromParent()]))
+    setEngineLevel(0)
+    removeFromParent()
+    return effect
+  }
+
+  func warpIn(to pos: CGPoint, atAngle angle: CGFloat, addTo node: SKNode) {
+    position = pos
+    zRotation = angle
+    let body = coastingConfiguration()
+    body.velocity = .zero
+    let effect = warpEffect(shader: warpInShader)
+    node.addChild(effect)
+    effect.run(SKAction.sequence([SKAction.wait(forDuration: warpTime), SKAction.removeFromParent()])) {
+      node.addChild(self)
+    }
   }
 
   func shoot(laser shot: SKNode) {

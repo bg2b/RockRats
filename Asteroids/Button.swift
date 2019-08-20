@@ -12,7 +12,8 @@ class Button: SKNode {
   let size: CGFloat
   let borderColor: UIColor
   let fillColor: UIColor
-  var action: (() -> Void)?
+  var enabled = true
+  var action: (() -> Void)? = nil
 
   func createButton(texture: SKTexture?) {
     let button = SKShapeNode(circleOfRadius: 0.5 * size)
@@ -34,7 +35,6 @@ class Button: SKNode {
     self.size = size
     self.borderColor = borderColor
     self.fillColor = fillColor
-    self.action = nil
     super.init()
     self.isUserInteractionEnabled = true
     self.name = "button"
@@ -45,9 +45,21 @@ class Button: SKNode {
     fatalError("init(coder:) has not been implemented by Button")
   }
 
+  func enable() {
+    enabled = true
+    alpha = 1.0
+  }
+
+  func disable() {
+    enabled = false
+    alpha = 0.5
+  }
+
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     guard let _ = touches.first else { return }
-    action?()
+    if enabled {
+      action?()
+    }
   }
 
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {

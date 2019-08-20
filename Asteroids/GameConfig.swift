@@ -29,6 +29,7 @@ struct GameConfig: Decodable {
   let playerShotSpeed: CGFloat
   let playerMaxShots: Int
   let safeTime: CGFloat
+  let hyperspaceCooldown: Double
   let asteroidMinSpeed: CGFloat
   let asteroidMaxSpeed: CGFloat
   let numAsteroidCoeffs: [Double]
