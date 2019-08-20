@@ -38,13 +38,34 @@ let explosionShader = SKShader(source :
   }
   """)
 
-func makeExplosion(texture: SKTexture, at position: CGPoint) -> Array<SKNode> {
+func makeExplosion(texture: SKTexture, angle: CGFloat, velocity: CGVector, at position: CGPoint) -> Array<SKNode> {
+  print(velocity)
   var pieces = [SKSpriteNode]()
-  for x in 0...explosionSplits{
-    for y in 0...explosionSplits{
-      let rect = CGRect(x: CGFloat(x), y: CGFloat(y), width: texture.size().width/CGFloat(explosionSplits), height: texture.size().height/CGFloat(explosionSplits))
-      let piece = SKSpriteNode(texture: SKTexture(rect: rect, in: texture))
-      piece.physicsBody = SKPhysicsBody(rectangleOf: rect.size)
+  let d = 1.0/Double(explosionSplits)
+  for x in 0..<explosionSplits {
+    for y in 0..<explosionSplits {
+      let dw = texture.size().width/CGFloat(explosionSplits)
+      let dh = texture.size().height/CGFloat(explosionSplits)
+      let xoriginal = (CGFloat(x) - CGFloat(explosionSplits) / 2 + 0.5) * dw
+      let yoriginal = (CGFloat(y) - CGFloat(explosionSplits) / 2 + 0.5) * dh
+      let c = cos(angle)
+      let s = sin(angle)
+      let rx = c*xoriginal - s*yoriginal
+      let ry = c*yoriginal + s*xoriginal
+      let rect = CGRect(origin: texture.textureRect().origin+CGVector(dx: d*Double(x), dy: d*Double(y)), size: CGSize(width: d, height: d))
+      let pieceTexture = SKTexture(rect: rect, in: texture)
+      let piece = SKSpriteNode(texture: pieceTexture)
+      piece.position = position + CGVector(dx: rx, dy: ry)
+      piece.zRotation = angle
+      piece.name = "fragment"
+      piece.run(SKAction.sequence([SKAction.wait(forDuration: 3), SKAction.fadeOut(withDuration: 1), SKAction.removeFromParent()]))
+      let body = SKPhysicsBody(circleOfRadius: texture.size().width/2.0/CGFloat(explosionSplits))
+      piece.physicsBody = body
+      body.velocity = velocity
+      body.mass = 0
+      body.categoryBitMask = ObjectCategories.shipFrag.rawValue
+      body.contactTestBitMask = 0
+      body.collisionBitMask = setOf([.player, .playerShot, .shipFrag, .asteroid, .ufo, .ufoShot])
       pieces.append(piece)
     }
   }

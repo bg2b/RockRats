@@ -22,6 +22,7 @@ enum ObjectCategories: UInt32 {
   case asteroid = 4
   case ufo = 8
   case ufoShot = 16
+  case shipFrag = 32
 }
 
 extension SKPhysicsBody {
@@ -46,6 +47,9 @@ extension SKNode {
     guard let frame = self.scene?.frame else { return }
     if frame.contains(position) {
       self["wasOnScreen"] = true
+    }
+    else if name! == "fragment" {
+      removeFromParent()
     }
     guard let wasOnScreen: Bool = self["wasOnScreen"], wasOnScreen else { return }
     // We wrap only after going past the edge a little bit so that an object that's
@@ -504,7 +508,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
   func playerCollided(asteroid: SKNode) {
     destroyPlayer()
-    splitAsteroid(asteroid as! SKSpriteNode)
+    //splitAsteroid(asteroid as! SKSpriteNode)
   }
 
   func when(_ contact: SKPhysicsContact,

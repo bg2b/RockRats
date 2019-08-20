@@ -219,8 +219,9 @@ class Ship: SKNode {
   }
 
   func explode() -> Array<SKNode> {
+    let velocity = physicsBody!.velocity
     setEngineLevel(0)
     removeFromParent()
-    return makeExplosion(texture: shipTexture, at: position)
+    return makeExplosion(texture: shipTexture, angle: zRotation, velocity: velocity, at: position)
   }
 }

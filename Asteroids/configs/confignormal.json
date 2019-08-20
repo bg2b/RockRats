@@ -6,7 +6,7 @@
   "playerMaxThrust": [100, 500],
   "playerMaxRotationRate": [3.14, 15],
   "playerShotSpeed": 700,
-  "playerMaxShots": 3,
+  "playerMaxShots": 4,
   "safeTime": 5,
   "asteroidMinSpeed": 0,
   "asteroidMaxSpeed": 250,
