@@ -14,7 +14,7 @@ class Button: SKNode {
   let fillColor: UIColor
   var action: (() -> Void)?
 
-  func createButton(decoration: SKNode?) {
+  func createButton(texture: SKTexture?) {
     let button = SKShapeNode(circleOfRadius: 0.5 * size)
     button.name = "buttonShape"
     button.fillColor = fillColor
@@ -22,16 +22,15 @@ class Button: SKNode {
     button.lineWidth = 0.05 * size
     button.isAntialiased = true
     addChild(button)
-    if let decoration = decoration {
-      decoration.name = "buttonDecoration"
-      decoration.xScale *= 0.6
-      decoration.yScale *= 0.6
-      decoration.zPosition = 1
-      button.addChild(decoration)
+    if let texture = texture {
+      let sprite = SKSpriteNode(texture: texture, size: texture.size().scale(to: 0.6 * size))
+      sprite.name = "buttonTexture"
+      sprite.zPosition = 1
+      button.addChild(sprite)
     }
   }
 
-  required init(size: CGFloat, borderColor: UIColor, fillColor: UIColor, decoration: SKNode?) {
+  required init(size: CGFloat, borderColor: UIColor, fillColor: UIColor, texture: SKTexture?) {
     self.size = size
     self.borderColor = borderColor
     self.fillColor = fillColor
@@ -39,7 +38,7 @@ class Button: SKNode {
     super.init()
     self.isUserInteractionEnabled = true
     self.name = "button"
-    createButton(decoration: decoration)
+    createButton(texture: texture)
   }
 
   required init(coder aDecoder: NSCoder) {
