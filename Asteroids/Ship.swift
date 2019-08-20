@@ -8,6 +8,32 @@
 
 import SpriteKit
 
+func hyperspaceShader() -> SKShader {
+  let shaderSource = """
+    void main() {
+      float dt = fract(0.02 * u_time);
+      float size = 1.0 - dt;
+      float max_rot = 6.0 * (1.0 - size);
+      float p = min(distance(v_tex_coord, vec2(0.5, 0.5)) * 2.0, 1.0);
+      if (p > size) {
+        gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
+      } else {
+        v_tex_coord -= 0.5;
+        v_tex_coord *= 2.0;
+        v_tex_coord /= size + 0.001;
+        float rot = max_rot * (1.0 - p);
+        float c = cos(rot);
+        float s = sin(rot);
+        v_tex_coord = vec2(c * v_tex_coord.x + s * v_tex_coord.y, -s * v_tex_coord.x + c * v_tex_coord.y);
+        v_tex_coord /= 2.0;
+        v_tex_coord += 0.5;
+        gl_FragColor = texture2D(u_texture, v_tex_coord);
+      }
+    }
+"""
+  return SKShader(source: shaderSource)
+}
+
 class Ship: SKNode {
   let joystick: Joystick
   let shipTexture: SKTexture
