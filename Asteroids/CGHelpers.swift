@@ -62,6 +62,10 @@ func -(left: CGVector, right: CGVector) -> CGVector {
   return CGVector(dx: left.dx - right.dx, dy: left.dy - right.dy)
 }
 
+func +(left: CGVector, right: CGVector) -> CGVector {
+  return CGVector(dx: left.dx + right.dx, dy: left.dy + right.dy)
+}
+
 extension CGPoint {
   func norm2() -> CGFloat {
     return sqrt(x * x + y * y)

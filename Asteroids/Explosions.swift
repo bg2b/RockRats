@@ -55,13 +55,14 @@ func makeExplosion(texture: SKTexture, angle: CGFloat, velocity: CGVector, at po
       let rect = CGRect(origin: texture.textureRect().origin+CGVector(dx: d*Double(x), dy: d*Double(y)), size: CGSize(width: d, height: d))
       let pieceTexture = SKTexture(rect: rect, in: texture)
       let piece = SKSpriteNode(texture: pieceTexture)
-      piece.position = position + CGVector(dx: rx, dy: ry)
+      let delta = CGVector(dx: rx, dy: ry)
+      piece.position = position + delta
       piece.zRotation = angle
       piece.name = "fragment"
       piece.run(SKAction.sequence([SKAction.wait(forDuration: 3), SKAction.fadeOut(withDuration: 1), SKAction.removeFromParent()]))
       let body = SKPhysicsBody(circleOfRadius: texture.size().width/2.0/CGFloat(explosionSplits))
       piece.physicsBody = body
-      body.velocity = velocity
+      body.velocity = velocity + CGVector(angle: delta.angle() + .random(in: -1...1)).scale(by: .random(in: 10...100))
       body.mass = 0
       body.categoryBitMask = ObjectCategories.shipFrag.rawValue
       body.contactTestBitMask = 0

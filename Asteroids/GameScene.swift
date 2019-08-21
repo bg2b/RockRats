@@ -48,9 +48,6 @@ extension SKNode {
     if frame.contains(position) {
       self["wasOnScreen"] = true
     }
-    else if name! == "fragment" {
-      removeFromParent()
-    }
     guard let wasOnScreen: Bool = self["wasOnScreen"], wasOnScreen else { return }
     // We wrap only after going past the edge a little bit so that an object that's
     // moving just along the edge won't stutter back and forth.
@@ -541,7 +538,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   func playerCollided(asteroid: SKNode) {
     splitAsteroid(asteroid as! SKSpriteNode)
     destroyPlayer()
-    //splitAsteroid(asteroid as! SKSpriteNode)
   }
 
   func when(_ contact: SKPhysicsContact,
