@@ -39,6 +39,10 @@ extension CGVector {
     return CGVector(dx: dx * amount, dy: dy * amount)
   }
 
+  func scale(by size: CGSize) -> CGVector {
+    return CGVector(dx: dx * size.width, dy: dy * size.height)
+  }
+
   func angle() -> CGFloat {
     return atan2(dy, dx)
   }
@@ -58,12 +62,12 @@ extension CGVector {
   }
 }
 
-func -(left: CGVector, right: CGVector) -> CGVector {
-  return CGVector(dx: left.dx - right.dx, dy: left.dy - right.dy)
-}
-
 func +(left: CGVector, right: CGVector) -> CGVector {
   return CGVector(dx: left.dx + right.dx, dy: left.dy + right.dy)
+}
+
+func -(left: CGVector, right: CGVector) -> CGVector {
+  return CGVector(dx: left.dx - right.dx, dy: left.dy - right.dy)
 }
 
 extension CGPoint {

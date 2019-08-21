@@ -22,7 +22,7 @@ enum ObjectCategories: UInt32 {
   case asteroid = 4
   case ufo = 8
   case ufoShot = 16
-  case shipFrag = 32
+  case fragment = 32
 }
 
 extension SKPhysicsBody {
