@@ -538,6 +538,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   func playerCollided(asteroid: SKNode) {
     splitAsteroid(asteroid as! SKSpriteNode)
     destroyPlayer()
+    physicsWorld.speed = 0.25
+    wait(for: 4) { self.physicsWorld.speed = 1 }
   }
 
   func when(_ contact: SKPhysicsContact,

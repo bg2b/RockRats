@@ -62,7 +62,7 @@ func makeExplosion(texture: SKTexture, angle: CGFloat, velocity: CGVector, at po
       piece.run(SKAction.sequence([SKAction.wait(forDuration: 3), SKAction.fadeOut(withDuration: 1), SKAction.removeFromParent()]))
       let body = SKPhysicsBody(circleOfRadius: texture.size().width/2.0/CGFloat(explosionSplits))
       piece.physicsBody = body
-      body.velocity = velocity + CGVector(angle: delta.angle() + .random(in: -1...1)).scale(by: .random(in: 10...100))
+      body.velocity = velocity + CGVector(angle: delta.angle() + .random(in: -1...1)).scale(by: 4 * .random(in: 10...100))
       body.mass = 0
       body.categoryBitMask = ObjectCategories.shipFrag.rawValue
       body.contactTestBitMask = 0
