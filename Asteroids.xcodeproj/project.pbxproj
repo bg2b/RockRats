@@ -61,6 +61,9 @@
 		FDA43B202308AB9600A29347 /* heartbeat.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B1F2308AB9600A29347 /* heartbeat.wav */; };
 		FDA43B222308C11E00A29347 /* gameover.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B212308C11E00A29347 /* gameover.wav */; };
 		FDA43B24230A111D00A29347 /* meteorhuge_hit.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B23230A111D00A29347 /* meteorhuge_hit.wav */; };
+		FDA43B26230C01C300A29347 /* warpedship_blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B25230C01C300A29347 /* warpedship_blue@2x.png */; };
+		FDA43B28230C1DC600A29347 /* warpout.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B27230C1DC600A29347 /* warpout.wav */; };
+		FDA43B2A230C2A1D00A29347 /* warpin.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B29230C2A1D00A29347 /* warpin.wav */; };
 		FDCF8CA322DA175F008EDFD1 /* CGHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDCF8CA222DA175F008EDFD1 /* CGHelpers.swift */; };
 		FDCF8CA522DA7296008EDFD1 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDCF8CA422DA7296008EDFD1 /* Globals.swift */; };
 		FDD831F222EDB50200CA4EC6 /* Explosions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD831F122EDB50200CA4EC6 /* Explosions.swift */; };
@@ -133,6 +136,9 @@
 		FDA43B1F2308AB9600A29347 /* heartbeat.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = heartbeat.wav; sourceTree = "<group>"; };
 		FDA43B212308C11E00A29347 /* gameover.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = gameover.wav; sourceTree = "<group>"; };
 		FDA43B23230A111D00A29347 /* meteorhuge_hit.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = meteorhuge_hit.wav; sourceTree = "<group>"; };
+		FDA43B25230C01C300A29347 /* warpedship_blue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "warpedship_blue@2x.png"; sourceTree = "<group>"; };
+		FDA43B27230C1DC600A29347 /* warpout.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = warpout.wav; sourceTree = "<group>"; };
+		FDA43B29230C2A1D00A29347 /* warpin.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = warpin.wav; sourceTree = "<group>"; };
 		FDCF8CA222DA175F008EDFD1 /* CGHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGHelpers.swift; sourceTree = "<group>"; };
 		FDCF8CA422DA7296008EDFD1 /* Globals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
 		FDD831F122EDB50200CA4EC6 /* Explosions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Explosions.swift; sourceTree = "<group>"; };
@@ -171,6 +177,8 @@
 				FD4D53CA2308206D00718938 /* player_laser.wav */,
 				FD4D53D423085AF800718938 /* player_engines.wav */,
 				FD4D53C423080D3600718938 /* player_explosion.wav */,
+				FDA43B29230C2A1D00A29347 /* warpin.wav */,
+				FDA43B27230C1DC600A29347 /* warpout.wav */,
 				FDA43B1D2308A1A600A29347 /* extra_life.wav */,
 			);
 			path = sounds;
@@ -262,6 +270,7 @@
 				FD0C070522D8925E00F19A55 /* starfield_purple@2x.png */,
 				FD0C070222D8925E00F19A55 /* starfield_violet@2x.png */,
 				FDE04B2522D5FEA30011A529 /* star3@2x.png */,
+				FDA43B25230C01C300A29347 /* warpedship_blue@2x.png */,
 			);
 			path = "Asset creation";
 			sourceTree = "<group>";
@@ -340,6 +349,7 @@
 				FD53168422DB445100F09E57 /* meteorbig3@2x.png in Resources */,
 				FD28DB5A22DFFA87009446A2 /* ufo_green@2x.png in Resources */,
 				FD4D53CB2308206D00718938 /* player_laser.wav in Resources */,
+				FDA43B26230C01C300A29347 /* warpedship_blue@2x.png in Resources */,
 				FD53169122DC1A0600F09E57 /* lasersmall_blue@2x.png in Resources */,
 				FD28DB5722DFFA87009446A2 /* meteorhuge1@2x.png in Resources */,
 				FD53168222DB445100F09E57 /* meteorsmall1@2x.png in Resources */,
@@ -375,6 +385,7 @@
 				FD28DB5922DFFA87009446A2 /* ufo_blue@2x.png in Resources */,
 				FD53167222DAA8EA00F09E57 /* fire3@2x.png in Resources */,
 				FDE04B2922D5FEA30011A529 /* star2@2x.png in Resources */,
+				FDA43B28230C1DC600A29347 /* warpout.wav in Resources */,
 				FDA43B1E2308A1A600A29347 /* extra_life.wav in Resources */,
 				FD79324622D20FE700E7D336 /* LaunchScreen.storyboard in Resources */,
 				FD0C070E22D8925E00F19A55 /* ship_orange@2x.png in Resources */,
@@ -382,6 +393,7 @@
 				FD28DB5522DFFA87009446A2 /* ufo_yellow@2x.png in Resources */,
 				FD0C070922D8925E00F19A55 /* ship_blue@2x.png in Resources */,
 				FD4D53D523085AF800718938 /* player_engines.wav in Resources */,
+				FDA43B2A230C2A1D00A29347 /* warpin.wav in Resources */,
 				FD53168E22DC1A0600F09E57 /* laserbig_green@2x.png in Resources */,
 				FDA43B222308C11E00A29347 /* gameover.wav in Resources */,
 			);
