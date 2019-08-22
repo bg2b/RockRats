@@ -48,10 +48,11 @@ extension SKNode {
     if frame.contains(position) {
       self["wasOnScreen"] = true
     }
+    let hysteresis = CGFloat(3)
+    special(hysteresis)
     guard let wasOnScreen: Bool = self["wasOnScreen"], wasOnScreen else { return }
     // We wrap only after going past the edge a little bit so that an object that's
     // moving just along the edge won't stutter back and forth.
-    let hysteresis = CGFloat(3)
     if position.x < frame.minX - hysteresis {
       position.x += frame.width
     } else if position.x > frame.maxX + hysteresis {
@@ -71,6 +72,23 @@ extension SKNode {
   func wait(for time: Double, then action: @escaping (() -> Void)) {
     wait(for: time, then: SKAction.run(action))
   }
+  func special(_ hysterisis: CGFloat) {
+    let gameScene = scene as! GameScene
+    if gameScene.frame.maxX - 10 < position.x && position.x < (gameScene.frame.maxX) + hysterisis {
+      if gameScene.frame.maxY - 10 < position.y && position.y < (gameScene.frame.maxY) + hysterisis {
+        if name == "lasersmall_green" {
+          Globals.xyzzy = true
+          gameScene.sounds.soundEffect(.warpIn)
+        }
+        else if name == "ship" {
+          if Globals.xyzzy == true {
+            Globals.xyzzy = false
+            gameScene.shift()
+          }
+        }
+      }
+    }
+  }
 }
 
 extension Globals {
@@ -78,6 +96,7 @@ extension Globals {
   static var spriteCache = SpriteCache()
   static var lastUpdateTime = 0.0
   static var directControls = 0
+  static var xyzzy = false
 }
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
@@ -262,6 +281,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   func updateLives(_ amount: Int) {
     livesRemaining += amount
     livesDisplay.showLives(livesRemaining)
+  }
+  
+  func shift() {
+    player.physicsBody?.velocity = CGVector(dx:0, dy:0)
+    player.setEngineLevel(0)
+    physicsWorld.speed = 0.25
+    wait(for: 5) { self.displayMessage("Daniel C Long", forTime: 2.0) }
+    wait(for: 10) {
+      self.destroyPlayer()
+      self.addToScore(1000)
+      self.physicsWorld.speed = 1
+    }
   }
 
   func displayMessage(_ message: String, forTime duration: Double, then action: (() -> Void)? = nil) {
