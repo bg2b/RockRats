@@ -8,15 +8,34 @@
 
 import SpriteKit
 
-func hyperspaceShader(inward: Bool, warpTime: Double) -> SKShader {
+func hyperspaceShader(forTexture texture: SKTexture, inward: Bool, warpTime: Double) -> SKShader {
   // The a_start_time ugliness is because u_time starts from 0 when a shader is first
   // used, but after that it just keeps counting up.  We have to be able to shift it
   // so that it effectively starts from 0 each time we use the shader.
+  //
+  // Also be careful not to assume that the texture has v_tex_coord ranging in (0, 0)
+  // to (1, 1)!  If the texture is part of a texture atlas, this is not true.  We
+  // could make another attribute or uniform to pass in the textureRect info, but
+  // since we only use this with a particular texture, we just pass in the texture
+  // and compile in the required v_tex_coord transformations for that texture.
+  //
+  // I still have some residual confusion about coordinate spaces in these things.
+  // If you look in the tiling shader used for the background star field, v_tex_coord
+  // on input corresponded to a position in the frame that was normalized to
+  // (0,0)-(1,1).  In that case we shifted and scaled only on output when the
+  // coordinate was being used to index into the tiled texture.  In this case, it's a
+  // texture for a sprite node that we're warping, and the input coordinate seems to
+  // be in terms of the textureRect coordinates too.  So we have to inverse transform
+  // to get to (0,0)-(1,1), do our stuff, and then transform back again to
+  // textureRect.
+  let rect = texture.textureRect()
   let shaderSource = """
   void main() {
     float dt = min((u_time - a_start_time) / \(warpTime), 1.0);
     float size = \(inward ? "1.0 - " : "")dt;
     float max_rot = \(inward ? 6.0 : -6.0) * (1.0 - size);
+    v_tex_coord -= vec2(\(rect.origin.x), \(rect.origin.y));
+    v_tex_coord *= vec2(\(1 / rect.size.width), \(1 / rect.size.height));
     float p = min(distance(v_tex_coord, vec2(0.5, 0.5)) * 2.0, 1.0);
     if (p > size) {
       gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
@@ -30,6 +49,8 @@ func hyperspaceShader(inward: Bool, warpTime: Double) -> SKShader {
       v_tex_coord = vec2(c * v_tex_coord.x + s * v_tex_coord.y, -s * v_tex_coord.x + c * v_tex_coord.y);
       v_tex_coord /= 2.0;
       v_tex_coord += 0.5;
+      v_tex_coord *= vec2(\(rect.size.width), \(rect.size.height));
+      v_tex_coord += vec2(\(rect.origin.x), \(rect.origin.y));
       gl_FragColor = texture2D(u_texture, v_tex_coord);
     }
   }
@@ -47,7 +68,7 @@ class Ship: SKNode {
   var forwardFlames = [SKSpriteNode]()
   var reverseFlames = [[SKSpriteNode]]()
   var lasersRemaining = Globals.gameConfig.playerMaxShots
-  let warpTime = 0.25
+  let warpTime = 0.5
   var warpOutShader: SKShader
   var warpInShader: SKShader
   var firstWarpTime: Double?
@@ -81,8 +102,8 @@ class Ship: SKNode {
     self.engineSounds.autoplayLooped = true
     self.engineSounds.run(SKAction.changeVolume(to: 0, duration: 0))
     sounds.addChild(self.engineSounds)
-    warpOutShader = hyperspaceShader(inward: true, warpTime: warpTime)
-    warpInShader = hyperspaceShader(inward: false, warpTime: warpTime)
+    warpOutShader = hyperspaceShader(forTexture: shipTexture, inward: true, warpTime: warpTime)
+    warpInShader = hyperspaceShader(forTexture: shipTexture, inward: false, warpTime: warpTime)
     super.init()
     self.name = "ship"
     let ship = SKSpriteNode(texture: shipTexture)

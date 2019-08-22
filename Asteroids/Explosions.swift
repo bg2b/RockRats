@@ -24,6 +24,8 @@ func makeExplosion(texture: SKTexture, angle: CGFloat, velocity: CGVector, at po
   let range = -explosionSplits / 2 ..< explosionSplits / 2
   let xys = range.flatMap { x in range.map { y in CGVector(dx: x, dy: y).scale(by: d) } }
   var pieces = [SKSpriteNode]()
+  // We have to use textureRect!  Assuming (0,0) - (1,1) for the texture coordinates
+  // will give "interesting" results if you have a texture that's part of an atlas...
   let rect = texture.textureRect()
   let dwh = rect.size.scale(by: d)
   let physicsSize2 = texture.size().scale(by: 0.5 * d)

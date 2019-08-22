@@ -106,7 +106,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     Globals.spriteCache.recycleSprite(sprite)
   }
 
-  func tilingShader() -> SKShader {
+  func tilingShader(forTexture texture: SKTexture) -> SKShader {
+    // Do not to assume that the texture has v_tex_coord ranging in (0, 0) to (1, 1)!
+    // If the texture is part of a texture atlas, this is not true.  Since we only
+    // use this for a particular texture, we just pass in the texture and hard-code
+    // the required v_tex_coord transformations.  For this case, the INPUT
+    // v_tex_coord is from (0,0) to (1,1), since it corresponds to the coordinates in
+    // the shape node that we're tiling.  The OUTPUT v_tex_coord has to be in the
+    // space of the texture, so it needs a scale and shift.
+    let rect = texture.textureRect()
     let shaderSource = """
     void main() {
       vec2 scaled = v_tex_coord * a_repetitions;
@@ -117,6 +125,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       if (rot == 1) v_tex_coord = vec2(1.0 - v_tex_coord.y, v_tex_coord.x);
       else if (rot == 2) v_tex_coord = vec2(1.0) - v_tex_coord;
       else if (rot == 3) v_tex_coord = vec2(v_tex_coord.y, 1.0 - v_tex_coord.x);
+      // Transform from (0,0)-(1,1)
+      v_tex_coord *= vec2(\(rect.size.width), \(rect.size.height));
+      v_tex_coord += vec2(\(rect.origin.x), \(rect.origin.y));
       gl_FragColor = SKDefaultShading();
     }
     """
@@ -135,7 +146,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let tsize = stars.size()
     background.fillTexture = stars
     background.fillColor = .white
-    background.fillShader = tilingShader()
+    background.fillShader = tilingShader(forTexture: stars)
     let reps = vector_float2([Float(frame.width / tsize.width), Float(frame.height / tsize.height)])
     background.setValue(SKAttributeValue(vectorFloat2: reps), forAttribute: "a_repetitions")
     addChild(background)
