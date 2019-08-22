@@ -21,6 +21,7 @@ enum SoundEffect: String, CaseIterable {
   case extraLife = "extra_life"
   case heartbeat = "heartbeat"
   case gameOver = "gameover"
+  case ufoExplosion = "ufo_explosion"
 }
 
 class Sounds: SKNode {

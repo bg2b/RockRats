@@ -526,13 +526,30 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     removeLaser(laser as! SKSpriteNode)
     splitAsteroid(asteroid as! SKSpriteNode)
   }
+  
+  func laserHit(laser: SKNode, ufo: SKNode) {
+    removeLaser(laser as! SKSpriteNode)
+    destroyUFO(ufo as! UFO)
+  }
 
+  func addExplosion(_ pieces: [SKNode], speedScale: CGFloat) {
+    for p in pieces {
+      if let body = p.physicsBody {
+        body.velocity = body.velocity.scale(by: 1 / speedScale)
+        body.angularVelocity /= speedScale
+      }
+      playfield.addChild(p)
+    }
+    if speedScale != 1 {
+      physicsWorld.speed = speedScale
+      wait(for: 4) { self.physicsWorld.speed = 1 }
+    }
+  }
+  
   func destroyPlayer() {
     enableHyperspaceJump()
     let pieces = player.explode()
-    for p in pieces {
-      playfield.addChild(p)
-    }
+    addExplosion(pieces, speedScale: 0.25)
     sounds.soundEffect(.playerExplosion)
     if livesRemaining > 0 {
       wait(for: 5.0) { self.spawnPlayer() }
@@ -545,12 +562,25 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       }
     }
   }
+  
+  func spawnUFO() {
+    playfield.addChild(UFO(isBig: true))
+  }
+  
+  func destroyUFO(_ ufo: UFO) {
+    addExplosion(ufo.explode(), speedScale: 1)
+    sounds.soundEffect(.ufoExplosion)
+    wait(for: 10) { self.spawnUFO() }
+  }
 
   func playerCollided(asteroid: SKNode) {
     splitAsteroid(asteroid as! SKSpriteNode)
     destroyPlayer()
-    physicsWorld.speed = 0.25
-    wait(for: 4) { self.physicsWorld.speed = 1 }
+  }
+  
+  func playerHitUFO(ufo: SKNode) {
+    destroyPlayer()
+    destroyUFO(ufo as! UFO)
   }
 
   func when(_ contact: SKPhysicsContact,
@@ -570,6 +600,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   func didBegin(_ contact: SKPhysicsContact) {
     when(contact, isBetween: .playerShot, and: .asteroid) { laserHit(laser: $0, asteroid: $1) }
     when(contact, isBetween: .player, and: .asteroid) { playerCollided(asteroid: $1) }
+    when(contact, isBetween: .playerShot, and: .ufo) { laserHit(laser: $0, ufo: $1) }
+    when(contact, isBetween: .player, and: .ufo) { playerHitUFO(ufo: $1) }
   }
   
   override func didMove(to view: SKView) {
@@ -588,6 +620,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     sounds.heartbeat()
     nextWave()
     wait(for: 3.0) { self.spawnPlayer() }
+    wait(for: 10.0) { self.spawnUFO() }
   }
 
   override func update(_ currentTime: TimeInterval) {
