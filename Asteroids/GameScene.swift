@@ -91,12 +91,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   var hyperspaceButton: Button!
   var lastJumpTime = 0.0
   var asteroids = Set<SKSpriteNode>()
+  var ufos = Set<UFO>()
   var waveNumber = 0
   var centralDisplay: SKLabelNode!
   var livesRemaining = 0
   var extraLivesAwarded = 0
   var livesDisplay: LivesDisplay!
   var sounds: Sounds!
+  var gameOver = false
 
   func makeSprite(imageNamed name: String, initializer: ((SKSpriteNode) -> Void)? = nil) -> SKSpriteNode {
     return Globals.spriteCache.findSprite(imageNamed: name, initializer: initializer)
@@ -452,9 +454,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   func removeAsteroid(_ asteroid: SKSpriteNode) {
     recycleSprite(asteroid)
     asteroids.remove(asteroid)
-    if asteroids.isEmpty {
+    if asteroids.isEmpty && !gameOver {
       sounds.normalHeartbeatRate()
-      wait(for: 4.0) { self.nextWave() }
+      run(SKAction.sequence([SKAction.wait(forDuration: 4), SKAction.run { self.nextWave() }]), withKey: "spawnWave")
     }
   }
 
@@ -532,7 +534,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   func laserHit(laser: SKNode, ufo: SKNode) {
     removeLaser(laser as! SKSpriteNode)
     destroyUFO(ufo as! UFO)
-    addToScore(100)
   }
 
   func addExplosion(_ pieces: [SKNode]) {
@@ -565,8 +566,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     if livesRemaining > 0 {
       wait(for: 5.0) { self.spawnPlayer() }
     } else {
+      gameOver = true
       sounds.stopHeartbeat()
-      self.removeAllActions()
+      self.removeAction(forKey: "spawnWave")
       wait(for: 2.0) {
         self.sounds.soundEffect(.gameOver)
         self.displayMessage("GAME OVER", forTime: 4)
@@ -575,12 +577,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
   
   func spawnUFO() {
-    playfield.addChild(UFO(isBig: true))
+    let ufo = UFO(isBig: Int.random(in: 0...1) == 1)
+    playfield.addChild(ufo)
+    ufos.insert(ufo)
   }
   
-  func destroyUFO(_ ufo: UFO) {
+  func destroyUFO(_ ufo: UFO, updateScore: Bool = true) {
+    if updateScore {
+      addToScore(ufo.isBig ? 20 : 100)
+    }
+    ufos.remove(ufo)
+    sounds.soundEffect(.ufoExplosion, at: ufo.position)
     addExplosion(ufo.explode())
-    sounds.soundEffect(.ufoExplosion)
     wait(for: 10) { self.spawnUFO() }
   }
 
@@ -590,14 +598,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
   
   func playerHitUFO(ufo: SKNode) {
-    destroyPlayer()
     destroyUFO(ufo as! UFO)
-    addToScore(100)
+    destroyPlayer()
   }
   
   func ufoCollided(ufo: SKNode, asteroid: SKNode) {
     splitAsteroid(asteroid as! SKSpriteNode, updateScore: false)
-    destroyUFO(ufo as! UFO)
+    destroyUFO(ufo as! UFO, updateScore: false)
   }
 
   func when(_ contact: SKPhysicsContact,
@@ -648,6 +655,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     } else {
       hyperspaceButton.disable()
     }
+    ufos.forEach { $0.fly() }
     player.fly()
     playfield.children.forEach { $0.wrapCoordinates() }
   }

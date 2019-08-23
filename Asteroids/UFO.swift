@@ -9,10 +9,12 @@
 import SpriteKit
 
 class UFO: SKNode {
+  let isBig: Bool
   let ufoTexture: SKTexture
   
   required init(isBig: Bool) {
-    self.ufoTexture = Globals.textureCache.findTexture(imageNamed: "ufo_green")
+    self.isBig = isBig
+    self.ufoTexture = Globals.textureCache.findTexture(imageNamed: isBig ? "ufo_green" : "ufo_red")
     super.init()
     self.name = "ufo"
     let ufo = SKSpriteNode(texture: ufoTexture)
@@ -34,14 +36,20 @@ class UFO: SKNode {
   
   func fly() {
     guard parent != nil else { return }
-    guard let body = physicsBody else {fatalError("UFO has lost its body. It is an UFH - unidentified flying head")}
+    guard let body = physicsBody else { fatalError("UFO has lost its body. It is an UFH - unidentified flying head") }
+    let toMove = Int.random(in: 0...100) == 0
+    if toMove || body.velocity.norm2() == 0 {
+      let angle = CGFloat.random(in: -.pi ... .pi)
+      let maxSpeed = Globals.gameConfig.value(for: \WaveConfig.ufoMaxSpeed, atWave: 1)[isBig ? 0 : 1]
+      body.velocity = CGVector(angle: angle).scale(by: maxSpeed)
+    }
   }
   
   func shoot(laser shot: SKNode) {
     shot.zRotation = zRotation
     let shotDirection = CGVector(angle: zRotation)
     shot.position = position + shotDirection.scale(by: 0.5 * ufoTexture.size().width)
-    let shotSpeed = Globals.gameConfig.value(for: \WaveConfig.ufoShotSpeed, atWave: 1)
+    let shotSpeed = Globals.gameConfig.value(for: \WaveConfig.ufoShotSpeed, atWave: 1)[isBig ? 0 : 1]
     shot.physicsBody?.velocity = shotDirection.scale(by: shotSpeed)
   }
   

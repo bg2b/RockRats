@@ -15,7 +15,8 @@ struct WaveConfig: Decodable {
   let maxUFOs: Int?
   let ufoAccuracy: Double?
   let ufoMaxShots: Int?
-  let ufoShotSpeed: CGFloat?
+  let ufoShotSpeed: [CGFloat]?
+  let ufoMaxSpeed: [CGFloat]?
   let asteroidSpeedBoost: CGFloat?
 }
 
