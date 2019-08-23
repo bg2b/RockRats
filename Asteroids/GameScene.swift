@@ -44,7 +44,7 @@ let numColors = teamColors.count
 
 extension SKNode {
   func wrapCoordinates() {
-    guard let frame = self.scene?.frame else { return }
+    guard let frame = scene?.frame else { return }
     if frame.contains(position) {
       self["wasOnScreen"] = true
     }
@@ -222,13 +222,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                             texture: Globals.textureCache.findTexture(imageNamed: "laserbig_green"))
     fireButton.position = CGPoint(x: frame.maxX - offset, y: frame.minY + offset)
     fireButton.zRotation = .pi / 2
-    fireButton.action = { self.fireLaser() }
+    fireButton.action = { [unowned self] in self.fireLaser() }
     controls.addChild(fireButton)
     hyperspaceButton = Button(size: controlSize, borderColor: .lightGray, fillColor: controlFill,
                               texture: Globals.textureCache.findTexture(imageNamed: "warpedship_blue"))
     hyperspaceButton.position = CGPoint(x: frame.maxX - offset, y: frame.minY + 2.25 * offset)
     hyperspaceButton.zRotation = .pi / 2
-    hyperspaceButton.action = { self.hyperspaceJump() }
+    hyperspaceButton.action = { [unowned self] in self.hyperspaceJump() }
     controls.addChild(hyperspaceButton)
     enableHyperspaceJump()
   }

@@ -52,7 +52,7 @@ extension CGVector {
   }
 
   func project(unitVector: CGVector) -> CGVector {
-    return unitVector.scale(by: self.dotProd(unitVector))
+    return unitVector.scale(by: dotProd(unitVector))
   }
 
   func rotate(by angle: CGFloat) -> CGVector {

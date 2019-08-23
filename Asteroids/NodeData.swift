@@ -10,24 +10,24 @@ import SpriteKit
 
 extension SKNode {
   func getUserDict() -> NSMutableDictionary {
-    if let dict = self.userData {
+    if let dict = userData {
       return dict
     } else {
       let dict = NSMutableDictionary()
-      self.userData = dict
+      userData = dict
       return dict
     }
   }
 
   subscript<T>(key: String) -> T? {
     get {
-      let dict = self.getUserDict()
+      let dict = getUserDict()
       guard let result: T = dict[key] as? T else { return nil }
       return result
     }
 
     set(newVal) {
-      self.getUserDict()[key] = newVal
+      getUserDict()[key] = newVal
     }
   }
 }
