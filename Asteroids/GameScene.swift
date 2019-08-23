@@ -405,17 +405,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var finalVelocity = velocity
     let speed = velocity.norm2()
     if speed == 0 {
-      finalVelocity = CGVector(angle: .random(in: 0 ... 2 * .pi)).scale(by: minSpeed)
+      finalVelocity = CGVector(angle: .random(in: 0 ... 2 * .pi)).scale(by: .random(in: minSpeed...maxSpeed))
     } else if speed < minSpeed {
       finalVelocity = velocity.scale(by: minSpeed / speed)
     } else if speed > maxSpeed {
       finalVelocity = velocity.scale(by: maxSpeed / speed)
     }
-    asteroid.physicsBody?.velocity = finalVelocity
-    asteroid["wasOnScreen"] = onScreen
-    asteroid.physicsBody?.angularVelocity = .random(in: -.pi ... .pi)
-    asteroids.insert(asteroid)
+    // Important: addChild must be done BEFORE setting the velocity.  If it's after,
+    // then the addChild mucks with the velocity a little bit, which is totally
+    // bizarre and also can totally screw us up.  If the asteroid is being spawned,
+    // we've calculated the initial position and velocity so that it will get onto
+    // the screen, but if the velocity gets tweaked, then that guarantee is out the
+    // window.
     playfield.addChild(asteroid)
+    guard let body = asteroid.physicsBody else { fatalError("An asteroid has lost its physicsBody") }
+    body.velocity = finalVelocity
+    asteroid["wasOnScreen"] = onScreen
+    body.angularVelocity = .random(in: -.pi ... .pi)
+    asteroids.insert(asteroid)
   }
 
   func spawnAsteroid(size: String) {
