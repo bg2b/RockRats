@@ -322,6 +322,6 @@ class Ship: SKNode {
     let velocity = physicsBody!.velocity
     setEngineLevel(0)
     removeFromParent()
-    return makeExplosion(texture: shipTexture, angle: zRotation, velocity: velocity, at: position, duration: 4)
+    return makeExplosion(texture: shipTexture, angle: zRotation, velocity: velocity, at: position, duration: 2)
   }
 }
