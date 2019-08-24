@@ -367,7 +367,33 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     recycleSprite(laser)
     player.laserDestroyed()
   }
-
+  
+  func fireUFOLaser(angle: CGFloat, position: CGPoint, speed: CGFloat) {
+    let laser = Globals.spriteCache.findSprite(imageNamed: "lasersmall_red") { sprite in
+      guard let texture = sprite.texture else { fatalError("Where is the laser texture?") }
+      let body = SKPhysicsBody(texture: texture, size: texture.size())
+      body.allowsRotation = false
+      body.linearDamping = 0
+      body.categoryBitMask = ObjectCategories.ufoShot.rawValue
+      body.collisionBitMask = 0
+      body.contactTestBitMask = setOf([.asteroid, .player])
+      sprite.physicsBody = body
+      sprite.zPosition = -1
+    }
+    laser.wait(for: Double(0.9 * frame.height / speed)) { self.removeUFOLaser(laser) }
+    playfield.addChild(laser)
+    laser.position = position
+    laser.zRotation = angle
+    guard let body = laser.physicsBody else { fatalError("Laser has no physics body") }
+    body.velocity = CGVector(angle: angle).scale(by: speed)
+    sounds.soundEffect(.playerShot, at: position)
+  }
+  
+  func removeUFOLaser(_ laser: SKSpriteNode) {
+    laser.removeAllActions()
+    recycleSprite(laser)
+  }
+  
   func hyperspaceJump() {
     guard player.canJump() else { return }
     lastJumpTime = Globals.lastUpdateTime
@@ -535,6 +561,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     removeLaser(laser as! SKSpriteNode)
     destroyUFO(ufo as! UFO)
   }
+  
+  func laserHit(laser: SKNode, player: SKNode) {
+    removeLaser(laser as! SKSpriteNode)
+    destroyPlayer()
+  }
 
   func addExplosion(_ pieces: [SKNode]) {
     for p in pieces {
@@ -627,6 +658,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     when(contact, isBetween: .playerShot, and: .ufo) { laserHit(laser: $0, ufo: $1) }
     when(contact, isBetween: .player, and: .ufo) { playerHitUFO(ufo: $1) }
     when(contact, isBetween: .ufo, and: .asteroid) { ufoCollided(ufo: $0, asteroid: $1) }
+    when(contact, isBetween: .ufoShot, and: .player) { laserHit(laser: $0, player: $1)}
   }
   
   override func didMove(to view: SKView) {
@@ -655,7 +687,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     } else {
       hyperspaceButton.disable()
     }
-    ufos.forEach { $0.fly() }
+    ufos.forEach {
+      $0.fly(player: player) {
+        (angle, position, speed) in self.fireUFOLaser(angle: angle, position: position, speed: speed)
+      }
+    }
     player.fly()
     playfield.children.forEach { $0.wrapCoordinates() }
   }

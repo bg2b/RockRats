@@ -34,23 +34,24 @@ class UFO: SKNode {
     fatalError("init(coder:) has not been implemented by UFO")
   }
   
-  func fly() {
+  func fly(player: Ship, addLaser: ((CGFloat, CGPoint, CGFloat) -> Void)) {
     guard parent != nil else { return }
     guard let body = physicsBody else { fatalError("UFO has lost its body. It is an UFH - unidentified flying head") }
+    body.angularVelocity = .pi * 2
     let toMove = Int.random(in: 0...100) == 0
     if toMove || body.velocity.norm2() == 0 {
       let angle = CGFloat.random(in: -.pi ... .pi)
       let maxSpeed = Globals.gameConfig.value(for: \WaveConfig.ufoMaxSpeed, atWave: 1)[isBig ? 0 : 1]
       body.velocity = CGVector(angle: angle).scale(by: maxSpeed)
     }
-  }
-  
-  func shoot(laser shot: SKNode) {
-    shot.zRotation = zRotation
-    let shotDirection = CGVector(angle: zRotation)
-    shot.position = position + shotDirection.scale(by: 0.5 * ufoTexture.size().width)
-    let shotSpeed = Globals.gameConfig.value(for: \WaveConfig.ufoShotSpeed, atWave: 1)[isBig ? 0 : 1]
-    shot.physicsBody?.velocity = shotDirection.scale(by: shotSpeed)
+    let toShoot = Int.random(in: 0...100) == 0
+    if toShoot && player.parent != nil {
+      let angle = (player.position - position).angle() + CGFloat.random(in: -0.25 * .pi ... 0.25 * .pi)
+      let shotDirection = CGVector(angle: angle)
+      let shotPosition = position + shotDirection.scale(by: 0.5 * ufoTexture.size().width)
+      let shotSpeed = Globals.gameConfig.value(for: \WaveConfig.ufoShotSpeed, atWave: 1)[isBig ? 0 : 1]
+      addLaser(angle, shotPosition, shotSpeed)
+    }
   }
   
   func explode() -> [SKNode] {
