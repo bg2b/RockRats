@@ -15,7 +15,9 @@
   "waveConfigs": [
     {
       "waveNumber": 1,
-      "asteroidSpeedBoost": 1.1
+      "asteroidSpeedBoost": 1.1,
+      "ufoShotSpeed": [300, 400],
+      "ufoMaxSpeed": [200, 300]
     }
   ]
 }

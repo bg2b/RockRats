@@ -19,7 +19,7 @@ import SpriteKit
 
 let explosionSplits = 8
 
-func makeExplosion(texture: SKTexture, angle: CGFloat, velocity: CGVector, at position: CGPoint) -> [SKNode] {
+func makeExplosion(texture: SKTexture, angle: CGFloat, velocity: CGVector, at position: CGPoint, duration: Double) -> [SKNode] {
   let d = 1 / CGFloat(explosionSplits)
   let range = -explosionSplits / 2 ..< explosionSplits / 2
   let xys = range.flatMap { x in range.map { y in CGVector(dx: x, dy: y).scale(by: d) } }
@@ -29,7 +29,10 @@ func makeExplosion(texture: SKTexture, angle: CGFloat, velocity: CGVector, at po
   let rect = texture.textureRect()
   let dwh = rect.size.scale(by: d)
   let physicsSize2 = texture.size().scale(by: 0.5 * d)
-  let waitAndRemove = SKAction.sequence([SKAction.wait(forDuration: 3), SKAction.fadeOut(withDuration: 1), SKAction.removeFromParent()])
+  let waitAndRemove = SKAction.sequence([
+    SKAction.wait(forDuration: 0.75 * duration),
+    SKAction.fadeOut(withDuration: 0.25 * duration),
+    SKAction.removeFromParent()])
   for xy in xys {
     let pieceOrigin = rect.origin + (xy + CGVector(dx: 0.5, dy: 0.5)).scale(by: rect.size)
     let pieceTexture = SKTexture(rect: CGRect(origin: pieceOrigin, size: dwh), in: texture)
@@ -47,8 +50,8 @@ func makeExplosion(texture: SKTexture, angle: CGFloat, velocity: CGVector, at po
     let delta = (xy.scale(by: texture.size()) + CGVector(dx: physicsSize2.width, dy: physicsSize2.height)).rotate(by: angle)
     piece.position = position + delta
     piece.zRotation = angle
-    body.velocity = velocity + CGVector(angle: delta.angle() + .random(in: -1...1)).scale(by: 4 * .random(in: 10...100))
-    body.angularVelocity = 4 * .random(in: -2 * .pi ... 2 * .pi)
+    body.velocity = velocity + CGVector(angle: delta.angle() + .random(in: -1...1)).scale(by: .random(in: 10...100))
+    body.angularVelocity = .random(in: -2 * .pi ... 2 * .pi)
     piece.run(waitAndRemove)
   }
   return pieces

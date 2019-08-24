@@ -91,12 +91,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   var hyperspaceButton: Button!
   var lastJumpTime = 0.0
   var asteroids = Set<SKSpriteNode>()
+  var ufos = Set<UFO>()
   var waveNumber = 0
   var centralDisplay: SKLabelNode!
   var livesRemaining = 0
   var extraLivesAwarded = 0
   var livesDisplay: LivesDisplay!
   var sounds: Sounds!
+  var gameOver = false
 
   func makeSprite(imageNamed name: String, initializer: ((SKSpriteNode) -> Void)? = nil) -> SKSpriteNode {
     return Globals.spriteCache.findSprite(imageNamed: name, initializer: initializer)
@@ -365,7 +367,33 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     recycleSprite(laser)
     player.laserDestroyed()
   }
-
+  
+  func fireUFOLaser(angle: CGFloat, position: CGPoint, speed: CGFloat) {
+    let laser = Globals.spriteCache.findSprite(imageNamed: "lasersmall_red") { sprite in
+      guard let texture = sprite.texture else { fatalError("Where is the laser texture?") }
+      let body = SKPhysicsBody(texture: texture, size: texture.size())
+      body.allowsRotation = false
+      body.linearDamping = 0
+      body.categoryBitMask = ObjectCategories.ufoShot.rawValue
+      body.collisionBitMask = 0
+      body.contactTestBitMask = setOf([.asteroid, .player])
+      sprite.physicsBody = body
+      sprite.zPosition = -1
+    }
+    laser.wait(for: Double(0.9 * frame.height / speed)) { self.removeUFOLaser(laser) }
+    playfield.addChild(laser)
+    laser.position = position
+    laser.zRotation = angle
+    guard let body = laser.physicsBody else { fatalError("Laser has no physics body") }
+    body.velocity = CGVector(angle: angle).scale(by: speed)
+    sounds.soundEffect(.playerShot, at: position)
+  }
+  
+  func removeUFOLaser(_ laser: SKSpriteNode) {
+    laser.removeAllActions()
+    recycleSprite(laser)
+  }
+  
   func hyperspaceJump() {
     guard player.canJump() else { return }
     lastJumpTime = Globals.lastUpdateTime
@@ -459,9 +487,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   func removeAsteroid(_ asteroid: SKSpriteNode) {
     recycleSprite(asteroid)
     asteroids.remove(asteroid)
-    if asteroids.isEmpty {
+    if asteroids.isEmpty && !gameOver {
       sounds.normalHeartbeatRate()
-      wait(for: 4.0) { self.nextWave() }
+      run(SKAction.sequence([SKAction.wait(forDuration: 4), SKAction.run { self.nextWave() }]), withKey: "spawnWave")
     }
   }
 
@@ -500,7 +528,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     addEmitter(emitter)
   }
 
-  func splitAsteroid(_ asteroid: SKSpriteNode) {
+  func splitAsteroid(_ asteroid: SKSpriteNode, updateScore: Bool = true) {
     let sizes = ["small", "med", "big", "huge"]
     let pointValues = [20, 10, 5, 2]
     let hitEffect: [SoundEffect] = [.asteroidSmallHit, .asteroidMedHit, .asteroidBigHit, .asteroidHugeHit]
@@ -526,38 +554,95 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       makeAsteroid(position: pos, size: sizes[size - 1], velocity: velocity2.scale(by: oomph), onScreen: true)
     }
     removeAsteroid(asteroid)
-    addToScore(pointValues[size])
+    if updateScore {
+      addToScore(pointValues[size])
+    }
   }
 
   func laserHit(laser: SKNode, asteroid: SKNode) {
     removeLaser(laser as! SKSpriteNode)
     splitAsteroid(asteroid as! SKSpriteNode)
   }
+  
+  func laserHit(laser: SKNode, ufo: SKNode) {
+    removeLaser(laser as! SKSpriteNode)
+    destroyUFO(ufo as! UFO)
+  }
+  
+  func laserHit(laser: SKNode, player: SKNode) {
+    removeLaser(laser as! SKSpriteNode)
+    destroyPlayer()
+  }
 
+  func addExplosion(_ pieces: [SKNode]) {
+    for p in pieces {
+      if let body = p.physicsBody {
+        body.velocity = body.velocity.scale(by: 1 / physicsWorld.speed)
+        body.angularVelocity /= physicsWorld.speed
+      }
+      playfield.addChild(p)
+    }
+  }
+  
+  func changeSpeed(to speed: CGFloat) {
+    for p in playfield.children {
+      if let body = p.physicsBody, body.isA(.fragment) {
+        body.velocity = body.velocity.scale(by: physicsWorld.speed / speed)
+        body.angularVelocity *= physicsWorld.speed / speed
+      }
+    }
+    physicsWorld.speed = speed
+  }
+  
   func destroyPlayer() {
     enableHyperspaceJump()
     let pieces = player.explode()
-    for p in pieces {
-      playfield.addChild(p)
-    }
+    addExplosion(pieces)
+    changeSpeed(to: 0.25)
+    wait(for: 4) { self.changeSpeed(to: 1) }
     sounds.soundEffect(.playerExplosion)
     if livesRemaining > 0 {
       wait(for: 5.0) { self.spawnPlayer() }
     } else {
+      gameOver = true
       sounds.stopHeartbeat()
-      self.removeAllActions()
+      self.removeAction(forKey: "spawnWave")
       wait(for: 2.0) {
         self.sounds.soundEffect(.gameOver)
         self.displayMessage("GAME OVER", forTime: 4)
       }
     }
   }
+  
+  func spawnUFO() {
+    let ufo = UFO(isBig: Int.random(in: 0...1) == 1)
+    playfield.addChild(ufo)
+    ufos.insert(ufo)
+  }
+  
+  func destroyUFO(_ ufo: UFO, updateScore: Bool = true) {
+    if updateScore {
+      addToScore(ufo.isBig ? 20 : 100)
+    }
+    ufos.remove(ufo)
+    sounds.soundEffect(.ufoExplosion, at: ufo.position)
+    addExplosion(ufo.explode())
+    wait(for: 10) { self.spawnUFO() }
+  }
 
   func playerCollided(asteroid: SKNode) {
     splitAsteroid(asteroid as! SKSpriteNode)
     destroyPlayer()
-    physicsWorld.speed = 0.25
-    wait(for: 4) { self.physicsWorld.speed = 1 }
+  }
+  
+  func playerHitUFO(ufo: SKNode) {
+    destroyUFO(ufo as! UFO)
+    destroyPlayer()
+  }
+  
+  func ufoCollided(ufo: SKNode, asteroid: SKNode) {
+    splitAsteroid(asteroid as! SKSpriteNode, updateScore: false)
+    destroyUFO(ufo as! UFO, updateScore: false)
   }
 
   func when(_ contact: SKPhysicsContact,
@@ -577,6 +662,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   func didBegin(_ contact: SKPhysicsContact) {
     when(contact, isBetween: .playerShot, and: .asteroid) { laserHit(laser: $0, asteroid: $1) }
     when(contact, isBetween: .player, and: .asteroid) { playerCollided(asteroid: $1) }
+    when(contact, isBetween: .playerShot, and: .ufo) { laserHit(laser: $0, ufo: $1) }
+    when(contact, isBetween: .player, and: .ufo) { playerHitUFO(ufo: $1) }
+    when(contact, isBetween: .ufo, and: .asteroid) { ufoCollided(ufo: $0, asteroid: $1) }
+    when(contact, isBetween: .ufoShot, and: .player) { laserHit(laser: $0, player: $1)}
   }
   
   override func didMove(to view: SKView) {
@@ -595,6 +684,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     sounds.heartbeat()
     nextWave()
     wait(for: 3.0) { self.spawnPlayer() }
+    wait(for: 10.0) { self.spawnUFO() }
   }
 
   override func update(_ currentTime: TimeInterval) {
@@ -603,6 +693,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       hyperspaceButton.enable()
     } else {
       hyperspaceButton.disable()
+    }
+    ufos.forEach {
+      $0.fly(player: player) {
+        (angle, position, speed) in self.fireUFOLaser(angle: angle, position: position, speed: speed)
+      }
     }
     player.fly()
     playfield.children.forEach { $0.wrapCoordinates() }

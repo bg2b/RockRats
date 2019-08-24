@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		6513D66C22DC0B4E00B4BD57 /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6513D66B22DC0B4E00B4BD57 /* Button.swift */; };
+		659CC03A230EC9FE00AA087C /* UFO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 659CC039230EC9FE00AA087C /* UFO.swift */; };
+		659CC040230EDA3500AA087C /* ufo_explosion.wav in Resources */ = {isa = PBXBuildFile; fileRef = 659CC03F230EDA3500AA087C /* ufo_explosion.wav */; };
 		FD0C070822D8925E00F19A55 /* ship_green@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD0C070022D8925E00F19A55 /* ship_green@2x.png */; };
 		FD0C070922D8925E00F19A55 /* ship_blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD0C070122D8925E00F19A55 /* ship_blue@2x.png */; };
 		FD0C070A22D8925E00F19A55 /* starfield_violet@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD0C070222D8925E00F19A55 /* starfield_violet@2x.png */; };
@@ -81,6 +83,8 @@
 
 /* Begin PBXFileReference section */
 		6513D66B22DC0B4E00B4BD57 /* Button.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Button.swift; sourceTree = "<group>"; };
+		659CC039230EC9FE00AA087C /* UFO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UFO.swift; sourceTree = "<group>"; };
+		659CC03F230EDA3500AA087C /* ufo_explosion.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo_explosion.wav; sourceTree = "<group>"; };
 		FD0C070022D8925E00F19A55 /* ship_green@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ship_green@2x.png"; sourceTree = "<group>"; };
 		FD0C070122D8925E00F19A55 /* ship_blue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ship_blue@2x.png"; sourceTree = "<group>"; };
 		FD0C070222D8925E00F19A55 /* starfield_violet@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "starfield_violet@2x.png"; sourceTree = "<group>"; };
@@ -168,6 +172,7 @@
 		FD4D53C323080BFD00718938 /* sounds */ = {
 			isa = PBXGroup;
 			children = (
+				659CC03F230EDA3500AA087C /* ufo_explosion.wav */,
 				FDA43B212308C11E00A29347 /* gameover.wav */,
 				FDA43B1F2308AB9600A29347 /* heartbeat.wav */,
 				FDA43B23230A111D00A29347 /* meteorhuge_hit.wav */,
@@ -207,6 +212,7 @@
 				FD79323522D20FE600E7D336 /* AppDelegate.swift */,
 				FD79323722D20FE600E7D336 /* GameScene.sks */,
 				FD79323B22D20FE600E7D336 /* GameScene.swift */,
+				659CC039230EC9FE00AA087C /* UFO.swift */,
 				FD4D53BF2306B47900718938 /* LivesDisplay.swift */,
 				FDD831F522F187D200CA4EC6 /* GameConfig.swift */,
 				FDD831F122EDB50200CA4EC6 /* Explosions.swift */,
@@ -342,6 +348,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FD53167122DAA8EA00F09E57 /* fire1@2x.png in Resources */,
+				659CC040230EDA3500AA087C /* ufo_explosion.wav in Resources */,
 				FD79324122D20FE600E7D336 /* Main.storyboard in Resources */,
 				FD0C070F22D8925E00F19A55 /* ship_red@2x.png in Resources */,
 				FD0C070B22D8925E00F19A55 /* starfield_black@2x.png in Resources */,
@@ -420,6 +427,7 @@
 				FDCF8CA522DA7296008EDFD1 /* Globals.swift in Sources */,
 				FD4D53C723080E7300718938 /* Sounds.swift in Sources */,
 				FD53167522DB24EC00F09E57 /* Ship.swift in Sources */,
+				659CC03A230EC9FE00AA087C /* UFO.swift in Sources */,
 				6513D66C22DC0B4E00B4BD57 /* Button.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
