@@ -91,6 +91,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   var hyperspaceButton: Button!
   var lastJumpTime = 0.0
   var asteroids = Set<SKSpriteNode>()
+  var wantToSpawnUFO = false
   var ufos = Set<UFO>()
   var centralDisplay: SKLabelNode!
   var livesRemaining = 0
@@ -474,6 +475,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     for _ in 1...numAsteroids {
       spawnAsteroid(size: "huge")
     }
+    spawnUFOs()
   }
 
   func nextWave() {
@@ -488,6 +490,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     asteroids.remove(asteroid)
     if asteroids.isEmpty && !gameOver {
       sounds.normalHeartbeatRate()
+      stopSpawningUFOs()
       run(SKAction.sequence([SKAction.wait(forDuration: 4), SKAction.run { self.nextWave() }]), withKey: "spawnWave")
     }
   }
@@ -614,6 +617,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
   
   func spawnUFO() {
+    guard player.parent != nil && ufos.count < Globals.gameConfig.value(for: \.maxUFOs) else { return }
     let ufo = UFO()
     playfield.addChild(ufo)
     ufos.insert(ufo)
@@ -626,7 +630,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     ufos.remove(ufo)
     sounds.soundEffect(.ufoExplosion, at: ufo.position)
     addExplosion(ufo.explode())
-    wait(for: 10) { self.spawnUFO() }
+  }
+
+  func spawnUFOs() {
+    let meanTimeToNextUFO = Globals.gameConfig.value(for: \.meanUFOTime)
+    let delay = Double.random(in: 0.75 * meanTimeToNextUFO ... 1.25 * meanTimeToNextUFO)
+    run(SKAction.sequence([SKAction.wait(forDuration: delay),
+                           SKAction.run { self.spawnUFO(); self.spawnUFOs() }]),
+        withKey: "spawnUFOs")
+  }
+
+  func stopSpawningUFOs() {
+    removeAction(forKey: "spawnUFOs")
   }
 
   func playerCollided(asteroid: SKNode) {
@@ -684,7 +699,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     sounds.heartbeat()
     nextWave()
     wait(for: 3.0) { self.spawnPlayer() }
-    wait(for: 10.0) { self.spawnUFO() }
   }
 
   override func update(_ currentTime: TimeInterval) {
