@@ -1,4 +1,5 @@
 {
+  "waveNumber": 0,
   "initialLives": 3,
   "extraLifeScore": 1000,
   "playerSpeedDamping": [0.05, 0.99],
@@ -15,9 +16,14 @@
   "waveConfigs": [
     {
       "waveNumber": 1,
+      "smallUFOChance": 0,
       "asteroidSpeedBoost": 1.1,
       "ufoShotSpeed": [300, 400],
       "ufoMaxSpeed": [200, 300]
+    },
+    {
+      "waveNumber": 2,
+      "smallUFOChance": 1
     }
   ]
 }

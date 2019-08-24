@@ -36,14 +36,16 @@ struct GameConfig: Decodable {
   let numAsteroidCoeffs: [Double]
   let waveConfigs: [WaveConfig]
 
-  func value<T>(for path: KeyPath<WaveConfig, T?>, atWave waveNumber: Int) -> T {
-    guard let result = (waveConfigs.last { $0.waveNumber <= waveNumber })?[keyPath: path] else {
+  var waveNumber = 0
+
+  func value<T>(for path: KeyPath<WaveConfig, T?>) -> T {
+    guard let config = waveConfigs.last(where: { $0.waveNumber <= waveNumber && $0[keyPath: path] != nil }) else {
       fatalError("Missing game configuration info")
     }
-    return result
+    return config[keyPath: path]!
   }
 
-  func numAsteroids(atWave waveNumber: Int) -> Int {
+  func numAsteroids() -> Int {
     var polynomial = 0.0
     for (i, coeff) in numAsteroidCoeffs.enumerated() {
       polynomial += coeff * pow(Double(waveNumber), Double(i))

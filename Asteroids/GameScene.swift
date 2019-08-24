@@ -92,7 +92,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   var lastJumpTime = 0.0
   var asteroids = Set<SKSpriteNode>()
   var ufos = Set<UFO>()
-  var waveNumber = 0
   var centralDisplay: SKLabelNode!
   var livesRemaining = 0
   var extraLivesAwarded = 0
@@ -471,15 +470,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func spawnWave() {
-    let numAsteroids = Globals.gameConfig.numAsteroids(atWave: waveNumber)
+    let numAsteroids = Globals.gameConfig.numAsteroids()
     for _ in 1...numAsteroids {
       spawnAsteroid(size: "huge")
     }
   }
 
   func nextWave() {
-    waveNumber += 1
-    displayMessage("WAVE \(waveNumber)", forTime: 1.5) {
+    Globals.gameConfig.waveNumber += 1
+    displayMessage("WAVE \(Globals.gameConfig.waveNumber)", forTime: 1.5) {
       self.spawnWave()
     }
   }
@@ -549,7 +548,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       // The second child's velocity is chosen from momentum conservation
       let velocity2 = velocity.scale(by: 2) - velocity1
       // Add a bit of extra spice just to keep the player on their toes
-      let oomph = Globals.gameConfig.value(for: \WaveConfig.asteroidSpeedBoost, atWave: waveNumber)
+      let oomph = Globals.gameConfig.value(for: \.asteroidSpeedBoost)
       makeAsteroid(position: pos, size: sizes[size - 1], velocity: velocity1.scale(by: oomph), onScreen: true)
       makeAsteroid(position: pos, size: sizes[size - 1], velocity: velocity2.scale(by: oomph), onScreen: true)
     }
@@ -615,7 +614,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
   
   func spawnUFO() {
-    let ufo = UFO(isBig: Int.random(in: 0...1) == 1)
+    let ufo = UFO()
     playfield.addChild(ufo)
     ufos.insert(ufo)
   }
@@ -678,6 +677,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     initInfo()
     initSounds()
     livesRemaining = Globals.gameConfig.initialLives
+    Globals.gameConfig.waveNumber = 0
     extraLivesAwarded = 0
     updateLives(0)
     player = Ship(color: teamColors[0], sounds: sounds, joystick: joystick)

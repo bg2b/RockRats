@@ -12,11 +12,11 @@ class UFO: SKNode {
   let isBig: Bool
   let ufoTexture: SKTexture
   
-  required init(isBig: Bool) {
-    self.isBig = isBig
-    self.ufoTexture = Globals.textureCache.findTexture(imageNamed: isBig ? "ufo_green" : "ufo_red")
+  override required init() {
+    isBig = .random(in: 0...1) >= Globals.gameConfig.value(for: \.smallUFOChance)
+    ufoTexture = Globals.textureCache.findTexture(imageNamed: isBig ? "ufo_green" : "ufo_red")
     super.init()
-    self.name = "ufo"
+    name = "ufo"
     let ufo = SKSpriteNode(texture: ufoTexture)
     ufo.name = "ufoImage"
     addChild(ufo)
@@ -41,7 +41,7 @@ class UFO: SKNode {
     let toMove = Int.random(in: 0...100) == 0
     if toMove || body.velocity.norm2() == 0 {
       let angle = CGFloat.random(in: -.pi ... .pi)
-      let maxSpeed = Globals.gameConfig.value(for: \WaveConfig.ufoMaxSpeed, atWave: 1)[isBig ? 0 : 1]
+      let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[isBig ? 0 : 1]
       body.velocity = CGVector(angle: angle).scale(by: maxSpeed)
     }
     let toShoot = Int.random(in: 0...100) == 0
@@ -49,7 +49,7 @@ class UFO: SKNode {
       let angle = (player.position - position).angle() + CGFloat.random(in: -0.25 * .pi ... 0.25 * .pi)
       let shotDirection = CGVector(angle: angle)
       let shotPosition = position + shotDirection.scale(by: 0.5 * ufoTexture.size().width)
-      let shotSpeed = Globals.gameConfig.value(for: \WaveConfig.ufoShotSpeed, atWave: 1)[isBig ? 0 : 1]
+      let shotSpeed = Globals.gameConfig.value(for: \.ufoShotSpeed)[isBig ? 0 : 1]
       addLaser(angle, shotPosition, shotSpeed)
     }
   }
