@@ -286,7 +286,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       SKAction.scale(to: 1.0, duration: 0.25),
       SKAction.wait(forDuration: duration),
       SKAction.fadeOut(withDuration: 0.5),
-      SKAction.hide()
+      SKAction.hide(),
+      // This slight extra delay makes sure that the WAVE # is gone from the screen
+      // before spawnWave is called.  Without this delay, in extreme cases (like 100
+      // asteroids spawned) there would be a slight stutter with the ghost of the
+      // message still displayed.
+      SKAction.wait(forDuration: 0.25)
       ])
     if let action = action {
       centralDisplay.run(growAndFade, completion: action)
@@ -339,6 +344,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       sounds.soundEffect(.warpIn)
       player.reset()
       player.warpIn(to: spawnPosition, atAngle: player.zRotation, addTo: playfield)
+      spawnUFOs()
       updateLives(-1)
     }
   }
@@ -457,13 +463,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // Initial direction of the asteroid from the center of the screen
     let dir = CGVector(angle: .random(in: -.pi ... .pi))
     // Traveling towards the center at a random speed
-    let velocity = dir.scale(by: -.random(in: 50...100))
+    let minSpeed = Globals.gameConfig.asteroidMinSpeed
+    let maxSpeed = Globals.gameConfig.asteroidMaxSpeed
+    let speed = CGFloat.random(in: minSpeed ... max(min(4 * minSpeed, 0.33 * maxSpeed), 0.25 * maxSpeed))
+    let velocity = dir.scale(by: -speed)
     // Offset from the center by some random amount
     let offset = CGPoint(x: .random(in: 0.75 * frame.minX...0.75 * frame.maxX),
                          y: .random(in: 0.75 * frame.minY...0.75 * frame.maxY))
     // Find a random distance that places us beyond the screen by a reasonable amount
     var dist = .random(in: 0.25...0.5) * frame.height
-    let exclusion = -CGFloat.random(in: 200...500)
+    let minExclusion = max(1.25 * speed, 50)
+    let maxExclusion = max(5 * speed, 200)
+    let exclusion = -CGFloat.random(in: minExclusion...maxExclusion)
     while frame.insetBy(dx: exclusion, dy: exclusion).contains(offset + dir.scale(by: dist)) {
       dist *= 1.5
     }
@@ -603,6 +614,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     changeSpeed(to: 0.25)
     wait(for: 4) { self.changeSpeed(to: 1) }
     sounds.soundEffect(.playerExplosion)
+    stopSpawningUFOs()
     if livesRemaining > 0 {
       wait(for: 5.0) { self.spawnPlayer() }
     } else {
@@ -633,6 +645,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func spawnUFOs() {
+    stopSpawningUFOs()  // Remove any existing scheduled spawn
     let meanTimeToNextUFO = Globals.gameConfig.value(for: \.meanUFOTime)
     let delay = Double.random(in: 0.75 * meanTimeToNextUFO ... 1.25 * meanTimeToNextUFO)
     run(SKAction.sequence([SKAction.wait(forDuration: delay),
