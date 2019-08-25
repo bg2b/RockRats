@@ -369,6 +369,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
   
   func removeLaser(_ laser: SKSpriteNode) {
+    assert(laser.parent != nil, "Laser has already been removed")
     laser.removeAllActions()
     recycleSprite(laser)
     player.laserDestroyed()

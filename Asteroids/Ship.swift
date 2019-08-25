@@ -306,6 +306,7 @@ class Ship: SKNode {
   }
   
   func laserDestroyed() {
+    assert(lasersRemaining < Globals.gameConfig.playerMaxShots, "Player has too many lasers")
     lasersRemaining += 1
   }
 
