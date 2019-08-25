@@ -8,6 +8,25 @@
 
 import SpriteKit
 
+func aim(at p: CGVector, targetVelocity v: CGFloat, shotSpeed s: CGFloat) -> CGFloat? {
+  let a = s * s - v * v
+  let b = -2 * p.dx * v
+  let c = -p.dx * p.dx - p.dy * p.dy
+  let discriminant = b * b - 4 * a * c
+  guard discriminant >= 0 else { return nil }
+  let r = sqrt(discriminant)
+  let solutionA = (-b - r) / (2 * a)
+  let solutionB = (-b + r) / (2 * a)
+  if solutionA >= 0 && solutionB >= 0 { return min(solutionA, solutionB) }
+  if solutionA < 0 && solutionB < 0 { return nil }
+  return max(solutionA, solutionB)
+}
+
+func aim(at p: CGVector, targetVelocity v: CGVector, shotSpeed s: CGFloat) -> CGFloat? {
+  let theta = v.angle()
+  return aim(at: p.rotate(by: -theta), targetVelocity: v.norm2(), shotSpeed: s)
+}
+
 class UFO: SKNode {
   let isBig: Bool
   let ufoTexture: SKTexture
@@ -46,12 +65,22 @@ class UFO: SKNode {
     }
     let toShoot = Int.random(in: 0...100) == 0
     if toShoot && player.parent != nil {
-      let angle = (player.position - position).angle() + CGFloat.random(in: -0.25 * .pi ... 0.25 * .pi)
+      //let angle = (player.position - position).angle() + CGFloat.random(in: -0.25 * .pi ... 0.25 * .pi)
+      let shotSpeed = Globals.gameConfig.value(for: \.ufoShotSpeed)[isBig ? 0 : 1]
+      guard var angle = aimAt(player, shotSpeed: shotSpeed) else { return }
+      angle += CGFloat.random(in: -0.25 * .pi ... 0.25 * .pi)
       let shotDirection = CGVector(angle: angle)
       let shotPosition = position + shotDirection.scale(by: 0.5 * ufoTexture.size().width)
-      let shotSpeed = Globals.gameConfig.value(for: \.ufoShotSpeed)[isBig ? 0 : 1]
       addLaser(angle, shotPosition, shotSpeed)
     }
+  }
+  
+  func aimAt(_ object: SKNode, shotSpeed s: CGFloat) -> CGFloat? {
+    guard let body = object.physicsBody else { return nil }
+    let p = object.position - position
+    guard let time = aim(at: p, targetVelocity: body.velocity, shotSpeed: s) else { return nil }
+    let futurePos = p + body.velocity.scale(by: time)
+    return futurePos.angle()
   }
   
   func explode() -> [SKNode] {
