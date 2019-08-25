@@ -65,10 +65,10 @@ class UFO: SKNode {
     }
     let toShoot = Int.random(in: 0...100) == 0
     if toShoot && player.parent != nil {
-      //let angle = (player.position - position).angle() + CGFloat.random(in: -0.25 * .pi ... 0.25 * .pi)
       let shotSpeed = Globals.gameConfig.value(for: \.ufoShotSpeed)[isBig ? 0 : 1]
       guard var angle = aimAt(player, shotSpeed: shotSpeed) else { return }
-      angle += CGFloat.random(in: -0.25 * .pi ... 0.25 * .pi)
+      let accuracy = Globals.gameConfig.value(for: \.ufoAccuracy)[isBig ? 0 : 1]
+      angle += CGFloat.random(in: -accuracy * .pi ... accuracy * .pi)
       let shotDirection = CGVector(angle: angle)
       let shotPosition = position + shotDirection.scale(by: 0.5 * ufoTexture.size().width)
       addLaser(angle, shotPosition, shotSpeed)

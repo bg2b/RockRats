@@ -13,7 +13,7 @@ struct WaveConfig: Decodable {
   let meanUFOTime: Double?
   let smallUFOChance: Double?
   let maxUFOs: Int?
-  let ufoAccuracy: Double?
+  let ufoAccuracy: [CGFloat]?
   let ufoMaxShots: Int?
   let ufoShotSpeed: [CGFloat]?
   let ufoMaxSpeed: [CGFloat]?
