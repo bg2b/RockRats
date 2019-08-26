@@ -43,27 +43,6 @@ let teamColors = ["blue", "green", "red", "orange"]
 let numColors = teamColors.count
 
 extension SKNode {
-  func wrapCoordinates() {
-    guard let frame = scene?.frame else { return }
-    if frame.contains(position) {
-      self["wasOnScreen"] = true
-    }
-    guard let wasOnScreen: Bool = self["wasOnScreen"], wasOnScreen else { return }
-    // We wrap only after going past the edge a little bit so that an object that's
-    // moving just along the edge won't stutter back and forth.
-    let hysteresis = CGFloat(3)
-    if position.x < frame.minX - hysteresis {
-      position.x += frame.width
-    } else if position.x > frame.maxX + hysteresis {
-      position.x -= frame.width
-    }
-    if position.y < frame.minY - hysteresis {
-      position.y += frame.height
-    } else if position.y > frame.maxY + hysteresis {
-      position.y -= frame.height
-    }
-  }
-
   func wait(for time: Double, then action: SKAction) {
     run(SKAction.sequence([SKAction.wait(forDuration: time), action]))
   }
@@ -83,7 +62,7 @@ extension Globals {
 class GameScene: SKScene, SKPhysicsContactDelegate {
   let textColor = RGB(101, 185, 240)
   let highlightTextColor = RGB(246, 205, 68)
-  var playfield: SKNode!
+  var playfield: Playfield!
   var player: Ship!
   var score = 0
   var scoreDisplay: SKLabelNode!
@@ -154,7 +133,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     addChild(background)
   }
 
-
   func twinkleAction(period: Double, from dim: CGFloat, to bright: CGFloat) -> SKAction {
     let twinkleDuration = 0.4
     let delay = SKAction.wait(forDuration: period - twinkleDuration)
@@ -201,8 +179,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func initPlayfield() {
-    playfield = SKNode()
-    playfield.name = "playfield"
+    playfield = Playfield()
     playfield.zPosition = LevelZs.playfield.rawValue
     addChild(playfield)
   }
@@ -735,6 +712,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       }
     }
     player.fly()
-    playfield.children.forEach { $0.wrapCoordinates() }
+    playfield.wrapCoordinates()
   }
 }
