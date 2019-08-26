@@ -369,7 +369,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
   
   func removeLaser(_ laser: SKSpriteNode) {
-    assert(laser.parent != nil, "Laser has already been removed")
+    assert(laser.name == "lasersmall_green")
     laser.removeAllActions()
     recycleSprite(laser)
     player.laserDestroyed()
@@ -397,6 +397,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
   
   func removeUFOLaser(_ laser: SKSpriteNode) {
+    assert(laser.name == "lasersmall_red")
     laser.removeAllActions()
     recycleSprite(laser)
   }
@@ -584,7 +585,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
   
   func laserHit(laser: SKNode, player: SKNode) {
-    removeLaser(laser as! SKSpriteNode)
+    removeUFOLaser(laser as! SKSpriteNode)
     destroyPlayer()
   }
 
