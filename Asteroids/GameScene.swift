@@ -583,8 +583,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     removeLaser(laser as! SKSpriteNode)
     destroyUFO(ufo as! UFO)
   }
-  
-  func laserHit(laser: SKNode, player: SKNode) {
+
+  func ufoLaserHit(laser: SKNode, asteroid: SKNode) {
+    removeUFOLaser(laser as! SKSpriteNode)
+    splitAsteroid(asteroid as! SKSpriteNode, updateScore: false)
+  }
+
+  func ufoLaserHit(laser: SKNode, player: SKNode) {
     removeUFOLaser(laser as! SKSpriteNode)
     destroyPlayer()
   }
@@ -693,8 +698,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     when(contact, isBetween: .player, and: .asteroid) { playerCollided(asteroid: $1) }
     when(contact, isBetween: .playerShot, and: .ufo) { laserHit(laser: $0, ufo: $1) }
     when(contact, isBetween: .player, and: .ufo) { playerHitUFO(ufo: $1) }
+    when(contact, isBetween: .ufoShot, and: .asteroid) { ufoLaserHit(laser: $0, asteroid: $1)}
     when(contact, isBetween: .ufo, and: .asteroid) { ufoCollided(ufo: $0, asteroid: $1) }
-    when(contact, isBetween: .ufoShot, and: .player) { laserHit(laser: $0, player: $1)}
+    when(contact, isBetween: .ufoShot, and: .player) { ufoLaserHit(laser: $0, player: $1)}
   }
   
   override func didMove(to view: SKView) {
