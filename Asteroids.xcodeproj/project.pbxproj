@@ -74,7 +74,6 @@
 		FDD831F622F187D200CA4EC6 /* GameConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD831F522F187D200CA4EC6 /* GameConfig.swift */; };
 		FDD831F922F1AE0D00CA4EC6 /* confignormal.json in Resources */ = {isa = PBXBuildFile; fileRef = FDD831F822F1AE0D00CA4EC6 /* confignormal.json */; };
 		FDDF488722D2A700006FB86F /* SpriteCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDDF488622D2A700006FB86F /* SpriteCache.swift */; };
-		FDDF488922D2D864006FB86F /* NodeData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDDF488822D2D864006FB86F /* NodeData.swift */; };
 		FDE04B2722D5FEA30011A529 /* star1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FDE04B2422D5FEA30011A529 /* star1@2x.png */; };
 		FDE04B2822D5FEA30011A529 /* star3@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FDE04B2522D5FEA30011A529 /* star3@2x.png */; };
 		FDE04B2922D5FEA30011A529 /* star2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FDE04B2622D5FEA30011A529 /* star2@2x.png */; };
@@ -152,7 +151,6 @@
 		FDD831F522F187D200CA4EC6 /* GameConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameConfig.swift; sourceTree = "<group>"; };
 		FDD831F822F1AE0D00CA4EC6 /* confignormal.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = confignormal.json; sourceTree = "<group>"; };
 		FDDF488622D2A700006FB86F /* SpriteCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteCache.swift; sourceTree = "<group>"; };
-		FDDF488822D2D864006FB86F /* NodeData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeData.swift; sourceTree = "<group>"; };
 		FDE04B2422D5FEA30011A529 /* star1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "star1@2x.png"; sourceTree = "<group>"; };
 		FDE04B2522D5FEA30011A529 /* star3@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "star3@2x.png"; sourceTree = "<group>"; };
 		FDE04B2622D5FEA30011A529 /* star2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "star2@2x.png"; sourceTree = "<group>"; };
@@ -228,7 +226,6 @@
 				FDE04B2C22D753240011A529 /* TextureCache.swift */,
 				FDD831F322EE27C700CA4EC6 /* kenvector_future.ttf */,
 				FDCF8CA422DA7296008EDFD1 /* Globals.swift */,
-				FDDF488822D2D864006FB86F /* NodeData.swift */,
 				FD79323D22D20FE600E7D336 /* GameViewController.swift */,
 				FD79323F22D20FE600E7D336 /* Main.storyboard */,
 				FD79324222D20FE700E7D336 /* Assets.xcassets */,
@@ -423,7 +420,6 @@
 				FD79323622D20FE600E7D336 /* AppDelegate.swift in Sources */,
 				FDE04B2B22D745470011A529 /* Joystick.swift in Sources */,
 				FDDF488722D2A700006FB86F /* SpriteCache.swift in Sources */,
-				FDDF488922D2D864006FB86F /* NodeData.swift in Sources */,
 				FDD831F222EDB50200CA4EC6 /* Explosions.swift in Sources */,
 				FDCF8CA322DA175F008EDFD1 /* CGHelpers.swift in Sources */,
 				FD4D53C02306B47900718938 /* LivesDisplay.swift in Sources */,
