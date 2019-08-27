@@ -350,8 +350,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       sprite.physicsBody = body
       sprite.zPosition = -1
     }
-    laser.wait(for: Double(0.9 * frame.height / Globals.gameConfig.playerShotSpeed)) { self.removeLaser(laser) }
-    playfield.addChild(laser)
+    laser.wait(for: 0.9) { self.removeLaser(laser) }
+    playfield.addWithScaling(laser)
     player.shoot(laser: laser)
     sounds.soundEffect(.playerShot)
   }
@@ -376,7 +376,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       sprite.zPosition = -1
     }
     laser.wait(for: Double(0.9 * frame.height / speed)) { self.removeUFOLaser(laser) }
-    playfield.addChild(laser)
+    playfield.addWithScaling(laser)
     laser.position = position
     laser.zRotation = angle
     guard let body = laser.physicsBody else { fatalError("Laser has no physics body") }
@@ -393,7 +393,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   func hyperspaceJump() {
     guard player.canJump() else { return }
     lastJumpTime = Globals.lastUpdateTime
-    playfield.addChild(player.warpOut())
+    playfield.addWithScaling(player.warpOut())
     sounds.soundEffect(.warpOut)
     let jumpRegion = frame.insetBy(dx: 0.05 * frame.width, dy: 0.05 * frame.height)
     let jumpPosition = CGPoint(x: .random(in: jumpRegion.minX...jumpRegion.maxX),
@@ -441,11 +441,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // we've calculated the initial position and velocity so that it will get onto
     // the screen, but if the velocity gets tweaked, then that guarantee is out the
     // window.
-    playfield.addChild(asteroid)
+    playfield.addWithScaling(asteroid)
     guard let body = asteroid.physicsBody else { fatalError("An asteroid has lost its physicsBody") }
     body.velocity = finalVelocity
     body.isOnScreen = onScreen
-//    asteroid["wasOnScreen"] = onScreen
     body.angularVelocity = .random(in: -.pi ... .pi)
     asteroids.insert(asteroid)
   }
@@ -493,7 +492,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     if asteroids.isEmpty && !gameOver {
       sounds.normalHeartbeatRate()
       stopSpawningUFOs()
-      run(SKAction.sequence([SKAction.wait(forDuration: 4), SKAction.run { self.nextWave() }]), withKey: "spawnWave")
+      // If the player dies from colliding with the last asteroid, then we have to
+      // wait long enough for any of the player's remaining lasers to possibly hit a
+      // UFO and score enough points for an extra life.  That wait is currently 4
+      // seconds (see destroyPlayer).  If no points have been scored within 4 seconds
+      // and the player is out of lives, then this action can be cancelled by
+      // respawnOrGameOver.
+      run(SKAction.sequence([SKAction.wait(forDuration: 4.1), SKAction.run { self.nextWave() }]), withKey: "spawnWave")
     }
   }
 
@@ -505,7 +510,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     emitter.zPosition = 1
     emitter.wait(for: maxTotalTime, then: SKAction.removeFromParent())
     emitter.isPaused = false
-    playfield.addChild(emitter)
+    playfield.addWithScaling(emitter)
   }
 
   func makeAsteroidSplitEffect(_ asteroid: SKSpriteNode, ofSize size: Int) {
@@ -585,49 +590,46 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
   func addExplosion(_ pieces: [SKNode]) {
     for p in pieces {
-      if let body = p.physicsBody {
-        body.velocity = body.velocity.scale(by: 1 / physicsWorld.speed)
-        body.angularVelocity /= physicsWorld.speed
-      }
-      playfield.addChild(p)
+      playfield.addWithScaling(p)
     }
   }
   
-  func changeSpeed(to speed: CGFloat) {
-    for p in playfield.children {
-      if let body = p.physicsBody, body.isA(.fragment) {
-        body.velocity = body.velocity.scale(by: physicsWorld.speed / speed)
-        body.angularVelocity *= physicsWorld.speed / speed
-      }
-    }
-    physicsWorld.speed = speed
-  }
-  
-  func destroyPlayer() {
-    enableHyperspaceJump()
-    let pieces = player.explode()
-    addExplosion(pieces)
-    changeSpeed(to: 0.25)
-    wait(for: 4) { self.changeSpeed(to: 1) }
-    sounds.soundEffect(.playerExplosion)
-    stopSpawningUFOs()
+  func respawnOrGameOver() {
     if livesRemaining > 0 {
-      wait(for: 5.0) { self.spawnPlayer() }
+      wait(for: 1) { self.spawnPlayer() }
     } else {
       gameOver = true
       sounds.stopHeartbeat()
       self.removeAction(forKey: "spawnWave")
-      wait(for: 2.0) {
+      wait(for: 2) {
         self.sounds.soundEffect(.gameOver)
         self.displayMessage("GAME OVER", forTime: 4)
       }
     }
   }
   
+  func destroyPlayer() {
+    enableHyperspaceJump()
+    let pieces = player.explode()
+    addExplosion(pieces)
+    playfield.changeSpeed(to: 0.25)
+    // Lasers live for a bit less than a second.  If the player fires and immediately
+    // dies, then due to the slow-motion effect that can get stretched to a bit less
+    // than 4 seconds.  If the player was going to hit anything to score some points
+    // and gain a life, then it should have happened by the time respawnOrGameOver is
+    // called.
+    wait(for: 4) {
+      self.playfield.changeSpeed(to: 1)
+      self.respawnOrGameOver()
+    }
+    sounds.soundEffect(.playerExplosion)
+    stopSpawningUFOs()
+  }
+  
   func spawnUFO() {
     guard player.parent != nil && ufos.count < Globals.gameConfig.value(for: \.maxUFOs) else { return }
     let ufo = UFO()
-    playfield.addChild(ufo)
+    playfield.addWithScaling(ufo)
     ufos.insert(ufo)
   }
   

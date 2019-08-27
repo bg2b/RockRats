@@ -285,15 +285,15 @@ class Ship: SKNode {
     return effect
   }
 
-  func warpIn(to pos: CGPoint, atAngle angle: CGFloat, addTo node: SKNode) {
+  func warpIn(to pos: CGPoint, atAngle angle: CGFloat, addTo playfield: Playfield) {
     position = pos
     zRotation = angle
     let body = coastingConfiguration()
     body.velocity = .zero
     let effect = warpEffect(shader: warpInShader)
-    node.addChild(effect)
+    playfield.addWithScaling(effect)
     effect.run(SKAction.sequence([SKAction.wait(forDuration: warpTime), SKAction.removeFromParent()])) {
-      node.addChild(self)
+      playfield.addWithScaling(self)
     }
   }
 

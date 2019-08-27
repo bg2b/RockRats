@@ -18,6 +18,29 @@ class Playfield: SKNode {
     fatalError("init(coder:) has not been implemented by Playfield")
   }
 
+  func addWithScaling(_ child: SKNode) {
+    guard let physics = scene?.physicsWorld, physics.speed != 1 else { return addChild(child) }
+    guard let body = child.physicsBody else { return addChild(child) }
+    addChild(child)
+    guard !body.isA(.fragment) else { return }
+    body.velocity = body.velocity.scale(by: 1 / physics.speed)
+    body.angularVelocity /= physics.speed
+    child.speed /= physics.speed
+  }
+
+  func changeSpeed(to newSpeed: CGFloat) {
+    guard let physics = scene?.physicsWorld else { return }
+    for p in children {
+      if let body = p.physicsBody, body.isA(.fragment) {
+        body.velocity = body.velocity.scale(by: physics.speed / newSpeed)
+        body.angularVelocity *= physics.speed / newSpeed
+        p.speed /= newSpeed
+      }
+    }
+    speed = newSpeed
+    physics.speed = newSpeed
+  }
+
   func wrapCoordinates() {
     guard let frame = scene?.frame else { return }
     for child in children {
