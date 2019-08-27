@@ -229,12 +229,11 @@ class Ship: SKNode {
         thrustForce = thrustAmount
       }
       if abs(abs(angle) - .pi / 2) <= halfSectorSize {
-        // Left or right rotation, set an absolute angular speed.  When thrusting backwards,
-        // it seems a bit more natural to reverse the direction of rotation.
+        // Left or right rotation, set an absolute angular speed.  I thought
+        // initially that when thrusting backwards it seemed a bit more natural to
+        // reverse the direction of rotation, but now I think that's just more
+        // confusing.
         body.angularVelocity = copysign(maxOmega * min(abs(stick.dy), 0.7) / 0.7, angle)
-        if thrustForce < 0 {
-          body.angularVelocity = -body.angularVelocity
-        }
       }
     }
     thrustForce *= maxThrust
