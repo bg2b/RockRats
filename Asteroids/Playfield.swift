@@ -21,10 +21,11 @@ class Playfield: SKNode {
   func wrapCoordinates() {
     guard let frame = scene?.frame else { return }
     for child in children {
+      guard let body = child.physicsBody else { continue }
       if frame.contains(child.position) {
-        child["wasOnScreen"] = true
+        body.isOnScreen = true
       }
-      guard let wasOnScreen: Bool = child["wasOnScreen"], wasOnScreen else { continue }
+      guard body.isOnScreen else { continue }
       // We wrap only after going past the edge a little bit so that an object that's
       // moving just along the edge won't stutter back and forth.
       let hysteresis = CGFloat(3)

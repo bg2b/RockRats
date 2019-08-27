@@ -23,11 +23,22 @@ enum ObjectCategories: UInt32 {
   case ufo = 8
   case ufoShot = 16
   case fragment = 32
+  case offScreen = 32768
 }
 
 extension SKPhysicsBody {
   func isA(_ category: ObjectCategories) -> Bool {
     return (categoryBitMask & category.rawValue) != 0
+  }
+
+  var isOnScreen: Bool {
+    get { return categoryBitMask & ObjectCategories.offScreen.rawValue == 0 }
+    set { if newValue {
+      categoryBitMask &= ~ObjectCategories.offScreen.rawValue
+      } else {
+      categoryBitMask |= ObjectCategories.offScreen.rawValue
+      }
+    }
   }
 }
 
@@ -433,7 +444,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     playfield.addChild(asteroid)
     guard let body = asteroid.physicsBody else { fatalError("An asteroid has lost its physicsBody") }
     body.velocity = finalVelocity
-    asteroid["wasOnScreen"] = onScreen
+    body.isOnScreen = onScreen
+//    asteroid["wasOnScreen"] = onScreen
     body.angularVelocity = .random(in: -.pi ... .pi)
     asteroids.insert(asteroid)
   }
