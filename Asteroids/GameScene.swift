@@ -707,7 +707,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       hyperspaceButton.disable()
     }
     ufos.forEach {
-      $0.fly(player: player) {
+      $0.fly(player: player, playfield: playfield) {
         (angle, position, speed) in self.fireUFOLaser(angle: angle, position: position, speed: speed)
       }
     }
