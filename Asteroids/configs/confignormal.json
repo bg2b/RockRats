@@ -19,6 +19,7 @@
       "meanUFOTime": 20,
       "smallUFOChance": 0,
       "maxUFOs": 1,
+      "ufoDodging": 5,
       "ufoAccuracy": [0.5, 0.25],
       "asteroidSpeedBoost": 1.1,
       "ufoShotSpeed": [300, 400],
@@ -26,28 +27,33 @@
     },
     {
       "waveNumber": 3,
+      "ufoDodging": 7,
       "smallUFOChance": 0.25,
       "ufoAccuracy": [0.4, 0.2],
     },
     {
       "waveNumber": 5,
+      "ufoDodging": 9,
       "smallUFOChance": 0.5,
       "ufoAccuracy": [0.3, 0.15],
     },
     {
       "waveNumber": 7,
       "maxUFOs": 2,
+      "ufoDodging": 11,
       "smallUFOChance": 0.75,
       "ufoAccuracy": [0.2, 0.1],
     },
     {
       "waveNumber": 9,
+      "ufoDodging": 13,
       "smallUFOChance": 1,
       "ufoAccuracy": [0.1, 0.05]
     },
     {
       "waveNumber": 11,
       "maxUFOs": 3,
+      "ufoDodging": 15,
       "ufoAccuracy": [0.02, 0.01]
     }
   ]

@@ -69,7 +69,7 @@ class UFO: SKNode {
       currentSpeed = .random(in: 0.3 * maxSpeed ... maxSpeed)
     }
     guard let bounds = scene?.frame else { return }
-    let forceScale = CGFloat(10_000)
+    let forceScale = Globals.gameConfig.value(for: \.ufoDodging) * 1000
     var totalForce = CGVector.zero
     for node in playfield.children {
       guard let body = node.physicsBody else { continue }
