@@ -121,6 +121,7 @@ class Ship: SKNode {
     body.collisionBitMask = 0
     body.contactTestBitMask = setOf([.asteroid, .ufo, .ufoShot])
     body.linearDamping = Globals.gameConfig.playerSpeedDamping[Globals.directControls]
+    body.restitution = 0.9
   }
 
   required init(coder aDecoder: NSCoder) {

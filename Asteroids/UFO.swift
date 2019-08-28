@@ -47,6 +47,7 @@ class UFO: SKNode {
     body.contactTestBitMask = setOf([.asteroid, .player, .playerShot])
     body.linearDamping = 0
     body.angularDamping = 0
+    body.restitution = 0.9
     physicsBody = body
   }
   

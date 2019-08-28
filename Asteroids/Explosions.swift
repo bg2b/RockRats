@@ -45,6 +45,7 @@ func makeExplosion(texture: SKTexture, angle: CGFloat, velocity: CGVector, at po
     body.collisionBitMask = setOf([.fragment, .asteroid, .player, .ufo])
     body.linearDamping = 0
     body.angularDamping = 0
+    body.restitution = 0.9
     piece.physicsBody = body
     pieces.append(piece)
     let delta = (xy.scale(by: texture.size()) + CGVector(dx: physicsSize2.width, dy: physicsSize2.height)).rotate(by: angle)

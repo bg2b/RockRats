@@ -421,6 +421,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       body.categoryBitMask = ObjectCategories.asteroid.rawValue
       body.collisionBitMask = 0
       body.contactTestBitMask = setOf([.player, .playerShot, .ufo, .ufoShot])
+      body.restitution = 0.9
       sprite.physicsBody = body
     }
     asteroid.position = pos
