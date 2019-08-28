@@ -629,7 +629,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   
   func spawnUFO() {
     guard player.parent != nil && ufos.count < Globals.gameConfig.value(for: \.maxUFOs) else { return }
-    let ufo = UFO()
+    let ufo = UFO(sounds: sounds)
     playfield.addWithScaling(ufo)
     ufos.insert(ufo)
   }

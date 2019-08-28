@@ -31,10 +31,16 @@ class UFO: SKNode {
   let isBig: Bool
   let ufoTexture: SKTexture
   var currentSpeed: CGFloat = 0
+  var engineSounds: SKAudioNode
   
-  override required init() {
+  required init(sounds: Sounds) {
     isBig = .random(in: 0...1) >= Globals.gameConfig.value(for: \.smallUFOChance)
     ufoTexture = Globals.textureCache.findTexture(imageNamed: isBig ? "ufo_green" : "ufo_red")
+    self.engineSounds = sounds.audioNodeFor(.ufoEngines)
+    self.engineSounds.isPositional = true
+    self.engineSounds.autoplayLooped = true
+    self.engineSounds.run(SKAction.sequence([SKAction.changeVolume(to: 0.5, duration: 0), SKAction.changePlaybackRate(to: 0.5, duration: 0)]))
+    sounds.addChild(self.engineSounds)
     super.init()
     name = "ufo"
     let ufo = SKSpriteNode(texture: ufoTexture)
@@ -134,6 +140,7 @@ class UFO: SKNode {
   
   func explode() -> [SKNode] {
     let velocity = physicsBody!.velocity
+    engineSounds.removeFromParent()
     removeFromParent()
     return makeExplosion(texture: ufoTexture, angle: zRotation, velocity: velocity, at: position, duration: 2)
   }
