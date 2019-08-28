@@ -84,7 +84,7 @@ class UFO: SKNode {
       // Be sure not to consider off-screen things.  That happens if the last asteroid is
       // destroyed while the UFO is flying around and a new wave spawns.
       guard let body = node.physicsBody, body.isOnScreen else { continue }
-      if body.isA(.asteroid) || body.isA(.playerShot) {
+      if body.isA(.asteroid) || body.isA(.playerShot) || body.isA(.player) {
         let dx1 = node.position.x - position.x
         let dx2 = copysign(bounds.width, -dx1) + dx1
         let dx = (abs(dx1) < abs(dx2) ? dx1 : dx2)
