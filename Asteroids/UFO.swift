@@ -69,10 +69,14 @@ class UFO: SKNode {
       currentSpeed = .random(in: 0.3 * maxSpeed ... maxSpeed)
     }
     guard let bounds = scene?.frame else { return }
+    let ourRadius = 0.5 * ufoTexture.size().diagonal()
     let forceScale = Globals.gameConfig.value(for: \.ufoDodging) * 1000
+    let shotAnticipation = Globals.gameConfig.value(for: \.ufoShotAnticipation)
     var totalForce = CGVector.zero
     for node in playfield.children {
-      guard let body = node.physicsBody else { continue }
+      // Be sure not to consider off-screen things.  That happens if the last asteroid is
+      // destroyed while the UFO is flying around and a new wave spawns.
+      guard let body = node.physicsBody, body.isOnScreen else { continue }
       if body.isA(.asteroid) || body.isA(.playerShot) {
         let dx1 = node.position.x - position.x
         let dx2 = copysign(bounds.width, -dx1) + dx1
@@ -80,10 +84,21 @@ class UFO: SKNode {
         let dy1 = node.position.y - position.y
         let dy2 = copysign(bounds.height, -dy1) + dy1
         let dy = (abs(dy1) < abs(dy2) ? dy1 : dy2)
-        assert(abs(dx) <= bounds.width / 2 && abs(dy) <= bounds.height/2)
-        let r = CGVector(dx: dx, dy: dy)
-        let d = max(r.norm2() - 0.5 * (ufoTexture.size().diagonal() + (node as! SKSpriteNode).texture!.size().diagonal()), 20)
-        totalForce = totalForce + r.scale(by: -forceScale / (d * d))
+        // The + 5 is because of possible wrapping hysteresis
+        assert(abs(dx) <= bounds.width / 2 + 5 && abs(dy) <= bounds.height / 2 + 5)
+        var r = CGVector(dx: dx, dy: dy)
+        if body.isA(.playerShot) {
+          // Shots travel fast, so emphasize dodging to the side.  We do this by projecting out
+          // some of the displacement along the direction of the shot.
+          let vhat = body.velocity.scale(by: 1 / body.velocity.norm2())
+          r = r - r.project(unitVector: vhat).scale(by: shotAnticipation)
+        }
+        let objectRadius = body.isA(.playerShot) ? 0 : 0.5 * (node as! SKSpriteNode).texture!.size().diagonal()
+        let d = r.norm2() - (ourRadius + objectRadius)
+        // Limit the force so that we don't poke the UFO by an enormous amount
+        let dmin = CGFloat(20)
+        let dlim = 0.5 * (sqrt((d - dmin) * (d - dmin) + dmin) + d)
+        totalForce = totalForce + r.scale(by: -forceScale / (dlim * dlim))
       }
     }
     body.applyForce(totalForce)
