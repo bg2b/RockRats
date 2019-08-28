@@ -85,6 +85,7 @@ class UFO: SKNode {
       // destroyed while the UFO is flying around and a new wave spawns.
       guard let body = node.physicsBody, body.isOnScreen else { continue }
       if body.isA(.asteroid) || body.isA(.playerShot) || body.isA(.player) {
+        //this needs to be done better. we need to think about how to do the different cases more fluidly rather than in one big loop with a bunch of conditionsals for the different types.
         let dx1 = node.position.x - position.x
         let dx2 = copysign(bounds.width, -dx1) + dx1
         let dx = (abs(dx1) < abs(dx2) ? dx1 : dx2)
@@ -100,7 +101,13 @@ class UFO: SKNode {
           let vhat = body.velocity.scale(by: 1 / body.velocity.norm2())
           r = r - r.project(unitVector: vhat).scale(by: shotAnticipation)
         }
-        let objectRadius = body.isA(.playerShot) ? 0 : 0.5 * (node as! SKSpriteNode).texture!.size().diagonal()
+        var objectRadius = CGFloat(0)
+        if body.isA(.asteroid) {
+          objectRadius = 0.5 * (node as! SKSpriteNode).texture!.size().diagonal()
+        }
+        if body.isA(.player) {
+          objectRadius = 0.5 * (node as! Ship).shipTexture.size().diagonal()
+        }
         let d = r.norm2() - (ourRadius + objectRadius)
         // Limit the force so that we don't poke the UFO by an enormous amount
         let dmin = CGFloat(20)

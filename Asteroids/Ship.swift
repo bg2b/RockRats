@@ -308,8 +308,6 @@ class Ship: SKNode {
     zRotation = angle
     let body = coastingConfiguration()
     body.velocity = .zero
-    let star = starBlink()
-    playfield.addWithScaling(star)
     let effect = self.warpEffect(shader: self.warpInShader)
     playfield.addWithScaling(effect)
     effect.run(SKAction.sequence([SKAction.wait(forDuration: self.warpTime), SKAction.removeFromParent()])) {
