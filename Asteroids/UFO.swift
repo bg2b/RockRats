@@ -65,6 +65,7 @@ class UFO: SKNode {
     guard parent != nil else { return }
     guard let body = physicsBody else { fatalError("UFO has lost its body. It is an UFH - unidentified flying head") }
     body.angularVelocity = .pi * 2
+    guard physicsBody?.isOnScreen == true else { return }
     let toMove = Int.random(in: 0...100) == 0
     let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[isBig ? 0 : 1]
     if body.velocity.norm2() == 0 {
