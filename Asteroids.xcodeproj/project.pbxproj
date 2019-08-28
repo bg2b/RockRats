@@ -10,6 +10,7 @@
 		6513D66C22DC0B4E00B4BD57 /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6513D66B22DC0B4E00B4BD57 /* Button.swift */; };
 		6523C0822316E5400071AB4B /* ufo2loop.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6523C0812316E5400071AB4B /* ufo2loop.wav */; };
 		6523C0842316E54E0071AB4B /* ufo1loop.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6523C0832316E54D0071AB4B /* ufo1loop.wav */; };
+		6523C0862316FBAD0071AB4B /* alternate_heartbeat.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6523C0852316FBAD0071AB4B /* alternate_heartbeat.wav */; };
 		659CC03A230EC9FE00AA087C /* UFO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 659CC039230EC9FE00AA087C /* UFO.swift */; };
 		659CC040230EDA3500AA087C /* ufo_explosion.wav in Resources */ = {isa = PBXBuildFile; fileRef = 659CC03F230EDA3500AA087C /* ufo_explosion.wav */; };
 		FD0C070822D8925E00F19A55 /* ship_green@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD0C070022D8925E00F19A55 /* ship_green@2x.png */; };
@@ -95,6 +96,7 @@
 		6513D66B22DC0B4E00B4BD57 /* Button.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Button.swift; sourceTree = "<group>"; };
 		6523C0812316E5400071AB4B /* ufo2loop.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo2loop.wav; sourceTree = "<group>"; };
 		6523C0832316E54D0071AB4B /* ufo1loop.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo1loop.wav; sourceTree = "<group>"; };
+		6523C0852316FBAD0071AB4B /* alternate_heartbeat.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = alternate_heartbeat.wav; sourceTree = "<group>"; };
 		659CC039230EC9FE00AA087C /* UFO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UFO.swift; sourceTree = "<group>"; };
 		659CC03F230EDA3500AA087C /* ufo_explosion.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo_explosion.wav; sourceTree = "<group>"; };
 		FD0C070022D8925E00F19A55 /* ship_green@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ship_green@2x.png"; sourceTree = "<group>"; };
@@ -192,6 +194,7 @@
 		FD4D53C323080BFD00718938 /* sounds */ = {
 			isa = PBXGroup;
 			children = (
+				6523C0852316FBAD0071AB4B /* alternate_heartbeat.wav */,
 				6523C0832316E54D0071AB4B /* ufo1loop.wav */,
 				6523C0812316E5400071AB4B /* ufo2loop.wav */,
 				659CC03F230EDA3500AA087C /* ufo_explosion.wav */,
@@ -385,6 +388,7 @@
 				FD0C070F22D8925E00F19A55 /* ship_red@2x.png in Resources */,
 				FD0C070B22D8925E00F19A55 /* starfield_black@2x.png in Resources */,
 				FD46BD842315F60B008C1F99 /* appiconipadpro@2x.png in Resources */,
+				6523C0862316FBAD0071AB4B /* alternate_heartbeat.wav in Resources */,
 				FD53169322DC1A0600F09E57 /* lasersmall_red@2x.png in Resources */,
 				FD53168422DB445100F09E57 /* meteorbig3@2x.png in Resources */,
 				FD28DB5A22DFFA87009446A2 /* ufo_green@2x.png in Resources */,

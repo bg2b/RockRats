@@ -19,7 +19,7 @@ enum SoundEffect: String, CaseIterable {
   case warpIn = "warpin"
   case warpOut = "warpout"
   case extraLife = "extra_life"
-  case heartbeat = "heartbeat"
+  case heartbeat = "alternate_heartbeat"
   case gameOver = "gameover"
   case ufoExplosion = "ufo_explosion"
   case ufoEnginesBig = "ufo1loop"
@@ -49,7 +49,8 @@ class Sounds: SKNode {
   }
 
   func heartbeat() {
-    soundEffect(.heartbeat, withVolume: 0.5)
+    soundEffect(.heartbeat, withVolume: 1.0, atSpeed: 2.0)
+    wait(for: 0.25) { self.soundEffect(.heartbeat, withVolume: 1.0, atSpeed: 1.0) }
     currentHeartbeatRate = max(0.99 * currentHeartbeatRate, heartbeatRateMax)
     run(SKAction.sequence([SKAction.wait(forDuration: currentHeartbeatRate),
                            SKAction.run { self.heartbeat() }]),
@@ -78,8 +79,9 @@ class Sounds: SKNode {
     return audioNodeFor(url: url)
   }
 
-  func playOnce(_ audio: SKAudioNode, atVolume volume: Float) {
+  func playOnce(_ audio: SKAudioNode, atVolume volume: Float, atSpeed speed: Float) {
     audio.run(SKAction.sequence([SKAction.changeVolume(to: volume, duration: 0),
+                                 SKAction.changePlaybackRate(to: speed, duration: 0),
                                  SKAction.play(),
                                  SKAction.wait(forDuration: 1.0),
                                  SKAction.removeFromParent()]))
@@ -87,14 +89,14 @@ class Sounds: SKNode {
   }
 
   func preload(_ sound: SoundEffect) {
-    playOnce(audioNodeFor(sound), atVolume: 0)
+    playOnce(audioNodeFor(sound), atVolume: 0, atSpeed: 1.0)
   }
 
-  func soundEffect(_ sound: SoundEffect, at position: CGPoint? = nil, withVolume volume: Float = 1.0) {
+  func soundEffect(_ sound: SoundEffect, at position: CGPoint? = nil, withVolume volume: Float = 1.0, atSpeed speed: Float = 1.0) {
     let effect = audioNodeFor(sound)
     if let position = position {
       effect.position = position
     }
-    playOnce(effect, atVolume: volume)
+    playOnce(effect, atVolume: volume, atSpeed: speed)
   }
 }
