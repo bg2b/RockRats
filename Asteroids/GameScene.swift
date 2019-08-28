@@ -632,16 +632,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   func spawnUFO() {
     guard player.parent != nil && ufos.count < Globals.gameConfig.value(for: \.maxUFOs) else { return }
     let ufo = UFO(sounds: sounds)
-    positionUFO(ufo: ufo)
     playfield.addWithScaling(ufo)
+    positionUFO(ufo: ufo)
     ufos.insert(ufo)
   }
   
   func positionUFO(ufo: UFO) {
-    let x = (.random(in: 0...1) == 1 ? frame.maxX : frame.minX) * 1.5
+    let x = (.random(in: 0...1) == 1 ? frame.maxX + 50 : frame.minX - 50)
     ufo.position = CGPoint(x: x, y: .random(in: frame.minY ... frame.maxY))
-    ufo.physicsBody?.velocity = CGVector(dx: (x > 0 ? -1 : 1) * 100, dy: 0)
-    ufo.physicsBody?.isOnScreen = false
+    wait(for: 0.5) {
+      ufo.physicsBody?.isDynamic = true
+      ufo.physicsBody?.velocity = CGVector(dx: (x > 0 ? -1 : 1), dy: 0).scale(by: ufo.currentSpeed)
+    }
   }
   
   func destroyUFO(_ ufo: UFO, updateScore: Bool = true) {

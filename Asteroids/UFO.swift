@@ -30,7 +30,7 @@ func aim(at p: CGVector, targetVelocity v: CGVector, shotSpeed s: CGFloat) -> CG
 class UFO: SKNode {
   let isBig: Bool
   let ufoTexture: SKTexture
-  var currentSpeed: CGFloat = 0
+  var currentSpeed: CGFloat
   var engineSounds: SKAudioNode
   
   required init(sounds: Sounds) {
@@ -41,6 +41,7 @@ class UFO: SKNode {
     self.engineSounds.autoplayLooped = true
     self.engineSounds.run(SKAction.sequence([SKAction.changeVolume(to: 0.5, duration: 0), SKAction.changePlaybackRate(to: 0.5, duration: 0)]))
     sounds.addChild(self.engineSounds)
+    currentSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[isBig ? 0 : 1]
     super.init()
     name = "ufo"
     let ufo = SKSpriteNode(texture: ufoTexture)
@@ -54,6 +55,8 @@ class UFO: SKNode {
     body.linearDamping = 0
     body.angularDamping = 0
     body.restitution = 0.9
+    body.isOnScreen = false
+    body.isDynamic = false
     physicsBody = body
   }
   
@@ -65,7 +68,7 @@ class UFO: SKNode {
     guard parent != nil else { return }
     guard let body = physicsBody else { fatalError("UFO has lost its body. It is an UFH - unidentified flying head") }
     body.angularVelocity = .pi * 2
-    guard physicsBody?.isOnScreen == true else { return }
+    guard body.isOnScreen else { return }
     let toMove = Int.random(in: 0...100) == 0
     let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[isBig ? 0 : 1]
     if body.velocity.norm2() == 0 {
