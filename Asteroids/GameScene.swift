@@ -393,7 +393,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   func hyperspaceJump() {
     guard player.canJump() else { return }
     lastJumpTime = Globals.lastUpdateTime
-    playfield.addWithScaling(player.warpOut())
+    let effects = player.warpOut()
+    playfield.addWithScaling(effects[0])
+    playfield.addWithScaling(effects[1])
     sounds.soundEffect(.warpOut)
     let jumpRegion = frame.insetBy(dx: 0.05 * frame.width, dy: 0.05 * frame.height)
     let jumpPosition = CGPoint(x: .random(in: jumpRegion.minX...jumpRegion.maxX),

@@ -277,22 +277,42 @@ class Ship: SKNode {
     return effect
   }
 
-  func warpOut() -> SKNode {
+  func warpOut() -> [SKNode] {
     let effect = warpEffect(shader: warpOutShader)
     effect.run(SKAction.sequence([SKAction.wait(forDuration: warpTime), SKAction.removeFromParent()]))
+    let star = starBlink()
     setEngineLevel(0)
     removeFromParent()
-    return effect
+    return [effect, star]
   }
 
+  func starBlink() -> SKSpriteNode {
+    let star = SKSpriteNode(imageNamed: "star1")
+    star.position = position
+    star.scale(to: CGSize(width: 0, height: 0))
+    star.run(SKAction.sequence([
+      SKAction.group([
+        SKAction.sequence([
+          SKAction.scale(to: 2, duration: self.warpTime),
+          SKAction.scale(to: 0, duration: self.warpTime)
+          ]),
+        SKAction.rotate(byAngle: .pi, duration: self.warpTime * 2),
+        ]),
+      SKAction.removeFromParent()
+    ]))
+    return star
+  }
+  
   func warpIn(to pos: CGPoint, atAngle angle: CGFloat, addTo playfield: Playfield) {
     position = pos
     zRotation = angle
     let body = coastingConfiguration()
     body.velocity = .zero
-    let effect = warpEffect(shader: warpInShader)
+    let star = starBlink()
+    playfield.addWithScaling(star)
+    let effect = self.warpEffect(shader: self.warpInShader)
     playfield.addWithScaling(effect)
-    effect.run(SKAction.sequence([SKAction.wait(forDuration: warpTime), SKAction.removeFromParent()])) {
+    effect.run(SKAction.sequence([SKAction.wait(forDuration: self.warpTime), SKAction.removeFromParent()])) {
       playfield.addWithScaling(self)
     }
   }
