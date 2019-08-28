@@ -19,7 +19,8 @@ enum SoundEffect: String, CaseIterable {
   case warpIn = "warpin"
   case warpOut = "warpout"
   case extraLife = "extra_life"
-  case heartbeat = "alternate_heartbeat"
+  case heartbeatHigh = "heartbeat_high"
+  case heartbeatLow = "heartbeat_low"
   case gameOver = "gameover"
   case ufoExplosion = "ufo_explosion"
   case ufoEnginesBig = "ufo1loop"
@@ -30,8 +31,9 @@ class Sounds: SKNode {
   var backgroundMusic: SKAudioNode!
   let backgroundDoubleTempoInterval = 60.0
   let heartbeatRateInitial = 2.0
-  let heartbeatRateMax = 0.25
+  let heartbeatRateMax = 0.5
   var currentHeartbeatRate = 0.0
+  var heartbeatVolume: Float = 0.0
 
   required init(listener: SKNode?) {
     super.init()
@@ -49,14 +51,18 @@ class Sounds: SKNode {
   }
 
   func heartbeat() {
-    soundEffect(.heartbeat, withVolume: 1.0, atSpeed: 2.0)
-    wait(for: 0.25) { self.soundEffect(.heartbeat, withVolume: 1.0, atSpeed: 1.0) }
-    currentHeartbeatRate = max(0.99 * currentHeartbeatRate, heartbeatRateMax)
-    run(SKAction.sequence([SKAction.wait(forDuration: currentHeartbeatRate),
-                           SKAction.run { self.heartbeat() }]),
-        withKey: "heartbeat")
+    soundEffect(.heartbeatHigh, withVolume: heartbeatVolume)
+    let fractionBetween = 0.2
+    wait(for: fractionBetween * currentHeartbeatRate) {
+      self.soundEffect(.heartbeatLow, withVolume: self.heartbeatVolume)
+      self.heartbeatVolume = 0.5
+      self.currentHeartbeatRate = max(0.995 * self.currentHeartbeatRate, self.heartbeatRateMax)
+      self.run(SKAction.sequence([SKAction.wait(forDuration: (1 - fractionBetween) * self.currentHeartbeatRate),
+                             SKAction.run { self.heartbeat() }]),
+          withKey: "heartbeat")
+    }
   }
-
+  
   func stopHeartbeat() {
     removeAction(forKey: "heartbeat")
   }
