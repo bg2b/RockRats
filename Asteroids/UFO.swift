@@ -80,7 +80,7 @@ class UFO: SKNode {
       currentSpeed = .random(in: 0.3 * maxSpeed ... maxSpeed)
     }
     guard let bounds = scene?.frame else { return }
-    let ourRadius = 0.5 * ufoTexture.size().diagonal()
+    let ourRadius = 0.5 * size.diagonal()
     let forceScale = Globals.gameConfig.value(for: \.ufoDodging) * 1000
     let shotAnticipation = Globals.gameConfig.value(for: \.ufoShotAnticipation)
     var totalForce = CGVector.zero
@@ -107,10 +107,10 @@ class UFO: SKNode {
         }
         var objectRadius = CGFloat(0)
         if body.isA(.asteroid) {
-          objectRadius = 0.5 * (node as! SKSpriteNode).texture!.size().diagonal()
+          objectRadius = 0.5 * (node as! SKSpriteNode).size.diagonal()
         }
         if body.isA(.player) {
-          objectRadius = 0.5 * (node as! Ship).shipTexture.size().diagonal()
+          objectRadius = 0.5 * (node as! Ship).size.diagonal()
         }
         let d = r.norm2() - (ourRadius + objectRadius)
         // Limit the force so that we don't poke the UFO by an enormous amount
@@ -155,4 +155,6 @@ class UFO: SKNode {
     removeFromParent()
     return makeExplosion(texture: ufoTexture, angle: zRotation, velocity: velocity, at: position, duration: 2)
   }
+
+  var size: CGSize { return ufoTexture.size() }
 }

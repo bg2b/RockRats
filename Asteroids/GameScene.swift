@@ -633,17 +633,43 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     guard player.parent != nil && ufos.count < Globals.gameConfig.value(for: \.maxUFOs) else { return }
     let ufo = UFO(sounds: sounds)
     playfield.addWithScaling(ufo)
-    positionUFO(ufo: ufo)
     ufos.insert(ufo)
+    // Position the UFO just off the screen on one side or another.  We set the side
+    // here so that the positional audio will give a clue about where it's coming
+    // from.  Actual choice of Y position and beginning of movement happens after a
+    // delay.
+    let ufoSize = 0.6 * ufo.size.diagonal()
+    let x = (Bool.random() ? frame.maxX + ufoSize : frame.minX - ufoSize)
+    ufo.position = CGPoint(x: x, y: frame.midY)
+    wait(for: 1) { self.launchUFO(ufo) }
   }
   
-  func positionUFO(ufo: UFO) {
-    let x = (.random(in: 0...1) == 1 ? frame.maxX + 50 : frame.minX - 50)
-    ufo.position = CGPoint(x: x, y: .random(in: frame.minY ... frame.maxY))
-    wait(for: 0.5) {
-      ufo.physicsBody?.isDynamic = true
-      ufo.physicsBody?.velocity = CGVector(dx: (x > 0 ? -1 : 1), dy: 0).scale(by: ufo.currentSpeed)
+  func launchUFO(_ ufo: UFO) {
+    let ufoSize = ufo.size.diagonal()
+    // Try to find a safe spawning position, but if we can't find one after some
+    // number of tries, just go ahead and spawn anyway.
+    var bestPosition: CGPoint? = nil
+    var bestClearance = CGFloat.infinity
+    for _ in 0..<10 {
+      let pos = CGPoint(x: ufo.position.x, y: .random(in: 0.9 * frame.minY ... 0.9 * frame.maxY))
+      var thisClearance = CGFloat.infinity
+      for asteroid in asteroids {
+        thisClearance = min(thisClearance, (asteroid.position -  pos).norm2())
+        // Check the wrapped position too
+        thisClearance = min(thisClearance, (asteroid.position - CGPoint(x: -pos.x, y: pos.y)).norm2())
+      }
+      if bestPosition == nil || thisClearance > bestClearance {
+        bestPosition = pos
+        bestClearance = thisClearance
+      }
+      if bestClearance > 3 * ufoSize {
+        break
+      }
     }
+    ufo.position = bestPosition!
+    guard let body = ufo.physicsBody else { fatalError("UFO has no physics body") }
+    body.isDynamic = true
+    body.velocity = CGVector(dx: copysign(ufo.currentSpeed, -ufo.position.x), dy: 0)
   }
   
   func destroyUFO(_ ufo: UFO, updateScore: Bool = true) {

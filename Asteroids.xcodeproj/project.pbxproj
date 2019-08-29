@@ -255,9 +255,9 @@
 			children = (
 				FD79323522D20FE600E7D336 /* AppDelegate.swift */,
 				FD79323722D20FE600E7D336 /* GameScene.sks */,
-				FD79323B22D20FE600E7D336 /* GameScene.swift */,
 				FD46BD71231415B7008C1F99 /* Playfield.swift */,
 				659CC039230EC9FE00AA087C /* UFO.swift */,
+				FD79323B22D20FE600E7D336 /* GameScene.swift */,
 				FD4D53BF2306B47900718938 /* LivesDisplay.swift */,
 				FDD831F522F187D200CA4EC6 /* GameConfig.swift */,
 				FDD831F122EDB50200CA4EC6 /* Explosions.swift */,

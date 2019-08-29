@@ -343,4 +343,6 @@ class Ship: SKNode {
     removeFromParent()
     return makeExplosion(texture: shipTexture, angle: zRotation, velocity: velocity, at: position, duration: 2)
   }
+
+  var size: CGSize { return shipTexture.size() }
 }
