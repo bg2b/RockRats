@@ -31,14 +31,6 @@
 		FD28DB5922DFFA87009446A2 /* ufo_blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD28DB5222DFFA87009446A2 /* ufo_blue@2x.png */; };
 		FD28DB5A22DFFA87009446A2 /* ufo_green@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD28DB5322DFFA87009446A2 /* ufo_green@2x.png */; };
 		FD46BD72231415B7008C1F99 /* Playfield.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD46BD71231415B7008C1F99 /* Playfield.swift */; };
-		FD46BD7F2315F60B008C1F99 /* appiconipadnoifications@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD46BD772315F60A008C1F99 /* appiconipadnoifications@2x.png */; };
-		FD46BD802315F60B008C1F99 /* appiconiphone@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD46BD782315F60B008C1F99 /* appiconiphone@2x.png */; };
-		FD46BD812315F60B008C1F99 /* appiconiphone@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD46BD792315F60B008C1F99 /* appiconiphone@3x.png */; };
-		FD46BD822315F60B008C1F99 /* appiconipad@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD46BD7A2315F60B008C1F99 /* appiconipad@2x.png */; };
-		FD46BD832315F60B008C1F99 /* appstoreicon.png in Resources */ = {isa = PBXBuildFile; fileRef = FD46BD7B2315F60B008C1F99 /* appstoreicon.png */; };
-		FD46BD842315F60B008C1F99 /* appiconipadpro@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD46BD7C2315F60B008C1F99 /* appiconipadpro@2x.png */; };
-		FD46BD852315F60B008C1F99 /* appiconipadspotlight@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD46BD7D2315F60B008C1F99 /* appiconipadspotlight@2x.png */; };
-		FD46BD862315F60B008C1F99 /* appiconipadsettings@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD46BD7E2315F60B008C1F99 /* appiconipadsettings@2x.png */; };
 		FD4D53C02306B47900718938 /* LivesDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4D53BF2306B47900718938 /* LivesDisplay.swift */; };
 		FD4D53C22306B60F00718938 /* life_blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53C12306B60F00718938 /* life_blue@2x.png */; };
 		FD4D53C523080D3600718938 /* player_explosion.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53C423080D3600718938 /* player_explosion.wav */; };
@@ -118,15 +110,18 @@
 		FD28DB5122DFFA87009446A2 /* ufo_red@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ufo_red@2x.png"; sourceTree = "<group>"; };
 		FD28DB5222DFFA87009446A2 /* ufo_blue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ufo_blue@2x.png"; sourceTree = "<group>"; };
 		FD28DB5322DFFA87009446A2 /* ufo_green@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ufo_green@2x.png"; sourceTree = "<group>"; };
+		FD3AF4E92317D0570059392A /* asteroids-spotlight-40x40@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "asteroids-spotlight-40x40@3x.png"; sourceTree = "<group>"; };
+		FD3AF4EA2317D0570059392A /* asteroids-notification-20x20@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "asteroids-notification-20x20@2x.png"; sourceTree = "<group>"; };
+		FD3AF4EB2317D0570059392A /* asteroids-spotlight-40x40@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "asteroids-spotlight-40x40@2x.png"; sourceTree = "<group>"; };
+		FD3AF4EC2317D0570059392A /* asteroids-notification-20x20@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "asteroids-notification-20x20@3x.png"; sourceTree = "<group>"; };
+		FD3AF4ED2317D0570059392A /* asteroids-settings-29x29@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "asteroids-settings-29x29@2x.png"; sourceTree = "<group>"; };
+		FD3AF4EE2317D0570059392A /* asteroids-app-store-1024x1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "asteroids-app-store-1024x1024.png"; sourceTree = "<group>"; };
+		FD3AF4EF2317D0570059392A /* asteroids-ipad-pro-83.5x83.5@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "asteroids-ipad-pro-83.5x83.5@2x.png"; sourceTree = "<group>"; };
+		FD3AF4F02317D0570059392A /* asteroids-settings-29x29@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "asteroids-settings-29x29@3x.png"; sourceTree = "<group>"; };
+		FD3AF4F12317D0570059392A /* asteroids-ipad-76x76@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "asteroids-ipad-76x76@2x.png"; sourceTree = "<group>"; };
+		FD3AF4F22317D0570059392A /* asteroids-iphone-60x60@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "asteroids-iphone-60x60@2x.png"; sourceTree = "<group>"; };
+		FD3AF4F32317D0570059392A /* asteroids-iphone-60x60@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "asteroids-iphone-60x60@3x.png"; sourceTree = "<group>"; };
 		FD46BD71231415B7008C1F99 /* Playfield.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Playfield.swift; sourceTree = "<group>"; };
-		FD46BD772315F60A008C1F99 /* appiconipadnoifications@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "appiconipadnoifications@2x.png"; sourceTree = "<group>"; };
-		FD46BD782315F60B008C1F99 /* appiconiphone@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "appiconiphone@2x.png"; sourceTree = "<group>"; };
-		FD46BD792315F60B008C1F99 /* appiconiphone@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "appiconiphone@3x.png"; sourceTree = "<group>"; };
-		FD46BD7A2315F60B008C1F99 /* appiconipad@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "appiconipad@2x.png"; sourceTree = "<group>"; };
-		FD46BD7B2315F60B008C1F99 /* appstoreicon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = appstoreicon.png; sourceTree = "<group>"; };
-		FD46BD7C2315F60B008C1F99 /* appiconipadpro@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "appiconipadpro@2x.png"; sourceTree = "<group>"; };
-		FD46BD7D2315F60B008C1F99 /* appiconipadspotlight@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "appiconipadspotlight@2x.png"; sourceTree = "<group>"; };
-		FD46BD7E2315F60B008C1F99 /* appiconipadsettings@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "appiconipadsettings@2x.png"; sourceTree = "<group>"; };
 		FD4D53BF2306B47900718938 /* LivesDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivesDisplay.swift; sourceTree = "<group>"; };
 		FD4D53C12306B60F00718938 /* life_blue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "life_blue@2x.png"; sourceTree = "<group>"; };
 		FD4D53C423080D3600718938 /* player_explosion.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = player_explosion.wav; sourceTree = "<group>"; };
@@ -195,6 +190,24 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		FD3AF4E82317D0570059392A /* appicons */ = {
+			isa = PBXGroup;
+			children = (
+				FD3AF4E92317D0570059392A /* asteroids-spotlight-40x40@3x.png */,
+				FD3AF4EA2317D0570059392A /* asteroids-notification-20x20@2x.png */,
+				FD3AF4EB2317D0570059392A /* asteroids-spotlight-40x40@2x.png */,
+				FD3AF4EC2317D0570059392A /* asteroids-notification-20x20@3x.png */,
+				FD3AF4ED2317D0570059392A /* asteroids-settings-29x29@2x.png */,
+				FD3AF4EE2317D0570059392A /* asteroids-app-store-1024x1024.png */,
+				FD3AF4EF2317D0570059392A /* asteroids-ipad-pro-83.5x83.5@2x.png */,
+				FD3AF4F02317D0570059392A /* asteroids-settings-29x29@3x.png */,
+				FD3AF4F12317D0570059392A /* asteroids-ipad-76x76@2x.png */,
+				FD3AF4F22317D0570059392A /* asteroids-iphone-60x60@2x.png */,
+				FD3AF4F32317D0570059392A /* asteroids-iphone-60x60@3x.png */,
+			);
+			path = appicons;
+			sourceTree = "<group>";
+		};
 		FD4D53C323080BFD00718938 /* sounds */ = {
 			isa = PBXGroup;
 			children = (
@@ -271,14 +284,7 @@
 		FD79325022D21AA000E7D336 /* Asset creation */ = {
 			isa = PBXGroup;
 			children = (
-				FD46BD7A2315F60B008C1F99 /* appiconipad@2x.png */,
-				FD46BD772315F60A008C1F99 /* appiconipadnoifications@2x.png */,
-				FD46BD7C2315F60B008C1F99 /* appiconipadpro@2x.png */,
-				FD46BD7E2315F60B008C1F99 /* appiconipadsettings@2x.png */,
-				FD46BD7D2315F60B008C1F99 /* appiconipadspotlight@2x.png */,
-				FD46BD782315F60B008C1F99 /* appiconiphone@2x.png */,
-				FD46BD792315F60B008C1F99 /* appiconiphone@3x.png */,
-				FD46BD7B2315F60B008C1F99 /* appstoreicon.png */,
+				FD3AF4E82317D0570059392A /* appicons */,
 				FD28DB5022DFFA87009446A2 /* meteorhuge1@2x.png */,
 				FD28DB4D22DFFA87009446A2 /* meteorhuge2@2x.png */,
 				FD28DB4F22DFFA87009446A2 /* meteorhuge3@2x.png */,
@@ -387,14 +393,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				FD53167122DAA8EA00F09E57 /* fire1@2x.png in Resources */,
-				FD46BD812315F60B008C1F99 /* appiconiphone@3x.png in Resources */,
 				659CC040230EDA3500AA087C /* ufo_explosion.wav in Resources */,
 				65A4CD6823173624006DEDB0 /* heartbeat_high.wav in Resources */,
-				FD46BD802315F60B008C1F99 /* appiconiphone@2x.png in Resources */,
 				FD79324122D20FE600E7D336 /* Main.storyboard in Resources */,
 				FD0C070F22D8925E00F19A55 /* ship_red@2x.png in Resources */,
 				FD0C070B22D8925E00F19A55 /* starfield_black@2x.png in Resources */,
-				FD46BD842315F60B008C1F99 /* appiconipadpro@2x.png in Resources */,
 				6523C0862316FBAD0071AB4B /* alternate_heartbeat.wav in Resources */,
 				FD53169322DC1A0600F09E57 /* lasersmall_red@2x.png in Resources */,
 				FD53168422DB445100F09E57 /* meteorbig3@2x.png in Resources */,
@@ -408,7 +411,6 @@
 				FD53168222DB445100F09E57 /* meteorsmall1@2x.png in Resources */,
 				FDA43B202308AB9600A29347 /* heartbeat.wav in Resources */,
 				FD79323822D20FE600E7D336 /* GameScene.sks in Resources */,
-				FD46BD852315F60B008C1F99 /* appiconipadspotlight@2x.png in Resources */,
 				FDD831F422EE27C700CA4EC6 /* kenvector_future.ttf in Resources */,
 				FD53168022DB445100F09E57 /* meteormed1@2x.png in Resources */,
 				FD53167F22DB445100F09E57 /* meteorbig1@2x.png in Resources */,
@@ -426,7 +428,6 @@
 				FD0C070D22D8925E00F19A55 /* starfield_purple@2x.png in Resources */,
 				FDE04B2722D5FEA30011A529 /* star1@2x.png in Resources */,
 				FD53167E22DB445100F09E57 /* meteorsmall2@2x.png in Resources */,
-				FD46BD7F2315F60B008C1F99 /* appiconipadnoifications@2x.png in Resources */,
 				FD53169222DC1A0600F09E57 /* lasersmall_green@2x.png in Resources */,
 				FD28DB5822DFFA87009446A2 /* ufo_red@2x.png in Resources */,
 				FDE04B2822D5FEA30011A529 /* star3@2x.png in Resources */,
@@ -439,18 +440,15 @@
 				FDA43B24230A111D00A29347 /* meteorhuge_hit.wav in Resources */,
 				FD4D53D0230843C900718938 /* meteormed_hit.wav in Resources */,
 				FD28DB5922DFFA87009446A2 /* ufo_blue@2x.png in Resources */,
-				FD46BD862315F60B008C1F99 /* appiconipadsettings@2x.png in Resources */,
 				FD53167222DAA8EA00F09E57 /* fire3@2x.png in Resources */,
 				FDE04B2922D5FEA30011A529 /* star2@2x.png in Resources */,
 				FDA43B28230C1DC600A29347 /* warpout.wav in Resources */,
 				FDA43B1E2308A1A600A29347 /* extra_life.wav in Resources */,
 				FD79324622D20FE700E7D336 /* LaunchScreen.storyboard in Resources */,
 				FD0C070E22D8925E00F19A55 /* ship_orange@2x.png in Resources */,
-				FD46BD832315F60B008C1F99 /* appstoreicon.png in Resources */,
 				FD53168122DB445100F09E57 /* meteormed2@2x.png in Resources */,
 				FD28DB5522DFFA87009446A2 /* ufo_yellow@2x.png in Resources */,
 				FD0C070922D8925E00F19A55 /* ship_blue@2x.png in Resources */,
-				FD46BD822315F60B008C1F99 /* appiconipad@2x.png in Resources */,
 				FD4D53D523085AF800718938 /* player_engines.wav in Resources */,
 				FDA43B2A230C2A1D00A29347 /* warpin.wav in Resources */,
 				FD53168E22DC1A0600F09E57 /* laserbig_green@2x.png in Resources */,
