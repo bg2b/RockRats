@@ -58,6 +58,7 @@
 		FD53169122DC1A0600F09E57 /* lasersmall_blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53168B22DC1A0500F09E57 /* lasersmall_blue@2x.png */; };
 		FD53169222DC1A0600F09E57 /* lasersmall_green@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53168C22DC1A0500F09E57 /* lasersmall_green@2x.png */; };
 		FD53169322DC1A0600F09E57 /* lasersmall_red@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53168D22DC1A0500F09E57 /* lasersmall_red@2x.png */; };
+		FD537DD6231BE385003312B3 /* ufo_laser.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD537DD5231BE384003312B3 /* ufo_laser.wav */; };
 		FD79323622D20FE600E7D336 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD79323522D20FE600E7D336 /* AppDelegate.swift */; };
 		FD79323822D20FE600E7D336 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = FD79323722D20FE600E7D336 /* GameScene.sks */; };
 		FD79323C22D20FE600E7D336 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD79323B22D20FE600E7D336 /* GameScene.swift */; };
@@ -149,6 +150,7 @@
 		FD53168B22DC1A0500F09E57 /* lasersmall_blue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "lasersmall_blue@2x.png"; sourceTree = "<group>"; };
 		FD53168C22DC1A0500F09E57 /* lasersmall_green@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "lasersmall_green@2x.png"; sourceTree = "<group>"; };
 		FD53168D22DC1A0500F09E57 /* lasersmall_red@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "lasersmall_red@2x.png"; sourceTree = "<group>"; };
+		FD537DD5231BE384003312B3 /* ufo_laser.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo_laser.wav; sourceTree = "<group>"; };
 		FD79323222D20FE600E7D336 /* Asteroids.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Asteroids.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD79323522D20FE600E7D336 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		FD79323722D20FE600E7D336 /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
@@ -216,6 +218,7 @@
 				6523C0852316FBAD0071AB4B /* alternate_heartbeat.wav */,
 				6523C0832316E54D0071AB4B /* ufo1loop.wav */,
 				6523C0812316E5400071AB4B /* ufo2loop.wav */,
+				FD537DD5231BE384003312B3 /* ufo_laser.wav */,
 				659CC03F230EDA3500AA087C /* ufo_explosion.wav */,
 				FDA43B212308C11E00A29347 /* gameover.wav */,
 				FDA43B1F2308AB9600A29347 /* heartbeat.wav */,
@@ -401,6 +404,7 @@
 				6523C0862316FBAD0071AB4B /* alternate_heartbeat.wav in Resources */,
 				FD53169322DC1A0600F09E57 /* lasersmall_red@2x.png in Resources */,
 				FD53168422DB445100F09E57 /* meteorbig3@2x.png in Resources */,
+				FD537DD6231BE385003312B3 /* ufo_laser.wav in Resources */,
 				65A4CD6A2317362D006DEDB0 /* heartbeat_low.wav in Resources */,
 				FD28DB5A22DFFA87009446A2 /* ufo_green@2x.png in Resources */,
 				FD4D53CB2308206D00718938 /* player_laser.wav in Resources */,

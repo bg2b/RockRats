@@ -381,7 +381,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     laser.zRotation = angle
     guard let body = laser.physicsBody else { fatalError("Laser has no physics body") }
     body.velocity = CGVector(angle: angle).scale(by: speed)
-    sounds.soundEffect(.playerShot)
+    sounds.soundEffect(.ufoShot, at: position)
   }
   
   func removeUFOLaser(_ laser: SKSpriteNode) {
