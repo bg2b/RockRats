@@ -25,6 +25,7 @@ enum SoundEffect: String, CaseIterable {
   case ufoExplosion = "ufo_explosion"
   case ufoEnginesBig = "ufo1loop"
   case ufoEnginesSmall = "ufo2loop"
+  case ufoShot = "ufo_laser"
 }
 
 class Sounds: SKNode {
