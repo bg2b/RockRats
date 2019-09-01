@@ -7,6 +7,7 @@
 //
 
 import SpriteKit
+import AVFoundation
 
 func hyperspaceShader(forTexture texture: SKTexture, inward: Bool, warpTime: Double) -> SKShader {
   // The a_start_time ugliness is because u_time starts from 0 when a shader is first
@@ -63,7 +64,7 @@ func hyperspaceShader(forTexture texture: SKTexture, inward: Bool, warpTime: Dou
 class Ship: SKNode {
   let joystick: Joystick
   let shipTexture: SKTexture
-  let engineSounds: SKAudioNode
+  let engineSounds: AVAudioPlayer
   var engineSoundLevel = 0
   var forwardFlames = [SKSpriteNode]()
   var reverseFlames = [[SKSpriteNode]]()
@@ -97,11 +98,10 @@ class Ship: SKNode {
   required init(color: String, sounds: Sounds, joystick: Joystick) {
     self.joystick = joystick
     self.shipTexture = Globals.textureCache.findTexture(imageNamed: "ship_\(color)")
-    self.engineSounds = sounds.audioNodeFor(.playerEngines)
-    self.engineSounds.isPositional = false
-    self.engineSounds.autoplayLooped = true
-    self.engineSounds.run(SKAction.changeVolume(to: 0, duration: 0))
-    sounds.addChild(self.engineSounds)
+    engineSounds = sounds.audioPlayerFor(.playerEngines)
+    engineSounds.numberOfLoops = -1
+    engineSounds.volume = 0
+    sounds.startPlaying(engineSounds)
     warpOutShader = hyperspaceShader(forTexture: shipTexture, inward: true, warpTime: warpTime)
     warpInShader = hyperspaceShader(forTexture: shipTexture, inward: false, warpTime: warpTime)
     super.init()
@@ -109,6 +109,7 @@ class Ship: SKNode {
     let ship = SKSpriteNode(texture: shipTexture)
     ship.name = "shipImage"
     addChild(ship)
+    sounds.addPositional(player: engineSounds, at: self)
     forwardFlames = buildFlames(at: CGPoint(x: -shipTexture.size().width / 2, y: 0.0))
     for side in [-1, 1] {
       reverseFlames.append(buildFlames(at: CGPoint(x: 0, y: CGFloat(side) * shipTexture.size().height / 2.1),
@@ -153,7 +154,9 @@ class Ship: SKNode {
   func setEngineLevel(_ amount: CGFloat) {
     let soundLevel = Int((amount + 0.24) * 4)
     if soundLevel != engineSoundLevel {
-      engineSounds.run(SKAction.changeVolume(to: 0.25 * 0.25 * Float(soundLevel), duration: 0))
+      // The first 0.25 * is to reduce the overall volume.  The second is to scale
+      // soundLevel to 0...1
+      engineSounds.volume = 0.25 * 0.25 * Float(soundLevel)
       engineSoundLevel = soundLevel
     }
   }

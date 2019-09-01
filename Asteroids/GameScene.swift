@@ -289,7 +289,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func initSounds() {
-    sounds = Sounds(listener: player)
+    sounds = Sounds()
     addChild(sounds)
   }
 
@@ -329,9 +329,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       wait(for: 0.5) { self.spawnPlayer(safeTime: max(safeTime - 0.25, 0)) }
     } else {
       enableHyperspaceJump()
-      sounds.soundEffect(.warpIn)
       player.reset()
       player.warpIn(to: spawnPosition, atAngle: player.zRotation, addTo: playfield)
+      sounds.soundEffect(.warpIn, at: spawnPosition)
       spawnUFOs()
       updateLives(-1)
     }
@@ -353,7 +353,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     laser.wait(for: 0.9) { self.removeLaser(laser) }
     playfield.addWithScaling(laser)
     player.shoot(laser: laser)
-    sounds.soundEffect(.playerShot)
+    sounds.soundEffect(.playerShot, at: player.position)
   }
   
   func removeLaser(_ laser: SKSpriteNode) {
@@ -396,12 +396,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let effects = player.warpOut()
     playfield.addWithScaling(effects[0])
     playfield.addWithScaling(effects[1])
-    sounds.soundEffect(.warpOut)
+    sounds.soundEffect(.warpOut, at: player.position)
     let jumpRegion = frame.insetBy(dx: 0.05 * frame.width, dy: 0.05 * frame.height)
     let jumpPosition = CGPoint(x: .random(in: jumpRegion.minX...jumpRegion.maxX),
                                y: .random(in: jumpRegion.minY...jumpRegion.maxY))
     wait(for: 1) {
-      self.sounds.soundEffect(.warpIn)
+      self.sounds.soundEffect(.warpIn, at: jumpPosition)
       self.player.warpIn(to: jumpPosition, atAngle: .random(in: 0 ... 2 * .pi), addTo: self.playfield)
     }
   }
@@ -613,8 +613,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   
   func destroyPlayer() {
     enableHyperspaceJump()
-    let pieces = player.explode()
-    addExplosion(pieces)
+    sounds.soundEffect(.playerExplosion, at: player.position)
+    addExplosion(player.explode())
+    stopSpawningUFOs()
     playfield.changeSpeed(to: 0.25)
     // Lasers live for a bit less than a second.  If the player fires and immediately
     // dies, then due to the slow-motion effect that can get stretched to a bit less
@@ -625,8 +626,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       self.playfield.changeSpeed(to: 1)
       self.respawnOrGameOver()
     }
-    sounds.soundEffect(.playerExplosion)
-    stopSpawningUFOs()
   }
   
   func spawnUFO() {
@@ -766,5 +765,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     player.fly()
     playfield.wrapCoordinates()
+    sounds.adjustPositionalEffects()
   }
 }
