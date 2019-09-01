@@ -381,7 +381,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     laser.zRotation = angle
     guard let body = laser.physicsBody else { fatalError("Laser has no physics body") }
     body.velocity = CGVector(angle: angle).scale(by: speed)
-    sounds.soundEffect(.playerShot, at: position)
+    sounds.soundEffect(.playerShot)
   }
   
   func removeUFOLaser(_ laser: SKSpriteNode) {
@@ -550,7 +550,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     guard let velocity = asteroid.physicsBody?.velocity else { fatalError("Asteroid had no velocity") }
     let pos = asteroid.position
     makeAsteroidSplitEffect(asteroid, ofSize: size)
-    sounds.soundEffect(hitEffect[size], at: pos)
+    sounds.soundEffect(hitEffect[size])
     // Don't split med or small asteroids.  Size progression should go huge -> big -> med,
     // but we include small just for completeness in case we change our minds later.
     if size >= 2 {
@@ -676,7 +676,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       addToScore(ufo.isBig ? 20 : 100)
     }
     ufos.remove(ufo)
-    sounds.soundEffect(.ufoExplosion, at: ufo.position)
+    sounds.soundEffect(.ufoExplosion)
     addExplosion(ufo.explode())
   }
 
