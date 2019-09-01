@@ -98,7 +98,6 @@ class Ship: SKNode {
     self.joystick = joystick
     self.shipTexture = Globals.textureCache.findTexture(imageNamed: "ship_\(color)")
     self.engineSounds = sounds.audioNodeFor(.playerEngines)
-    self.engineSounds.isPositional = false
     self.engineSounds.autoplayLooped = true
     self.engineSounds.run(SKAction.changeVolume(to: 0, duration: 0))
     sounds.addChild(self.engineSounds)

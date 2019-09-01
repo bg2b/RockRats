@@ -35,11 +35,10 @@ class Sounds: SKNode {
   var currentHeartbeatRate = 0.0
   var heartbeatVolume: Float = 0.0
 
-  required init(listener: SKNode?) {
+  override required init() {
     super.init()
     name = "sounds"
     position = .zero
-    scene?.listener = listener
     for effect in SoundEffect.allCases {
       preload(effect)
     }
@@ -85,24 +84,20 @@ class Sounds: SKNode {
     return audioNodeFor(url: url)
   }
 
-  func playOnce(_ audio: SKAudioNode, atVolume volume: Float, atSpeed speed: Float) {
+  func playOnce(_ audio: SKAudioNode, atVolume volume: Float) {
+    addChild(audio)
     audio.run(SKAction.sequence([SKAction.changeVolume(to: volume, duration: 0),
-                                 SKAction.changePlaybackRate(to: speed, duration: 0),
                                  SKAction.play(),
                                  SKAction.wait(forDuration: 1.0),
                                  SKAction.removeFromParent()]))
-    addChild(audio)
   }
 
   func preload(_ sound: SoundEffect) {
-    playOnce(audioNodeFor(sound), atVolume: 0, atSpeed: 1.0)
+    playOnce(audioNodeFor(sound), atVolume: 0)
   }
 
-  func soundEffect(_ sound: SoundEffect, at position: CGPoint? = nil, withVolume volume: Float = 1.0, atSpeed speed: Float = 1.0) {
+  func soundEffect(_ sound: SoundEffect, withVolume volume: Float = 1.0) {
     let effect = audioNodeFor(sound)
-    if let position = position {
-      effect.position = position
-    }
-    playOnce(effect, atVolume: volume, atSpeed: speed)
+    playOnce(effect, atVolume: volume)
   }
 }

@@ -37,9 +37,8 @@ class UFO: SKNode {
     isBig = .random(in: 0...1) >= Globals.gameConfig.value(for: \.smallUFOChance)
     ufoTexture = Globals.textureCache.findTexture(imageNamed: isBig ? "ufo_green" : "ufo_red")
     self.engineSounds = sounds.audioNodeFor(isBig ? .ufoEnginesBig : .ufoEnginesSmall)
-    self.engineSounds.isPositional = true
     self.engineSounds.autoplayLooped = true
-    self.engineSounds.run(SKAction.sequence([SKAction.changeVolume(to: 0.5, duration: 0), SKAction.changePlaybackRate(to: 0.5, duration: 0)]))
+    self.engineSounds.run(SKAction.changeVolume(to: 0.5, duration: 0))
     sounds.addChild(self.engineSounds)
     currentSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[isBig ? 0 : 1]
     super.init()
