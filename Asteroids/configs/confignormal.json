@@ -20,7 +20,7 @@
       "smallUFOChance": 0,
       "maxUFOs": 1,
       "ufoDodging": 2,
-      "ufoShotAnticipation": 0.2,
+      "ufoShotAnticipation": 0,
       "ufoAccuracy": [0.5, 0.25],
       "asteroidSpeedBoost": 1.1,
       "ufoShotSpeed": [300, 400],
@@ -29,7 +29,7 @@
     {
       "waveNumber": 3,
       "ufoDodging": 4,
-      "ufoShotAnticipation": 0.3,
+      "ufoShotAnticipation": 0,
       "smallUFOChance": 0.25,
       "ufoAccuracy": [0.4, 0.2],
       "asteroidSpeedBoost": 1.1
@@ -37,7 +37,7 @@
     {
       "waveNumber": 5,
       "ufoDodging": 6,
-      "ufoShotAnticipation": 0.4,
+      "ufoShotAnticipation": 0,
       "smallUFOChance": 0.5,
       "ufoAccuracy": [0.3, 0.15],
       "asteroidSpeedBoost": 1.2
@@ -46,7 +46,7 @@
       "waveNumber": 7,
       "maxUFOs": 2,
       "ufoDodging": 8,
-      "ufoShotAnticipation": 0.5,
+      "ufoShotAnticipation": 0.1,
       "smallUFOChance": 0.75,
       "ufoAccuracy": [0.2, 0.1],
       "asteroidSpeedBoost": 1.3
@@ -54,7 +54,7 @@
     {
       "waveNumber": 9,
       "ufoDodging": 11,
-      "ufoShotAnticipation": 0.7,
+      "ufoShotAnticipation": 0.2,
       "smallUFOChance": 1,
       "ufoAccuracy": [0.1, 0.05],
       "asteroidSpeedBoost": 1.4
@@ -62,15 +62,15 @@
     {
       "waveNumber": 10,
       "ufoDodging": 13,
-      "ufoShotAnticipation": 0.9,
+      "ufoShotAnticipation": 0.3,
       "ufoAccuracy": [0.05, 0.02],
       "asteroidSpeedBoost": 1.5
     },
     {
       "waveNumber": 11,
-      "maxUFOs": 3,
+      "maxUFOs": 1,
       "ufoDodging": 15,
-      "ufoShotAnticipation": 0.95,
+      "ufoShotAnticipation": 0.4,
       "ufoAccuracy": [0.02, 0.01],
       "asteroidSpeedBoost": 1.6
     }
