@@ -46,7 +46,7 @@ class UFO: SKNode {
     let ufo = SKSpriteNode(texture: ufoTexture)
     ufo.name = "ufoImage"
     addChild(ufo)
-    let body = SKPhysicsBody(texture: ufoTexture, size: ufoTexture.size())
+    let body = SKPhysicsBody(circleOfRadius: 0.5 * ufoTexture.size().width)
     body.mass = isBig ? 1 : 0.75
     body.categoryBitMask = ObjectCategories.ufo.rawValue
     body.collisionBitMask = 0
