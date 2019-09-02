@@ -45,22 +45,26 @@ class Playfield: SKNode {
     guard let frame = scene?.frame else { return }
     for child in children {
       guard let body = child.physicsBody else { continue }
-      if frame.contains(child.position) {
-        body.isOnScreen = true
-      }
-      guard body.isOnScreen else { continue }
-      // We wrap only after going past the edge a little bit so that an object that's
-      // moving just along the edge won't stutter back and forth.
-      let hysteresis = CGFloat(3)
-      if child.position.x < frame.minX - hysteresis {
-        child.position.x += frame.width
-      } else if child.position.x > frame.maxX + hysteresis {
-        child.position.x -= frame.width
-      }
-      if child.position.y < frame.minY - hysteresis {
-        child.position.y += frame.height
-      } else if child.position.y > frame.maxY + hysteresis {
-        child.position.y -= frame.height
+      if !body.isOnScreen {
+        // This isn't on screen yet, so we're just waiting for it to appear before we
+        // start wrapping.
+        if frame.contains(child.position) {
+          body.isOnScreen = true
+        }
+      } else {
+        // We wrap only after going past the edge a little bit so that an object
+        // that's moving just along the edge won't stutter back and forth.
+        let hysteresis = CGFloat(3)
+        if child.position.x < frame.minX - hysteresis {
+          child.position.x += frame.width
+        } else if child.position.x > frame.maxX + hysteresis {
+          child.position.x -= frame.width
+        }
+        if child.position.y < frame.minY - hysteresis {
+          child.position.y += frame.height
+        } else if child.position.y > frame.maxY + hysteresis {
+          child.position.y -= frame.height
+        }
       }
     }
   }
