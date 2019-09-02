@@ -219,8 +219,10 @@ class Ship: SKNode {
     } else {
       let angle = stick.angle()
       let halfSectorSize = (120 * CGFloat.pi / 180) / 2
-      if abs(angle) >= .pi - halfSectorSize {
-        // Joystick is pointing backwards, apply reverse thrusters
+      if abs(angle) >= .pi - 0.5 * halfSectorSize {
+        // Joystick is pointing backwards, apply reverse thrusters.  Because reverse
+        // thrust tends to be confusing while turning, we reduce the region where
+        // reverse thrust is active.
         thrustAmount = min(-stick.dx, 0.7) / 0.7
         thrustForce = -0.5 * thrustAmount
       } else if abs(angle) <= halfSectorSize {
