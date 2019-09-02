@@ -31,6 +31,10 @@ extension SKPhysicsBody {
     return (categoryBitMask & category.rawValue) != 0
   }
 
+  func isOneOf(_ categories: UInt32) -> Bool {
+    return (categoryBitMask & categories) != 0
+  }
+
   var isOnScreen: Bool {
     get { return categoryBitMask & ObjectCategories.offScreen.rawValue == 0 }
     set { if newValue {

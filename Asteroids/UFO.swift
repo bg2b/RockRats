@@ -87,11 +87,14 @@ class UFO: SKNode {
     let forceScale = Globals.gameConfig.value(for: \.ufoDodging) * 1000
     let shotAnticipation = Globals.gameConfig.value(for: \.ufoShotAnticipation)
     var totalForce = CGVector.zero
+    let interesting = (shotAnticipation > 0 ?
+      setOf([.asteroid, .player, .playerShot]) :
+      setOf([.asteroid, .player]))
     for node in playfield.children {
       // Be sure not to consider off-screen things.  That happens if the last asteroid is
       // destroyed while the UFO is flying around and a new wave spawns.
       guard let body = node.physicsBody, body.isOnScreen else { continue }
-      if body.isA(.asteroid) || body.isA(.playerShot) || body.isA(.player) {
+      if body.isOneOf(interesting) {
         //this needs to be done better. we need to think about how to do the different cases more fluidly rather than in one big loop with a bunch of conditionsals for the different types.
         let dx1 = node.position.x - position.x
         let dx2 = copysign(bounds.width, -dx1) + dx1
@@ -108,14 +111,15 @@ class UFO: SKNode {
           let vhat = body.velocity.scale(by: 1 / body.velocity.norm2())
           r = r - r.project(unitVector: vhat).scale(by: shotAnticipation)
         }
+        var d = r.norm2()
+        if d > 10 * ourRadius { continue }
         var objectRadius = CGFloat(0)
         if body.isA(.asteroid) {
           objectRadius = 0.5 * (node as! SKSpriteNode).size.diagonal()
-        }
-        if body.isA(.player) {
+        } else if body.isA(.player) {
           objectRadius = 0.5 * (node as! Ship).size.diagonal()
         }
-        let d = r.norm2() - (ourRadius + objectRadius)
+        d -= ourRadius + objectRadius
         // Limit the force so that we don't poke the UFO by an enormous amount
         let dmin = CGFloat(20)
         let dlim = 0.5 * (sqrt((d - dmin) * (d - dmin) + dmin) + d)
