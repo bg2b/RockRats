@@ -32,6 +32,7 @@ class UFO: SKNode {
   let ufoTexture: SKTexture
   var currentSpeed: CGFloat
   var engineSounds: SKAudioNode
+  var timeOfLastShot = 0.0
   
   required init(sounds: Sounds) {
     isBig = .random(in: 0...1) >= Globals.gameConfig.value(for: \.smallUFOChance)
@@ -132,7 +133,9 @@ class UFO: SKNode {
     if body.velocity.norm2() > maxSpeed {
       body.velocity = body.velocity.scale(by: maxSpeed / body.velocity.norm2())
     }
-    let toShoot = Int.random(in: 0...100) == 0
+    let averageShotTime = 2.0
+    let averageShotDistance = CGFloat(250)
+    let toShoot = CGFloat((Globals.lastUpdateTime - timeOfLastShot) / averageShotTime) * averageShotDistance / (position - player.position).norm2() >= 1
     if toShoot && player.parent != nil {
       let shotSpeed = Globals.gameConfig.value(for: \.ufoShotSpeed)[isBig ? 0 : 1]
       guard var angle = aimAt(player, shotSpeed: shotSpeed) else { return }
@@ -141,6 +144,7 @@ class UFO: SKNode {
       let shotDirection = CGVector(angle: angle)
       let shotPosition = position + shotDirection.scale(by: 0.5 * ufoTexture.size().width)
       addLaser(angle, shotPosition, shotSpeed)
+      timeOfLastShot = Globals.lastUpdateTime
     }
   }
   
