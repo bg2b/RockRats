@@ -159,7 +159,7 @@ class Ship: SKNode {
 
   // Sets the ship to the standard coasting configuration
   func coastingConfiguration() -> SKPhysicsBody {
-    guard let body = physicsBody else { fatalError("Where did Ship's physicsBody go?") }
+    let body = requiredPhysicsBody()
     body.angularVelocity = 0
     flamesOff()
     return body

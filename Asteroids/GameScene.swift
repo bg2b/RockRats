@@ -61,6 +61,12 @@ extension SKNode {
   func wait(for time: Double, then action: @escaping (() -> Void)) {
     wait(for: time, then: SKAction.run(action))
   }
+
+  func requiredPhysicsBody() -> SKPhysicsBody {
+    let printName = name ?? "<unknown name>"
+    guard let body = physicsBody else { fatalError("Node \(printName) is missing a physics body") }
+    return body
+  }
 }
 
 extension Globals {
@@ -379,8 +385,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     playfield.addWithScaling(laser)
     laser.position = position
     laser.zRotation = angle
-    guard let body = laser.physicsBody else { fatalError("Laser has no physics body") }
-    body.velocity = CGVector(angle: angle).scale(by: speed)
+    laser.requiredPhysicsBody().velocity = CGVector(angle: angle).scale(by: speed)
     sounds.soundEffect(.ufoShot)
   }
   
@@ -445,7 +450,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // the screen, but if the velocity gets tweaked, then that guarantee is out the
     // window.
     playfield.addWithScaling(asteroid)
-    guard let body = asteroid.physicsBody else { fatalError("An asteroid has lost its physicsBody") }
+    let body = asteroid.requiredPhysicsBody()
     body.velocity = finalVelocity
     body.isOnScreen = onScreen
     body.angularVelocity = .random(in: -.pi ... .pi)
@@ -547,7 +552,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     guard let size = (sizes.firstIndex { asteroid.name!.contains($0) }) else {
       fatalError("Asteroid not of recognized size")
     }
-    guard let velocity = asteroid.physicsBody?.velocity else { fatalError("Asteroid had no velocity") }
+    let velocity = asteroid.requiredPhysicsBody().velocity
     let pos = asteroid.position
     makeAsteroidSplitEffect(asteroid, ofSize: size)
     sounds.soundEffect(hitEffect[size])
@@ -667,7 +672,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       }
     }
     ufo.position = bestPosition!
-    guard let body = ufo.physicsBody else { fatalError("UFO has no physics body") }
+    let body = ufo.requiredPhysicsBody()
     body.isDynamic = true
     body.velocity = CGVector(dx: copysign(ufo.currentSpeed, -ufo.position.x), dy: 0)
   }
