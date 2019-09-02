@@ -347,7 +347,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     guard player.canShoot() else { return }
     let laser = Globals.spriteCache.findSprite(imageNamed: "lasersmall_green") { sprite in
       guard let texture = sprite.texture else { fatalError("Where is the laser texture?") }
-      let body = SKPhysicsBody(texture: texture, size: texture.size())
+      // Physics body is just a little circle at the front end of the laser, since
+      // that's likely to be the first and only thing that will hit an object anyway.
+      let ht = texture.size().height
+      let body = SKPhysicsBody(circleOfRadius: 0.5 * ht,
+                               center: CGPoint(x: 0.5 * (texture.size().width - ht), y: 0))
       body.allowsRotation = false
       body.linearDamping = 0
       body.categoryBitMask = ObjectCategories.playerShot.rawValue
@@ -372,7 +376,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   func fireUFOLaser(angle: CGFloat, position: CGPoint, speed: CGFloat) {
     let laser = Globals.spriteCache.findSprite(imageNamed: "lasersmall_red") { sprite in
       guard let texture = sprite.texture else { fatalError("Where is the laser texture?") }
-      let body = SKPhysicsBody(texture: texture, size: texture.size())
+      let ht = texture.size().height
+      let body = SKPhysicsBody(circleOfRadius: 0.5 * ht,
+                               center: CGPoint(x: 0.5 * (texture.size().width - ht), y: 0))
       body.allowsRotation = false
       body.linearDamping = 0
       body.categoryBitMask = ObjectCategories.ufoShot.rawValue
@@ -416,13 +422,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     guard let numTypes = typesForSize[size] else { fatalError("Incorrect asteroid size") }
     var type = Int.random(in: 1...numTypes)
     if Int.random(in: 1...4) != 1 {
-      // Prefer the last type for each size, rest just for variety
+      // Prefer the last type for each size (where we can use a circular physics
+      // body), rest just for variety.
       type = numTypes
     }
     let name = "meteor\(size)\(type)"
     let asteroid = Globals.spriteCache.findSprite(imageNamed: name) { sprite in
       guard let texture = sprite.texture else { fatalError("Where is the asteroid texture?") }
-      let body = SKPhysicsBody(texture: texture, size: texture.size())
+      // Huge and big asteroids of all types except the default have irregular shape,
+      // so we use a pixel-perfect physics body for those.  Everything else gets a
+      // circle.
+      let body = (type == numTypes || size == "med" || size == "small" ?
+        SKPhysicsBody(circleOfRadius: 0.5 * texture.size().width) :
+        SKPhysicsBody(texture: texture, size: texture.size()))
       body.angularDamping = 0
       body.linearDamping = 0
       body.categoryBitMask = ObjectCategories.asteroid.rawValue
