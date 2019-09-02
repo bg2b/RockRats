@@ -69,7 +69,7 @@ class UFO: SKNode {
   
   func fly(player: Ship, playfield: Playfield, addLaser: ((CGFloat, CGPoint, CGFloat) -> Void)) {
     guard parent != nil else { return }
-    guard let body = physicsBody else { fatalError("UFO has lost its body. It is an UFH - unidentified flying head") }
+    let body = requiredPhysicsBody()
     body.angularVelocity = .pi * 2
     guard body.isOnScreen else { return }
     let toMove = Int.random(in: 0...100) == 0
