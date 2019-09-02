@@ -50,7 +50,7 @@ class UFO: SKNode {
     ufo.name = "ufoImage"
     addChild(ufo)
     sounds.addPositional(player: engineSounds, at: self)
-    let body = SKPhysicsBody(texture: ufoTexture, size: ufoTexture.size())
+    let body = SKPhysicsBody(circleOfRadius: 0.5 * ufoTexture.size().width)
     body.mass = isBig ? 1 : 0.75
     body.categoryBitMask = ObjectCategories.ufo.rawValue
     body.collisionBitMask = 0
