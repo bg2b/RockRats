@@ -59,6 +59,7 @@ func hyperspaceShader(forTexture texture: SKTexture, inward: Bool, warpTime: Dou
   shader.attributes = [SKAttribute(name: "a_start_time", type: .float)]
   return shader
 }
+var firstWarpTime: Double?
 
 class Ship: SKNode {
   let joystick: Joystick
@@ -71,7 +72,6 @@ class Ship: SKNode {
   let warpTime = 0.5
   var warpOutShader: SKShader
   var warpInShader: SKShader
-  var firstWarpTime: Double?
 
   func buildFlames(at exhaustPos: CGPoint, scale: CGFloat = 1, direction: CGFloat = 0) -> [SKSpriteNode] {
     var fire = (1...3).compactMap { Globals.textureCache.findTexture(imageNamed: "fire\($0)") }

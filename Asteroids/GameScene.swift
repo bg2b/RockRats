@@ -656,6 +656,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     sounds.soundEffect(.playerExplosion)
     stopSpawningUFOs()
+    ufos.forEach { ufo in
+      self.wait(for: 1) {
+        let effects = ufo.warpOut()
+        self.playfield.addWithScaling(effects[0])
+        self.playfield.addWithScaling(effects[1])
+      }
+    }
+    ufos.removeAll()
   }
   
   func spawnUFO() {

@@ -35,6 +35,8 @@ class UFO: SKNode {
   let meanShotTime: Double
   var timeOfNextShot: Double  // Negative initially, see init
   var shotAccuracy: CGFloat
+  let warpOutShader: SKShader
+  let warpTime = 0.25
 
   required init(sounds: Sounds, brothersKilled: Int) {
     isBig = .random(in: 0...1) >= Globals.gameConfig.value(for: \.smallUFOChance)
@@ -42,6 +44,7 @@ class UFO: SKNode {
     self.engineSounds = sounds.audioNodeFor(isBig ? .ufoEnginesBig : .ufoEnginesSmall)
     self.engineSounds.autoplayLooped = true
     self.engineSounds.run(SKAction.changeVolume(to: 0.5, duration: 0))
+    self.warpOutShader = hyperspaceShader(forTexture: ufoTexture, inward: true, warpTime: warpTime)
     sounds.addChild(self.engineSounds)
     let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[isBig ? 0 : 1]
     currentSpeed = .random(in: 0.5 * maxSpeed ... maxSpeed)
@@ -172,6 +175,40 @@ class UFO: SKNode {
     let shotPosition = position + shotDirection.scale(by: 0.5 * ufoTexture.size().width)
     addLaser(angle, shotPosition, shotSpeed)
     timeOfNextShot = Globals.lastUpdateTime + .random(in: 0.5 * meanShotTime ... 1.5 * meanShotTime)
+  }
+  
+  func warpEffect(shader: SKShader) -> SKNode {
+    let effect = SKSpriteNode(texture: ufoTexture)
+    effect.position = position
+    effect.zRotation = zRotation
+    effect.run(SKAction.scale(to: 0, duration: warpTime/2))
+    return effect
+  }
+  
+  func warpOut() -> [SKNode] {
+    let effect = warpEffect(shader: warpOutShader)
+    effect.run(SKAction.sequence([SKAction.wait(forDuration: warpTime), SKAction.removeFromParent()]))
+    let star = starBlink()
+    removeFromParent()
+    engineSounds.removeFromParent()
+    return [effect, star]
+  }
+  
+  func starBlink() -> SKSpriteNode {
+    let star = SKSpriteNode(imageNamed: "star1")
+    star.position = position
+    star.scale(to: CGSize(width: 0, height: 0))
+    star.run(SKAction.sequence([
+      SKAction.group([
+        SKAction.sequence([
+          SKAction.scale(to: 2, duration: self.warpTime),
+          SKAction.scale(to: 0, duration: self.warpTime)
+          ]),
+        SKAction.rotate(byAngle: .pi, duration: self.warpTime * 2),
+        ]),
+      SKAction.removeFromParent()
+      ]))
+    return star
   }
   
   func aimAt(_ object: SKNode, shotSpeed s: CGFloat) -> CGFloat? {
