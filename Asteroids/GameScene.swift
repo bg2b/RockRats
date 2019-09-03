@@ -92,6 +92,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   var lastJumpTime = 0.0
   var asteroids = Set<SKSpriteNode>()
   var wantToSpawnUFO = false
+  var ufosToAvenge = 0
   var ufos = Set<UFO>()
   var centralDisplay: SKLabelNode!
   var livesRemaining = 0
@@ -105,6 +106,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func recycleSprite(_ sprite: SKSpriteNode) {
+    // Speed may have been altered by the slow-motion effect in the playfield.  Be
+    // sure that when we give back the recycled sprite for a new object that the
+    // speed is reset to the default 1.
+    sprite.speed = 1
     Globals.spriteCache.recycleSprite(sprite)
   }
 
@@ -338,6 +343,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       // aggressive about what is considered safe.
       wait(for: 0.5) { self.spawnPlayer(safeTime: max(safeTime - 0.25, 0)) }
     } else {
+      ufosToAvenge /= 2
       enableHyperspaceJump()
       sounds.soundEffect(.warpIn)
       player.reset()
@@ -505,6 +511,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
   func nextWave() {
     Globals.gameConfig.waveNumber += 1
+    ufosToAvenge = 0
     displayMessage("WAVE \(Globals.gameConfig.waveNumber)", forTime: 1.5) {
       self.spawnWave()
     }
@@ -598,6 +605,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
   
   func laserHit(laser: SKNode, ufo: SKNode) {
+    ufosToAvenge += 1
     removeLaser(laser as! SKSpriteNode)
     destroyUFO(ufo as! UFO)
   }
@@ -652,7 +660,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   
   func spawnUFO() {
     guard player.parent != nil && ufos.count < Globals.gameConfig.value(for: \.maxUFOs) else { return }
-    let ufo = UFO(sounds: sounds)
+    let ufo = UFO(sounds: sounds, brothersKilled: ufosToAvenge)
     playfield.addWithScaling(ufo)
     ufos.insert(ufo)
     // Position the UFO just off the screen on one side or another.  We set the side
