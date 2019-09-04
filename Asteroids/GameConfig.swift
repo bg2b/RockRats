@@ -16,7 +16,7 @@ class WaveConfig: Decodable {
   var ufoDodging: CGFloat? = nil
   var ufoShotAnticipation: CGFloat? = nil
   var ufoAccuracy: [CGFloat]? = nil
-  var ufoMaxShots: Int? = nil
+  let ufoMeanShotTime: [Double]?
   var ufoShotSpeed: [CGFloat]? = nil
   var ufoMaxSpeed: [CGFloat]? = nil
   var asteroidSpeedBoost: CGFloat? = nil

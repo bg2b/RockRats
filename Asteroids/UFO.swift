@@ -32,15 +32,29 @@ class UFO: SKNode {
   let ufoTexture: SKTexture
   var currentSpeed: CGFloat
   var engineSounds: SKAudioNode
-  
-  required init(sounds: Sounds) {
+  let meanShotTime: Double
+  var timeOfNextShot: Double  // Negative initially, see init
+  var shotAccuracy: CGFloat
+  let warpTime = 0.5
+
+  required init(sounds: Sounds, brothersKilled: Int) {
     isBig = .random(in: 0...1) >= Globals.gameConfig.value(for: \.smallUFOChance)
     ufoTexture = Globals.textureCache.findTexture(imageNamed: isBig ? "ufo_green" : "ufo_red")
     self.engineSounds = sounds.audioNodeFor(isBig ? .ufoEnginesBig : .ufoEnginesSmall)
     self.engineSounds.autoplayLooped = true
     self.engineSounds.run(SKAction.changeVolume(to: 0.5, duration: 0))
     sounds.addChild(self.engineSounds)
-    currentSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[isBig ? 0 : 1]
+    let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[isBig ? 0 : 1]
+    currentSpeed = .random(in: 0.5 * maxSpeed ... maxSpeed)
+    let revengeFactor = max(brothersKilled - 3, 0)
+    // timeOfNextShot is negative initially, meaning that the UFO hasn't gotten on to
+    // the screen yet.  When it appears, the negative value will be added to the
+    // current time, so effectively the initial value here specifies a delay.  When
+    // revenge factor starts increasing, the UFOs start shooting faster, getting much
+    // quicker on the draw initially, and being much more accurate in their shooting.
+    meanShotTime = Globals.gameConfig.value(for: \.ufoMeanShotTime)[isBig ? 0 : 1] * pow(0.75, Double(revengeFactor))
+    timeOfNextShot = -Double.random(in: 0 ... meanShotTime * pow(0.75, Double(revengeFactor)))
+    shotAccuracy = Globals.gameConfig.value(for: \.ufoAccuracy)[isBig ? 0 : 1] * pow(0.75, CGFloat(revengeFactor))
     super.init()
     name = "ufo"
     let ufo = SKSpriteNode(texture: ufoTexture)
@@ -56,29 +70,28 @@ class UFO: SKNode {
     body.restitution = 0.9
     body.isOnScreen = false
     body.isDynamic = false
+    body.angularVelocity = .pi * 2
     physicsBody = body
   }
   
   required init(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented by UFO")
   }
-  
+
   func fly(player: Ship, playfield: Playfield, addLaser: ((CGFloat, CGPoint, CGFloat) -> Void)) {
     guard parent != nil else { return }
-    let body = requiredPhysicsBody()
-    body.angularVelocity = .pi * 2
-    guard body.isOnScreen else { return }
-    let toMove = Int.random(in: 0...100) == 0
-    let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[isBig ? 0 : 1]
-    if body.velocity.norm2() == 0 {
-      let angle = CGFloat.random(in: -.pi ... .pi)
-      currentSpeed = maxSpeed
-      body.velocity = CGVector(angle: angle).scale(by: maxSpeed)
-    }
-    if toMove {
-      currentSpeed = .random(in: 0.3 * maxSpeed ... maxSpeed)
-    }
     guard let bounds = scene?.frame else { return }
+    let body = requiredPhysicsBody()
+    guard body.isOnScreen else { return }
+    if timeOfNextShot < 0 {
+      // Just moved onto the screen, set the next shot time
+      timeOfNextShot += Globals.lastUpdateTime
+    }
+    let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[isBig ? 0 : 1]
+    if Int.random(in: 0...100) == 0 {
+      currentSpeed = .random(in: 0.3 * maxSpeed ... maxSpeed)
+      body.angularVelocity = copysign(.pi * 2, -body.angularVelocity)
+    }
     let ourRadius = 0.5 * size.diagonal()
     let forceScale = Globals.gameConfig.value(for: \.ufoDodging) * 1000
     let shotAnticipation = Globals.gameConfig.value(for: \.ufoShotAnticipation)
@@ -86,12 +99,17 @@ class UFO: SKNode {
     let interesting = (shotAnticipation > 0 ?
       setOf([.asteroid, .player, .playerShot]) :
       setOf([.asteroid, .player]))
+    var potentialTarget: SKNode? = (player.parent != nil ? player : nil)
+    var targetDistance = CGFloat.infinity
+    var playerDistance = CGFloat.infinity
     for node in playfield.children {
       // Be sure not to consider off-screen things.  That happens if the last asteroid is
       // destroyed while the UFO is flying around and a new wave spawns.
       guard let body = node.physicsBody, body.isOnScreen else { continue }
       if body.isOneOf(interesting) {
-        //this needs to be done better. we need to think about how to do the different cases more fluidly rather than in one big loop with a bunch of conditionsals for the different types.
+        // This can maybe be done better.  We need to think about how to do the
+        // different cases more fluidly rather than in one big loop with a bunch of
+        // conditionals for the different types.
         let dx1 = node.position.x - position.x
         let dx2 = copysign(bounds.width, -dx1) + dx1
         let dx = (abs(dx1) < abs(dx2) ? dx1 : dx2)
@@ -114,6 +132,11 @@ class UFO: SKNode {
           objectRadius = 0.5 * (node as! SKSpriteNode).size.diagonal()
         } else if body.isA(.player) {
           objectRadius = 0.5 * (node as! Ship).size.diagonal()
+          playerDistance = d
+        }
+        if d < targetDistance {
+          potentialTarget = node
+          targetDistance = d
         }
         d -= ourRadius + objectRadius
         // Limit the force so that we don't poke the UFO by an enormous amount
@@ -132,16 +155,58 @@ class UFO: SKNode {
     if body.velocity.norm2() > maxSpeed {
       body.velocity = body.velocity.scale(by: maxSpeed / body.velocity.norm2())
     }
-    let toShoot = Int.random(in: 0...100) == 0
-    if toShoot && player.parent != nil {
-      let shotSpeed = Globals.gameConfig.value(for: \.ufoShotSpeed)[isBig ? 0 : 1]
-      guard var angle = aimAt(player, shotSpeed: shotSpeed) else { return }
-      let accuracy = Globals.gameConfig.value(for: \.ufoAccuracy)[isBig ? 0 : 1]
-      angle += CGFloat.random(in: -accuracy * .pi ... accuracy * .pi)
-      let shotDirection = CGVector(angle: angle)
-      let shotPosition = position + shotDirection.scale(by: 0.5 * ufoTexture.size().width)
-      addLaser(angle, shotPosition, shotSpeed)
+    if playerDistance < 1.5 * targetDistance {
+      // Override closest-object targetting if the player is not too much farther away.
+      potentialTarget = player
     }
+    guard let target = potentialTarget, Globals.lastUpdateTime > timeOfNextShot else { return }
+    let shotSpeed = Globals.gameConfig.value(for: \.ufoShotSpeed)[isBig ? 0 : 1]
+    guard var angle = aimAt(target, shotSpeed: shotSpeed) else { return }
+    if target != player {
+      // If we're targetting an asteroid, be pretty accurate
+      angle += CGFloat.random(in: -0.1 * shotAccuracy * .pi ... 0.1 * shotAccuracy * .pi)
+    } else {
+      angle += CGFloat.random(in: -shotAccuracy * .pi ... shotAccuracy * .pi)
+    }
+    shotAccuracy *= 0.97  // Gunner training ;-)
+    let shotDirection = CGVector(angle: angle)
+    let shotPosition = position + shotDirection.scale(by: 0.5 * ufoTexture.size().width)
+    addLaser(angle, shotPosition, shotSpeed)
+    timeOfNextShot = Globals.lastUpdateTime + .random(in: 0.5 * meanShotTime ... 1.5 * meanShotTime)
+  }
+  
+  func warpEffect() -> SKNode {
+    let effect = SKSpriteNode(texture: ufoTexture)
+    effect.position = position
+    effect.zRotation = zRotation
+    effect.run(SKAction.scale(to: 0, duration: warpTime / 2))
+    return effect
+  }
+  
+  func warpOut() -> [SKNode] {
+    let effect = warpEffect()
+    effect.run(SKAction.sequence([SKAction.wait(forDuration: warpTime), SKAction.removeFromParent()]))
+    let star = starBlink()
+    removeFromParent()
+    engineSounds.removeFromParent()
+    return [effect, star]
+  }
+  
+  func starBlink() -> SKSpriteNode {
+    let star = SKSpriteNode(imageNamed: "star1")
+    star.position = position
+    star.scale(to: CGSize(width: 0, height: 0))
+    star.run(SKAction.sequence([
+      SKAction.group([
+        SKAction.sequence([
+          SKAction.scale(to: 2, duration: self.warpTime),
+          SKAction.scale(to: 0, duration: self.warpTime)
+          ]),
+        SKAction.rotate(byAngle: .pi, duration: self.warpTime * 2),
+        ]),
+      SKAction.removeFromParent()
+      ]))
+    return star
   }
   
   func aimAt(_ object: SKNode, shotSpeed s: CGFloat) -> CGFloat? {
