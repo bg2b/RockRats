@@ -510,9 +510,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func nextWave() {
-    Globals.gameConfig.waveNumber += 1
+    Globals.gameConfig.nextWave()
     ufosToAvenge = 0
-    displayMessage("WAVE \(Globals.gameConfig.waveNumber)", forTime: 1.5) {
+    displayMessage("WAVE \(Globals.gameConfig.waveNumber())", forTime: 1.5) {
       self.spawnWave()
     }
   }
@@ -802,7 +802,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     initInfo()
     initSounds()
     livesRemaining = Globals.gameConfig.initialLives
-    Globals.gameConfig.waveNumber = 0
+    Globals.gameConfig.currentWaveNumber = 0
     extraLivesAwarded = 0
     updateLives(0)
     player = Ship(color: teamColors[0], sounds: sounds, joystick: joystick)

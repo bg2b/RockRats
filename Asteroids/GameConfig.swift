@@ -8,18 +8,22 @@
 
 import SpriteKit
 
-struct WaveConfig: Decodable {
+class WaveConfig: Decodable {
   let waveNumber: Int
-  let meanUFOTime: Double?
-  let smallUFOChance: Double?
-  let maxUFOs: Int?
-  let ufoDodging: CGFloat?
-  let ufoShotAnticipation: CGFloat?
-  let ufoAccuracy: [CGFloat]?
-  let ufoMeanShotTime: [Double]?
-  let ufoShotSpeed: [CGFloat]?
-  let ufoMaxSpeed: [CGFloat]?
-  let asteroidSpeedBoost: CGFloat?
+  var meanUFOTime: Double? = nil
+  var smallUFOChance: Double? = nil
+  var maxUFOs: Int? = nil
+  var ufoDodging: CGFloat? = nil
+  var ufoShotAnticipation: CGFloat? = nil
+  var ufoAccuracy: [CGFloat]? = nil
+  var ufoMeanShotTime: [Double]? = nil
+  var ufoShotSpeed: [CGFloat]? = nil
+  var ufoMaxSpeed: [CGFloat]? = nil
+  var asteroidSpeedBoost: CGFloat? = nil
+
+  required init(waveNumber: Int) {
+    self.waveNumber = waveNumber
+  }
 }
 
 struct GameConfig: Decodable {
@@ -38,16 +42,38 @@ struct GameConfig: Decodable {
   let numAsteroidCoeffs: [Double]
   let waveConfigs: [WaveConfig]
 
-  var waveNumber = 0
+  var currentWaveNumber: Int?
+  var configCache: WaveConfig?
 
-  func value<T>(for path: KeyPath<WaveConfig, T?>) -> T {
+  func waveNumber() -> Int {
+    guard let result = currentWaveNumber else { fatalError("You didn't set the current wave number") }
+    return result
+  }
+
+  mutating func nextWave() {
+    let current = waveNumber()
+    currentWaveNumber = current + 1
+  }
+
+  mutating func value<T>(for path: WritableKeyPath<WaveConfig, T?>) -> T {
+    let waveNumber = self.waveNumber()
+    guard var cache = configCache, cache.waveNumber == waveNumber else {
+      configCache = WaveConfig(waveNumber: waveNumber)
+      return value(for: path)
+    }
+    if let cached = cache[keyPath: path] {
+      return cached
+    }
     guard let config = waveConfigs.last(where: { $0.waveNumber <= waveNumber && $0[keyPath: path] != nil }) else {
       fatalError("Missing game configuration info")
     }
-    return config[keyPath: path]!
+    let result = config[keyPath: path]!
+    cache[keyPath: path] = result
+    return result
   }
 
   func numAsteroids() -> Int {
+    let waveNumber = self.waveNumber()
     var polynomial = 0.0
     for (i, coeff) in numAsteroidCoeffs.enumerated() {
       polynomial += coeff * pow(Double(waveNumber), Double(i))
