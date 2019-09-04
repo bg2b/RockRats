@@ -625,15 +625,42 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       playfield.addWithScaling(p)
     }
   }
+
+  func warpOutUFOs() -> Double {
+    // This is a little involved, but here's the idea.  The player has just died and
+    // we've delayed a bit to let any of his existing shots hit stuff.  After the
+    // shots are gone, any remaining UFOs will warp out before the player respawns or
+    // we show GAME OVER.  We warp out the UFOs by having each run an action that
+    // waits for a random delay before calling ufo.warpOut.  While the UFO is
+    // delaying though, it might hit an asteroid and be destroyed, so the action has
+    // a "warpOut" key through which we can cancel it.  This function returns the
+    // maximum warpOut delay for all the UFOs; respawnOrGameOver will wait a bit
+    // longer than that before triggering whatever it's going to do.
+    var maxDelay = 0.0
+    ufos.forEach { ufo in
+      let delay = Double.random(in: 0.5...1.5)
+      maxDelay = max(maxDelay, delay)
+      ufo.run(SKAction.sequence([
+        SKAction.wait(forDuration: delay),
+        SKAction.run({
+          self.ufos.remove(ufo)
+          let effects = ufo.warpOut()
+          self.playfield.addWithScaling(effects[0])
+          self.playfield.addWithScaling(effects[1])
+        })]), withKey: "warpOut")
+    }
+    return maxDelay
+  }
   
   func respawnOrGameOver() {
+    let delay = warpOutUFOs() + 1
     if livesRemaining > 0 {
-      wait(for: 1) { self.spawnPlayer() }
+      wait(for: delay) { self.spawnPlayer() }
     } else {
       gameOver = true
       sounds.stopHeartbeat()
       self.removeAction(forKey: "spawnWave")
-      wait(for: 2) {
+      wait(for: delay) {
         self.sounds.soundEffect(.gameOver)
         self.displayMessage("GAME OVER", forTime: 4)
       }
@@ -656,14 +683,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     sounds.soundEffect(.playerExplosion)
     stopSpawningUFOs()
-    ufos.forEach { ufo in
-      self.wait(for: 1) {
-        let effects = ufo.warpOut()
-        self.playfield.addWithScaling(effects[0])
-        self.playfield.addWithScaling(effects[1])
-      }
-    }
-    ufos.removeAll()
   }
   
   func spawnUFO() {
@@ -713,6 +732,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     if updateScore {
       addToScore(ufo.isBig ? 20 : 100)
     }
+    // If the player was destroyed earlier, the UFO will have been scheduled for
+    // warpOut.  But if it just got destroyed (by hitting an asteroid) we have to be
+    // sure to cancel the warp.
+    ufo.removeAction(forKey: "warpOut")
     ufos.remove(ufo)
     sounds.soundEffect(.ufoExplosion)
     addExplosion(ufo.explode())

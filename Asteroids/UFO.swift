@@ -35,8 +35,7 @@ class UFO: SKNode {
   let meanShotTime: Double
   var timeOfNextShot: Double  // Negative initially, see init
   var shotAccuracy: CGFloat
-  let warpOutShader: SKShader
-  let warpTime = 0.25
+  let warpTime = 0.5
 
   required init(sounds: Sounds, brothersKilled: Int) {
     isBig = .random(in: 0...1) >= Globals.gameConfig.value(for: \.smallUFOChance)
@@ -44,7 +43,6 @@ class UFO: SKNode {
     self.engineSounds = sounds.audioNodeFor(isBig ? .ufoEnginesBig : .ufoEnginesSmall)
     self.engineSounds.autoplayLooped = true
     self.engineSounds.run(SKAction.changeVolume(to: 0.5, duration: 0))
-    self.warpOutShader = hyperspaceShader(forTexture: ufoTexture, inward: true, warpTime: warpTime)
     sounds.addChild(self.engineSounds)
     let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[isBig ? 0 : 1]
     currentSpeed = .random(in: 0.5 * maxSpeed ... maxSpeed)
@@ -177,16 +175,16 @@ class UFO: SKNode {
     timeOfNextShot = Globals.lastUpdateTime + .random(in: 0.5 * meanShotTime ... 1.5 * meanShotTime)
   }
   
-  func warpEffect(shader: SKShader) -> SKNode {
+  func warpEffect() -> SKNode {
     let effect = SKSpriteNode(texture: ufoTexture)
     effect.position = position
     effect.zRotation = zRotation
-    effect.run(SKAction.scale(to: 0, duration: warpTime/2))
+    effect.run(SKAction.scale(to: 0, duration: warpTime / 2))
     return effect
   }
   
   func warpOut() -> [SKNode] {
-    let effect = warpEffect(shader: warpOutShader)
+    let effect = warpEffect()
     effect.run(SKAction.sequence([SKAction.wait(forDuration: warpTime), SKAction.removeFromParent()]))
     let star = starBlink()
     removeFromParent()
