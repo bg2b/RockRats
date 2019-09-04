@@ -807,7 +807,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     extraLivesAwarded = 0
     updateLives(0)
     player = Ship(color: teamColors[0], sounds: sounds, joystick: joystick)
-    sounds.heartbeat()
+    sounds.startHearbeat()
     nextWave()
     wait(for: 3.0) { self.spawnPlayer() }
   }
