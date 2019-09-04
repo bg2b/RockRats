@@ -81,6 +81,7 @@ class Sounds: SKNode {
   let heartbeatRateMax = 0.5
   var currentHeartbeatRate = 0.0
   var heartbeatVolume: Float = 0.0
+  var heartbeatOn = false
   var audioPlayerCache = [SoundEffect: SoundEffectPlayers]()
   var positionalEffects = [PositionalEffect]()
   var soundQueue = OperationQueue()
@@ -101,20 +102,25 @@ class Sounds: SKNode {
   }
 
   func heartbeat() {
-    soundEffect(.heartbeatHigh, withVolume: heartbeatVolume)
-    let fractionBetween = 0.2
-    wait(for: fractionBetween * currentHeartbeatRate) {
-      self.soundEffect(.heartbeatLow, withVolume: self.heartbeatVolume)
-      self.heartbeatVolume = 0.5
-      self.currentHeartbeatRate = max(0.995 * self.currentHeartbeatRate, self.heartbeatRateMax)
-      self.run(SKAction.sequence([SKAction.wait(forDuration: (1 - fractionBetween) * self.currentHeartbeatRate),
-                             SKAction.run { self.heartbeat() }]),
-          withKey: "heartbeat")
+    if heartbeatOn {
+      soundEffect(.heartbeatHigh, withVolume: heartbeatVolume)
+      let fractionBetween = 0.2
+      wait(for: fractionBetween * currentHeartbeatRate) {
+        self.soundEffect(.heartbeatLow, withVolume: self.heartbeatVolume)
+        self.heartbeatVolume = 0.5
+        self.currentHeartbeatRate = max(0.98 * self.currentHeartbeatRate, self.heartbeatRateMax)
+        self.wait(for: (1 - fractionBetween) * self.currentHeartbeatRate) { self.heartbeat() }
+      }
     }
   }
 
+  func startHearbeat() {
+    heartbeatOn = true
+    heartbeat()
+  }
+
   func stopHeartbeat() {
-    removeAction(forKey: "heartbeat")
+    heartbeatOn = false
   }
 
   func normalHeartbeatRate() {

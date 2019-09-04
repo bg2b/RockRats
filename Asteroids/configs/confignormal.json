@@ -24,6 +24,7 @@
       "ufoAccuracy": [0.5, 0.25],
       "asteroidSpeedBoost": 1.1,
       "ufoShotSpeed": [300, 400],
+      "ufoMeanShotTime": [4, 3],
       "ufoMaxSpeed": [200, 300]
     },
     {
@@ -32,6 +33,7 @@
       "ufoShotAnticipation": 0,
       "smallUFOChance": 0.25,
       "ufoAccuracy": [0.4, 0.2],
+      "ufoMeanShotTime": [3, 2.25],
       "asteroidSpeedBoost": 1.1
     },
     {
@@ -40,6 +42,7 @@
       "ufoShotAnticipation": 0,
       "smallUFOChance": 0.5,
       "ufoAccuracy": [0.3, 0.15],
+      "ufoMeanShotTime": [2, 1.5],
       "asteroidSpeedBoost": 1.2
     },
     {
@@ -49,6 +52,7 @@
       "ufoShotAnticipation": 0.1,
       "smallUFOChance": 0.75,
       "ufoAccuracy": [0.2, 0.1],
+      "ufoMeanShotTime": [1.5, 1.125],
       "asteroidSpeedBoost": 1.3
     },
     {
@@ -57,6 +61,7 @@
       "ufoShotAnticipation": 0.2,
       "smallUFOChance": 1,
       "ufoAccuracy": [0.1, 0.05],
+      "ufoMeanShotTime": [1, 0.75],
       "asteroidSpeedBoost": 1.4
     },
     {
@@ -72,6 +77,7 @@
       "ufoDodging": 15,
       "ufoShotAnticipation": 0.4,
       "ufoAccuracy": [0.02, 0.01],
+      "ufoMeanShotTime": [0.75, 0.5],
       "asteroidSpeedBoost": 1.6
     }
   ]
