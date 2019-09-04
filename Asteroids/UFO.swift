@@ -191,8 +191,8 @@ class UFO: SKNode {
     let effect = warpEffect()
     effect.run(SKAction.sequence([SKAction.wait(forDuration: warpTime), SKAction.removeFromParent()]))
     let star = starBlink()
+    engineSounds.stop()
     removeFromParent()
-    engineSounds.removeFromParent()
     return [effect, star]
   }
   
