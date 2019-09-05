@@ -397,12 +397,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       sprite.physicsBody = body
       sprite.zPosition = -1
     }
+    laser.wait(for: Double(0.9 * frame.height / speed)) { self.removeUFOLaser(laser) }
     playfield.addWithScaling(laser)
-    // If the UFO shoots while slow-motion is in effect, it seems like we
-    // have to scale explicitly by playfield.speed for some reason that we
-    // don't understand...
-    // laser.wait(for: Double(0.9 * frame.height / speed)) { self.removeUFOLaser(laser) }
-    laser.wait(for: Double(0.9 * frame.height / speed / playfield.speed)) { self.removeUFOLaser(laser) }
     laser.position = position
     laser.zRotation = angle
     laser.requiredPhysicsBody().velocity = CGVector(angle: angle).scale(by: speed)
