@@ -647,6 +647,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
           let effects = ufo.warpOut()
           self.playfield.addWithScaling(effects[0])
           self.playfield.addWithScaling(effects[1])
+          self.sounds.soundEffect(.ufoWarpOut)
         })]), withKey: "warpOut")
     }
     return maxDelay

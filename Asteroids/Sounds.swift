@@ -27,6 +27,7 @@ enum SoundEffect: String, CaseIterable {
   case ufoEnginesBig = "ufo1loop"
   case ufoEnginesSmall = "ufo2loop"
   case ufoShot = "ufo_laser"
+  case ufoWarpOut = "ufo_warpout"
 
   var url: URL {
     guard let url = Bundle.main.url(forResource: self.rawValue, withExtension: "wav") else {
@@ -50,7 +51,9 @@ let numSimultaneousSounds = [
   .asteroidMedHit: 5,
   .ufoExplosion: 3,
   .ufoEnginesBig: 3,
-  .ufoEnginesSmall: 3
+  .ufoEnginesSmall: 3,
+  .ufoShot: 3,
+  .ufoWarpOut: 3
 ]
 
 class SoundEffectPlayers {
