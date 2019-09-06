@@ -86,6 +86,7 @@
 		FDE04B2B22D745470011A529 /* Joystick.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE04B2A22D745470011A529 /* Joystick.swift */; };
 		FDE04B2D22D753240011A529 /* TextureCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE04B2C22D753240011A529 /* TextureCache.swift */; };
 		FDF92B422322456900CC4DFE /* Hyperspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDF92B412322456900CC4DFE /* Hyperspace.swift */; };
+		FDF92B442322666600CC4DFE /* ufo_warpout.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDF92B432322666600CC4DFE /* ufo_warpout.wav */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -181,6 +182,7 @@
 		FDE04B2A22D745470011A529 /* Joystick.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Joystick.swift; sourceTree = "<group>"; };
 		FDE04B2C22D753240011A529 /* TextureCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureCache.swift; sourceTree = "<group>"; };
 		FDF92B412322456900CC4DFE /* Hyperspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hyperspace.swift; sourceTree = "<group>"; };
+		FDF92B432322666600CC4DFE /* ufo_warpout.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo_warpout.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -222,6 +224,7 @@
 				6523C0812316E5400071AB4B /* ufo2loop.wav */,
 				FD537DD5231BE384003312B3 /* ufo_laser.wav */,
 				659CC03F230EDA3500AA087C /* ufo_explosion.wav */,
+				FDF92B432322666600CC4DFE /* ufo_warpout.wav */,
 				FDA43B212308C11E00A29347 /* gameover.wav */,
 				FDA43B1F2308AB9600A29347 /* heartbeat.wav */,
 				FDA43B23230A111D00A29347 /* meteorhuge_hit.wav */,
@@ -431,6 +434,7 @@
 				FD53168F22DC1A0600F09E57 /* laserbig_red@2x.png in Resources */,
 				FD0C070822D8925E00F19A55 /* ship_green@2x.png in Resources */,
 				FD53167322DAA8EA00F09E57 /* fire2@2x.png in Resources */,
+				FDF92B442322666600CC4DFE /* ufo_warpout.wav in Resources */,
 				FD53168522DB445100F09E57 /* meteorbig2@2x.png in Resources */,
 				FD0C070D22D8925E00F19A55 /* starfield_purple@2x.png in Resources */,
 				FDE04B2722D5FEA30011A529 /* star1@2x.png in Resources */,
