@@ -165,8 +165,10 @@ class UFO: SKNode {
     if body.velocity.norm2() > maxSpeed {
       body.velocity = body.velocity.scale(by: maxSpeed / body.velocity.norm2())
     }
-    if playerDistance < 1.5 * targetDistance {
-      // Override closest-object targetting if the player is not too much farther away.
+    if playerDistance < 1.5 * targetDistance || (player.parent != nil && Int.random(in: 0..<100) >= 25) {
+      // Override closest-object targetting if the player is about at the same
+      // distance.  Also bias towards randomly shooting at the player even if they're
+      // pretty far.
       potentialTarget = player
     }
     guard let target = potentialTarget, shootingEnabled else { return }
