@@ -85,6 +85,7 @@
 		FDE04B2922D5FEA30011A529 /* star2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FDE04B2622D5FEA30011A529 /* star2@2x.png */; };
 		FDE04B2B22D745470011A529 /* Joystick.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE04B2A22D745470011A529 /* Joystick.swift */; };
 		FDE04B2D22D753240011A529 /* TextureCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE04B2C22D753240011A529 /* TextureCache.swift */; };
+		FDF92B422322456900CC4DFE /* Hyperspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDF92B412322456900CC4DFE /* Hyperspace.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -179,6 +180,7 @@
 		FDE04B2622D5FEA30011A529 /* star2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "star2@2x.png"; sourceTree = "<group>"; };
 		FDE04B2A22D745470011A529 /* Joystick.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Joystick.swift; sourceTree = "<group>"; };
 		FDE04B2C22D753240011A529 /* TextureCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureCache.swift; sourceTree = "<group>"; };
+		FDF92B412322456900CC4DFE /* Hyperspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hyperspace.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -265,6 +267,7 @@
 				FDD831F522F187D200CA4EC6 /* GameConfig.swift */,
 				FDD831F122EDB50200CA4EC6 /* Explosions.swift */,
 				FD53167422DB24EC00F09E57 /* Ship.swift */,
+				FDF92B412322456900CC4DFE /* Hyperspace.swift */,
 				FDCF8CA222DA175F008EDFD1 /* CGHelpers.swift */,
 				FD4D53C623080E7300718938 /* Sounds.swift */,
 				FDE04B2A22D745470011A529 /* Joystick.swift */,
@@ -474,6 +477,7 @@
 				FD79323622D20FE600E7D336 /* AppDelegate.swift in Sources */,
 				FDE04B2B22D745470011A529 /* Joystick.swift in Sources */,
 				FDDF488722D2A700006FB86F /* SpriteCache.swift in Sources */,
+				FDF92B422322456900CC4DFE /* Hyperspace.swift in Sources */,
 				FDD831F222EDB50200CA4EC6 /* Explosions.swift in Sources */,
 				FDCF8CA322DA175F008EDFD1 /* CGHelpers.swift in Sources */,
 				FD4D53C02306B47900718938 /* LivesDisplay.swift in Sources */,

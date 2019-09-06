@@ -34,10 +34,12 @@ class UFO: SKNode {
   var currentSpeed: CGFloat
   var engineSounds: AVAudioPlayer
   let meanShotTime: Double
-  var timeOfNextShot: Double  // Negative initially, see init
+  var delayOfFirstShot: Double
+  var shootingEnabled = false
   var shotAccuracy: CGFloat
   let warpTime = 0.5
-  
+  let warpOutShader: SKShader
+
   required init(sounds: Sounds, brothersKilled: Int) {
     isBig = .random(in: 0...1) >= Globals.gameConfig.value(for: \.smallUFOChance)
     ufoTexture = Globals.textureCache.findTexture(imageNamed: isBig ? "ufo_green" : "ufo_red")
@@ -50,14 +52,15 @@ class UFO: SKNode {
     let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[isBig ? 0 : 1]
     currentSpeed = .random(in: 0.5 * maxSpeed ... maxSpeed)
     let revengeFactor = max(brothersKilled - 3, 0)
-    // timeOfNextShot is negative initially, meaning that the UFO hasn't gotten on to
-    // the screen yet.  When it appears, the negative value will be added to the
-    // current time, so effectively the initial value here specifies a delay.  When
-    // revenge factor starts increasing, the UFOs start shooting faster, getting much
-    // quicker on the draw initially, and being much more accurate in their shooting.
+    // When delayOfFirstShot is nonnegative, it means that the UFO hasn't gotten on
+    // to the screen yet.  When it appears, we schedule an action after that delay to
+    // enable firing.  When revenge factor starts increasing, the UFOs start shooting
+    // faster, getting much quicker on the draw initially, and being much more
+    // accurate in their shooting.
     meanShotTime = Globals.gameConfig.value(for: \.ufoMeanShotTime)[isBig ? 0 : 1] * pow(0.75, Double(revengeFactor))
-    timeOfNextShot = -Double.random(in: 0 ... meanShotTime * pow(0.75, Double(revengeFactor)))
+    delayOfFirstShot = Double.random(in: 0 ... meanShotTime * pow(0.75, Double(revengeFactor)))
     shotAccuracy = Globals.gameConfig.value(for: \.ufoAccuracy)[isBig ? 0 : 1] * pow(0.75, CGFloat(revengeFactor))
+    warpOutShader = fanFoldShader(forTexture: ufoTexture, warpTime: warpTime)
     super.init()
     name = "ufo"
     let ufo = SKSpriteNode(texture: ufoTexture)
@@ -87,9 +90,10 @@ class UFO: SKNode {
     guard let bounds = scene?.frame else { return }
     let body = requiredPhysicsBody()
     guard body.isOnScreen else { return }
-    if timeOfNextShot < 0 {
-      // Just moved onto the screen, set the next shot time
-      timeOfNextShot += Globals.lastUpdateTime
+    if delayOfFirstShot >= 0 {
+      // Just moved onto the screen, enable shooting after a delay
+      wait(for: delayOfFirstShot) { self.shootingEnabled = true }
+      delayOfFirstShot = -1
     }
     let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[isBig ? 0 : 1]
     if Int.random(in: 0...100) == 0 {
@@ -103,9 +107,14 @@ class UFO: SKNode {
     let interesting = (shotAnticipation > 0 ?
       setOf([.asteroid, .player, .playerShot]) :
       setOf([.asteroid, .player]))
+    // By default, shoot at the player.  If there's an asteroid that's notably closer
+    // though, shoot that instead.  In addition to the revenge factor increase in UFO
+    // danger, that helps ensure that the player can't sit around and farm UFOs for
+    // points forever.
     var potentialTarget: SKNode? = (player.parent != nil ? player : nil)
     var targetDistance = CGFloat.infinity
     var playerDistance = CGFloat.infinity
+    let interestingDistance = 0.33 * min(bounds.width, bounds.height)
     for node in playfield.children {
       // Be sure not to consider off-screen things.  That happens if the last asteroid is
       // destroyed while the UFO is flying around and a new wave spawns.
@@ -130,7 +139,8 @@ class UFO: SKNode {
           r = r - r.project(unitVector: vhat).scale(by: shotAnticipation)
         }
         var d = r.norm2()
-        if d > 10 * ourRadius { continue }
+        // Ignore stuff that's too far away
+        guard d <= interestingDistance else { continue }
         var objectRadius = CGFloat(0)
         if body.isA(.asteroid) {
           objectRadius = 0.5 * (node as! SKSpriteNode).size.diagonal()
@@ -163,7 +173,7 @@ class UFO: SKNode {
       // Override closest-object targetting if the player is not too much farther away.
       potentialTarget = player
     }
-    guard let target = potentialTarget, Globals.lastUpdateTime > timeOfNextShot else { return }
+    guard let target = potentialTarget, shootingEnabled else { return }
     let shotSpeed = Globals.gameConfig.value(for: \.ufoShotSpeed)[isBig ? 0 : 1]
     guard var angle = aimAt(target, shotSpeed: shotSpeed) else { return }
     if target != player {
@@ -176,41 +186,20 @@ class UFO: SKNode {
     let shotDirection = CGVector(angle: angle)
     let shotPosition = position + shotDirection.scale(by: 0.5 * ufoTexture.size().width)
     addLaser(angle, shotPosition, shotSpeed)
-    timeOfNextShot = Globals.lastUpdateTime + .random(in: 0.5 * meanShotTime ... 1.5 * meanShotTime)
+    shootingEnabled = false
+    wait(for: .random(in: 0.5 * meanShotTime ... 1.5 * meanShotTime)) { self.shootingEnabled = true }
   }
-  
-  func warpEffect() -> SKNode {
+
+  func warpOut() -> [SKNode] {
     let effect = SKSpriteNode(texture: ufoTexture)
     effect.position = position
     effect.zRotation = zRotation
-    effect.run(SKAction.scale(to: 0, duration: warpTime / 2))
-    return effect
-  }
-  
-  func warpOut() -> [SKNode] {
-    let effect = warpEffect()
-    effect.run(SKAction.sequence([SKAction.wait(forDuration: warpTime), SKAction.removeFromParent()]))
-    let star = starBlink()
+    effect.shader = warpOutShader
+    setStartTimeAttrib(effect)
+    let star = starBlink(at: position, throughAngle: -.pi, duration: 2 * warpTime)
     engineSounds.stop()
     removeFromParent()
     return [effect, star]
-  }
-  
-  func starBlink() -> SKSpriteNode {
-    let star = SKSpriteNode(imageNamed: "star1")
-    star.position = position
-    star.scale(to: CGSize(width: 0, height: 0))
-    star.run(SKAction.sequence([
-      SKAction.group([
-        SKAction.sequence([
-          SKAction.scale(to: 2, duration: self.warpTime),
-          SKAction.scale(to: 0, duration: self.warpTime)
-          ]),
-        SKAction.rotate(byAngle: .pi, duration: self.warpTime * 2),
-        ]),
-      SKAction.removeFromParent()
-      ]))
-    return star
   }
   
   func aimAt(_ object: SKNode, shotSpeed s: CGFloat) -> CGFloat? {
