@@ -60,7 +60,6 @@
 		FD53169322DC1A0600F09E57 /* lasersmall_red@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53168D22DC1A0500F09E57 /* lasersmall_red@2x.png */; };
 		FD537DD6231BE385003312B3 /* ufo_laser.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD537DD5231BE384003312B3 /* ufo_laser.wav */; };
 		FD79323622D20FE600E7D336 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD79323522D20FE600E7D336 /* AppDelegate.swift */; };
-		FD79323822D20FE600E7D336 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = FD79323722D20FE600E7D336 /* GameScene.sks */; };
 		FD79323C22D20FE600E7D336 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD79323B22D20FE600E7D336 /* GameScene.swift */; };
 		FD79323E22D20FE600E7D336 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD79323D22D20FE600E7D336 /* GameViewController.swift */; };
 		FD79324122D20FE600E7D336 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FD79323F22D20FE600E7D336 /* Main.storyboard */; };
@@ -155,7 +154,6 @@
 		FD537DD5231BE384003312B3 /* ufo_laser.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo_laser.wav; sourceTree = "<group>"; };
 		FD79323222D20FE600E7D336 /* Asteroids.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Asteroids.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD79323522D20FE600E7D336 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		FD79323722D20FE600E7D336 /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
 		FD79323B22D20FE600E7D336 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
 		FD79323D22D20FE600E7D336 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		FD79324022D20FE600E7D336 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -262,7 +260,6 @@
 			isa = PBXGroup;
 			children = (
 				FD79323522D20FE600E7D336 /* AppDelegate.swift */,
-				FD79323722D20FE600E7D336 /* GameScene.sks */,
 				FD79323B22D20FE600E7D336 /* GameScene.swift */,
 				659CC039230EC9FE00AA087C /* UFO.swift */,
 				FD46BD71231415B7008C1F99 /* Playfield.swift */,
@@ -420,7 +417,6 @@
 				6523C0842316E54E0071AB4B /* ufo1loop.wav in Resources */,
 				FD53168222DB445100F09E57 /* meteorsmall1@2x.png in Resources */,
 				FDA43B202308AB9600A29347 /* heartbeat.wav in Resources */,
-				FD79323822D20FE600E7D336 /* GameScene.sks in Resources */,
 				FDD831F422EE27C700CA4EC6 /* kenvector_future.ttf in Resources */,
 				FD53168022DB445100F09E57 /* meteormed1@2x.png in Resources */,
 				FD53167F22DB445100F09E57 /* meteorbig1@2x.png in Resources */,
