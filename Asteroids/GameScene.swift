@@ -202,8 +202,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     for _ in 0..<100 {
       let star = makeStar()
       star.alpha = dim
-      star.position = CGPoint(x: .random(in: gameFrame.minX...gameFrame.maxX),
-                              y: .random(in: gameFrame.minY...gameFrame.maxY))
+      var minSep = CGFloat(0)
+      let wantedSep = 3 * star.size.diagonal()
+      while minSep < wantedSep {
+        minSep = .infinity
+        star.position = CGPoint(x: .random(in: gameFrame.minX...gameFrame.maxX),
+                                y: .random(in: gameFrame.minY...gameFrame.maxY))
+        for otherStar in stars.children {
+          minSep = min(minSep, (otherStar.position - star.position).norm2())
+        }
+      }
       star.wait(for: .random(in: 0.0...period), then: twinkle)
       star.speed = .random(in: 0.75...1.5)
       stars.addChild(star)
