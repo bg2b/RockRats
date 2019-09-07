@@ -813,6 +813,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     wait(for: 3.0) { self.spawnPlayer() }
   }
 
+  func setSafeArea(left: CGFloat, right: CGFloat) {
+    print(view!.frame)
+    print(frame)
+    print(left, right)
+  }
+
   override func update(_ currentTime: TimeInterval) {
     Globals.lastUpdateTime = currentTime
     if currentTime >= lastJumpTime + Globals.gameConfig.hyperspaceCooldown {

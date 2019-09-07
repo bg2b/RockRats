@@ -10,24 +10,32 @@ import UIKit
 import SpriteKit
 
 class GameViewController: UIViewController {
+  weak var scene: GameScene? = nil
 
   override func viewDidLoad() {
     super.viewDidLoad()
-
     if let view = self.view as! SKView? {
-      // Load the SKScene from 'GameScene.sks'
-      if let scene = SKScene(fileNamed: "GameScene") {
-        // Set the scale mode to scale to fit the window
-        scene.scaleMode = .resizeFill
-
-        // Present the scene
-        view.presentScene(scene)
-      }
+      let aspect = view.frame.width / view.frame.height
+      let scene = GameScene(size: CGSize(width: 768 * aspect, height: 768))
+      scene.scaleMode = .aspectFill
+      scene.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+      scene.physicsWorld.gravity = .zero
+      self.scene = scene
+      view.presentScene(scene)
       view.preferredFramesPerSecond = 120
       view.ignoresSiblingOrder = true
       view.showsFPS = true
       view.showsNodeCount = true
       view.showsDrawCount = true
+    }
+  }
+
+  override func viewWillLayoutSubviews() {
+    super.viewWillLayoutSubviews()
+    if let scene = scene {
+      let leftPadding = view.safeAreaInsets.left * scene.frame.width / view.frame.width
+      let rightPadding = view.safeAreaInsets.right * scene.frame.width / view.frame.width
+      scene.setSafeArea(left: leftPadding, right: rightPadding)
     }
   }
 
