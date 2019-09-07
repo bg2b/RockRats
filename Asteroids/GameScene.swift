@@ -83,11 +83,17 @@ extension Globals {
 class GameScene: SKScene, SKPhysicsContactDelegate {
   let textColor = RGB(101, 185, 240)
   let highlightTextColor = RGB(246, 205, 68)
+  var tabletFormat = true
+  var gameFrame: CGRect!
+  var gameArea = SKCropNode()
   var playfield: Playfield!
   var player: Ship!
   var score = 0
   var scoreDisplay: SKLabelNode!
+  var safeAreaLeft = CGFloat(0.0)
+  var safeAreaRight = CGFloat(0.0)
   var joystick: Joystick!
+  var fireButton: Button!
   var hyperspaceButton: Button!
   var lastJumpTime = 0.0
   var asteroids = Set<SKSpriteNode>()
@@ -144,7 +150,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func initBackground() {
-    let background = SKShapeNode(rect: frame)
+    let background = SKShapeNode(rect: gameFrame)
     background.name = "background"
     background.strokeColor = .clear
     background.blendMode = .replace
@@ -154,9 +160,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     background.fillTexture = stars
     background.fillColor = .white
     background.fillShader = tilingShader(forTexture: stars)
-    let reps = vector_float2([Float(frame.width / tsize.width), Float(frame.height / tsize.height)])
+    let reps = vector_float2([Float(gameFrame.width / tsize.width), Float(gameFrame.height / tsize.height)])
     background.setValue(SKAttributeValue(vectorFloat2: reps), forAttribute: "a_repetitions")
-    addChild(background)
+    gameArea.addChild(background)
   }
 
   func twinkleAction(period: Double, from dim: CGFloat, to bright: CGFloat) -> SKAction {
@@ -188,7 +194,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let stars = SKNode()
     stars.name = "stars"
     stars.zPosition = LevelZs.stars.rawValue
-    addChild(stars)
+    gameArea.addChild(stars)
     let dim = CGFloat(0.1)
     let bright = CGFloat(0.3)
     let period = 8.0
@@ -196,8 +202,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     for _ in 0..<100 {
       let star = makeStar()
       star.alpha = dim
-      star.position = CGPoint(x: .random(in: frame.minX...frame.maxX),
-                              y: .random(in: frame.minY...frame.maxY))
+      star.position = CGPoint(x: .random(in: gameFrame.minX...gameFrame.maxX),
+                              y: .random(in: gameFrame.minY...gameFrame.maxY))
       star.wait(for: .random(in: 0.0...period), then: twinkle)
       star.speed = .random(in: 0.75...1.5)
       stars.addChild(star)
@@ -205,9 +211,27 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func initPlayfield() {
-    playfield = Playfield()
+    playfield = Playfield(bounds: gameFrame)
     playfield.zPosition = LevelZs.playfield.rawValue
-    addChild(playfield)
+    gameArea.addChild(playfield)
+  }
+
+  func setPositionsForSafeArea() {
+    guard let _ = joystick, !tabletFormat else { return }
+    // Normal midX is 0.  If the left safe area is bigger than the right, then we
+    // want to push midX in the positive direction.
+    let midX = 0.5 * (safeAreaLeft - safeAreaRight)
+    print(gameArea.position)
+    gameArea.position = CGPoint(x: midX, y: 0)
+    let gameAreaLeft = midX - 0.5 * gameFrame.width
+    // Middle of space between edge of left safe area and left edge of playing area
+    let leftAlleyMidX = 0.5 * ((-0.5 * frame.width + safeAreaLeft) + gameAreaLeft)
+    joystick.position = CGPoint(x: leftAlleyMidX, y: joystick.position.y)
+    // Middle of space between edge of right safe area and right edge of playing area
+    let gameAreaRight = midX + 0.5 * gameFrame.width
+    let rightAlleyMidX = 0.5 * (gameAreaRight + (0.5 * frame.width - safeAreaRight))
+    fireButton.position = CGPoint(x: rightAlleyMidX, y: fireButton.position.y)
+    hyperspaceButton.position = CGPoint(x: rightAlleyMidX, y: hyperspaceButton.position.y)
   }
 
   func initControls() {
@@ -215,40 +239,49 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     controls.name = "controls"
     controls.zPosition = LevelZs.controls.rawValue
     addChild(controls)
-    let controlSize = CGFloat(100)
-    let offset = controlSize
+    let controlSize = (tabletFormat ? CGFloat(100) : 0.6 * 0.5 * (frame.width - gameFrame.width))
     let controlFill: UIColor = UIColor(white: 0.33, alpha: 0.33)
     joystick = Joystick(size: controlSize, borderColor: .lightGray, fillColor: controlFill,
                         texture: Globals.textureCache.findTexture(imageNamed: "ship_blue"))
-    joystick.position = CGPoint(x: frame.minX + offset, y: frame.minY + offset)
     joystick.zRotation = .pi / 2
     controls.addChild(joystick)
-    let fireButton = Button(size: controlSize, borderColor: .lightGray, fillColor: controlFill,
-                            texture: Globals.textureCache.findTexture(imageNamed: "laserbig_green"))
-    fireButton.position = CGPoint(x: frame.maxX - offset, y: frame.minY + offset)
+    fireButton = Button(size: controlSize, borderColor: .lightGray, fillColor: controlFill,
+                        texture: Globals.textureCache.findTexture(imageNamed: "laserbig_green"))
     fireButton.zRotation = .pi / 2
     fireButton.action = { [unowned self] in self.fireLaser() }
     controls.addChild(fireButton)
     hyperspaceButton = Button(size: controlSize, borderColor: .lightGray, fillColor: controlFill,
                               texture: Globals.textureCache.findTexture(imageNamed: "warpedship_blue"))
-    hyperspaceButton.position = CGPoint(x: frame.maxX - offset, y: frame.minY + 2.25 * offset)
     hyperspaceButton.zRotation = .pi / 2
     hyperspaceButton.action = { [unowned self] in self.hyperspaceJump() }
     controls.addChild(hyperspaceButton)
     enableHyperspaceJump()
+    if tabletFormat {
+      let offset = controlSize
+      joystick.position = CGPoint(x: frame.minX + offset, y: frame.minY + offset)
+      fireButton.position = CGPoint(x: frame.maxX - offset, y: frame.minY + offset)
+      hyperspaceButton.position = CGPoint(x: frame.maxX - offset, y: frame.minY + 2.25 * offset)
+    } else {
+      let xOffset = 0.5 * 0.5 * (frame.width - gameFrame.width)
+      let yOffset = 1.25 * controlSize
+      joystick.position = CGPoint(x: frame.minX + xOffset, y: frame.midY - 0.5 * yOffset)
+      fireButton.position = CGPoint(x: frame.maxX - xOffset, y: frame.midY - 0.5 * yOffset)
+      hyperspaceButton.position = CGPoint(x: frame.maxX - xOffset, y: frame.midY + 0.5 * yOffset)
+      setPositionsForSafeArea()
+    }
   }
 
   func initInfo() {
     let info = SKNode()
     info.name = "info"
     info.zPosition = LevelZs.info.rawValue
-    addChild(info)
+    gameArea.addChild(info)
     scoreDisplay = SKLabelNode(fontNamed: "KenVector Future")
     scoreDisplay.fontSize = 50
     scoreDisplay.fontColor = textColor
     scoreDisplay.text = "0"
     scoreDisplay.name = "score"
-    scoreDisplay.position = CGPoint(x: frame.midX, y: frame.maxY - 50)
+    scoreDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.maxY - 50)
     info.addChild(scoreDisplay)
     centralDisplay = SKLabelNode(fontNamed: "KenVector Future")
     centralDisplay.fontSize = 100
@@ -257,11 +290,37 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     centralDisplay.name = "centralDisplay"
     centralDisplay.isHidden = true
     centralDisplay.verticalAlignmentMode = .center
-    centralDisplay.position = CGPoint(x: frame.midX, y: frame.midY)
+    centralDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.midY)
     info.addChild(centralDisplay)
     livesDisplay = LivesDisplay(extraColor: textColor)
-    livesDisplay.position = CGPoint(x: frame.minX + 20, y: frame.maxY - 20)
+    livesDisplay.position = CGPoint(x: gameFrame.minX + 20, y: gameFrame.maxY - 20)
     info.addChild(livesDisplay)
+  }
+
+  func initGameArea() {
+    let aspect = frame.width / frame.height
+    if aspect < 1.6 {
+      // A tablet format.  Playfield will fill the complete frame, controls will be
+      // on the playfield at the bottom left and right.
+      tabletFormat = true
+      gameFrame = frame
+    } else {
+      // A phone format.  Playfield is a central box with 4:3 aspect ratio, controls
+      // centered on the left and right.
+      tabletFormat = false
+      let dx = frame.height / 2 * 4 / 3
+      gameFrame = CGRect(x: -dx, y: frame.minY, width: 2 * dx, height: frame.height)
+      let mask = SKShapeNode(rect: gameFrame)
+      mask.fillColor = .white
+      mask.strokeColor = .clear
+      gameArea.maskNode = mask
+    }
+    gameArea.name = "gameArea"
+    addChild(gameArea)
+    initBackground()
+    initStars()
+    initPlayfield()
+    initInfo()
   }
 
   func addToScore(_ amount: Int) {
@@ -330,10 +389,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func spawnPlayer(safeTime: CGFloat = Globals.gameConfig.safeTime) {
-    var spawnPosition = CGPoint(x: frame.midX, y: frame.midY)
+    var spawnPosition = CGPoint(x: gameFrame.midX, y: gameFrame.midY)
     var attemptsRemaining = 5
     while attemptsRemaining > 0 && !isSafe(point: spawnPosition, forDuration: safeTime) {
-      let spawnRegion = frame.insetBy(dx: 0.33 * frame.width, dy: 0.33 * frame.height)
+      let spawnRegion = gameFrame.insetBy(dx: 0.33 * gameFrame.width, dy: 0.33 * gameFrame.height)
       spawnPosition = CGPoint(x: .random(in: spawnRegion.minX...spawnRegion.maxX),
                               y: .random(in: spawnRegion.minY...spawnRegion.maxY))
       attemptsRemaining -= 1
@@ -397,7 +456,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       sprite.physicsBody = body
       sprite.zPosition = -1
     }
-    laser.wait(for: Double(0.9 * frame.height / speed)) { self.removeUFOLaser(laser) }
+    laser.wait(for: Double(0.9 * gameFrame.height / speed)) { self.removeUFOLaser(laser) }
     playfield.addWithScaling(laser)
     laser.position = position
     laser.zRotation = angle
@@ -418,7 +477,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     playfield.addWithScaling(effects[0])
     playfield.addWithScaling(effects[1])
     sounds.soundEffect(.warpOut)
-    let jumpRegion = frame.insetBy(dx: 0.05 * frame.width, dy: 0.05 * frame.height)
+    let jumpRegion = gameFrame.insetBy(dx: 0.05 * gameFrame.width, dy: 0.05 * gameFrame.height)
     let jumpPosition = CGPoint(x: .random(in: jumpRegion.minX...jumpRegion.maxX),
                                y: .random(in: jumpRegion.minY...jumpRegion.maxY))
     wait(for: 1) {
@@ -488,14 +547,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let speed = CGFloat.random(in: minSpeed ... max(min(4 * minSpeed, 0.33 * maxSpeed), 0.25 * maxSpeed))
     let velocity = dir.scale(by: -speed)
     // Offset from the center by some random amount
-    let offset = CGPoint(x: .random(in: 0.75 * frame.minX...0.75 * frame.maxX),
-                         y: .random(in: 0.75 * frame.minY...0.75 * frame.maxY))
+    let offset = CGPoint(x: .random(in: 0.75 * gameFrame.minX...0.75 * gameFrame.maxX),
+                         y: .random(in: 0.75 * gameFrame.minY...0.75 * gameFrame.maxY))
     // Find a random distance that places us beyond the screen by a reasonable amount
-    var dist = .random(in: 0.25...0.5) * frame.height
+    var dist = .random(in: 0.25...0.5) * gameFrame.height
     let minExclusion = max(1.25 * speed, 50)
     let maxExclusion = max(5 * speed, 200)
     let exclusion = -CGFloat.random(in: minExclusion...maxExclusion)
-    while frame.insetBy(dx: exclusion, dy: exclusion).contains(offset + dir.scale(by: dist)) {
+    while gameFrame.insetBy(dx: exclusion, dy: exclusion).contains(offset + dir.scale(by: dist)) {
       dist *= 1.5
     }
     makeAsteroid(position: offset + dir.scale(by: dist), size: size, velocity: velocity, onScreen: false)
@@ -696,8 +755,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // from.  Actual choice of Y position and beginning of movement happens after a
     // delay.
     let ufoSize = 0.6 * ufo.size.diagonal()
-    let x = (Bool.random() ? frame.maxX + ufoSize : frame.minX - ufoSize)
-    ufo.position = CGPoint(x: x, y: frame.midY)
+    let x = (Bool.random() ? gameFrame.maxX + ufoSize : gameFrame.minX - ufoSize)
+    ufo.position = CGPoint(x: x, y: gameFrame.midY)
     wait(for: 1) { self.launchUFO(ufo) }
   }
   
@@ -708,7 +767,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var bestPosition: CGPoint? = nil
     var bestClearance = CGFloat.infinity
     for _ in 0..<10 {
-      let pos = CGPoint(x: ufo.position.x, y: .random(in: 0.9 * frame.minY ... 0.9 * frame.maxY))
+      let pos = CGPoint(x: ufo.position.x, y: .random(in: 0.9 * gameFrame.minY ... 0.9 * gameFrame.maxY))
       var thisClearance = CGFloat.infinity
       for asteroid in asteroids {
         thisClearance = min(thisClearance, (asteroid.position -  pos).norm2())
@@ -793,15 +852,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     when(contact, isBetween: .ufo, and: .asteroid) { ufoCollided(ufo: $0, asteroid: $1) }
     when(contact, isBetween: .ufoShot, and: .player) { ufoLaserHit(laser: $0, player: $1)}
   }
-  
+
   override func didMove(to view: SKView) {
     name = "scene"
     physicsWorld.contactDelegate = self
-    initBackground()
-    initStars()
-    initPlayfield()
+    initGameArea()
     initControls()
-    initInfo()
     initSounds()
     livesRemaining = Globals.gameConfig.initialLives
     Globals.gameConfig.currentWaveNumber = 0
@@ -814,9 +870,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func setSafeArea(left: CGFloat, right: CGFloat) {
-    print(view!.frame)
-    print(frame)
-    print(left, right)
+    // Because of the shape of our controls, we don't need to exclude the full safe area.
+    safeAreaLeft = 0.67 * left
+    safeAreaRight = 0.67 * right
+    setPositionsForSafeArea()
   }
 
   override func update(_ currentTime: TimeInterval) {

@@ -9,7 +9,10 @@
 import SpriteKit
 
 class Playfield: SKNode {
-  override required init() {
+  let bounds: CGRect
+
+  required init(bounds: CGRect) {
+    self.bounds = bounds
     super.init()
     name = "playfield"
   }
@@ -46,28 +49,27 @@ class Playfield: SKNode {
   }
 
   func wrapCoordinates() {
-    guard let frame = scene?.frame else { return }
     for child in children {
       guard let body = child.physicsBody else { continue }
       if !body.isOnScreen {
         // This isn't on screen yet, so we're just waiting for it to appear before we
         // start wrapping.
-        if frame.contains(child.position) {
+        if bounds.contains(child.position) {
           body.isOnScreen = true
         }
       } else {
         // We wrap only after going past the edge a little bit so that an object
         // that's moving just along the edge won't stutter back and forth.
         let hysteresis = CGFloat(3)
-        if child.position.x < frame.minX - hysteresis {
-          child.position.x += frame.width
-        } else if child.position.x > frame.maxX + hysteresis {
-          child.position.x -= frame.width
+        if child.position.x < bounds.minX - hysteresis {
+          child.position.x += bounds.width
+        } else if child.position.x > bounds.maxX + hysteresis {
+          child.position.x -= bounds.width
         }
-        if child.position.y < frame.minY - hysteresis {
-          child.position.y += frame.height
-        } else if child.position.y > frame.maxY + hysteresis {
-          child.position.y -= frame.height
+        if child.position.y < bounds.minY - hysteresis {
+          child.position.y += bounds.height
+        } else if child.position.y > bounds.maxY + hysteresis {
+          child.position.y -= bounds.height
         }
       }
     }

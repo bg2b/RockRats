@@ -83,7 +83,7 @@ class UFO: SKNode {
 
   func fly(player: Ship, playfield: Playfield, addLaser: ((CGFloat, CGPoint, CGFloat) -> Void)) {
     guard parent != nil else { return }
-    guard let bounds = scene?.frame else { return }
+    let bounds = playfield.bounds
     let body = requiredPhysicsBody()
     guard body.isOnScreen else { return }
     if delayOfFirstShot >= 0 {
