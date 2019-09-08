@@ -76,6 +76,7 @@ class UFO: SKNode {
     body.angularDamping = 0
     body.restitution = 0.9
     body.isOnScreen = false
+    // Don't move initially; GameScene will launch us after positioning us at an appropriate spot.
     body.isDynamic = false
     body.angularVelocity = .pi * 2
     physicsBody = body

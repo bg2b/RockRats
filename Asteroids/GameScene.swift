@@ -229,7 +229,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // Normal midX is 0.  If the left safe area is bigger than the right, then we
     // want to push midX in the positive direction.
     let midX = 0.5 * (safeAreaLeft - safeAreaRight)
-    print(gameArea.position)
     gameArea.position = CGPoint(x: midX, y: 0)
     let gameAreaLeft = midX - 0.5 * gameFrame.width
     // Middle of space between edge of left safe area and left edge of playing area
@@ -767,12 +766,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // delay.
     let ufoSize = 0.6 * ufo.size.diagonal()
     let x = (Bool.random() ? gameFrame.maxX + ufoSize : gameFrame.minX - ufoSize)
-    ufo.position = CGPoint(x: x, y: gameFrame.midY)
+    // Audio depends only on left/right, i.e., x.  We have the y way off in the
+    // distance to avoid potential collisions in the time before launch.
+    ufo.position = CGPoint(x: x, y: -1e9)
     wait(for: 1) { self.launchUFO(ufo) }
   }
   
   func launchUFO(_ ufo: UFO) {
-    let ufoSize = ufo.size.diagonal()
+    let ufoRadius = 0.5 * ufo.size.diagonal()
     // Try to find a safe spawning position, but if we can't find one after some
     // number of tries, just go ahead and spawn anyway.
     var bestPosition: CGPoint? = nil
@@ -781,15 +782,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       let pos = CGPoint(x: ufo.position.x, y: .random(in: 0.9 * gameFrame.minY ... 0.9 * gameFrame.maxY))
       var thisClearance = CGFloat.infinity
       for asteroid in asteroids {
-        thisClearance = min(thisClearance, (asteroid.position -  pos).norm2())
+        let bothRadii = ufoRadius + 0.5 * asteroid.size.diagonal()
+        thisClearance = min(thisClearance, (asteroid.position - pos).norm2() - bothRadii)
         // Check the wrapped position too
-        thisClearance = min(thisClearance, (asteroid.position - CGPoint(x: -pos.x, y: pos.y)).norm2())
+        thisClearance = min(thisClearance, (asteroid.position - CGPoint(x: -pos.x, y: pos.y)).norm2() - bothRadii)
       }
       if bestPosition == nil || thisClearance > bestClearance {
         bestPosition = pos
         bestClearance = thisClearance
       }
-      if bestClearance > 3 * ufoSize {
+      if bestClearance > 5 * ufoRadius {
         break
       }
     }
@@ -845,6 +847,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             action: (SKNode, SKNode) -> Void) {
     let b1 = contact.bodyA
     let b2 = contact.bodyB
+    guard b1.isOnScreen else { return }
+    guard b2.isOnScreen else { return }
     guard let node1 = contact.bodyA.node, node1.parent != nil else { return }
     guard let node2 = contact.bodyB.node, node2.parent != nil else { return }
     if b1.isA(type1) && b2.isA(type2) {
