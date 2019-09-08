@@ -202,8 +202,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     for _ in 0..<100 {
       let star = makeStar()
       star.alpha = dim
-      star.position = CGPoint(x: .random(in: gameFrame.minX...gameFrame.maxX),
-                              y: .random(in: gameFrame.minY...gameFrame.maxY))
+      var minSep = CGFloat(0)
+      let wantedSep = 3 * star.size.diagonal()
+      while minSep < wantedSep {
+        minSep = .infinity
+        star.position = CGPoint(x: .random(in: gameFrame.minX...gameFrame.maxX),
+                                y: .random(in: gameFrame.minY...gameFrame.maxY))
+        for otherStar in stars.children {
+          minSep = min(minSep, (otherStar.position - star.position).norm2())
+        }
+      }
       star.wait(for: .random(in: 0.0...period), then: twinkle)
       star.speed = .random(in: 0.75...1.5)
       stars.addChild(star)
@@ -667,6 +675,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     ufosToAvenge += 1
     removeLaser(laser as! SKSpriteNode)
     destroyUFO(ufo as! UFO)
+    // This resets the time to the next UFO so that it doesn't show up immediately,
+    // but it's also not so long as the usual full duration like when the player is
+    // destroyed or a new wave starts.
+    spawnUFOs(relativeDuration: 0.5)
   }
 
   func ufoLaserHit(laser: SKNode, asteroid: SKNode) {
@@ -800,9 +812,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     addExplosion(ufo.explode())
   }
 
-  func spawnUFOs() {
+  func spawnUFOs(relativeDuration: Double = 1) {
     stopSpawningUFOs()  // Remove any existing scheduled spawn
-    let meanTimeToNextUFO = Globals.gameConfig.value(for: \.meanUFOTime)
+    let meanTimeToNextUFO = relativeDuration * Globals.gameConfig.value(for: \.meanUFOTime)
     let delay = Double.random(in: 0.75 * meanTimeToNextUFO ... 1.25 * meanTimeToNextUFO)
     run(SKAction.sequence([SKAction.wait(forDuration: delay),
                            SKAction.run { self.spawnUFO(); self.spawnUFOs() }]),
