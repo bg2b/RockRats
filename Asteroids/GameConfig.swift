@@ -29,10 +29,10 @@ class WaveConfig: Decodable {
 struct GameConfig: Decodable {
   let initialLives: Int
   let extraLifeScore: Int
-  let playerSpeedDamping: [CGFloat]
-  let playerMaxSpeed: [CGFloat]
-  let playerMaxThrust: [CGFloat]
-  let playerMaxRotationRate: [CGFloat]
+  let playerSpeedDamping: CGFloat
+  let playerMaxSpeed: CGFloat
+  let playerMaxThrust: CGFloat
+  let playerMaxRotationRate: CGFloat
   let playerShotSpeed: CGFloat
   let playerMaxShots: Int
   let safeTime: CGFloat

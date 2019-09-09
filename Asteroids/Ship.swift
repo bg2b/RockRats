@@ -66,7 +66,7 @@ class Ship: SKNode {
     body.categoryBitMask = ObjectCategories.player.rawValue
     body.collisionBitMask = 0
     body.contactTestBitMask = setOf([.asteroid, .ufo, .ufoShot])
-    body.linearDamping = Globals.gameConfig.playerSpeedDamping[Globals.directControls]
+    body.linearDamping = Globals.gameConfig.playerSpeedDamping
     body.restitution = 0.9
   }
 
@@ -125,68 +125,30 @@ class Ship: SKNode {
     }
     var thrustAmount = CGFloat(0)
     var thrustForce = CGFloat(0)
-    let maxOmega = Globals.gameConfig.playerMaxRotationRate[Globals.directControls]
-    let maxThrust = Globals.gameConfig.playerMaxThrust[Globals.directControls]
-    if Globals.directControls == 1 {
-      while zRotation > .pi {
-        zRotation -= 2 * .pi
-      }
-      while zRotation < -.pi {
-        zRotation += 2 * .pi
-      }
-      var angle = stick.angle() + joystick.zRotation
-      while abs(angle + 2 * .pi - zRotation) < abs(angle - zRotation) {
-        angle += 2 * .pi
-      }
-      while abs(angle - 2 * .pi - zRotation) < abs(angle - zRotation) {
-        angle -= 2 * .pi
-      }
-      let delta = angle - zRotation
-      if abs(delta) < maxOmega / 50 {
-        // Once we get close, just snap to the desired angle to avoid stuttering
-        zRotation = angle
-      } else {
-        // Set an absolute angular speed
-        body.angularVelocity = copysign(maxOmega, delta)
-      }
-      thrustAmount = stick.norm2()
-      if thrustAmount < 0.9 {
-        thrustAmount = 0
-      }
-      let thrustCutoff = CGFloat.pi / 10
-      if abs(delta) > thrustCutoff {
-        // Pointing too far away from the desired direction, so don't thrust.
-        thrustAmount = 0
-      } else if abs(delta) > thrustCutoff / 2 {
-        // We scale down the thrust by a factor which is 0 at thrustCutoff and 1 and
-        // thrustCutoff / 2.
-        thrustAmount *= 2 - abs(delta) / (thrustCutoff / 2)
-      }
+    let maxOmega = Globals.gameConfig.playerMaxRotationRate
+    let maxThrust = Globals.gameConfig.playerMaxThrust
+    let angle = stick.angle()
+    let halfSectorSize = (120 * CGFloat.pi / 180) / 2
+    if abs(angle) >= .pi - 0.5 * halfSectorSize {
+      // Joystick is pointing backwards, apply reverse thrusters.  Because reverse
+      // thrust tends to be confusing while turning, we reduce the region where
+      // reverse thrust is active.
+      thrustAmount = min(-stick.dx, 0.7) / 0.7
+      thrustForce = -0.5 * thrustAmount
+    } else if abs(angle) <= halfSectorSize {
+      // Pointing forwards, thrusters active
+      thrustAmount = min(stick.dx, 0.7) / 0.7
       thrustForce = thrustAmount
-    } else {
-      let angle = stick.angle()
-      let halfSectorSize = (120 * CGFloat.pi / 180) / 2
-      if abs(angle) >= .pi - 0.5 * halfSectorSize {
-        // Joystick is pointing backwards, apply reverse thrusters.  Because reverse
-        // thrust tends to be confusing while turning, we reduce the region where
-        // reverse thrust is active.
-        thrustAmount = min(-stick.dx, 0.7) / 0.7
-        thrustForce = -0.5 * thrustAmount
-      } else if abs(angle) <= halfSectorSize {
-        // Pointing forwards, thrusters active
-        thrustAmount = min(stick.dx, 0.7) / 0.7
-        thrustForce = thrustAmount
-      }
-      if abs(abs(angle) - .pi / 2) <= halfSectorSize {
-        // Left or right rotation, set an absolute angular speed.  I thought
-        // initially that when thrusting backwards it seemed a bit more natural to
-        // reverse the direction of rotation, but now I think that's just more
-        // confusing.
-        body.angularVelocity = copysign(maxOmega * min(abs(stick.dy), 0.7) / 0.7, angle)
-      }
+    }
+    if abs(abs(angle) - .pi / 2) <= halfSectorSize {
+      // Left or right rotation, set an absolute angular speed.  I thought
+      // initially that when thrusting backwards it seemed a bit more natural to
+      // reverse the direction of rotation, but now I think that's just more
+      // confusing.
+      body.angularVelocity = copysign(maxOmega * min(abs(stick.dy), 0.7) / 0.7, angle)
     }
     thrustForce *= maxThrust
-    let maxSpeed = Globals.gameConfig.playerMaxSpeed[Globals.directControls]
+    let maxSpeed = Globals.gameConfig.playerMaxSpeed
     let currentSpeed = body.velocity.norm2()
     if currentSpeed > 0.5 * maxSpeed {
       thrustForce *= (maxSpeed - currentSpeed) / (0.5 * maxSpeed)
