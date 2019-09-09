@@ -368,7 +368,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func initSounds() {
-    sounds = Sounds()
+    sounds = Sounds(stereoEffectsFrame: gameFrame)
     addChild(sounds)
   }
 

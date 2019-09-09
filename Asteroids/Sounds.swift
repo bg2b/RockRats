@@ -87,9 +87,11 @@ class Sounds: SKNode {
   var heartbeatOn = false
   var audioPlayerCache = [SoundEffect: SoundEffectPlayers]()
   var positionalEffects = [PositionalEffect]()
+  let stereoEffectsFrame: CGRect
   var soundQueue = OperationQueue()
 
-  override required init() {
+  required init(stereoEffectsFrame: CGRect) {
+    self.stereoEffectsFrame = stereoEffectsFrame
     super.init()
     soundQueue.qualityOfService = .background
     name = "sounds"
@@ -136,10 +138,9 @@ class Sounds: SKNode {
   }
 
   func stereoBalance(_ position: CGPoint) -> Float {
-    guard let frame = scene?.frame else { return 0 }
-    guard position.x <= frame.maxX else { return 1 }
-    guard position.x >= frame.minX else { return -1 }
-    return Float((position.x - frame.midX) / (0.5 * frame.width))
+    guard position.x <= stereoEffectsFrame.maxX else { return 1 }
+    guard position.x >= stereoEffectsFrame.minX else { return -1 }
+    return Float((position.x - stereoEffectsFrame.midX) / (0.5 * stereoEffectsFrame.width))
   }
 
   func addPositional(player: AVAudioPlayer, at node: SKNode) {
