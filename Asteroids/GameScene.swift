@@ -396,6 +396,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   func isSafe(point: CGPoint, forDuration time: CGFloat) -> Bool {
     if time > 0 {
       for asteroid in asteroids {
+        // Don't check safety for spawning asteroids!  They're off the screen, so the
+        // image ship method we use for safety could wind up thinking that the center
+        // of the screen isn't safe.
+        guard asteroid.requiredPhysicsBody().isOnScreen else { continue }
         let asteroidRadius = 0.5 * asteroid.texture!.size().diagonal()
         let playerRadius = 0.5 * player.shipTexture.size().diagonal()
         let pathStart = asteroid.position
