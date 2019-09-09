@@ -77,7 +77,6 @@ extension Globals {
   static var textureCache = TextureCache()
   static var spriteCache = SpriteCache()
   static var lastUpdateTime = 0.0
-  static var directControls = 0
 }
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
@@ -97,7 +96,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   var hyperspaceButton: Button!
   var lastJumpTime = 0.0
   var asteroids = Set<SKSpriteNode>()
-  var wantToSpawnUFO = false
   var ufosToAvenge = 0
   var ufos = Set<UFO>()
   var centralDisplay: SKLabelNode!
