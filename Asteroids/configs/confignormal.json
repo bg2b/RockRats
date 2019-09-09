@@ -73,7 +73,7 @@
     },
     {
       "waveNumber": 11,
-      "maxUFOs": 1,
+      "maxUFOs": 3,
       "ufoDodging": 15,
       "ufoShotAnticipation": 0.4,
       "ufoAccuracy": [0.02, 0.01],
