@@ -374,6 +374,27 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     addChild(sounds)
   }
 
+  func isSafe(point: CGPoint, pathStart: CGPoint, pathEnd: CGPoint, clearance: CGFloat) -> Bool {
+    // Generate "image" points in wrapped positions and make sure that all clear
+    // the segment.  This seems easier than trying to simulate the wrapping of the
+    // segment.
+    var dxs = [CGFloat(0)]
+    if pathEnd.x < gameFrame.minX { dxs.append(-gameFrame.width) }
+    if pathEnd.x > gameFrame.maxX { dxs.append(gameFrame.width) }
+    var dys = [CGFloat(0)]
+    if pathEnd.y < gameFrame.minY { dys.append(-gameFrame.height) }
+    if pathEnd.y > gameFrame.maxY { dys.append(gameFrame.height) }
+    for dx in dxs {
+      for dy in dys {
+        let p = CGPoint(x: point.x + dx, y: point.y + dy)
+        if distanceBetween(point: p, segment: (pathStart, pathEnd)) < clearance {
+          return false
+        }
+      }
+    }
+    return true
+  }
+
   func isSafe(point: CGPoint, forDuration time: CGFloat) -> Bool {
     if time > 0 {
       for asteroid in asteroids {
@@ -381,7 +402,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let playerRadius = 0.5 * player.shipTexture.size().diagonal()
         let pathStart = asteroid.position
         let pathEnd = asteroid.position + asteroid.physicsBody!.velocity.scale(by: time)
-        if distanceBetween(point: point, segment: (pathStart, pathEnd)) < asteroidRadius + playerRadius {
+        if !isSafe(point: point, pathStart: pathStart, pathEnd: pathEnd, clearance: asteroidRadius + playerRadius) {
           return false
         }
       }
