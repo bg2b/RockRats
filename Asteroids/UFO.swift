@@ -89,7 +89,7 @@ class UFO: SKNode {
     guard body.isOnScreen else { return }
     if delayOfFirstShot >= 0 {
       // Just moved onto the screen, enable shooting after a delay
-      wait(for: delayOfFirstShot) { self.shootingEnabled = true }
+      wait(for: delayOfFirstShot) { [unowned self] in self.shootingEnabled = true }
       delayOfFirstShot = -1
     }
     let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[isBig ? 0 : 1]
@@ -186,7 +186,13 @@ class UFO: SKNode {
     let shotPosition = position + shotDirection.scale(by: 0.5 * ufoTexture.size().width)
     addLaser(angle, shotPosition, shotSpeed)
     shootingEnabled = false
-    wait(for: .random(in: 0.5 * meanShotTime ... 1.5 * meanShotTime)) { self.shootingEnabled = true }
+    wait(for: .random(in: 0.5 * meanShotTime ... 1.5 * meanShotTime)) { [unowned self] in self.shootingEnabled = true }
+  }
+
+  func cleanup() {
+    engineSounds.removeFromParent()
+    removeAllActions()
+    removeFromParent()
   }
 
   func warpOut() -> [SKNode] {
@@ -196,8 +202,7 @@ class UFO: SKNode {
     effect.shader = warpOutShader
     setStartTimeAttrib(effect)
     let star = starBlink(at: position, throughAngle: -.pi, duration: 2 * warpTime)
-    removeFromParent()
-    engineSounds.removeFromParent()
+    cleanup()
     return [effect, star]
   }
   
@@ -211,8 +216,7 @@ class UFO: SKNode {
   
   func explode() -> [SKNode] {
     let velocity = physicsBody!.velocity
-    engineSounds.removeFromParent()
-    removeFromParent()
+    cleanup()
     return makeExplosion(texture: ufoTexture, angle: zRotation, velocity: velocity, at: position, duration: 2)
   }
 
