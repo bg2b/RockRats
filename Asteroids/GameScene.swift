@@ -54,9 +54,6 @@ func RGB(_ red: Int, _ green: Int, _ blue: Int) -> UIColor {
   return UIColor(red: CGFloat(red)/255.0, green: CGFloat(green)/255.0, blue: CGFloat(blue)/255.0, alpha: 1.0)
 }
 
-let teamColors = ["blue", "green", "red", "orange"]
-let numColors = teamColors.count
-
 extension SKNode {
   func wait(for time: Double, then action: SKAction) {
     run(SKAction.sequence([SKAction.wait(forDuration: time), action]))
@@ -281,14 +278,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     info.name = "info"
     info.zPosition = LevelZs.info.rawValue
     gameArea.addChild(info)
-    scoreDisplay = SKLabelNode(fontNamed: "KenVector Future")
+    scoreDisplay = SKLabelNode(fontNamed: "Kenney Future")
     scoreDisplay.fontSize = 50
     scoreDisplay.fontColor = textColor
     scoreDisplay.text = "0"
     scoreDisplay.name = "score"
     scoreDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.maxY - 50)
     info.addChild(scoreDisplay)
-    centralDisplay = SKLabelNode(fontNamed: "KenVector Future")
+    centralDisplay = SKLabelNode(fontNamed: "Kenney Future")
     centralDisplay.fontSize = 100
     centralDisplay.fontColor = highlightTextColor
     centralDisplay.text = ""
@@ -902,7 +899,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     Globals.gameConfig.currentWaveNumber = 0
     extraLivesAwarded = 0
     updateLives(0)
-    player = Ship(color: teamColors[0], sounds: sounds, joystick: joystick)
+    player = Ship(color: "blue", sounds: sounds, joystick: joystick)
     sounds.startHearbeat()
     nextWave()
     wait(for: 3.0) { self.spawnPlayer() }

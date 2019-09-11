@@ -14,7 +14,7 @@ class LivesDisplay: SKNode {
   let numericDisplay: SKLabelNode
 
   required init(extraColor: UIColor) {
-    numericDisplay = SKLabelNode(fontNamed: "KenVector Future")
+    numericDisplay = SKLabelNode(fontNamed: "Kenney Future")
     numericDisplay.name = "extraLives"
     numericDisplay.fontColor = extraColor
     numericDisplay.horizontalAlignmentMode = .left
