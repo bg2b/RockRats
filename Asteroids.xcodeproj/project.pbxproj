@@ -65,6 +65,8 @@
 		FD79324122D20FE600E7D336 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FD79323F22D20FE600E7D336 /* Main.storyboard */; };
 		FD79324322D20FE700E7D336 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FD79324222D20FE700E7D336 /* Assets.xcassets */; };
 		FD79324622D20FE700E7D336 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FD79324422D20FE700E7D336 /* LaunchScreen.storyboard */; };
+		FD808FCA2328FE5F0025A71E /* kenneyfuture.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FD808FC92328FE5F0025A71E /* kenneyfuture.ttf */; };
+		FD808FCC2328FE6E0025A71E /* kenneyfuturenarrow.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FD808FCB2328FE6E0025A71E /* kenneyfuturenarrow.ttf */; };
 		FDA43B1E2308A1A600A29347 /* extra_life.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B1D2308A1A600A29347 /* extra_life.wav */; };
 		FDA43B202308AB9600A29347 /* heartbeat.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B1F2308AB9600A29347 /* heartbeat.wav */; };
 		FDA43B222308C11E00A29347 /* gameover.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B212308C11E00A29347 /* gameover.wav */; };
@@ -75,7 +77,6 @@
 		FDCF8CA322DA175F008EDFD1 /* CGHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDCF8CA222DA175F008EDFD1 /* CGHelpers.swift */; };
 		FDCF8CA522DA7296008EDFD1 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDCF8CA422DA7296008EDFD1 /* Globals.swift */; };
 		FDD831F222EDB50200CA4EC6 /* Explosions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD831F122EDB50200CA4EC6 /* Explosions.swift */; };
-		FDD831F422EE27C700CA4EC6 /* kenvector_future.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FDD831F322EE27C700CA4EC6 /* kenvector_future.ttf */; };
 		FDD831F622F187D200CA4EC6 /* GameConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD831F522F187D200CA4EC6 /* GameConfig.swift */; };
 		FDD831F922F1AE0D00CA4EC6 /* confignormal.json in Resources */ = {isa = PBXBuildFile; fileRef = FDD831F822F1AE0D00CA4EC6 /* confignormal.json */; };
 		FDDF488722D2A700006FB86F /* SpriteCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDDF488622D2A700006FB86F /* SpriteCache.swift */; };
@@ -160,6 +161,8 @@
 		FD79324222D20FE700E7D336 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FD79324522D20FE700E7D336 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FD79324722D20FE700E7D336 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FD808FC92328FE5F0025A71E /* kenneyfuture.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = kenneyfuture.ttf; sourceTree = "<group>"; };
+		FD808FCB2328FE6E0025A71E /* kenneyfuturenarrow.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = kenneyfuturenarrow.ttf; sourceTree = "<group>"; };
 		FDA43B1D2308A1A600A29347 /* extra_life.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = extra_life.wav; sourceTree = "<group>"; };
 		FDA43B1F2308AB9600A29347 /* heartbeat.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = heartbeat.wav; sourceTree = "<group>"; };
 		FDA43B212308C11E00A29347 /* gameover.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = gameover.wav; sourceTree = "<group>"; };
@@ -170,7 +173,6 @@
 		FDCF8CA222DA175F008EDFD1 /* CGHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGHelpers.swift; sourceTree = "<group>"; };
 		FDCF8CA422DA7296008EDFD1 /* Globals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
 		FDD831F122EDB50200CA4EC6 /* Explosions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Explosions.swift; sourceTree = "<group>"; };
-		FDD831F322EE27C700CA4EC6 /* kenvector_future.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = kenvector_future.ttf; sourceTree = "<group>"; };
 		FDD831F522F187D200CA4EC6 /* GameConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameConfig.swift; sourceTree = "<group>"; };
 		FDD831F822F1AE0D00CA4EC6 /* confignormal.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = confignormal.json; sourceTree = "<group>"; };
 		FDDF488622D2A700006FB86F /* SpriteCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteCache.swift; sourceTree = "<group>"; };
@@ -274,13 +276,13 @@
 				6513D66B22DC0B4E00B4BD57 /* Button.swift */,
 				FDDF488622D2A700006FB86F /* SpriteCache.swift */,
 				FDE04B2C22D753240011A529 /* TextureCache.swift */,
-				FDD831F322EE27C700CA4EC6 /* kenvector_future.ttf */,
 				FDCF8CA422DA7296008EDFD1 /* Globals.swift */,
 				FD79323D22D20FE600E7D336 /* GameViewController.swift */,
 				FD79323F22D20FE600E7D336 /* Main.storyboard */,
 				FD79324222D20FE700E7D336 /* Assets.xcassets */,
 				FD79324422D20FE700E7D336 /* LaunchScreen.storyboard */,
 				FDD831F722F1ADD100CA4EC6 /* configs */,
+				FD808FC82328FE380025A71E /* fonts */,
 				FD4D53C323080BFD00718938 /* sounds */,
 				FD79324722D20FE700E7D336 /* Info.plist */,
 			);
@@ -330,6 +332,15 @@
 				FDA43B25230C01C300A29347 /* warpedship_blue@2x.png */,
 			);
 			path = "Asset creation";
+			sourceTree = "<group>";
+		};
+		FD808FC82328FE380025A71E /* fonts */ = {
+			isa = PBXGroup;
+			children = (
+				FD808FC92328FE5F0025A71E /* kenneyfuture.ttf */,
+				FD808FCB2328FE6E0025A71E /* kenneyfuturenarrow.ttf */,
+			);
+			path = fonts;
 			sourceTree = "<group>";
 		};
 		FDD831F722F1ADD100CA4EC6 /* configs */ = {
@@ -417,8 +428,8 @@
 				6523C0842316E54E0071AB4B /* ufo1loop.wav in Resources */,
 				FD53168222DB445100F09E57 /* meteorsmall1@2x.png in Resources */,
 				FDA43B202308AB9600A29347 /* heartbeat.wav in Resources */,
-				FDD831F422EE27C700CA4EC6 /* kenvector_future.ttf in Resources */,
 				FD53168022DB445100F09E57 /* meteormed1@2x.png in Resources */,
+				FD808FCA2328FE5F0025A71E /* kenneyfuture.ttf in Resources */,
 				FD53167F22DB445100F09E57 /* meteorbig1@2x.png in Resources */,
 				FD4D53CF230843C900718938 /* meteorbig_hit.wav in Resources */,
 				FD4D53C22306B60F00718938 /* life_blue@2x.png in Resources */,
@@ -447,6 +458,7 @@
 				FDA43B24230A111D00A29347 /* meteorhuge_hit.wav in Resources */,
 				FD4D53D0230843C900718938 /* meteormed_hit.wav in Resources */,
 				FD28DB5922DFFA87009446A2 /* ufo_blue@2x.png in Resources */,
+				FD808FCC2328FE6E0025A71E /* kenneyfuturenarrow.ttf in Resources */,
 				FD53167222DAA8EA00F09E57 /* fire3@2x.png in Resources */,
 				FDE04B2922D5FEA30011A529 /* star2@2x.png in Resources */,
 				FDA43B28230C1DC600A29347 /* warpout.wav in Resources */,
