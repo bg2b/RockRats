@@ -867,8 +867,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             action: (SKNode, SKNode) -> Void) {
     let b1 = contact.bodyA
     let b2 = contact.bodyB
-    guard b1.isOnScreen else { return }
-    guard b2.isOnScreen else { return }
     guard let node1 = contact.bodyA.node, node1.parent != nil else { return }
     guard let node2 = contact.bodyB.node, node2.parent != nil else { return }
     if b1.isA(type1) && b2.isA(type2) {
