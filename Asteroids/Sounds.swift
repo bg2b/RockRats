@@ -40,6 +40,7 @@ enum SoundEffect: String, CaseIterable {
     guard let result = try? AVAudioPlayer(contentsOf: self.url) else {
       fatalError("Unable to instantiate AVAudioPlayer")
     }
+    result.prepareToPlay()
     return result
   }
 }
@@ -60,7 +61,7 @@ class SoundEffectPlayers {
   let players: [AVAudioPlayer]
   var nextPlayer = -1
 
-  required init(forEffect effect: SoundEffect, count: Int) {
+  init(forEffect effect: SoundEffect, count: Int) {
     players = (0..<count).map { _ in effect.player() }
   }
 
@@ -78,8 +79,7 @@ struct PositionalEffect {
   weak var atNode: SKNode?
 }
 
-class Sounds: SKNode {
-  var backgroundMusic: SKAudioNode!
+class Sounds {
   let heartbeatRateInitial = 2.0
   let heartbeatRateMax = 0.5
   var currentHeartbeatRate = 0.0
@@ -87,23 +87,20 @@ class Sounds: SKNode {
   var heartbeatOn = false
   var audioPlayerCache = [SoundEffect: SoundEffectPlayers]()
   var positionalEffects = [PositionalEffect]()
-  let stereoEffectsFrame: CGRect
-  var soundQueue = OperationQueue()
+  var stereoEffectsFrame = CGRect(origin: .zero, size: .zero)
+  let soundQueue: DispatchQueue
 
-  required init(stereoEffectsFrame: CGRect) {
-    self.stereoEffectsFrame = stereoEffectsFrame
-    super.init()
-    soundQueue.qualityOfService = .background
-    name = "sounds"
-    position = .zero
+  init() {
+    soundQueue = DispatchQueue.global(qos: .background)
     for effect in SoundEffect.allCases {
       preload(effect)
     }
     normalHeartbeatRate()
   }
 
-  required init(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented by Sounds")
+  func wait(for duration: Double, execute closure: @escaping () -> Void) {
+    let dispatchTime = DispatchTime.now() + duration
+    soundQueue.asyncAfter(deadline: dispatchTime, execute: closure)
   }
 
   func heartbeat() {
@@ -138,6 +135,7 @@ class Sounds: SKNode {
   }
 
   func stereoBalance(_ position: CGPoint) -> Float {
+    guard stereoEffectsFrame.width != 0 else { return 0 }
     guard position.x <= stereoEffectsFrame.maxX else { return 1 }
     guard position.x >= stereoEffectsFrame.minX else { return -1 }
     return Float((position.x - stereoEffectsFrame.midX) / (0.5 * stereoEffectsFrame.width))
@@ -152,7 +150,7 @@ class Sounds: SKNode {
   }
 
   func startPlaying(_ player: AVAudioPlayer) {
-    soundQueue.addOperation {
+    soundQueue.async {
       player.play()
     }
   }
@@ -160,7 +158,7 @@ class Sounds: SKNode {
   func soundEffect(_ sound: SoundEffect, at position: CGPoint = .zero, withVolume volume: Float = 1) {
     let player = audioPlayerFor(sound)
     let balance = stereoBalance(position)
-    soundQueue.addOperation {
+    soundQueue.async {
       player.volume = volume
       player.pan = balance
       player.play()
@@ -171,7 +169,7 @@ class Sounds: SKNode {
     for positional in positionalEffects {
       guard let player = positional.player, let node = positional.atNode else { continue }
       let balance = stereoBalance(node.position)
-      soundQueue.addOperation {
+      soundQueue.async {
         player.pan = balance
       }
     }

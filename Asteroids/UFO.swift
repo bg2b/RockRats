@@ -43,12 +43,12 @@ class UFO: SKNode {
   required init(brothersKilled: Int) {
     isBig = .random(in: 0...1) >= Globals.gameConfig.value(for: \.smallUFOChance)
     ufoTexture = Globals.textureCache.findTexture(imageNamed: isBig ? "ufo_green" : "ufo_red")
-    engineSounds = sounds.audioPlayerFor(isBig ? .ufoEnginesBig : .ufoEnginesSmall)
+    engineSounds = Globals.sounds.audioPlayerFor(isBig ? .ufoEnginesBig : .ufoEnginesSmall)
     engineSounds.numberOfLoops = -1
     engineSounds.volume = 0.5
     //engineSounds.enableRate = true
     //engineSounds.rate = 0.5
-    sounds.startPlaying(engineSounds)
+    Globals.sounds.startPlaying(engineSounds)
     let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[isBig ? 0 : 1]
     currentSpeed = .random(in: 0.5 * maxSpeed ... maxSpeed)
     let revengeFactor = max(brothersKilled - 3, 0)
@@ -66,7 +66,7 @@ class UFO: SKNode {
     let ufo = SKSpriteNode(texture: ufoTexture)
     ufo.name = "ufoImage"
     addChild(ufo)
-    sounds.addPositional(player: engineSounds, at: self)
+    Globals.sounds.addPositional(player: engineSounds, at: self)
     let body = SKPhysicsBody(circleOfRadius: 0.5 * ufoTexture.size().width)
     body.mass = isBig ? 1 : 0.75
     body.categoryBitMask = ObjectCategories.ufo.rawValue

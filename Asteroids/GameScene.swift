@@ -362,8 +362,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func initSounds() {
-    sounds = Sounds(stereoEffectsFrame: gameFrame)
-    addChild(sounds)
+    Globals.sounds.stereoEffectsFrame = gameFrame
   }
 
   func isSafe(point: CGPoint, pathStart: CGPoint, pathEnd: CGPoint, clearance: CGFloat) -> Bool {
@@ -428,10 +427,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     } else {
       ufosToAvenge /= 2
       enableHyperspaceJump()
-      Globals.sounds.soundEffect(.warpIn)
       player.reset()
       player.warpIn(to: spawnPosition, atAngle: player.zRotation, addTo: playfield)
-      sounds.soundEffect(.warpIn, at: spawnPosition)
+      Globals.sounds.soundEffect(.warpIn, at: spawnPosition)
       spawnUFOs()
       updateLives(-1)
     }
@@ -457,7 +455,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     laser.wait(for: 0.9) { self.removeLaser(laser) }
     playfield.addWithScaling(laser)
     player.shoot(laser: laser)
-    sounds.soundEffect(.playerShot, at: player.position)
+    Globals.sounds.soundEffect(.playerShot, at: player.position)
   }
   
   func removeLaser(_ laser: SKSpriteNode) {
@@ -486,7 +484,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     laser.position = position
     laser.zRotation = angle
     laser.requiredPhysicsBody().velocity = CGVector(angle: angle).scale(by: speed)
-    sounds.soundEffect(.ufoShot, at: position)
+    Globals.sounds.soundEffect(.ufoShot, at: position)
   }
   
   func removeUFOLaser(_ laser: SKSpriteNode) {
@@ -501,12 +499,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let effects = player.warpOut()
     playfield.addWithScaling(effects[0])
     playfield.addWithScaling(effects[1])
-    sounds.soundEffect(.warpOut, at: player.position)
+    Globals.sounds.soundEffect(.warpOut, at: player.position)
     let jumpRegion = gameFrame.insetBy(dx: 0.05 * gameFrame.width, dy: 0.05 * gameFrame.height)
     let jumpPosition = CGPoint(x: .random(in: jumpRegion.minX...jumpRegion.maxX),
                                y: .random(in: jumpRegion.minY...jumpRegion.maxY))
     wait(for: 1) {
-      self.sounds.soundEffect(.warpIn, at: jumpPosition)
+      Globals.sounds.soundEffect(.warpIn, at: jumpPosition)
       self.player.warpIn(to: jumpPosition, atAngle: .random(in: 0 ... 2 * .pi), addTo: self.playfield)
     }
   }
@@ -758,7 +756,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   
   func destroyPlayer() {
     enableHyperspaceJump()
-    sounds.soundEffect(.playerExplosion, at: player.position)
+    Globals.sounds.soundEffect(.playerExplosion, at: player.position)
     addExplosion(player.explode())
     stopSpawningUFOs()
     playfield.changeSpeed(to: 0.25)
@@ -923,6 +921,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     player.fly()
     playfield.wrapCoordinates()
-    sounds.adjustPositionalEffects()
+    Globals.sounds.adjustPositionalEffects()
   }
 }

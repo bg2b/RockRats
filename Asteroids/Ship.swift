@@ -45,10 +45,10 @@ class Ship: SKNode {
   required init(color: String, joystick: Joystick) {
     self.joystick = joystick
     self.shipTexture = Globals.textureCache.findTexture(imageNamed: "ship_\(color)")
-    engineSounds = sounds.audioPlayerFor(.playerEngines)
+    engineSounds = Globals.sounds.audioPlayerFor(.playerEngines)
     engineSounds.numberOfLoops = -1
     engineSounds.volume = 0
-    sounds.startPlaying(engineSounds)
+    Globals.sounds.startPlaying(engineSounds)
     warpOutShader = swirlShader(forTexture: shipTexture, inward: true, warpTime: warpTime)
     warpInShader = swirlShader(forTexture: shipTexture, inward: false, warpTime: warpTime)
     super.init()
@@ -56,7 +56,7 @@ class Ship: SKNode {
     let ship = SKSpriteNode(texture: shipTexture)
     ship.name = "shipImage"
     addChild(ship)
-    sounds.addPositional(player: engineSounds, at: self)
+    Globals.sounds.addPositional(player: engineSounds, at: self)
     forwardFlames = buildFlames(at: CGPoint(x: -shipTexture.size().width / 2, y: 0.0))
     for side in [-1, 1] {
       reverseFlames.append(buildFlames(at: CGPoint(x: 0, y: CGFloat(side) * shipTexture.size().height / 2.1),
