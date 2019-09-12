@@ -25,3 +25,7 @@ class TextureCache {
     print("Loaded \(textures.count) textures")
   }
 }
+
+extension Globals {
+  static var textureCache = TextureCache()
+}

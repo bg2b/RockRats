@@ -71,8 +71,6 @@ extension SKNode {
 }
 
 extension Globals {
-  static var textureCache = TextureCache()
-  static var spriteCache = SpriteCache()
   static var lastUpdateTime = 0.0
 }
 
