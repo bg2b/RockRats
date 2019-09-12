@@ -178,3 +178,7 @@ class Sounds: SKNode {
     positionalEffects.removeAll { $0.player == nil || $0.atNode == nil }
   }
 }
+
+extension Globals {
+  static let sounds = Sounds()
+}

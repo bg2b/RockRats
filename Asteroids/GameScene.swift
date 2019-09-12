@@ -71,8 +71,6 @@ extension SKNode {
 }
 
 extension Globals {
-  static var textureCache = TextureCache()
-  static var spriteCache = SpriteCache()
   static var lastUpdateTime = 0.0
 }
 
@@ -99,7 +97,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   var livesRemaining = 0
   var extraLivesAwarded = 0
   var livesDisplay: LivesDisplay!
-  var sounds: Sounds!
   var gameOver = false
 
   func makeSprite(imageNamed name: String, initializer: ((SKSpriteNode) -> Void)? = nil) -> SKSpriteNode {
@@ -330,7 +327,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let extraLivesEarned = score / Globals.gameConfig.extraLifeScore
     if extraLivesEarned > extraLivesAwarded {
       updateLives(+1)
-      sounds.soundEffect(.extraLife)
+      Globals.sounds.soundEffect(.extraLife)
       extraLivesAwarded += 1
     }
     scoreDisplay.text = "\(score)"
@@ -431,6 +428,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     } else {
       ufosToAvenge /= 2
       enableHyperspaceJump()
+      Globals.sounds.soundEffect(.warpIn)
       player.reset()
       player.warpIn(to: spawnPosition, atAngle: player.zRotation, addTo: playfield)
       sounds.soundEffect(.warpIn, at: spawnPosition)
@@ -607,7 +605,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     recycleSprite(asteroid)
     asteroids.remove(asteroid)
     if asteroids.isEmpty && !gameOver {
-      sounds.normalHeartbeatRate()
+      Globals.sounds.normalHeartbeatRate()
       stopSpawningUFOs()
       // If the player dies from colliding with the last asteroid, then we have to
       // wait long enough for any of the player's remaining lasers to possibly hit a
@@ -664,7 +662,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let velocity = asteroid.requiredPhysicsBody().velocity
     let pos = asteroid.position
     makeAsteroidSplitEffect(asteroid, ofSize: size)
-    sounds.soundEffect(hitEffect[size])
+    Globals.sounds.soundEffect(hitEffect[size])
     // Don't split med or small asteroids.  Size progression should go huge -> big -> med,
     // but we include small just for completeness in case we change our minds later.
     if size >= 2 {
@@ -737,7 +735,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
           let effects = ufo.warpOut()
           self.playfield.addWithScaling(effects[0])
           self.playfield.addWithScaling(effects[1])
-          self.sounds.soundEffect(.ufoWarpOut)
+          Globals.sounds.soundEffect(.ufoWarpOut)
         })]), withKey: "warpOut")
     }
     return maxDelay
@@ -749,10 +747,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       wait(for: delay) { self.spawnPlayer() }
     } else {
       gameOver = true
-      sounds.stopHeartbeat()
+      Globals.sounds.stopHeartbeat()
       self.removeAction(forKey: "spawnWave")
       wait(for: delay) {
-        self.sounds.soundEffect(.gameOver)
+        Globals.sounds.soundEffect(.gameOver)
         self.displayMessage("GAME OVER", forTime: 4)
       }
     }
@@ -773,11 +771,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       self.playfield.changeSpeed(to: 1)
       self.respawnOrGameOver()
     }
+    Globals.sounds.soundEffect(.playerExplosion)
+    stopSpawningUFOs()
   }
   
   func spawnUFO() {
     guard player.parent != nil && ufos.count < Globals.gameConfig.value(for: \.maxUFOs) else { return }
-    let ufo = UFO(sounds: sounds, brothersKilled: ufosToAvenge)
+    let ufo = UFO(brothersKilled: ufosToAvenge)
     playfield.addWithScaling(ufo)
     ufos.insert(ufo)
     // Position the UFO just off the screen on one side or another.  We set the side
@@ -830,7 +830,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // sure to cancel the warp.
     ufo.removeAction(forKey: "warpOut")
     ufos.remove(ufo)
-    sounds.soundEffect(.ufoExplosion)
+    Globals.sounds.soundEffect(.ufoExplosion)
     addExplosion(ufo.explode())
   }
 
@@ -896,8 +896,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     Globals.gameConfig.currentWaveNumber = 0
     extraLivesAwarded = 0
     updateLives(0)
-    player = Ship(color: "blue", sounds: sounds, joystick: joystick)
-    sounds.startHearbeat()
+    player = Ship(color: "blue", joystick: joystick)
+    Globals.sounds.startHearbeat()
     nextWave()
     wait(for: 3.0) { self.spawnPlayer() }
   }

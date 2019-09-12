@@ -42,7 +42,7 @@ class Ship: SKNode {
     return flames
   }
 
-  required init(color: String, sounds: Sounds, joystick: Joystick) {
+  required init(color: String, joystick: Joystick) {
     self.joystick = joystick
     self.shipTexture = Globals.textureCache.findTexture(imageNamed: "ship_\(color)")
     engineSounds = sounds.audioPlayerFor(.playerEngines)

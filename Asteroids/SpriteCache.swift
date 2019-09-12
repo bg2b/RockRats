@@ -49,3 +49,7 @@ class SpriteCache {
     print("Created \(created) sprites; \(recycled) sprites are in the recycle bin")
   }
 }
+
+extension Globals {
+  static let spriteCache = SpriteCache()
+}
