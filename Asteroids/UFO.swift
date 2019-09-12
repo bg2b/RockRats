@@ -39,13 +39,13 @@ class UFO: SKNode {
   let warpTime = 0.5
   let warpOutShader: SKShader
 
-  required init(sounds: Sounds, brothersKilled: Int) {
+  required init(brothersKilled: Int) {
     isBig = .random(in: 0...1) >= Globals.gameConfig.value(for: \.smallUFOChance)
     ufoTexture = Globals.textureCache.findTexture(imageNamed: isBig ? "ufo_green" : "ufo_red")
-    self.engineSounds = sounds.audioNodeFor(isBig ? .ufoEnginesBig : .ufoEnginesSmall)
+    self.engineSounds = Globals.sounds.audioNodeFor(isBig ? .ufoEnginesBig : .ufoEnginesSmall)
     self.engineSounds.autoplayLooped = true
     self.engineSounds.run(SKAction.changeVolume(to: 0.5, duration: 0))
-    sounds.addChild(self.engineSounds)
+    Globals.sounds.addChild(self.engineSounds)
     let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[isBig ? 0 : 1]
     currentSpeed = .random(in: 0.5 * maxSpeed ... maxSpeed)
     let revengeFactor = max(brothersKilled - 3, 0)

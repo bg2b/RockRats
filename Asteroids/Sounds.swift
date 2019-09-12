@@ -107,3 +107,7 @@ class Sounds: SKNode {
     playOnce(effect, atVolume: volume)
   }
 }
+
+extension Globals {
+  static let sounds = Sounds()
+}

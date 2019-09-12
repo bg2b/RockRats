@@ -41,13 +41,13 @@ class Ship: SKNode {
     return flames
   }
 
-  required init(color: String, sounds: Sounds, joystick: Joystick) {
+  required init(color: String, joystick: Joystick) {
     self.joystick = joystick
     self.shipTexture = Globals.textureCache.findTexture(imageNamed: "ship_\(color)")
-    self.engineSounds = sounds.audioNodeFor(.playerEngines)
+    self.engineSounds = Globals.sounds.audioNodeFor(.playerEngines)
     self.engineSounds.autoplayLooped = true
     self.engineSounds.run(SKAction.changeVolume(to: 0, duration: 0))
-    sounds.addChild(self.engineSounds)
+    Globals.sounds.addChild(self.engineSounds)
     warpOutShader = swirlShader(forTexture: shipTexture, inward: true, warpTime: warpTime)
     warpInShader = swirlShader(forTexture: shipTexture, inward: false, warpTime: warpTime)
     super.init()

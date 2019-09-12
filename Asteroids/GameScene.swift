@@ -97,7 +97,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   var livesRemaining = 0
   var extraLivesAwarded = 0
   var livesDisplay: LivesDisplay!
-  var sounds: Sounds!
   var gameOver = false
 
   func makeSprite(imageNamed name: String, initializer: ((SKSpriteNode) -> Void)? = nil) -> SKSpriteNode {
@@ -328,7 +327,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let extraLivesEarned = score / Globals.gameConfig.extraLifeScore
     if extraLivesEarned > extraLivesAwarded {
       updateLives(+1)
-      sounds.soundEffect(.extraLife)
+      Globals.sounds.soundEffect(.extraLife)
       extraLivesAwarded += 1
     }
     scoreDisplay.text = "\(score)"
@@ -363,8 +362,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func initSounds() {
-    sounds = Sounds()
-    addChild(sounds)
+    Globals.sounds.removeFromParent()
+    addChild(Globals.sounds)
   }
 
   func isSafe(point: CGPoint, pathStart: CGPoint, pathEnd: CGPoint, clearance: CGFloat) -> Bool {
@@ -429,7 +428,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     } else {
       ufosToAvenge /= 2
       enableHyperspaceJump()
-      sounds.soundEffect(.warpIn)
+      Globals.sounds.soundEffect(.warpIn)
       player.reset()
       player.warpIn(to: spawnPosition, atAngle: player.zRotation, addTo: playfield)
       spawnUFOs()
@@ -457,7 +456,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     laser.wait(for: 0.9) { self.removeLaser(laser) }
     playfield.addWithScaling(laser)
     player.shoot(laser: laser)
-    sounds.soundEffect(.playerShot)
+    Globals.sounds.soundEffect(.playerShot)
   }
   
   func removeLaser(_ laser: SKSpriteNode) {
@@ -486,7 +485,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     laser.position = position
     laser.zRotation = angle
     laser.requiredPhysicsBody().velocity = CGVector(angle: angle).scale(by: speed)
-    sounds.soundEffect(.ufoShot)
+    Globals.sounds.soundEffect(.ufoShot)
   }
   
   func removeUFOLaser(_ laser: SKSpriteNode) {
@@ -501,12 +500,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let effects = player.warpOut()
     playfield.addWithScaling(effects[0])
     playfield.addWithScaling(effects[1])
-    sounds.soundEffect(.warpOut)
+    Globals.sounds.soundEffect(.warpOut)
     let jumpRegion = gameFrame.insetBy(dx: 0.05 * gameFrame.width, dy: 0.05 * gameFrame.height)
     let jumpPosition = CGPoint(x: .random(in: jumpRegion.minX...jumpRegion.maxX),
                                y: .random(in: jumpRegion.minY...jumpRegion.maxY))
     wait(for: 1) {
-      self.sounds.soundEffect(.warpIn)
+      Globals.sounds.soundEffect(.warpIn)
       self.player.warpIn(to: jumpPosition, atAngle: .random(in: 0 ... 2 * .pi), addTo: self.playfield)
     }
   }
@@ -605,7 +604,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     recycleSprite(asteroid)
     asteroids.remove(asteroid)
     if asteroids.isEmpty && !gameOver {
-      sounds.normalHeartbeatRate()
+      Globals.sounds.normalHeartbeatRate()
       stopSpawningUFOs()
       // If the player dies from colliding with the last asteroid, then we have to
       // wait long enough for any of the player's remaining lasers to possibly hit a
@@ -662,7 +661,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let velocity = asteroid.requiredPhysicsBody().velocity
     let pos = asteroid.position
     makeAsteroidSplitEffect(asteroid, ofSize: size)
-    sounds.soundEffect(hitEffect[size])
+    Globals.sounds.soundEffect(hitEffect[size])
     // Don't split med or small asteroids.  Size progression should go huge -> big -> med,
     // but we include small just for completeness in case we change our minds later.
     if size >= 2 {
@@ -735,7 +734,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
           let effects = ufo.warpOut()
           self.playfield.addWithScaling(effects[0])
           self.playfield.addWithScaling(effects[1])
-          self.sounds.soundEffect(.ufoWarpOut)
+          Globals.sounds.soundEffect(.ufoWarpOut)
         })]), withKey: "warpOut")
     }
     return maxDelay
@@ -747,10 +746,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       wait(for: delay) { self.spawnPlayer() }
     } else {
       gameOver = true
-      sounds.stopHeartbeat()
+      Globals.sounds.stopHeartbeat()
       self.removeAction(forKey: "spawnWave")
       wait(for: delay) {
-        self.sounds.soundEffect(.gameOver)
+        Globals.sounds.soundEffect(.gameOver)
         self.displayMessage("GAME OVER", forTime: 4)
       }
     }
@@ -770,13 +769,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
       self.playfield.changeSpeed(to: 1)
       self.respawnOrGameOver()
     }
-    sounds.soundEffect(.playerExplosion)
+    Globals.sounds.soundEffect(.playerExplosion)
     stopSpawningUFOs()
   }
   
   func spawnUFO() {
     guard player.parent != nil && ufos.count < Globals.gameConfig.value(for: \.maxUFOs) else { return }
-    let ufo = UFO(sounds: sounds, brothersKilled: ufosToAvenge)
+    let ufo = UFO(brothersKilled: ufosToAvenge)
     playfield.addWithScaling(ufo)
     ufos.insert(ufo)
     // Position the UFO just off the screen on one side or another.  We set the side
@@ -829,7 +828,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // sure to cancel the warp.
     ufo.removeAction(forKey: "warpOut")
     ufos.remove(ufo)
-    sounds.soundEffect(.ufoExplosion)
+    Globals.sounds.soundEffect(.ufoExplosion)
     addExplosion(ufo.explode())
   }
 
@@ -895,8 +894,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     Globals.gameConfig.currentWaveNumber = 0
     extraLivesAwarded = 0
     updateLives(0)
-    player = Ship(color: "blue", sounds: sounds, joystick: joystick)
-    sounds.startHearbeat()
+    player = Ship(color: "blue", joystick: joystick)
+    Globals.sounds.startHearbeat()
     nextWave()
     wait(for: 3.0) { self.spawnPlayer() }
   }
