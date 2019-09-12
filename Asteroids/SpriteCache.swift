@@ -51,5 +51,5 @@ class SpriteCache {
 }
 
 extension Globals {
-  static var spriteCache = SpriteCache()
+  static let spriteCache = SpriteCache()
 }

@@ -27,5 +27,5 @@ class TextureCache {
 }
 
 extension Globals {
-  static var textureCache = TextureCache()
+  static let textureCache = TextureCache()
 }
