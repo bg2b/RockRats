@@ -29,7 +29,7 @@ class GameScene: BasicScene {
     controls.name = "controls"
     controls.zPosition = LevelZs.controls.rawValue
     addChild(controls)
-    let controlSize = (tabletFormat ? CGFloat(100) : 0.6 * 0.5 * (frame.width - gameFrame.width))
+    let controlSize = (tabletFormat ? CGFloat(100) : 0.6 * 0.5 * (size.width - gameFrame.width))
     let controlFill: UIColor = UIColor(white: 0.33, alpha: 0.33)
     joystick = Joystick(size: controlSize, borderColor: .lightGray, fillColor: controlFill,
                         texture: Globals.textureCache.findTexture(imageNamed: "ship_blue"))
@@ -48,15 +48,15 @@ class GameScene: BasicScene {
     enableHyperspaceJump()
     if tabletFormat {
       let offset = controlSize
-      joystick.position = CGPoint(x: frame.minX + offset, y: frame.minY + offset)
-      fireButton.position = CGPoint(x: frame.maxX - offset, y: frame.minY + offset)
-      hyperspaceButton.position = CGPoint(x: frame.maxX - offset, y: frame.minY + 2.25 * offset)
+      joystick.position = CGPoint(x: fullFrame.minX + offset, y: fullFrame.minY + offset)
+      fireButton.position = CGPoint(x: fullFrame.maxX - offset, y: fullFrame.minY + offset)
+      hyperspaceButton.position = CGPoint(x: fullFrame.maxX - offset, y: fullFrame.minY + 2.25 * offset)
     } else {
-      let xOffset = 0.5 * 0.5 * (frame.width - gameFrame.width)
+      let xOffset = 0.5 * 0.5 * (fullFrame.width - gameFrame.width)
       let yOffset = 1.25 * controlSize
-      joystick.position = CGPoint(x: frame.minX + xOffset, y: frame.midY - 0.5 * yOffset)
-      fireButton.position = CGPoint(x: frame.maxX - xOffset, y: frame.midY - 0.5 * yOffset)
-      hyperspaceButton.position = CGPoint(x: frame.maxX - xOffset, y: frame.midY + 0.5 * yOffset)
+      joystick.position = CGPoint(x: fullFrame.minX + xOffset, y: fullFrame.midY - 0.5 * yOffset)
+      fireButton.position = CGPoint(x: fullFrame.maxX - xOffset, y: fullFrame.midY - 0.5 * yOffset)
+      hyperspaceButton.position = CGPoint(x: fullFrame.maxX - xOffset, y: fullFrame.midY + 0.5 * yOffset)
       setPositionsForSafeArea()
     }
   }
@@ -73,11 +73,11 @@ class GameScene: BasicScene {
     gameArea.position = CGPoint(x: midX, y: 0)
     let gameAreaLeft = midX - 0.5 * gameFrame.width
     // Middle of space between edge of left safe area and left edge of playing area
-    let leftAlleyMidX = 0.5 * ((-0.5 * frame.width + left) + gameAreaLeft)
+    let leftAlleyMidX = 0.5 * ((-0.5 * size.width + left) + gameAreaLeft)
     joystick.position = CGPoint(x: leftAlleyMidX, y: joystick.position.y)
     // Middle of space between edge of right safe area and right edge of playing area
     let gameAreaRight = midX + 0.5 * gameFrame.width
-    let rightAlleyMidX = 0.5 * (gameAreaRight + (0.5 * frame.width - right))
+    let rightAlleyMidX = 0.5 * (gameAreaRight + (0.5 * size.width - right))
     fireButton.position = CGPoint(x: rightAlleyMidX, y: fireButton.position.y)
     hyperspaceButton.position = CGPoint(x: rightAlleyMidX, y: hyperspaceButton.position.y)
   }
@@ -393,9 +393,9 @@ class GameScene: BasicScene {
   override func didMove(to view: SKView) {
     name = "scene"
     physicsWorld.contactDelegate = self
-    initGameArea()
-    initInfo()
-    initControls()
+    //initGameArea()
+    //initInfo()
+    //initControls()
     initSounds()
     livesRemaining = Globals.gameConfig.initialLives
     Globals.gameConfig.currentWaveNumber = 0
@@ -421,5 +421,15 @@ class GameScene: BasicScene {
     }
     player.fly()
     playfield.wrapCoordinates()
+  }
+
+  override required init(size: CGSize) {
+    super.init(size: size)
+    initInfo()
+    initControls()
+  }
+
+  required init(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented by GameScene")
   }
 }
