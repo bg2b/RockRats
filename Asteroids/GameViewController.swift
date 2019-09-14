@@ -10,7 +10,7 @@ import UIKit
 import SpriteKit
 
 class GameViewController: UIViewController {
-  weak var scene: GameScene? = nil
+  weak var scene: BasicScene? = nil
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -44,11 +44,7 @@ class GameViewController: UIViewController {
   }
 
   override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-    if UIDevice.current.userInterfaceIdiom == .phone {
-      return .allButUpsideDown
-    } else {
-      return .all
-    }
+    return .landscape
   }
 
   override var prefersStatusBarHidden: Bool {
