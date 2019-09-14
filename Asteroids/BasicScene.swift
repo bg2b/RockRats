@@ -216,13 +216,13 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     setPositionsForSafeArea()
   }
 
-  func initGameArea() {
+  func initGameArea(limitAspectRatio: Bool) {
     let aspect = size.width / size.height
-    if aspect < 1.6 {
+    if aspect < 1.6 || !limitAspectRatio {
       // A tablet format.  Playfield will fill the complete frame, controls will be
       // on the playfield at the bottom left and right.
       tabletFormat = true
-      gameFrame = CGRect(x: -0.5 * size.width, y: -0.5 * size.height, width: size.width, height: size.height)
+      gameFrame = fullFrame
     } else {
       // A phone format.  Playfield is a central box with 4:3 aspect ratio, controls
       // centered on the left and right.
@@ -455,15 +455,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     return maxDelay
   }
 
-  func maybeCreateUFO() -> UFO? {
-    // This gets called when the timer for UFO creation triggers.  Subclasses should
-    // override this to check for any other conditions required for UFO creation.
-    // Return nil to indicate no UFO at this time, otherwise return the new UFO.
-    return nil
-  }
-
-  func spawnUFO() {
-    guard let ufo = maybeCreateUFO() else { return }
+  func spawnUFO(ufo: UFO) {
     playfield.addWithScaling(ufo)
     ufos.insert(ufo)
     // Position the UFO just off the screen on one side or another.  We set the side
@@ -517,19 +509,6 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     addExplosion(ufo.explode())
   }
 
-  func spawnUFOs(relativeDuration: Double = 1) {
-    stopSpawningUFOs()  // Remove any existing scheduled spawn
-    let meanTimeToNextUFO = relativeDuration * Globals.gameConfig.value(for: \.meanUFOTime)
-    let delay = Double.random(in: 0.75 * meanTimeToNextUFO ... 1.25 * meanTimeToNextUFO)
-    run(SKAction.sequence([SKAction.wait(forDuration: delay),
-                           SKAction.run { self.spawnUFO(); self.spawnUFOs() }]),
-        withKey: "spawnUFOs")
-  }
-
-  func stopSpawningUFOs() {
-    removeAction(forKey: "spawnUFOs")
-  }
-
   func ufoLaserHit(laser: SKNode, asteroid: SKNode) {
     removeUFOLaser(laser as! SKSpriteNode)
     splitAsteroid(asteroid as! SKSpriteNode)
@@ -552,6 +531,14 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     } else if b2.isA(type1) && b1.isA(type2) {
       action(node2, node1)
     }
+  }
+
+  func switchScene(to newScene: SKScene) {
+    let transitionColor = RGB(43, 45, 50)
+    let transition = SKTransition.fade(with: transitionColor, duration: 3)
+    transition.pausesOutgoingScene = false
+    transition.pausesIncomingScene = false
+    view?.presentScene(newScene, transition: transition)
   }
 
   // Subclasses should provide a didBegin method and set themselves as the
@@ -578,13 +565,12 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
 
   // The initializers should also be overridden by subclasses, but be sure to call
   // super.init()
-  override init(size: CGSize) {
+  override required init(size: CGSize) {
     super.init(size: size)
     fullFrame = CGRect(x: -0.5 * size.width, y: -0.5 * size.height, width: size.width, height: size.height)
     scaleMode = .aspectFill
     anchorPoint = CGPoint(x: 0.5, y: 0.5)
     physicsWorld.gravity = .zero
-    initGameArea()
   }
 
   required init(coder aDecoder: NSCoder) {

@@ -324,10 +324,23 @@ class GameScene: BasicScene {
     spawnUFOs(relativeDuration: 0.5)
   }
 
-  override func maybeCreateUFO() -> UFO? {
-    guard player.parent != nil else { return nil }
-    guard ufos.count < Globals.gameConfig.value(for: \.maxUFOs) else { return nil }
-    return UFO(brothersKilled: ufosToAvenge)
+  func maybeSpawnUFO() {
+    guard player.parent != nil else { return }
+    guard ufos.count < Globals.gameConfig.value(for: \.maxUFOs) else { return }
+    spawnUFO(ufo: UFO(brothersKilled: ufosToAvenge))
+  }
+
+  func spawnUFOs(relativeDuration: Double = 1) {
+    stopSpawningUFOs()  // Remove any existing scheduled spawn
+    let meanTimeToNextUFO = relativeDuration * Globals.gameConfig.value(for: \.meanUFOTime)
+    let delay = Double.random(in: 0.75 * meanTimeToNextUFO ... 1.25 * meanTimeToNextUFO)
+    run(SKAction.sequence([SKAction.wait(forDuration: delay),
+                           SKAction.run { self.maybeSpawnUFO(); self.spawnUFOs() }]),
+        withKey: "spawnUFOs")
+  }
+
+  func stopSpawningUFOs() {
+    removeAction(forKey: "spawnUFOs")
   }
 
   func respawnOrGameOver() {
@@ -341,6 +354,7 @@ class GameScene: BasicScene {
       wait(for: delay) {
         Globals.sounds.soundEffect(.gameOver)
         self.displayMessage("GAME OVER", forTime: 4)
+        self.wait(for: 5) { self.switchScene(to: Globals.menuScene) }
       }
     }
   }
@@ -391,17 +405,12 @@ class GameScene: BasicScene {
   }
 
   override func didMove(to view: SKView) {
-    name = "scene"
-    physicsWorld.contactDelegate = self
-    //initGameArea()
-    //initInfo()
-    //initControls()
     initSounds()
+    Globals.gameConfig = loadGameConfig(forMode: "normal")
     livesRemaining = Globals.gameConfig.initialLives
     Globals.gameConfig.currentWaveNumber = 0
     extraLivesAwarded = 0
     updateLives(0)
-    player = Ship(color: "blue", joystick: joystick)
     Globals.sounds.startHearbeat()
     nextWave()
     wait(for: 3.0) { self.spawnPlayer() }
@@ -423,10 +432,14 @@ class GameScene: BasicScene {
     playfield.wrapCoordinates()
   }
 
-  override required init(size: CGSize) {
+  required init(size: CGSize) {
     super.init(size: size)
+    initGameArea(limitAspectRatio: true)
     initInfo()
     initControls()
+    player = Ship(color: "blue", joystick: joystick)
+    name = "gameScene"
+    physicsWorld.contactDelegate = self
   }
 
   required init(coder aDecoder: NSCoder) {

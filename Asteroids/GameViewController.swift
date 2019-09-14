@@ -10,14 +10,17 @@ import UIKit
 import SpriteKit
 
 class GameViewController: UIViewController {
+  var menuScene: MenuScene!
   var gameScene: GameScene!
 
   override func viewDidLoad() {
     super.viewDidLoad()
     if let view = self.view as! SKView? {
       let aspect = view.frame.width / view.frame.height
-      gameScene = GameScene(size: CGSize(width: 768 * aspect, height: 768))
-      view.presentScene(gameScene)
+      let size = CGSize(width: 768 * aspect, height: 768)
+      Globals.gameScene = GameScene(size: size)
+      Globals.menuScene = MenuScene(size: size)
+      view.presentScene(Globals.gameScene)
       view.preferredFramesPerSecond = 120
       view.ignoresSiblingOrder = true
       view.showsFPS = true
@@ -28,9 +31,11 @@ class GameViewController: UIViewController {
 
   override func viewWillLayoutSubviews() {
     super.viewWillLayoutSubviews()
-    let leftPadding = view.safeAreaInsets.left * gameScene.size.width / view.frame.width
-    let rightPadding = view.safeAreaInsets.right * gameScene.size.width / view.frame.width
-    gameScene.setSafeArea(left: leftPadding, right: rightPadding)
+    if let gameScene = Globals.gameScene {
+      let leftPadding = view.safeAreaInsets.left * gameScene.size.width / view.frame.width
+      let rightPadding = view.safeAreaInsets.right * gameScene.size.width / view.frame.width
+      gameScene.setSafeArea(left: leftPadding, right: rightPadding)
+    }
   }
 
   override var shouldAutorotate: Bool {
@@ -44,4 +49,9 @@ class GameViewController: UIViewController {
   override var prefersStatusBarHidden: Bool {
     return true
   }
+}
+
+extension Globals {
+  static var menuScene: MenuScene!
+  static var gameScene: GameScene!
 }
