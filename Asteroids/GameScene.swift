@@ -177,10 +177,6 @@ class GameScene: BasicScene {
     }
   }
 
-  func initSounds() {
-    Globals.sounds.stereoEffectsFrame = gameFrame
-  }
-
   func isSafe(point: CGPoint, pathStart: CGPoint, pathEnd: CGPoint, clearance: CGFloat) -> Bool {
     // Generate "image" points in wrapped positions and make sure that all clear
     // the segment.  This seems easier than trying to simulate the wrapping of the
@@ -280,34 +276,6 @@ class GameScene: BasicScene {
     recycleSprite(laser)
     player.laserDestroyed()
   }
-  
-  func fireUFOLaser(angle: CGFloat, position: CGPoint, speed: CGFloat) {
-    let laser = Globals.spriteCache.findSprite(imageNamed: "lasersmall_red") { sprite in
-      guard let texture = sprite.texture else { fatalError("Where is the laser texture?") }
-      let ht = texture.size().height
-      let body = SKPhysicsBody(circleOfRadius: 0.5 * ht,
-                               center: CGPoint(x: 0.5 * (texture.size().width - ht), y: 0))
-      body.allowsRotation = false
-      body.linearDamping = 0
-      body.categoryBitMask = ObjectCategories.ufoShot.rawValue
-      body.collisionBitMask = 0
-      body.contactTestBitMask = setOf([.asteroid, .player])
-      sprite.physicsBody = body
-      sprite.zPosition = -1
-    }
-    laser.wait(for: Double(0.9 * gameFrame.height / speed)) { self.removeUFOLaser(laser) }
-    playfield.addWithScaling(laser)
-    laser.position = position
-    laser.zRotation = angle
-    laser.requiredPhysicsBody().velocity = CGVector(angle: angle).scale(by: speed)
-    Globals.sounds.soundEffect(.ufoShot, at: position)
-  }
-  
-  func removeUFOLaser(_ laser: SKSpriteNode) {
-    assert(laser.name == "lasersmall_red")
-    laser.removeAllActions()
-    recycleSprite(laser)
-  }
 
   func hyperspaceJump() {
     guard player.canJump() else { return }
@@ -406,7 +374,6 @@ class GameScene: BasicScene {
       self.playfield.changeSpeed(to: 1)
       self.respawnOrGameOver()
     }
-    Globals.sounds.soundEffect(.playerExplosion)
     stopSpawningUFOs()
   }
 

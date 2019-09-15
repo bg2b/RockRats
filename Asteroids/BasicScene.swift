@@ -242,8 +242,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func initSounds() {
-    Globals.sounds.removeFromParent()
-    addChild(Globals.sounds)
+    Globals.sounds.stereoEffectsFrame = gameFrame
   }
   
   func fireUFOLaser(angle: CGFloat, position: CGPoint, speed: CGFloat) {
@@ -265,7 +264,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     laser.position = position
     laser.zRotation = angle
     laser.requiredPhysicsBody().velocity = CGVector(angle: angle).scale(by: speed)
-    Globals.sounds.soundEffect(.ufoShot)
+    Globals.sounds.soundEffect(.ufoShot, at: position)
   }
   
   func removeUFOLaser(_ laser: SKSpriteNode) {
@@ -404,7 +403,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     let velocity = asteroid.requiredPhysicsBody().velocity
     let pos = asteroid.position
     makeAsteroidSplitEffect(asteroid, ofSize: size)
-    Globals.sounds.soundEffect(hitEffect[size])
+    Globals.sounds.soundEffect(hitEffect[size], at: pos)
     // Don't split med or small asteroids.  Size progression should go huge -> big -> med,
     // but we include small just for completeness in case we change our minds later.
     if size >= 2 {
@@ -446,10 +445,10 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
         SKAction.wait(forDuration: delay),
         SKAction.run({
           self.ufos.remove(ufo)
+          Globals.sounds.soundEffect(.ufoWarpOut, at: ufo.position)
           let effects = ufo.warpOut()
           self.playfield.addWithScaling(effects[0])
           self.playfield.addWithScaling(effects[1])
-          Globals.sounds.soundEffect(.ufoWarpOut)
         })]), withKey: "warpOut")
     }
     return maxDelay
@@ -505,7 +504,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     // sure to cancel the warp.
     ufo.removeAction(forKey: "warpOut")
     ufos.remove(ufo)
-    Globals.sounds.soundEffect(.ufoExplosion)
+    Globals.sounds.soundEffect(.ufoExplosion, at: ufo.position)
     addExplosion(ufo.explode())
   }
 

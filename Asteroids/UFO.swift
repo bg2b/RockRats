@@ -69,7 +69,9 @@ class UFO: SKNode {
     let ufo = SKSpriteNode(texture: ufoTexture)
     ufo.name = "ufoImage"
     addChild(ufo)
-    Globals.sounds.addPositional(player: engineSounds, at: self)
+    if let engineSounds = engineSounds {
+      Globals.sounds.addPositional(player: engineSounds, at: self)
+    }
     let body = SKPhysicsBody(circleOfRadius: 0.5 * ufoTexture.size().width)
     body.mass = isBig ? 1 : 0.75
     body.categoryBitMask = ObjectCategories.ufo.rawValue
