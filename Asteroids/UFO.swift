@@ -32,7 +32,7 @@ class UFO: SKNode {
   let isBig: Bool
   let ufoTexture: SKTexture
   var currentSpeed: CGFloat
-  var engineSounds: AVAudioPlayer
+  var engineSounds: AVAudioPlayer?
   let meanShotTime: Double
   var delayOfFirstShot: Double
   var shootingEnabled = false
@@ -40,15 +40,18 @@ class UFO: SKNode {
   let warpTime = 0.5
   let warpOutShader: SKShader
 
-  required init(brothersKilled: Int) {
+  required init(brothersKilled: Int, withSounds: Bool = true) {
     isBig = .random(in: 0...1) >= Globals.gameConfig.value(for: \.smallUFOChance)
     ufoTexture = Globals.textureCache.findTexture(imageNamed: isBig ? "ufo_green" : "ufo_red")
-    engineSounds = Globals.sounds.audioPlayerFor(isBig ? .ufoEnginesBig : .ufoEnginesSmall)
-    engineSounds.numberOfLoops = -1
-    engineSounds.volume = 0.5
-    //engineSounds.enableRate = true
-    //engineSounds.rate = 0.5
-    Globals.sounds.startPlaying(engineSounds)
+    if withSounds {
+      let engineSounds = Globals.sounds.audioPlayerFor(isBig ? .ufoEnginesBig : .ufoEnginesSmall)
+      engineSounds.numberOfLoops = -1
+      engineSounds.volume = 0.5
+      Globals.sounds.startPlaying(engineSounds)
+      self.engineSounds = engineSounds
+    } else {
+      self.engineSounds = nil
+    }
     let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[isBig ? 0 : 1]
     currentSpeed = .random(in: 0.5 * maxSpeed ... maxSpeed)
     let revengeFactor = max(brothersKilled - 3, 0)
@@ -86,7 +89,7 @@ class UFO: SKNode {
     fatalError("init(coder:) has not been implemented by UFO")
   }
 
-  func fly(player: Ship, playfield: Playfield, addLaser: ((CGFloat, CGPoint, CGFloat) -> Void)) {
+  func fly(player: Ship?, playfield: Playfield, addLaser: ((CGFloat, CGPoint, CGFloat) -> Void)) {
     guard parent != nil else { return }
     let bounds = playfield.bounds
     let body = requiredPhysicsBody()
@@ -112,7 +115,7 @@ class UFO: SKNode {
     // though, shoot that instead.  In addition to the revenge factor increase in UFO
     // danger, that helps ensure that the player can't sit around and farm UFOs for
     // points forever.
-    var potentialTarget: SKNode? = (player.parent != nil ? player : nil)
+    var potentialTarget: SKNode? = (player?.parent != nil ? player : nil)
     var targetDistance = CGFloat.infinity
     var playerDistance = CGFloat.infinity
     let interestingDistance = 0.33 * min(bounds.width, bounds.height)
@@ -170,7 +173,7 @@ class UFO: SKNode {
     if body.velocity.norm2() > maxSpeed {
       body.velocity = body.velocity.scale(by: maxSpeed / body.velocity.norm2())
     }
-    if playerDistance < 1.5 * targetDistance || (player.parent != nil && Int.random(in: 0..<100) >= 25) {
+    if playerDistance < 1.5 * targetDistance || (player?.parent != nil && Int.random(in: 0..<100) >= 25) {
       // Override closest-object targetting if the player is about at the same
       // distance.  Also bias towards randomly shooting at the player even if they're
       // pretty far.
@@ -194,7 +197,7 @@ class UFO: SKNode {
   }
 
   func cleanup() {
-    engineSounds.stop()
+    engineSounds?.stop()
     removeAllActions()
     removeFromParent()
   }

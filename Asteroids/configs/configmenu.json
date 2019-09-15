@@ -1,0 +1,32 @@
+{
+  "waveNumber": 0,
+  "initialLives": 3,
+  "extraLifeScore": 1000,
+  "playerSpeedDamping": 0.05,
+  "playerMaxSpeed": 350,
+  "playerMaxThrust": 100,
+  "playerMaxRotationRate": 3.14,
+  "playerShotSpeed": 700,
+  "playerMaxShots": 4,
+  "safeTime": 5,
+  "hyperspaceCooldown": 10,
+  "asteroidMinSpeed": 25,
+  "asteroidMaxSpeed": 250,
+  "numAsteroidCoeffs": [4, 0.7],
+  "waveConfigs": [
+    {
+      "waveNumber": 1,
+      "meanUFOTime": 20,
+      "smallUFOChance": 0.5,
+      "maxUFOs": 1,
+      "ufoDodging": 4,
+      "ufoShotAnticipation": 0,
+      "ufoAccuracy": [0.25, 0.125],
+      "asteroidSpeedBoost": 1.1,
+      "ufoShotSpeed": [300, 400],
+      "ufoMeanShotTime": [1, 1],
+      "ufoMaxSpeed": [200, 300]
+    }
+  ]
+}
+

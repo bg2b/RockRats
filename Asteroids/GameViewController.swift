@@ -10,18 +10,17 @@ import UIKit
 import SpriteKit
 
 class GameViewController: UIViewController {
-  weak var scene: GameScene? = nil
+  var menuScene: MenuScene!
+  var gameScene: GameScene!
 
   override func viewDidLoad() {
     super.viewDidLoad()
     if let view = self.view as! SKView? {
       let aspect = view.frame.width / view.frame.height
-      let scene = GameScene(size: CGSize(width: 768 * aspect, height: 768))
-      scene.scaleMode = .aspectFill
-      scene.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-      scene.physicsWorld.gravity = .zero
-      self.scene = scene
-      view.presentScene(scene)
+      let size = CGSize(width: 768 * aspect, height: 768)
+      Globals.gameScene = GameScene(size: size)
+      Globals.menuScene = MenuScene(size: size)
+      view.presentScene(Globals.gameScene)
       view.preferredFramesPerSecond = 120
       view.ignoresSiblingOrder = true
       view.showsFPS = true
@@ -32,10 +31,10 @@ class GameViewController: UIViewController {
 
   override func viewWillLayoutSubviews() {
     super.viewWillLayoutSubviews()
-    if let scene = scene {
-      let leftPadding = view.safeAreaInsets.left * scene.frame.width / view.frame.width
-      let rightPadding = view.safeAreaInsets.right * scene.frame.width / view.frame.width
-      scene.setSafeArea(left: leftPadding, right: rightPadding)
+    if let gameScene = Globals.gameScene {
+      let leftPadding = view.safeAreaInsets.left * gameScene.size.width / view.frame.width
+      let rightPadding = view.safeAreaInsets.right * gameScene.size.width / view.frame.width
+      gameScene.setSafeArea(left: leftPadding, right: rightPadding)
     }
   }
 
@@ -44,14 +43,15 @@ class GameViewController: UIViewController {
   }
 
   override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-    if UIDevice.current.userInterfaceIdiom == .phone {
-      return .allButUpsideDown
-    } else {
-      return .all
-    }
+    return .landscape
   }
 
   override var prefersStatusBarHidden: Bool {
     return true
   }
+}
+
+extension Globals {
+  static var menuScene: MenuScene!
+  static var gameScene: GameScene!
 }

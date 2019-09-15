@@ -60,7 +60,7 @@
 		FD53169322DC1A0600F09E57 /* lasersmall_red@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53168D22DC1A0500F09E57 /* lasersmall_red@2x.png */; };
 		FD537DD6231BE385003312B3 /* ufo_laser.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD537DD5231BE384003312B3 /* ufo_laser.wav */; };
 		FD79323622D20FE600E7D336 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD79323522D20FE600E7D336 /* AppDelegate.swift */; };
-		FD79323C22D20FE600E7D336 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD79323B22D20FE600E7D336 /* GameScene.swift */; };
+		FD79323C22D20FE600E7D336 /* BasicScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD79323B22D20FE600E7D336 /* BasicScene.swift */; };
 		FD79323E22D20FE600E7D336 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD79323D22D20FE600E7D336 /* GameViewController.swift */; };
 		FD79324122D20FE600E7D336 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FD79323F22D20FE600E7D336 /* Main.storyboard */; };
 		FD79324322D20FE700E7D336 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FD79324222D20FE700E7D336 /* Assets.xcassets */; };
@@ -79,6 +79,9 @@
 		FDD831F222EDB50200CA4EC6 /* Explosions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD831F122EDB50200CA4EC6 /* Explosions.swift */; };
 		FDD831F622F187D200CA4EC6 /* GameConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD831F522F187D200CA4EC6 /* GameConfig.swift */; };
 		FDD831F922F1AE0D00CA4EC6 /* confignormal.json in Resources */ = {isa = PBXBuildFile; fileRef = FDD831F822F1AE0D00CA4EC6 /* confignormal.json */; };
+		FDD8FB91232B99BE00A83EB5 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD8FB90232B99BE00A83EB5 /* GameScene.swift */; };
+		FDD8FB93232CF4FC00A83EB5 /* MenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD8FB92232CF4FC00A83EB5 /* MenuScene.swift */; };
+		FDD8FB95232D120E00A83EB5 /* configmenu.json in Resources */ = {isa = PBXBuildFile; fileRef = FDD8FB94232D120E00A83EB5 /* configmenu.json */; };
 		FDDF488722D2A700006FB86F /* SpriteCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDDF488622D2A700006FB86F /* SpriteCache.swift */; };
 		FDE04B2722D5FEA30011A529 /* star1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FDE04B2422D5FEA30011A529 /* star1@2x.png */; };
 		FDE04B2822D5FEA30011A529 /* star3@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FDE04B2522D5FEA30011A529 /* star3@2x.png */; };
@@ -155,7 +158,7 @@
 		FD537DD5231BE384003312B3 /* ufo_laser.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo_laser.wav; sourceTree = "<group>"; };
 		FD79323222D20FE600E7D336 /* Asteroids.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Asteroids.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD79323522D20FE600E7D336 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		FD79323B22D20FE600E7D336 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
+		FD79323B22D20FE600E7D336 /* BasicScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasicScene.swift; sourceTree = "<group>"; };
 		FD79323D22D20FE600E7D336 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		FD79324022D20FE600E7D336 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		FD79324222D20FE700E7D336 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -175,6 +178,9 @@
 		FDD831F122EDB50200CA4EC6 /* Explosions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Explosions.swift; sourceTree = "<group>"; };
 		FDD831F522F187D200CA4EC6 /* GameConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameConfig.swift; sourceTree = "<group>"; };
 		FDD831F822F1AE0D00CA4EC6 /* confignormal.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = confignormal.json; sourceTree = "<group>"; };
+		FDD8FB90232B99BE00A83EB5 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
+		FDD8FB92232CF4FC00A83EB5 /* MenuScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuScene.swift; sourceTree = "<group>"; };
+		FDD8FB94232D120E00A83EB5 /* configmenu.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = configmenu.json; sourceTree = "<group>"; };
 		FDDF488622D2A700006FB86F /* SpriteCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteCache.swift; sourceTree = "<group>"; };
 		FDE04B2422D5FEA30011A529 /* star1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "star1@2x.png"; sourceTree = "<group>"; };
 		FDE04B2522D5FEA30011A529 /* star3@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "star3@2x.png"; sourceTree = "<group>"; };
@@ -262,12 +268,14 @@
 			isa = PBXGroup;
 			children = (
 				FD79323522D20FE600E7D336 /* AppDelegate.swift */,
-				FD79323B22D20FE600E7D336 /* GameScene.swift */,
+				FD79323B22D20FE600E7D336 /* BasicScene.swift */,
+				FDD8FB90232B99BE00A83EB5 /* GameScene.swift */,
 				659CC039230EC9FE00AA087C /* UFO.swift */,
 				FD46BD71231415B7008C1F99 /* Playfield.swift */,
 				FD4D53BF2306B47900718938 /* LivesDisplay.swift */,
 				FDD831F522F187D200CA4EC6 /* GameConfig.swift */,
 				FDD831F122EDB50200CA4EC6 /* Explosions.swift */,
+				FDD8FB92232CF4FC00A83EB5 /* MenuScene.swift */,
 				FD53167422DB24EC00F09E57 /* Ship.swift */,
 				FDF92B412322456900CC4DFE /* Hyperspace.swift */,
 				FDCF8CA222DA175F008EDFD1 /* CGHelpers.swift */,
@@ -347,6 +355,7 @@
 			isa = PBXGroup;
 			children = (
 				FDD831F822F1AE0D00CA4EC6 /* confignormal.json */,
+				FDD8FB94232D120E00A83EB5 /* configmenu.json */,
 			);
 			path = configs;
 			sourceTree = "<group>";
@@ -443,6 +452,7 @@
 				FD53167322DAA8EA00F09E57 /* fire2@2x.png in Resources */,
 				FDF92B442322666600CC4DFE /* ufo_warpout.wav in Resources */,
 				FD53168522DB445100F09E57 /* meteorbig2@2x.png in Resources */,
+				FDD8FB95232D120E00A83EB5 /* configmenu.json in Resources */,
 				FD0C070D22D8925E00F19A55 /* starfield_purple@2x.png in Resources */,
 				FDE04B2722D5FEA30011A529 /* star1@2x.png in Resources */,
 				FD53167E22DB445100F09E57 /* meteorsmall2@2x.png in Resources */,
@@ -482,8 +492,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FDD8FB93232CF4FC00A83EB5 /* MenuScene.swift in Sources */,
 				FDE04B2D22D753240011A529 /* TextureCache.swift in Sources */,
-				FD79323C22D20FE600E7D336 /* GameScene.swift in Sources */,
+				FD79323C22D20FE600E7D336 /* BasicScene.swift in Sources */,
 				FD79323E22D20FE600E7D336 /* GameViewController.swift in Sources */,
 				FDD831F622F187D200CA4EC6 /* GameConfig.swift in Sources */,
 				FD79323622D20FE600E7D336 /* AppDelegate.swift in Sources */,
@@ -494,6 +505,7 @@
 				FDCF8CA322DA175F008EDFD1 /* CGHelpers.swift in Sources */,
 				FD4D53C02306B47900718938 /* LivesDisplay.swift in Sources */,
 				FDCF8CA522DA7296008EDFD1 /* Globals.swift in Sources */,
+				FDD8FB91232B99BE00A83EB5 /* GameScene.swift in Sources */,
 				FD4D53C723080E7300718938 /* Sounds.swift in Sources */,
 				FD53167522DB24EC00F09E57 /* Ship.swift in Sources */,
 				659CC03A230EC9FE00AA087C /* UFO.swift in Sources */,
