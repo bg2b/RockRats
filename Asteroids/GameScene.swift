@@ -16,13 +16,15 @@ class GameScene: BasicScene {
   var fireButton: Button!
   var hyperspaceButton: Button!
   var lastJumpTime = 0.0
+  var lastWarpInTime = 0.0
   var ufosToAvenge = 0
+  var ufosKilledWithoutDying = 0
+  var timesUFOsShot = 0
   var centralDisplay: SKLabelNode!
   var livesRemaining = 0
   var extraLivesAwarded = 0
   var livesDisplay: LivesDisplay!
   var gameOver = false
-
 
   func initControls() {
     let controls = SKNode()
@@ -109,6 +111,9 @@ class GameScene: BasicScene {
   }
 
   func spawnWave() {
+    if Globals.gameConfig.waveNumber() == 11 {
+      reportAchievement(achievement: .spinalTap)
+    }
     let numAsteroids = Globals.gameConfig.numAsteroids()
     for _ in 1...numAsteroids {
       spawnAsteroid(size: "huge")
@@ -119,6 +124,7 @@ class GameScene: BasicScene {
   func nextWave() {
     Globals.gameConfig.nextWave()
     ufosToAvenge = 0
+    ufosKilledWithoutDying = 0
     displayMessage("WAVE \(Globals.gameConfig.waveNumber())", forTime: 1.5) {
       self.spawnWave()
     }
@@ -147,6 +153,14 @@ class GameScene: BasicScene {
       extraLivesAwarded += 1
     }
     scoreDisplay.text = "\(score)"
+    if score == 404 {
+      wait(for: 1.5) {
+        if self.score == 404 {
+          self.scoreDisplay.text = "\(self.score): Not Found"
+          reportAchievement(achievement: .score404)
+        }
+      }
+    }
   }
 
   func updateLives(_ amount: Int) {
@@ -277,8 +291,24 @@ class GameScene: BasicScene {
     player.laserDestroyed()
   }
 
+  func setFutureFilter(enabled: Bool) {
+    if enabled {
+      filter = CIFilter(name: "CIEdgeWork")
+      filter?.setValue(0.75, forKey: "inputRadius")
+      shouldEnableEffects = (filter != nil)
+    } else {
+      shouldEnableEffects = false
+    }
+  }
+  
   func hyperspaceJump() {
     guard player.canJump() else { return }
+    if score % 100 == 79 {
+      setFutureFilter(enabled: true)
+      reportAchievement(achievement: .backToTheFuture)
+    } else {
+      setFutureFilter(enabled: false)
+    }
     lastJumpTime = Globals.lastUpdateTime
     let effects = player.warpOut()
     playfield.addWithScaling(effects[0])
@@ -308,6 +338,9 @@ class GameScene: BasicScene {
   }
 
   func laserHit(laser: SKNode, asteroid: SKNode) {
+    if !asteroid.requiredPhysicsBody().isOnScreen {
+      reportAchievement(achievement: .quickFingers)
+    }
     addToScore(asteroidPoints(asteroid))
     removeLaser(laser as! SKSpriteNode)
     splitAsteroid(asteroid as! SKSpriteNode)
@@ -315,6 +348,13 @@ class GameScene: BasicScene {
 
   func laserHit(laser: SKNode, ufo: SKNode) {
     ufosToAvenge += 1
+    ufosKilledWithoutDying += 1
+    if ufosKilledWithoutDying == 12 {
+      reportAchievement(achievement: .armedAndDangerous)
+    }
+    if !ufo.requiredPhysicsBody().isOnScreen {
+      reportAchievement(achievement: .hanShotFirst)
+    }
     addToScore(ufoPoints(ufo))
     removeLaser(laser as! SKSpriteNode)
     destroyUFO(ufo as! UFO)
@@ -328,6 +368,9 @@ class GameScene: BasicScene {
     guard player.parent != nil else { return }
     guard ufos.count < Globals.gameConfig.value(for: \.maxUFOs) else { return }
     spawnUFO(ufo: UFO(brothersKilled: ufosToAvenge))
+    if ufos.count == 2 {
+      reportAchievement(achievement: .doubleTrouble)
+    }
   }
 
   func spawnUFOs(relativeDuration: Double = 1) {
@@ -360,7 +403,11 @@ class GameScene: BasicScene {
   }
 
   func destroyPlayer() {
+    if Globals.lastUpdateTime - lastWarpInTime <= 0.1 {
+      reportAchievement(achievement: .rightPlaceWrongTime)
+    }
     enableHyperspaceJump()
+    ufosKilledWithoutDying = 0
     let pieces = player.explode()
     addExplosion(pieces)
     playfield.changeSpeed(to: 0.25)
@@ -378,6 +425,9 @@ class GameScene: BasicScene {
   }
 
   func ufoLaserHit(laser: SKNode, player: SKNode) {
+    if timesUFOsShot == 1 {
+      reportAchievement(achievement: .redShirt)
+    }
     removeUFOLaser(laser as! SKSpriteNode)
     destroyPlayer()
   }
@@ -389,6 +439,7 @@ class GameScene: BasicScene {
   }
 
   func playerHitUFO(ufo: SKNode) {
+    reportAchievement(achievement: .leeroyJenkins)
     addToScore(ufoPoints(ufo))
     destroyUFO(ufo as! UFO)
     destroyPlayer()
@@ -410,6 +461,7 @@ class GameScene: BasicScene {
     livesRemaining = Globals.gameConfig.initialLives
     Globals.gameConfig.currentWaveNumber = 0
     extraLivesAwarded = 0
+    timesUFOsShot = 0
     updateLives(0)
     Globals.sounds.startHearbeat()
     nextWave()
@@ -418,6 +470,9 @@ class GameScene: BasicScene {
 
   override func update(_ currentTime: TimeInterval) {
     Globals.lastUpdateTime = currentTime
+    if player.parent == nil {
+      lastWarpInTime = currentTime
+    }
     if currentTime >= lastJumpTime + Globals.gameConfig.hyperspaceCooldown {
       hyperspaceButton.enable()
     } else {
@@ -426,6 +481,7 @@ class GameScene: BasicScene {
     ufos.forEach {
       $0.fly(player: player, playfield: playfield) {
         (angle, position, speed) in self.fireUFOLaser(angle: angle, position: position, speed: speed)
+        timesUFOsShot += 1
       }
     }
     player.fly()
