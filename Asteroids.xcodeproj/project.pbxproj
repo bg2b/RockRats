@@ -11,6 +11,7 @@
 		6523C0822316E5400071AB4B /* ufo2loop.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6523C0812316E5400071AB4B /* ufo2loop.wav */; };
 		6523C0842316E54E0071AB4B /* ufo1loop.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6523C0832316E54D0071AB4B /* ufo1loop.wav */; };
 		6523C0862316FBAD0071AB4B /* alternate_heartbeat.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6523C0852316FBAD0071AB4B /* alternate_heartbeat.wav */; };
+		6565DA11232E6818008EA85B /* Achievments.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6565DA10232E6818008EA85B /* Achievments.swift */; };
 		659CC03A230EC9FE00AA087C /* UFO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 659CC039230EC9FE00AA087C /* UFO.swift */; };
 		659CC040230EDA3500AA087C /* ufo_explosion.wav in Resources */ = {isa = PBXBuildFile; fileRef = 659CC03F230EDA3500AA087C /* ufo_explosion.wav */; };
 		65A4CD6823173624006DEDB0 /* heartbeat_high.wav in Resources */ = {isa = PBXBuildFile; fileRef = 65A4CD6723173624006DEDB0 /* heartbeat_high.wav */; };
@@ -97,6 +98,7 @@
 		6523C0812316E5400071AB4B /* ufo2loop.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo2loop.wav; sourceTree = "<group>"; };
 		6523C0832316E54D0071AB4B /* ufo1loop.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo1loop.wav; sourceTree = "<group>"; };
 		6523C0852316FBAD0071AB4B /* alternate_heartbeat.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = alternate_heartbeat.wav; sourceTree = "<group>"; };
+		6565DA10232E6818008EA85B /* Achievments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Achievments.swift; sourceTree = "<group>"; };
 		659CC039230EC9FE00AA087C /* UFO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UFO.swift; sourceTree = "<group>"; };
 		659CC03F230EDA3500AA087C /* ufo_explosion.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo_explosion.wav; sourceTree = "<group>"; };
 		65A4CD6723173624006DEDB0 /* heartbeat_high.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = heartbeat_high.wav; sourceTree = "<group>"; };
@@ -270,6 +272,7 @@
 				FD79323522D20FE600E7D336 /* AppDelegate.swift */,
 				FD79323B22D20FE600E7D336 /* BasicScene.swift */,
 				FDD8FB90232B99BE00A83EB5 /* GameScene.swift */,
+				6565DA10232E6818008EA85B /* Achievments.swift */,
 				659CC039230EC9FE00AA087C /* UFO.swift */,
 				FD46BD71231415B7008C1F99 /* Playfield.swift */,
 				FD4D53BF2306B47900718938 /* LivesDisplay.swift */,
@@ -507,6 +510,7 @@
 				FDCF8CA522DA7296008EDFD1 /* Globals.swift in Sources */,
 				FDD8FB91232B99BE00A83EB5 /* GameScene.swift in Sources */,
 				FD4D53C723080E7300718938 /* Sounds.swift in Sources */,
+				6565DA11232E6818008EA85B /* Achievments.swift in Sources */,
 				FD53167522DB24EC00F09E57 /* Ship.swift in Sources */,
 				659CC03A230EC9FE00AA087C /* UFO.swift in Sources */,
 				FD46BD72231415B7008C1F99 /* Playfield.swift in Sources */,

@@ -16,13 +16,15 @@ class GameScene: BasicScene {
   var fireButton: Button!
   var hyperspaceButton: Button!
   var lastJumpTime = 0.0
+  var lastWarpInTime = 0.0
   var ufosToAvenge = 0
+  var ufosKilledWithoutDying = 0
+  var timesUFOsShot = 0
   var centralDisplay: SKLabelNode!
   var livesRemaining = 0
   var extraLivesAwarded = 0
   var livesDisplay: LivesDisplay!
   var gameOver = false
-
 
   func initControls() {
     let controls = SKNode()
@@ -108,7 +110,42 @@ class GameScene: BasicScene {
     info.addChild(livesDisplay)
   }
 
+  func initFutureShader() {
+    let shaderSource = """
+    float grayscale(vec2 coord, texture2d<float> texture) {
+      vec4 color = texture2D(texture, coord);
+      return 0.2 * color.r + 0.7 * color.g + 0.1 * color.b;
+    }
+    float edge_detect(vec2 coord, vec2 delta, texture2d<float> texture) {
+      return abs(grayscale(coord + delta, texture) - grayscale(coord - delta, texture));
+    }
+    void main() {
+      vec2 radius = 0.35 / a_size;
+      float dx = radius.x;
+      float dy = radius.y;
+      float const invr2 = 0.707;
+      float vedge = edge_detect(v_tex_coord, vec2(dx, 0.0), u_texture);
+      float hedge = edge_detect(v_tex_coord, vec2(0.0, dy), u_texture);
+      float d1edge = edge_detect(v_tex_coord, invr2 * vec2(dx, dy), u_texture);
+      float d2edge = edge_detect(v_tex_coord, invr2 * vec2(dx, -dy), u_texture);
+      float gray = hedge + vedge + d1edge + d2edge;
+      gray = max(gray - 0.05, 0.0);
+      gray *= 5.0;
+      gray = min(gray, 1.0);
+      gl_FragColor = vec4(gray, gray, gray, 0.0);
+    }
+    """
+    let shader = SKShader(source: shaderSource)
+    shader.attributes = [SKAttribute(name: "a_size", type: .vectorFloat2)]
+    let pixelSize = vector_float2(Float(fullFrame.width), Float(fullFrame.height))
+    setValue(SKAttributeValue(vectorFloat2: pixelSize), forAttribute: "a_size")
+    self.shader = shader
+  }
+
   func spawnWave() {
+    if Globals.gameConfig.waveNumber() == 11 {
+      reportAchievement(achievement: .spinalTap)
+    }
     let numAsteroids = Globals.gameConfig.numAsteroids()
     for _ in 1...numAsteroids {
       spawnAsteroid(size: "huge")
@@ -119,6 +156,7 @@ class GameScene: BasicScene {
   func nextWave() {
     Globals.gameConfig.nextWave()
     ufosToAvenge = 0
+    ufosKilledWithoutDying = 0
     displayMessage("WAVE \(Globals.gameConfig.waveNumber())", forTime: 1.5) {
       self.spawnWave()
     }
@@ -147,6 +185,14 @@ class GameScene: BasicScene {
       extraLivesAwarded += 1
     }
     scoreDisplay.text = "\(score)"
+    if score == 404 {
+      wait(for: 1.5) {
+        if self.score == 404 {
+          self.scoreDisplay.text = "\(self.score): Not Found"
+          reportAchievement(achievement: .score404)
+        }
+      }
+    }
   }
 
   func updateLives(_ amount: Int) {
@@ -277,8 +323,13 @@ class GameScene: BasicScene {
     player.laserDestroyed()
   }
 
+  func setFutureFilter(enabled: Bool) {
+    shouldEnableEffects = enabled && (shader != nil)
+  }
+  
   func hyperspaceJump() {
     guard player.canJump() else { return }
+    let backToTheFuture = (score % 100 == 79)
     lastJumpTime = Globals.lastUpdateTime
     let effects = player.warpOut()
     playfield.addWithScaling(effects[0])
@@ -288,6 +339,12 @@ class GameScene: BasicScene {
     let jumpPosition = CGPoint(x: .random(in: jumpRegion.minX...jumpRegion.maxX),
                                y: .random(in: jumpRegion.minY...jumpRegion.maxY))
     wait(for: 1) {
+      if backToTheFuture {
+        self.setFutureFilter(enabled: true)
+        reportAchievement(achievement: .backToTheFuture)
+      } else {
+        self.setFutureFilter(enabled: false)
+      }
       Globals.sounds.soundEffect(.warpIn, at: jumpPosition)
       self.player.warpIn(to: jumpPosition, atAngle: .random(in: 0 ... 2 * .pi), addTo: self.playfield)
     }
@@ -308,6 +365,9 @@ class GameScene: BasicScene {
   }
 
   func laserHit(laser: SKNode, asteroid: SKNode) {
+    if !asteroid.requiredPhysicsBody().isOnScreen {
+      reportAchievement(achievement: .quickFingers)
+    }
     addToScore(asteroidPoints(asteroid))
     removeLaser(laser as! SKSpriteNode)
     splitAsteroid(asteroid as! SKSpriteNode)
@@ -315,6 +375,13 @@ class GameScene: BasicScene {
 
   func laserHit(laser: SKNode, ufo: SKNode) {
     ufosToAvenge += 1
+    ufosKilledWithoutDying += 1
+    if ufosKilledWithoutDying == 12 {
+      reportAchievement(achievement: .armedAndDangerous)
+    }
+    if !ufo.requiredPhysicsBody().isOnScreen {
+      reportAchievement(achievement: .hanShotFirst)
+    }
     addToScore(ufoPoints(ufo))
     removeLaser(laser as! SKSpriteNode)
     destroyUFO(ufo as! UFO)
@@ -328,6 +395,9 @@ class GameScene: BasicScene {
     guard player.parent != nil else { return }
     guard ufos.count < Globals.gameConfig.value(for: \.maxUFOs) else { return }
     spawnUFO(ufo: UFO(brothersKilled: ufosToAvenge))
+    if ufos.count == 2 {
+      reportAchievement(achievement: .doubleTrouble)
+    }
   }
 
   func spawnUFOs(relativeDuration: Double = 1) {
@@ -360,7 +430,11 @@ class GameScene: BasicScene {
   }
 
   func destroyPlayer() {
+    if Globals.lastUpdateTime - lastWarpInTime <= 0.1 {
+      reportAchievement(achievement: .rightPlaceWrongTime)
+    }
     enableHyperspaceJump()
+    ufosKilledWithoutDying = 0
     Globals.sounds.soundEffect(.playerExplosion, at: player.position)
     addExplosion(player.explode())
     stopSpawningUFOs()
@@ -374,10 +448,12 @@ class GameScene: BasicScene {
       self.playfield.changeSpeed(to: 1)
       self.respawnOrGameOver()
     }
-    stopSpawningUFOs()
   }
 
   func ufoLaserHit(laser: SKNode, player: SKNode) {
+    if timesUFOsShot == 1 {
+      reportAchievement(achievement: .redShirt)
+    }
     removeUFOLaser(laser as! SKSpriteNode)
     destroyPlayer()
   }
@@ -389,6 +465,7 @@ class GameScene: BasicScene {
   }
 
   func playerHitUFO(ufo: SKNode) {
+    reportAchievement(achievement: .leeroyJenkins)
     addToScore(ufoPoints(ufo))
     destroyUFO(ufo as! UFO)
     destroyPlayer()
@@ -410,6 +487,7 @@ class GameScene: BasicScene {
     livesRemaining = Globals.gameConfig.initialLives
     Globals.gameConfig.currentWaveNumber = 0
     extraLivesAwarded = 0
+    timesUFOsShot = 0
     updateLives(0)
     Globals.sounds.startHearbeat()
     nextWave()
@@ -418,6 +496,9 @@ class GameScene: BasicScene {
 
   override func update(_ currentTime: TimeInterval) {
     Globals.lastUpdateTime = currentTime
+    if player.parent == nil {
+      lastWarpInTime = currentTime
+    }
     if currentTime >= lastJumpTime + Globals.gameConfig.hyperspaceCooldown {
       hyperspaceButton.enable()
     } else {
@@ -426,6 +507,7 @@ class GameScene: BasicScene {
     ufos.forEach {
       $0.fly(player: player, playfield: playfield) {
         (angle, position, speed) in self.fireUFOLaser(angle: angle, position: position, speed: speed)
+        timesUFOsShot += 1
       }
     }
     player.fly()
@@ -438,6 +520,7 @@ class GameScene: BasicScene {
     initGameArea(limitAspectRatio: true)
     initInfo()
     initControls()
+    initFutureShader()
     player = Ship(color: "blue", joystick: joystick)
     name = "gameScene"
     physicsWorld.contactDelegate = self
