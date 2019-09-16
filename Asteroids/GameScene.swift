@@ -110,6 +110,38 @@ class GameScene: BasicScene {
     info.addChild(livesDisplay)
   }
 
+  func initFutureShader() {
+    let shaderSource = """
+    float grayscale(vec2 coord, texture2d<float> texture) {
+      vec4 color = texture2D(texture, coord);
+      return 0.2 * color.r + 0.7 * color.g + 0.1 * color.b;
+    }
+    float edge_detect(vec2 coord, vec2 delta, texture2d<float> texture) {
+      return abs(grayscale(coord + delta, texture) - grayscale(coord - delta, texture));
+    }
+    void main() {
+      vec2 radius = 0.35 / a_size;
+      float dx = radius.x;
+      float dy = radius.y;
+      float const invr2 = 0.707;
+      float vedge = edge_detect(v_tex_coord, vec2(dx, 0.0), u_texture);
+      float hedge = edge_detect(v_tex_coord, vec2(0.0, dy), u_texture);
+      float d1edge = edge_detect(v_tex_coord, invr2 * vec2(dx, dy), u_texture);
+      float d2edge = edge_detect(v_tex_coord, invr2 * vec2(dx, -dy), u_texture);
+      float gray = hedge + vedge + d1edge + d2edge;
+      gray = max(gray - 0.05, 0.0);
+      gray *= 5.0;
+      gray = min(gray, 1.0);
+      gl_FragColor = vec4(gray, gray, gray, 0.0);
+    }
+    """
+    let shader = SKShader(source: shaderSource)
+    shader.attributes = [SKAttribute(name: "a_size", type: .vectorFloat2)]
+    let pixelSize = vector_float2(Float(fullFrame.width), Float(fullFrame.height))
+    setValue(SKAttributeValue(vectorFloat2: pixelSize), forAttribute: "a_size")
+    self.shader = shader
+  }
+
   func spawnWave() {
     if Globals.gameConfig.waveNumber() == 11 {
       reportAchievement(achievement: .spinalTap)
@@ -292,23 +324,12 @@ class GameScene: BasicScene {
   }
 
   func setFutureFilter(enabled: Bool) {
-    if enabled {
-      filter = CIFilter(name: "CIEdgeWork")
-      filter?.setValue(0.75, forKey: "inputRadius")
-      shouldEnableEffects = (filter != nil)
-    } else {
-      shouldEnableEffects = false
-    }
+    shouldEnableEffects = enabled && (shader != nil)
   }
   
   func hyperspaceJump() {
     guard player.canJump() else { return }
-    if score % 100 == 79 {
-      setFutureFilter(enabled: true)
-      reportAchievement(achievement: .backToTheFuture)
-    } else {
-      setFutureFilter(enabled: false)
-    }
+    let backToTheFuture = (score % 100 == 79)
     lastJumpTime = Globals.lastUpdateTime
     let effects = player.warpOut()
     playfield.addWithScaling(effects[0])
@@ -318,6 +339,12 @@ class GameScene: BasicScene {
     let jumpPosition = CGPoint(x: .random(in: jumpRegion.minX...jumpRegion.maxX),
                                y: .random(in: jumpRegion.minY...jumpRegion.maxY))
     wait(for: 1) {
+      if backToTheFuture {
+        self.setFutureFilter(enabled: true)
+        reportAchievement(achievement: .backToTheFuture)
+      } else {
+        self.setFutureFilter(enabled: false)
+      }
       Globals.sounds.soundEffect(.warpIn)
       self.player.warpIn(to: jumpPosition, atAngle: .random(in: 0 ... 2 * .pi), addTo: self.playfield)
     }
@@ -493,6 +520,7 @@ class GameScene: BasicScene {
     initGameArea(limitAspectRatio: true)
     initInfo()
     initControls()
+    initFutureShader()
     player = Ship(color: "blue", joystick: joystick)
     name = "gameScene"
     physicsWorld.contactDelegate = self
