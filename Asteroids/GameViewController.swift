@@ -10,9 +10,6 @@ import UIKit
 import SpriteKit
 
 class GameViewController: UIViewController {
-  var menuScene: MenuScene!
-  var gameScene: GameScene!
-
   override func viewDidLoad() {
     super.viewDidLoad()
     if let view = self.view as! SKView? {
