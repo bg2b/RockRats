@@ -16,6 +16,7 @@
 		659CC040230EDA3500AA087C /* ufo_explosion.wav in Resources */ = {isa = PBXBuildFile; fileRef = 659CC03F230EDA3500AA087C /* ufo_explosion.wav */; };
 		65A4CD6823173624006DEDB0 /* heartbeat_high.wav in Resources */ = {isa = PBXBuildFile; fileRef = 65A4CD6723173624006DEDB0 /* heartbeat_high.wav */; };
 		65A4CD6A2317362D006DEDB0 /* heartbeat_low.wav in Resources */ = {isa = PBXBuildFile; fileRef = 65A4CD692317362D006DEDB0 /* heartbeat_low.wav */; };
+		65FA95EA23305FE100B6B4AF /* retroship@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 65FA95E923305FE000B6B4AF /* retroship@2x.png */; };
 		FD0C070822D8925E00F19A55 /* ship_green@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD0C070022D8925E00F19A55 /* ship_green@2x.png */; };
 		FD0C070922D8925E00F19A55 /* ship_blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD0C070122D8925E00F19A55 /* ship_blue@2x.png */; };
 		FD0C070A22D8925E00F19A55 /* starfield_violet@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD0C070222D8925E00F19A55 /* starfield_violet@2x.png */; };
@@ -103,6 +104,7 @@
 		659CC03F230EDA3500AA087C /* ufo_explosion.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo_explosion.wav; sourceTree = "<group>"; };
 		65A4CD6723173624006DEDB0 /* heartbeat_high.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = heartbeat_high.wav; sourceTree = "<group>"; };
 		65A4CD692317362D006DEDB0 /* heartbeat_low.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = heartbeat_low.wav; sourceTree = "<group>"; };
+		65FA95E923305FE000B6B4AF /* retroship@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "retroship@2x.png"; sourceTree = "<group>"; };
 		FD0C070022D8925E00F19A55 /* ship_green@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ship_green@2x.png"; sourceTree = "<group>"; };
 		FD0C070122D8925E00F19A55 /* ship_blue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ship_blue@2x.png"; sourceTree = "<group>"; };
 		FD0C070222D8925E00F19A55 /* starfield_violet@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "starfield_violet@2x.png"; sourceTree = "<group>"; };
@@ -308,6 +310,7 @@
 				FD28DB4D22DFFA87009446A2 /* meteorhuge2@2x.png */,
 				FD28DB4F22DFFA87009446A2 /* meteorhuge3@2x.png */,
 				FD28DB5222DFFA87009446A2 /* ufo_blue@2x.png */,
+				65FA95E923305FE000B6B4AF /* retroship@2x.png */,
 				FD28DB5322DFFA87009446A2 /* ufo_green@2x.png */,
 				FD28DB5122DFFA87009446A2 /* ufo_red@2x.png */,
 				FD4D53C12306B60F00718938 /* life_blue@2x.png */,
@@ -439,6 +442,7 @@
 				FD28DB5722DFFA87009446A2 /* meteorhuge1@2x.png in Resources */,
 				6523C0842316E54E0071AB4B /* ufo1loop.wav in Resources */,
 				FD53168222DB445100F09E57 /* meteorsmall1@2x.png in Resources */,
+				65FA95EA23305FE100B6B4AF /* retroship@2x.png in Resources */,
 				FDA43B202308AB9600A29347 /* heartbeat.wav in Resources */,
 				FD53168022DB445100F09E57 /* meteormed1@2x.png in Resources */,
 				FD808FCA2328FE5F0025A71E /* kenneyfuture.ttf in Resources */,

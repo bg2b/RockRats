@@ -16,6 +16,9 @@ class TextureCache {
       return cached
     } else {
       let texture = SKTexture(imageNamed: name)
+      // It seems like the texture is not always really loaded for reasons that I don't
+      // understand.  Evaluating the size seems to force it to do the loading for real.
+      let _ = texture.size()
       textures[name] = texture
       return texture
     }
