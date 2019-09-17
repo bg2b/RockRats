@@ -41,13 +41,19 @@ class GameScene: BasicScene {
                         texture: Globals.textureCache.findTexture(imageNamed: "laserbig_green"))
     fireButton.zRotation = .pi / 2
     fireButton.action = { [unowned self] in self.fireLaser() }
-    controls.addChild(fireButton)
+    //controls.addChild(fireButton)
     hyperspaceButton = Button(size: controlSize, borderColor: .lightGray, fillColor: controlFill,
                               texture: Globals.textureCache.findTexture(imageNamed: "warpedship_blue"))
     hyperspaceButton.zRotation = .pi / 2
     hyperspaceButton.action = { [unowned self] in self.hyperspaceJump() }
-    controls.addChild(hyperspaceButton)
+    //controls.addChild(hyperspaceButton)
     enableHyperspaceJump()
+    let invisiButton = InvisiButtons(size: CGSize(width: 1.5 * controlSize, height: 3 * controlSize), actions: [
+    { [unowned self] in self.fireLaser() },
+    { [unowned self] in self.hyperspaceJump() }
+    ])
+    invisiButton.position = CGPoint(x: fullFrame.maxX - 0.5 * invisiButton.size.width, y: fullFrame.minY + 0.5 * invisiButton.size.height)
+    addChild(invisiButton)
     if tabletFormat {
       let offset = controlSize
       joystick.position = CGPoint(x: fullFrame.minX + offset, y: fullFrame.minY + offset)
