@@ -341,8 +341,10 @@ class GameScene: BasicScene {
     wait(for: 1) {
       if backToTheFuture {
         self.setFutureFilter(enabled: true)
+        self.player.setAppearance(to: .retro)
         reportAchievement(achievement: .backToTheFuture)
       } else {
+        self.player.setAppearance(to: .modern)
         self.setFutureFilter(enabled: false)
       }
       Globals.sounds.soundEffect(.warpIn, at: jumpPosition)

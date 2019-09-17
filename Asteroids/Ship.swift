@@ -9,17 +9,38 @@
 import SpriteKit
 import AVFoundation
 
+enum ShipAppearance: Int {
+  case modern = 0
+  case retro = 1
+}
+
+class ShipAppearanceAlternative {
+  let texture: SKTexture
+  let sprite: SKSpriteNode
+  let warpOutShader: SKShader
+  let warpInShader: SKShader
+  let body: SKPhysicsBody
+
+  init(imageName: String, warpTime: Double) {
+    texture = Globals.textureCache.findTexture(imageNamed: imageName)
+    sprite = SKSpriteNode(texture: texture)
+    sprite.name = "shipImage"
+    warpOutShader = swirlShader(forTexture: texture, inward: true, warpTime: warpTime)
+    warpInShader = swirlShader(forTexture: texture, inward: false, warpTime: warpTime)
+    body = SKPhysicsBody(texture: texture, size: texture.size())
+  }
+}
+
 class Ship: SKNode {
   let joystick: Joystick
-  let shipTexture: SKTexture
+  var shipAppearances: [ShipAppearanceAlternative]
+  var currentAppearance = ShipAppearance.modern
   let engineSounds: AVAudioPlayer
   var engineSoundLevel = 0
   var forwardFlames = [SKSpriteNode]()
   var reverseFlames = [[SKSpriteNode]]()
   var lasersRemaining = Globals.gameConfig.playerMaxShots
   let warpTime = 0.5
-  let warpOutShader: SKShader
-  let warpInShader: SKShader
 
   func buildFlames(at exhaustPos: CGPoint, scale: CGFloat = 1, direction: CGFloat = 0) -> [SKSpriteNode] {
     var fire = (1...3).compactMap { Globals.textureCache.findTexture(imageNamed: "fire\($0)") }
@@ -44,32 +65,31 @@ class Ship: SKNode {
 
   required init(color: String, joystick: Joystick) {
     self.joystick = joystick
-    self.shipTexture = Globals.textureCache.findTexture(imageNamed: "ship_\(color)")
+    shipAppearances = []
+    shipAppearances.append(ShipAppearanceAlternative(imageName: "ship_\(color)", warpTime: warpTime))
+    shipAppearances.append(ShipAppearanceAlternative(imageName: "retroship", warpTime: warpTime))
     engineSounds = Globals.sounds.audioPlayerFor(.playerEngines)
     engineSounds.numberOfLoops = -1
     engineSounds.volume = 0
     Globals.sounds.startPlaying(engineSounds)
-    warpOutShader = swirlShader(forTexture: shipTexture, inward: true, warpTime: warpTime)
-    warpInShader = swirlShader(forTexture: shipTexture, inward: false, warpTime: warpTime)
     super.init()
     self.name = "ship"
-    let ship = SKSpriteNode(texture: shipTexture)
-    ship.name = "shipImage"
-    addChild(ship)
+    addChild(shipAppearance.sprite)
     Globals.sounds.addPositional(player: engineSounds, at: self)
     forwardFlames = buildFlames(at: CGPoint(x: -shipTexture.size().width / 2, y: 0.0))
     for side in [-1, 1] {
       reverseFlames.append(buildFlames(at: CGPoint(x: 0, y: CGFloat(side) * shipTexture.size().height / 2.1),
                                        scale: 0.5, direction: .pi))
     }
-    physicsBody = SKPhysicsBody(texture: shipTexture, size: shipTexture.size())
-    let body = coastingConfiguration()
-    body.mass = 1
-    body.categoryBitMask = ObjectCategories.player.rawValue
-    body.collisionBitMask = 0
-    body.contactTestBitMask = setOf([.asteroid, .ufo, .ufoShot])
-    body.linearDamping = Globals.gameConfig.playerSpeedDamping
-    body.restitution = 0.9
+    for appearance in shipAppearances {
+      appearance.body.mass = 1
+      appearance.body.categoryBitMask = ObjectCategories.player.rawValue
+      appearance.body.collisionBitMask = 0
+      appearance.body.contactTestBitMask = setOf([.asteroid, .ufo, .ufoShot])
+      appearance.body.linearDamping = Globals.gameConfig.playerSpeedDamping
+      appearance.body.restitution = 0.9
+    }
+    physicsBody = shipAppearance.body
   }
 
   required init(coder aDecoder: NSCoder) {
@@ -173,17 +193,22 @@ class Ship: SKNode {
     return parent != nil
   }
 
-  func warpEffect(shader: SKShader) -> SKNode {
+  var shipAppearance: ShipAppearanceAlternative { return shipAppearances[currentAppearance.rawValue] }
+
+  var shipTexture: SKTexture { return shipAppearance.texture }
+
+  func warpEffect(direction: KeyPath<ShipAppearanceAlternative, SKShader>) -> SKNode {
     let effect = SKSpriteNode(texture: shipTexture)
+    effect.name = "shipWarpEffect"
     effect.position = position
     effect.zRotation = zRotation
-    effect.shader = shader
+    effect.shader = shipAppearance[keyPath: direction]
     setStartTimeAttrib(effect)
     return effect
   }
 
   func warpOut() -> [SKNode] {
-    let effect = warpEffect(shader: warpOutShader)
+    let effect = warpEffect(direction: \.warpOutShader)
     effect.run(SKAction.sequence([SKAction.wait(forDuration: warpTime), SKAction.removeFromParent()]))
     let star = starBlink(at: position, throughAngle: .pi, duration: 2 * warpTime)
     setEngineLevel(0)
@@ -196,10 +221,31 @@ class Ship: SKNode {
     zRotation = angle
     let body = coastingConfiguration()
     body.velocity = .zero
-    let effect = warpEffect(shader: warpInShader)
+    let effect = warpEffect(direction: \.warpInShader)
     playfield.addWithScaling(effect)
     effect.run(SKAction.sequence([SKAction.wait(forDuration: warpTime), SKAction.removeFromParent()])) {
       playfield.addWithScaling(self)
+    }
+  }
+
+  func setAppearance(to newAppearance: ShipAppearance) {
+    if currentAppearance != newAppearance {
+      shipAppearance.sprite.removeFromParent()
+      currentAppearance = newAppearance
+      addChild(shipAppearance.sprite)
+      physicsBody = shipAppearance.body
+      for revFlameIndex in [0, 1] {
+        let side = 2 * revFlameIndex - 1
+        let revFlamePos = CGPoint(x: 0, y: CGFloat(side) * shipTexture.size().height / 2.1)
+        reverseFlames[revFlameIndex].forEach {
+          $0.position = revFlamePos
+          if currentAppearance == .modern {
+            $0.zRotation = .pi
+          } else {
+            $0.zRotation = .pi * (1 + 0.25 * CGFloat(side))
+          }
+        }
+      }
     }
   }
 
