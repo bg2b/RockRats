@@ -22,6 +22,7 @@
       "ufoDodging": 2,
       "ufoShotAnticipation": 0,
       "ufoAccuracy": [0.5, 0.25],
+      "ufoShotWrapping": false,
       "asteroidSpeedBoost": 1.1,
       "ufoShotSpeed": [300, 400],
       "ufoMeanShotTime": [4, 3],
@@ -52,6 +53,7 @@
       "ufoShotAnticipation": 0.1,
       "smallUFOChance": 0.75,
       "ufoAccuracy": [0.2, 0.1],
+      "ufoShotWrapping": true,
       "ufoMeanShotTime": [1.5, 1.125],
       "asteroidSpeedBoost": 1.3
     },

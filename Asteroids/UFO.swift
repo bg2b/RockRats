@@ -28,6 +28,18 @@ func aim(at p: CGVector, targetVelocity v: CGVector, shotSpeed s: CGFloat) -> CG
   return aim(at: p.rotate(by: -theta), targetVelocity: v.norm2(), shotSpeed: s)
 }
 
+func wrappedDisplacement(direct: CGVector, bounds: CGRect) -> CGVector {
+  let dx1 = direct.dx
+  let dx2 = copysign(bounds.width, -dx1) + dx1
+  let dx = (abs(dx1) < abs(dx2) ? dx1 : dx2)
+  let dy1 = direct.dy
+  let dy2 = copysign(bounds.height, -dy1) + dy1
+  let dy = (abs(dy1) < abs(dy2) ? dy1 : dy2)
+  // The + 5 is because of possible wrapping hysteresis
+  assert(abs(dx) <= bounds.width / 2 + 5 && abs(dy) <= bounds.height / 2 + 5)
+  return CGVector(dx: dx, dy: dy)
+}
+
 class UFO: SKNode {
   let isBig: Bool
   let ufoTexture: SKTexture
@@ -129,15 +141,7 @@ class UFO: SKNode {
         // This can maybe be done better.  We need to think about how to do the
         // different cases more fluidly rather than in one big loop with a bunch of
         // conditionals for the different types.
-        let dx1 = node.position.x - position.x
-        let dx2 = copysign(bounds.width, -dx1) + dx1
-        let dx = (abs(dx1) < abs(dx2) ? dx1 : dx2)
-        let dy1 = node.position.y - position.y
-        let dy2 = copysign(bounds.height, -dy1) + dy1
-        let dy = (abs(dy1) < abs(dy2) ? dy1 : dy2)
-        // The + 5 is because of possible wrapping hysteresis
-        assert(abs(dx) <= bounds.width / 2 + 5 && abs(dy) <= bounds.height / 2 + 5)
-        var r = CGVector(dx: dx, dy: dy)
+        var r = wrappedDisplacement(direct: node.position - position, bounds: bounds)
         if body.isA(.playerShot) {
           // Shots travel fast, so emphasize dodging to the side.  We do this by projecting out
           // some of the displacement along the direction of the shot.
@@ -183,7 +187,8 @@ class UFO: SKNode {
     }
     guard let target = potentialTarget, shootingEnabled else { return }
     let shotSpeed = Globals.gameConfig.value(for: \.ufoShotSpeed)[isBig ? 0 : 1]
-    guard var angle = aimAt(target, shotSpeed: shotSpeed) else { return }
+    let useBounds = Globals.gameConfig.value(for: \.ufoShotWrapping)
+    guard var angle = aimAt(target, shotSpeed: shotSpeed, bounds: useBounds ? bounds : nil) else { return }
     if target != player {
       // If we're targetting an asteroid, be pretty accurate
       angle += CGFloat.random(in: -0.1 * shotAccuracy * .pi ... 0.1 * shotAccuracy * .pi)
@@ -215,9 +220,12 @@ class UFO: SKNode {
     return [effect, star]
   }
   
-  func aimAt(_ object: SKNode, shotSpeed s: CGFloat) -> CGFloat? {
+  func aimAt(_ object: SKNode, shotSpeed s: CGFloat, bounds: CGRect?) -> CGFloat? {
     guard let body = object.physicsBody else { return nil }
-    let p = object.position - position
+    var p = object.position - position
+    if let bounds = bounds {
+      p = wrappedDisplacement(direct: p, bounds: bounds)
+    }
     guard let time = aim(at: p, targetVelocity: body.velocity, shotSpeed: s) else { return nil }
     let futurePos = p + body.velocity.scale(by: time)
     return futurePos.angle()
