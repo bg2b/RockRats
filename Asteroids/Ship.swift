@@ -31,7 +31,7 @@ class ShipAppearanceAlternative {
 }
 
 class Ship: SKNode {
-  let joystick: Joystick
+  let getJoystickDirection: () -> CGVector
   var shipAppearances: [ShipAppearanceAlternative]
   var currentAppearance = ShipAppearance.modern
   let engineSounds: SKAudioNode
@@ -62,8 +62,8 @@ class Ship: SKNode {
     return flames
   }
 
-  required init(color: String, joystick: Joystick) {
-    self.joystick = joystick
+  required init(color: String, getJoystickDirection: @escaping () -> CGVector) {
+    self.getJoystickDirection = getJoystickDirection
     shipAppearances = []
     shipAppearances.append(ShipAppearanceAlternative(imageName: "ship_\(color)", warpTime: warpTime))
     shipAppearances.append(ShipAppearanceAlternative(imageName: "retroship", warpTime: warpTime))
@@ -138,7 +138,7 @@ class Ship: SKNode {
       return
     }
     let body = coastingConfiguration()
-    let stick = joystick.getDirection()
+    let stick = getJoystickDirection()
     guard stick != .zero else {
       setEngineLevel(0)
       return
