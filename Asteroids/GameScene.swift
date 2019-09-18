@@ -37,12 +37,12 @@ class GameScene: BasicScene {
                         texture: Globals.textureCache.findTexture(imageNamed: "ship_blue"))
     joystick.zRotation = .pi / 2
     controls.addChild(joystick)
-    fireButton = Button(size: controlSize, borderColor: .lightGray, fillColor: controlFill,
+    fireButton = Button(circleOfSize: controlSize, borderColor: .lightGray, fillColor: controlFill,
                         texture: Globals.textureCache.findTexture(imageNamed: "laserbig_green"))
     fireButton.zRotation = .pi / 2
     fireButton.action = { [unowned self] in self.fireLaser() }
     //controls.addChild(fireButton)
-    hyperspaceButton = Button(size: controlSize, borderColor: .lightGray, fillColor: controlFill,
+    hyperspaceButton = Button(circleOfSize: controlSize, borderColor: .lightGray, fillColor: controlFill,
                               texture: Globals.textureCache.findTexture(imageNamed: "warpedship_blue"))
     hyperspaceButton.zRotation = .pi / 2
     hyperspaceButton.action = { [unowned self] in self.hyperspaceJump() }
