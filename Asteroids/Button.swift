@@ -9,36 +9,35 @@
 import SpriteKit
 
 class Button: SKNode {
-  let size: CGFloat
-  let borderColor: UIColor
-  let fillColor: UIColor
+  let child: SKNode
   var enabled = true
   var action: (() -> Void)? = nil
 
-  func createButton(texture: SKTexture?) {
-    let button = SKShapeNode(circleOfRadius: 0.5 * size)
-    button.name = "buttonShape"
-    button.fillColor = fillColor
-    button.strokeColor = borderColor
-    button.lineWidth = 0.05 * size
-    button.isAntialiased = true
-    addChild(button)
+  required init(withChild child: SKNode) {
+    self.child = child
+    super.init()
+    name = "button"
+    addChild(child)
+    isUserInteractionEnabled = true
+  }
+
+  convenience init(circleOfSize size: CGFloat, borderColor: UIColor, fillColor: UIColor, texture: SKTexture?) {
+    let buttonShape = SKNode()
+    buttonShape.name = "buttonShape"
+    let buttonBorder = SKShapeNode(circleOfRadius: 0.5 * size)
+    buttonBorder.name = "buttonBorder"
+    buttonBorder.fillColor = fillColor
+    buttonBorder.strokeColor = borderColor
+    buttonBorder.lineWidth = 0.05 * size
+    buttonBorder.isAntialiased = true
+    buttonShape.addChild(buttonBorder)
     if let texture = texture {
       let sprite = SKSpriteNode(texture: texture, size: texture.size().scale(to: 0.6 * size))
       sprite.name = "buttonTexture"
       sprite.zPosition = 1
-      button.addChild(sprite)
+      buttonShape.addChild(sprite)
     }
-  }
-
-  required init(size: CGFloat, borderColor: UIColor, fillColor: UIColor, texture: SKTexture?) {
-    self.size = size
-    self.borderColor = borderColor
-    self.fillColor = fillColor
-    super.init()
-    self.isUserInteractionEnabled = true
-    self.name = "button"
-    createButton(texture: texture)
+    self.init(withChild: buttonShape)
   }
 
   required init(coder aDecoder: NSCoder) {
