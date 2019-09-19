@@ -74,39 +74,6 @@ extension Globals {
   static var lastUpdateTime = 0.0
 }
 
-var showLogging = true
-var lastLogMessage = ""
-var lastLogMessageRepeated = 0
-
-func logging(_ message: String...) {
-  if showLogging {
-    switch message.count {
-    case 0:
-      print("logging called with no message?!")
-    case 1:
-      print(message[0])
-      lastLogMessage = message[0]
-      lastLogMessageRepeated = 1
-    default:
-      if lastLogMessage == message[0] {
-        lastLogMessageRepeated += 1
-        if lastLogMessageRepeated & (lastLogMessageRepeated - 1) == 0 {
-          // A power of 2 repeats
-          var fullMessage = "\(lastLogMessageRepeated) repeats:"
-          message.forEach { fullMessage += " \($0)" }
-          print(fullMessage)
-        }
-      } else {
-        var fullMessage = message[0]
-        message[1...].forEach { fullMessage += " \($0)" }
-        print(fullMessage)
-        lastLogMessage = message[0]
-        lastLogMessageRepeated = 1
-      }
-    }
-  }
-}
-
 class BasicScene: SKScene, SKPhysicsContactDelegate {
   var fullFrame: CGRect!
   let textColor = RGB(101, 185, 240)
