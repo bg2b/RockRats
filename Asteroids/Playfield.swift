@@ -9,7 +9,7 @@
 import SpriteKit
 
 class Playfield: SKNode {
-  let bounds: CGRect
+  var bounds: CGRect
 
   required init(bounds: CGRect) {
     self.bounds = bounds
@@ -28,6 +28,10 @@ class Playfield: SKNode {
     body.velocity = body.velocity.scale(by: 1 / speed)
     body.angularVelocity /= speed
     child.speed /= speed
+  }
+  
+  func setBounds(to newBounds: CGRect) {
+    bounds = newBounds
   }
 
   func changeSpeed(to newSpeed: CGFloat) {
