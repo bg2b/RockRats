@@ -17,7 +17,7 @@ class GameViewController: UIViewController {
       let size = CGSize(width: 768 * aspect, height: 768)
       Globals.gameScene = GameScene(size: size)
       Globals.menuScene = MenuScene(size: size)
-      view.presentScene(Globals.gameScene)
+      view.presentScene(Globals.menuScene)
       view.preferredFramesPerSecond = 120
       view.ignoresSiblingOrder = true
       view.showsFPS = true

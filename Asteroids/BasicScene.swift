@@ -78,6 +78,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   var fullFrame: CGRect!
   let textColor = RGB(101, 185, 240)
   let highlightTextColor = RGB(246, 205, 68)
+  let buttonColor = RGB(137, 198, 79)
   var tabletFormat = true
   var gameFrame: CGRect!
   var gameArea = SKCropNode()
@@ -360,6 +361,15 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     asteroidRemoved()
   }
 
+  func removeAllAsteroids() {
+    // For clearing out the playfield when starting a new game
+    asteroids.forEach {
+      $0.removeFromParent()
+      recycleSprite($0)
+    }
+    asteroids.removeAll()
+  }
+
   func addEmitter(_ emitter: SKEmitterNode) {
     emitter.name = "emitter"
     let maxParticleLifetime = emitter.particleLifetime + 0.5 * emitter.particleLifetimeRange
@@ -535,9 +545,11 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
 
   func switchScene(to newScene: SKScene) {
     let transitionColor = RGB(43, 45, 50)
-    let transition = SKTransition.fade(with: transitionColor, duration: 3)
-    transition.pausesOutgoingScene = false
-    transition.pausesIncomingScene = false
+    let transition = SKTransition.fade(with: transitionColor, duration: 1)
+    removeAllActions()
+    newScene.removeAllActions()
+//    transition.pausesOutgoingScene = false
+//    transition.pausesIncomingScene = false
     view?.presentScene(newScene, transition: transition)
   }
 

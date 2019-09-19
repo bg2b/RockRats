@@ -64,6 +64,7 @@ class Sounds: SKNode {
   }
 
   func startHearbeat() {
+    normalHeartbeatRate()
     heartbeatOn = true
     heartbeat()
   }

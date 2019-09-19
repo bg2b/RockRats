@@ -40,6 +40,28 @@ class Button: SKNode {
     self.init(withChild: buttonShape)
   }
 
+  convenience init(forText text: String, size: CGSize, fontName: String, fontColor: UIColor) {
+    let buttonShape = SKNode()
+    buttonShape.name = "buttonShape"
+    let buttonBorder = SKShapeNode(rectOf: size, cornerRadius: 0.1 * min(size.width, size.height))
+    buttonBorder.name = "buttonBorder"
+    buttonBorder.fillColor = .clear
+    buttonBorder.strokeColor = .green
+    buttonBorder.lineWidth = 2
+    buttonBorder.glowWidth = 1
+    buttonBorder.isAntialiased = true
+    buttonShape.addChild(buttonBorder)
+    let label = SKLabelNode(text: text)
+    label.name = "buttonText"
+    label.fontName = fontName
+    label.fontSize = 0.9 * size.height
+    label.fontColor = fontColor
+    label.horizontalAlignmentMode = .center
+    label.verticalAlignmentMode = .center
+    buttonShape.addChild(label)
+    self.init(withChild: buttonShape)
+  }
+
   required init(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented by Button")
   }
