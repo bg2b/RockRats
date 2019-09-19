@@ -502,7 +502,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
           SKAction.wait(forDuration: delay),
           SKAction.run({
             self.ufos.remove(ufo)
-            Globals.sounds.soundEffect(.ufoWarpOut, at ufo:position)
+            Globals.sounds.soundEffect(.ufoWarpOut, at: ufo.position)
             let effects = ufo.warpOut()
             self.playfield.addWithScaling(effects[0])
             self.playfield.addWithScaling(effects[1])
