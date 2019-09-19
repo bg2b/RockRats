@@ -489,6 +489,7 @@ class GameScene: BasicScene {
   }
 
   override func didMove(to view: SKView) {
+    super.didMove(to: view)
     removeAllAsteroids()
     initSounds()
     Globals.gameConfig = loadGameConfig(forMode: "normal")
@@ -507,10 +508,11 @@ class GameScene: BasicScene {
       self.nextWave()
       self.wait(for: 3) { self.spawnPlayer() }
     }
+    logging("\(name!) finished didMove to view")
   }
 
   override func update(_ currentTime: TimeInterval) {
-    Globals.lastUpdateTime = currentTime
+    super.update(currentTime)
     if player.parent == nil {
       lastWarpInTime = currentTime
     }

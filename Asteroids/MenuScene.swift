@@ -10,6 +10,7 @@ import SpriteKit
 
 class MenuScene: BasicScene {
   var asteroidsHit = 0
+  var ufoSpawningAllowed = true
   var menu: SKNode!
 
   func initMenu() {
@@ -38,11 +39,11 @@ class MenuScene: BasicScene {
   }
 
   func spawnUFOs() {
-    if asteroids.count >= 3 && ufos.isEmpty {
+    if ufoSpawningAllowed && asteroids.count >= 3 && ufos.isEmpty {
       spawnUFO(ufo: UFO(brothersKilled: 0, withSounds: false))
       asteroidsHit = 0
     }
-    wait(for: 5) { self.spawnUFOs() }
+    wait(for: 1) { self.spawnUFOs() }
   }
 
   func didBegin(_ contact: SKPhysicsContact) {
@@ -57,9 +58,10 @@ class MenuScene: BasicScene {
   }
 
   func startGame() {
+    ufoSpawningAllowed = false
     let delay = warpOutUFOs()
     if delay > 0 {
-      wait(for: delay + 1.5) {
+      wait(for: delay + 2.5) {
         self.switchScene(to: Globals.gameScene)
       }
     } else {
@@ -68,15 +70,18 @@ class MenuScene: BasicScene {
   }
 
   override func didMove(to view: SKView) {
+    super.didMove(to: view)
     initSounds()
     Globals.gameConfig = loadGameConfig(forMode: "menu")
     Globals.gameConfig.currentWaveNumber = 1
     wait(for: 1) { self.spawnAsteroids() }
+    ufoSpawningAllowed = true
     wait(for: 10) { self.spawnUFOs() }
+    logging("\(name!) finished didMove to view")
   }
 
   override func update(_ currentTime: TimeInterval) {
-    Globals.lastUpdateTime = currentTime
+    super.update(currentTime)
     ufos.forEach {
       $0.fly(player: nil, playfield: playfield) {
         (angle, position, speed) in self.fireUFOLaser(angle: angle, position: position, speed: speed)
