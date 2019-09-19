@@ -74,10 +74,44 @@ extension Globals {
   static var lastUpdateTime = 0.0
 }
 
+var showLogging = true
+var lastLogMessage = ""
+var lastLogMessageRepeated = 0
+
+func logging(_ message: String...) {
+  if showLogging {
+    switch message.count {
+    case 0:
+      print("logging called with no message?!")
+    case 1:
+      print(message[0])
+      lastLogMessage = message[0]
+      lastLogMessageRepeated = 1
+    default:
+      if lastLogMessage == message[0] {
+        lastLogMessageRepeated += 1
+        if lastLogMessageRepeated & (lastLogMessageRepeated - 1) == 0 {
+          // A power of 2 repeats
+          var fullMessage = "\(lastLogMessageRepeated) repeats:"
+          message.forEach { fullMessage += " \($0)" }
+          print(fullMessage)
+        }
+      } else {
+        var fullMessage = message[0]
+        message[1...].forEach { fullMessage += " \($0)" }
+        print(fullMessage)
+        lastLogMessage = message[0]
+        lastLogMessageRepeated = 1
+      }
+    }
+  }
+}
+
 class BasicScene: SKScene, SKPhysicsContactDelegate {
   var fullFrame: CGRect!
   let textColor = RGB(101, 185, 240)
   let highlightTextColor = RGB(246, 205, 68)
+  let buttonColor = RGB(137, 198, 79)
   var tabletFormat = true
   var gameFrame: CGRect!
   var gameArea = SKCropNode()
@@ -359,6 +393,15 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     asteroidRemoved()
   }
 
+  func removeAllAsteroids() {
+    // For clearing out the playfield when starting a new game
+    asteroids.forEach {
+      $0.removeFromParent()
+      recycleSprite($0)
+    }
+    asteroids.removeAll()
+  }
+
   func addEmitter(_ emitter: SKEmitterNode) {
     emitter.name = "emitter"
     let maxParticleLifetime = emitter.particleLifetime + 0.5 * emitter.particleLifetimeRange
@@ -437,19 +480,38 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     // a "warpOut" key through which we can cancel it.  This function returns the
     // maximum warpOut delay for all the UFOs; respawnOrGameOver will wait a bit
     // longer than that before triggering whatever it's going to do.
+    //
+    // One further caveat...
+    //
+    // When a UFO gets added by spawnUFO, it's initially way off the playfield, but
+    // its audio will start so as to give the player a chance to prepare.  After a
+    // second, an action will trigger to launch the UFO.  It gets moved to just off
+    // the screen and its velocity is set so that it will move and become visible,
+    // and as soon as isOnScreen becomes true, it will start flying normally.  For
+    // warpOuts of these UFOs, everything will happen as you expect with the usual
+    // animations.  However, for a UFO that has been spawned but not yet launched, we
+    // still want warpOutUFOs to get rid of it.  These we'll just nuke immediately,
+    // but be sure to call their cleanup method to give them a chance to do any
+    // housekeeping that they may need.
     var maxDelay = 0.0
     ufos.forEach { ufo in
-      let delay = Double.random(in: 0.5...1.5)
-      maxDelay = max(maxDelay, delay)
-      ufo.run(SKAction.sequence([
-        SKAction.wait(forDuration: delay),
-        SKAction.run({
-          self.ufos.remove(ufo)
-          Globals.sounds.soundEffect(.ufoWarpOut, at: ufo.position)
-          let effects = ufo.warpOut()
-          self.playfield.addWithScaling(effects[0])
-          self.playfield.addWithScaling(effects[1])
-        })]), withKey: "warpOut")
+      if ufo.requiredPhysicsBody().isOnScreen {
+        let delay = Double.random(in: 0.5...1.5)
+        maxDelay = max(maxDelay, delay)
+        ufo.run(SKAction.sequence([
+          SKAction.wait(forDuration: delay),
+          SKAction.run({
+            self.ufos.remove(ufo)
+            Globals.sounds.soundEffect(.ufoWarpOut, at ufo:position)
+            let effects = ufo.warpOut()
+            self.playfield.addWithScaling(effects[0])
+            self.playfield.addWithScaling(effects[1])
+          })]), withKey: "warpOut")
+      } else {
+        logging("Cleanup on unlaunched ufo")
+        ufo.cleanup()
+        ufos.remove(ufo)
+      }
     }
     return maxDelay
   }
@@ -533,11 +595,13 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func switchScene(to newScene: SKScene) {
+    logging("\(name!) switchScene to \(newScene.name!)")
     let transitionColor = RGB(43, 45, 50)
-    let transition = SKTransition.fade(with: transitionColor, duration: 3)
-    transition.pausesOutgoingScene = false
-    transition.pausesIncomingScene = false
+    let transition = SKTransition.fade(with: transitionColor, duration: 1)
+    newScene.removeAllActions()
+    logging("\(name!) about to call presentScene")
     view?.presentScene(newScene, transition: transition)
+    logging("\(name!) finished presentScene")
   }
 
   // Subclasses should provide a didBegin method and set themselves as the
@@ -552,7 +616,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   // They should also provide an update method with their own frame logic, e.g.,
   //
   //  override func update(_ currentTime: TimeInterval) {
-  //    Globals.lastUpdateTime = currentTime
+  //    super.update(currentTime)
   //    ufos.forEach {
   //      $0.fly(player: player, playfield: playfield) {
   //        (angle, position, speed) in self.fireUFOLaser(angle: angle, position: position, speed: speed)
@@ -561,6 +625,11 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   //    playfield.wrapCoordinates()
   //    ...
   //  }
+  override func update(_ currentTime: TimeInterval) {
+    super.update(currentTime)
+    Globals.lastUpdateTime = currentTime
+    logging("\(name!) update", "time \(currentTime)")
+  }
 
   // The initializers should also be overridden by subclasses, but be sure to call
   // super.init()
@@ -574,5 +643,16 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
 
   required init(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented by BasicScene")
+  }
+
+  // Subclasses should override these too, typically to do something like starting a
+  // new game or showing a menu.  When debugging, messages can go here.
+  override func didMove(to view: SKView) {
+    logging("\(name!) didMove to view")
+  }
+
+  override func willMove(from view: SKView) {
+    logging("\(name!) willMove from view")
+    removeAllActions()
   }
 }

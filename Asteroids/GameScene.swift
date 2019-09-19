@@ -430,7 +430,7 @@ class GameScene: BasicScene {
       wait(for: delay) {
         Globals.sounds.soundEffect(.gameOver)
         self.displayMessage("GAME OVER", forTime: 4)
-        self.wait(for: 5) { self.switchScene(to: Globals.menuScene) }
+        self.wait(for: 6) { self.switchScene(to: Globals.menuScene) }
       }
     }
   }
@@ -488,20 +488,30 @@ class GameScene: BasicScene {
   }
 
   override func didMove(to view: SKView) {
+    super.didMove(to: view)
+    removeAllAsteroids()
     initSounds()
     Globals.gameConfig = loadGameConfig(forMode: "normal")
-    livesRemaining = Globals.gameConfig.initialLives
     Globals.gameConfig.currentWaveNumber = 0
-    extraLivesAwarded = 0
+    score = 0
+    addToScore(0)
+    lastJumpTime = 0
+    lastWarpInTime = 0
     timesUFOsShot = 0
+    livesRemaining = Globals.gameConfig.initialLives
+    extraLivesAwarded = 0
     updateLives(0)
-    Globals.sounds.startHearbeat()
-    nextWave()
-    wait(for: 3.0) { self.spawnPlayer() }
+    gameOver = false
+    wait(for: 1) {
+      Globals.sounds.startHearbeat()
+      self.nextWave()
+      self.wait(for: 3) { self.spawnPlayer() }
+    }
+    logging("\(name!) finished didMove to view")
   }
 
   override func update(_ currentTime: TimeInterval) {
-    Globals.lastUpdateTime = currentTime
+    super.update(currentTime)
     if player.parent == nil {
       lastWarpInTime = currentTime
     }

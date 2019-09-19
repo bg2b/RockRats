@@ -23,7 +23,7 @@ enum Achievement: String {
 }
 
 func reportAchievement(achievement: Achievement) {
-  print("would send achievement \(achievement.rawValue) to gamecenter")
+  logging("would send achievement \(achievement.rawValue) to gamecenter")
     /*
   GKAchievement.report([GKAchievement(identifier: achievement.rawValue)]) { error in
     guard let e = error else { print("worked"); return }

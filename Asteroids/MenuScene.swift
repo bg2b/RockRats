@@ -10,6 +10,26 @@ import SpriteKit
 
 class MenuScene: BasicScene {
   var asteroidsHit = 0
+  var ufoSpawningAllowed = true
+  var menu: SKNode!
+
+  func initMenu() {
+    menu = SKNode()
+    menu.name = "menu"
+    menu.zPosition = LevelZs.info.rawValue
+    addChild(menu)
+    let title = SKLabelNode(fontNamed: "Kenney Future Narrow")
+    title.fontSize = 125
+    title.fontColor = highlightTextColor
+    title.text = "ASTEROIDS"
+    title.verticalAlignmentMode = .center
+    title.position = CGPoint(x: fullFrame.midX, y: 0.875 * fullFrame.midY + 0.125 * fullFrame.maxY)
+    menu.addChild(title)
+    let playButton = Button(forText: "Play", size: CGSize(width: 250, height: 75), fontName: "Kenney Future Narrow", fontColor: textColor)
+    playButton.position = CGPoint(x: fullFrame.midX, y: 0.75 * fullFrame.midY + 0.25 * fullFrame.minY)
+    playButton.action = { [unowned self] in self.startGame() }
+    menu.addChild(playButton)
+  }
 
   func spawnAsteroids() {
     if asteroids.count < 15 {
@@ -19,7 +39,7 @@ class MenuScene: BasicScene {
   }
 
   func spawnUFOs() {
-    if asteroids.count >= 3 && ufos.isEmpty {
+    if ufoSpawningAllowed && asteroids.count >= 3 && ufos.isEmpty {
       spawnUFO(ufo: UFO(brothersKilled: 0, withSounds: false))
       asteroidsHit = 0
     }
@@ -37,16 +57,31 @@ class MenuScene: BasicScene {
     when(contact, isBetween: .ufo, and: .asteroid) { ufoCollided(ufo: $0, asteroid: $1) }
   }
 
+  func startGame() {
+    ufoSpawningAllowed = false
+    let delay = warpOutUFOs()
+    if delay > 0 {
+      wait(for: delay + 2.5) {
+        self.switchScene(to: Globals.gameScene)
+      }
+    } else {
+      switchScene(to: Globals.gameScene)
+    }
+  }
+
   override func didMove(to view: SKView) {
+    super.didMove(to: view)
     initSounds()
     Globals.gameConfig = loadGameConfig(forMode: "menu")
     Globals.gameConfig.currentWaveNumber = 1
     wait(for: 1) { self.spawnAsteroids() }
+    ufoSpawningAllowed = true
     wait(for: 10) { self.spawnUFOs() }
+    logging("\(name!) finished didMove to view")
   }
 
   override func update(_ currentTime: TimeInterval) {
-    Globals.lastUpdateTime = currentTime
+    super.update(currentTime)
     ufos.forEach {
       $0.fly(player: nil, playfield: playfield) {
         (angle, position, speed) in self.fireUFOLaser(angle: angle, position: position, speed: speed)
@@ -58,6 +93,7 @@ class MenuScene: BasicScene {
   required init(size: CGSize) {
     super.init(size: size)
     initGameArea(limitAspectRatio: false)
+    initMenu()
     name = "menuScene"
     physicsWorld.contactDelegate = self
   }

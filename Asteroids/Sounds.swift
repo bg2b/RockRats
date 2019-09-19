@@ -117,6 +117,7 @@ class Sounds {
   }
 
   func startHearbeat() {
+    normalHeartbeatRate()
     heartbeatOn = true
     heartbeat()
   }
