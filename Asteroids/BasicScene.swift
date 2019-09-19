@@ -232,6 +232,9 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     safeAreaLeft = left
     safeAreaRight = right
     maybeResizeGameFrame()
+    if let playfield = playfield {
+      playfield.setBounds(to: gameFrame)
+    }
     setPositionsForSafeArea()
   }
 
