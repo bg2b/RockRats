@@ -79,7 +79,6 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   let textColor = RGB(101, 185, 240)
   let highlightTextColor = RGB(246, 205, 68)
   let buttonColor = RGB(137, 198, 79)
-  var tabletFormat = true
   var gameFrame: CGRect!
   var gameArea = SKCropNode()
   var playfield: Playfield!
@@ -207,33 +206,44 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
 
   func setPositionsForSafeArea() {
     // Subclasses that need to do something when the safe area changes should
-    // override this.  E.g., the main GameScene should move the controls around in
-    // this method.
+    // override this.
+    logging("setPositionsForSafeArea called")
+  }
+
+  func maybeResizeGameFrame() {
+    // This is used to set the gameFrame in response to notifications about the safe
+    // area.
+    guard safeAreaLeft != 0 || safeAreaRight != 0 else {
+      gameFrame = fullFrame
+      gameArea.maskNode = nil
+      return
+    }
+    let gameAreaWidth = size.width - (safeAreaLeft + safeAreaRight)
+    logging("maybeResizeGameFrame using width \(gameAreaWidth)")
+    gameFrame = CGRect(x: -0.5 * gameAreaWidth, y: -0.5 * size.height, width: gameAreaWidth, height: size.height)
+    let mask = SKShapeNode(rect: gameFrame)
+    mask.fillColor = .white
+    mask.strokeColor = .clear
+    gameArea.maskNode = mask
   }
 
   func setSafeArea(left: CGFloat, right: CGFloat) {
+    logging("setSafeArea called with \(left) and \(right)")
     safeAreaLeft = left
     safeAreaRight = right
+    maybeResizeGameFrame()
     setPositionsForSafeArea()
   }
 
   func initGameArea(limitAspectRatio: Bool) {
     let aspect = size.width / size.height
     if aspect < 1.6 || !limitAspectRatio {
-      // A tablet format.  Playfield will fill the complete frame, controls will be
-      // on the playfield at the bottom left and right.
-      tabletFormat = true
+      // Playfield will fill the complete frame.
       gameFrame = fullFrame
     } else {
-      // A phone format.  Playfield is a central box with 4:3 aspect ratio, controls
-      // centered on the left and right.
-      tabletFormat = false
-      let gameAreaWidth = size.height * 4 / 3
-      gameFrame = CGRect(x: -0.5 * gameAreaWidth, y: -0.5 * size.height, width: gameAreaWidth, height: size.height)
-      let mask = SKShapeNode(rect: gameFrame)
-      mask.fillColor = .white
-      mask.strokeColor = .clear
-      gameArea.maskNode = mask
+      // This is probably a phone.  We may want to limit the aspect ratio, but even
+      // if not there might be a nontrivial safe area.
+      maybeResizeGameFrame()
     }
     gameArea.name = "gameArea"
     addChild(gameArea)

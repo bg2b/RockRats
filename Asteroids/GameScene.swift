@@ -78,16 +78,22 @@ class GameScene: BasicScene {
     touchesEnded(touches, with: event)
   }
 
+  func setPositionsOfInfoItems() {
+    scoreDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.maxY - 50)
+    centralDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.midY)
+    livesDisplay.position = CGPoint(x: gameFrame.minX + 20, y: gameFrame.maxY - 20)
+    logging("\(name!) positions display items")
+    logging("scoreDisplay at \(scoreDisplay.position.x),\(scoreDisplay.position.y)")
+    logging("centralDisplay at \(centralDisplay.position.x),\(centralDisplay.position.y)")
+    logging("livesDisplay at \(livesDisplay.position.x),\(livesDisplay.position.y)")
+  }
+
   override func setPositionsForSafeArea() {
     super.setPositionsForSafeArea()
-    guard !tabletFormat else { return }
-    // Because of the shape of our controls, we don't need the full safe areas
-    let left = 0.67 * safeAreaLeft
-    let right = 0.67 * safeAreaRight
-    // Normal midX is 0.  If the left safe area is bigger than the right, then we
-    // want to push midX in the positive direction.
-    let midX = 0.5 * (left - right)
+    let midX = 0.5 * (safeAreaLeft - safeAreaRight)
+    logging("\(name!) repositions gameArea to \(midX),0 for new safe area")
     gameArea.position = CGPoint(x: midX, y: 0)
+    setPositionsOfInfoItems()
   }
 
   func initInfo() {
@@ -100,7 +106,6 @@ class GameScene: BasicScene {
     scoreDisplay.fontColor = textColor
     scoreDisplay.text = "0"
     scoreDisplay.name = "score"
-    scoreDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.maxY - 50)
     info.addChild(scoreDisplay)
     centralDisplay = SKLabelNode(fontNamed: "Kenney Future")
     centralDisplay.fontSize = 100
@@ -109,11 +114,10 @@ class GameScene: BasicScene {
     centralDisplay.name = "centralDisplay"
     centralDisplay.isHidden = true
     centralDisplay.verticalAlignmentMode = .center
-    centralDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.midY)
     info.addChild(centralDisplay)
     livesDisplay = LivesDisplay(extraColor: textColor)
-    livesDisplay.position = CGPoint(x: gameFrame.minX + 20, y: gameFrame.maxY - 20)
     info.addChild(livesDisplay)
+    setPositionsOfInfoItems()
   }
 
   func initFutureShader() {
@@ -528,12 +532,12 @@ class GameScene: BasicScene {
 
   required init(size: CGSize) {
     super.init(size: size)
+    name = "gameScene"
     initGameArea(limitAspectRatio: true)
     initInfo()
     initControls()
     initFutureShader()
     player = Ship(color: "blue", getJoystickDirection: { [unowned self] in return self.joystickDirection })
-    name = "gameScene"
     physicsWorld.contactDelegate = self
   }
 

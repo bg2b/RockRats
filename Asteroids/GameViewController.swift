@@ -17,6 +17,7 @@ class GameViewController: UIViewController {
       let size = CGSize(width: 768 * aspect, height: 768)
       Globals.gameScene = GameScene(size: size)
       Globals.menuScene = MenuScene(size: size)
+      logging("viewDidLoad will present \(Globals.menuScene.name!)")
       view.presentScene(Globals.menuScene)
       view.preferredFramesPerSecond = 120
       view.ignoresSiblingOrder = true
@@ -29,6 +30,7 @@ class GameViewController: UIViewController {
   override func viewWillLayoutSubviews() {
     super.viewWillLayoutSubviews()
     if let gameScene = Globals.gameScene {
+      logging("viewWillLayoutSubviews calling setSafeArea for gameScene")
       let leftPadding = view.safeAreaInsets.left * gameScene.size.width / view.frame.width
       let rightPadding = view.safeAreaInsets.right * gameScene.size.width / view.frame.width
       gameScene.setSafeArea(left: leftPadding, right: rightPadding)
