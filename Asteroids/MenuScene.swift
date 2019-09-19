@@ -43,7 +43,7 @@ class MenuScene: BasicScene {
       spawnUFO(ufo: UFO(brothersKilled: 0, withSounds: false))
       asteroidsHit = 0
     }
-    wait(for: 1) { self.spawnUFOs() }
+    wait(for: 5) { self.spawnUFOs() }
   }
 
   func didBegin(_ contact: SKPhysicsContact) {
