@@ -22,10 +22,10 @@ class GameScene: BasicScene {
   var extraLivesAwarded = 0
   var livesDisplay: LivesDisplay!
   var gameOver = false
-  var averageFireLocation: CGPoint? = nil
   var joystickLocation = CGPoint.zero
   var joystickDirection = CGVector.zero
   var joystickTouch: UITouch? = nil
+  var fireOrWarpTouches = [UITouch: CGPoint]()
 
   func initControls() {
     isUserInteractionEnabled = true
@@ -34,22 +34,9 @@ class GameScene: BasicScene {
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     for touch in touches {
       let location = touch.location(in: self)
-      if location.x > 0.5 * fullFrame.maxX {
-        if let fireLocation = averageFireLocation {
-          if (location - fireLocation).norm2() > 100 {
-            if Globals.lastUpdateTime >= lastJumpTime + Globals.gameConfig.hyperspaceCooldown {
-              hyperspaceJump()
-            }
-          } else {
-            fireLaser()
-            let alpha = CGFloat(0.1)
-            averageFireLocation = location.scale(by: alpha) + fireLocation.scale(by: 1 - alpha)
-          }
-        } else {
-          self.fireLaser()
-          averageFireLocation = location
-        }
-      } else if location.x < 0.5 * fullFrame.minX && joystickTouch == nil {
+      if location.x > fullFrame.midX {
+        fireOrWarpTouches[touch] = location
+      } else if joystickTouch == nil {
         joystickLocation = location
         joystickTouch = touch
       }
@@ -68,9 +55,20 @@ class GameScene: BasicScene {
   
   override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
     for touch in touches {
-      guard touch == joystickTouch else { continue }
-      joystickDirection = .zero
-      joystickTouch = nil
+      if touch == joystickTouch {
+        joystickDirection = .zero
+        joystickTouch = nil
+      } else {
+        guard let startLocation = fireOrWarpTouches.removeValue(forKey: touch) else { continue }
+        let location = touch.location(in: self)
+        if (location - startLocation).norm2() > 100 {
+          if Globals.lastUpdateTime >= lastJumpTime + Globals.gameConfig.hyperspaceCooldown {
+            hyperspaceJump()
+          }
+        } else {
+          fireLaser()
+        }
+      }
     }
   }
   
@@ -493,6 +491,8 @@ class GameScene: BasicScene {
 
   override func didMove(to view: SKView) {
     super.didMove(to: view)
+    joystickTouch = nil
+    fireOrWarpTouches.removeAll()
     removeAllAsteroids()
     initSounds()
     Globals.gameConfig = loadGameConfig(forMode: "normal")
