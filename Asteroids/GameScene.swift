@@ -12,9 +12,6 @@ class GameScene: BasicScene {
   var player: Ship!
   var score = 0
   var scoreDisplay: SKLabelNode!
-  var joystick: Joystick!
-  var fireButton: Button!
-  var hyperspaceButton: Button!
   var lastJumpTime = 0.0
   var lastWarpInTime = 0.0
   var ufosToAvenge = 0
@@ -25,47 +22,65 @@ class GameScene: BasicScene {
   var extraLivesAwarded = 0
   var livesDisplay: LivesDisplay!
   var gameOver = false
+  var averageFireLocation: CGPoint? = nil
+  var joystickLocation = CGPoint.zero
+  var joystickDirection = CGVector.zero
+  var joystickTouch: UITouch? = nil
 
   func initControls() {
-    let controls = SKNode()
-    controls.name = "controls"
-    controls.zPosition = LevelZs.controls.rawValue
-    addChild(controls)
-    let controlSize = (tabletFormat ? CGFloat(100) : 0.6 * 0.5 * (size.width - gameFrame.width))
-    let controlFill: UIColor = UIColor(white: 0.33, alpha: 0.33)
-    joystick = Joystick(size: controlSize, borderColor: .lightGray, fillColor: controlFill,
-                        texture: Globals.textureCache.findTexture(imageNamed: "ship_blue"))
-    joystick.zRotation = .pi / 2
-    controls.addChild(joystick)
-    fireButton = Button(circleOfSize: controlSize, borderColor: .lightGray, fillColor: controlFill,
-                        texture: Globals.textureCache.findTexture(imageNamed: "laserbig_green"))
-    fireButton.zRotation = .pi / 2
-    fireButton.action = { [unowned self] in self.fireLaser() }
-    controls.addChild(fireButton)
-    hyperspaceButton = Button(circleOfSize: controlSize, borderColor: .lightGray, fillColor: controlFill,
-                              texture: Globals.textureCache.findTexture(imageNamed: "warpedship_blue"))
-    hyperspaceButton.zRotation = .pi / 2
-    hyperspaceButton.action = { [unowned self] in self.hyperspaceJump() }
-    controls.addChild(hyperspaceButton)
-    enableHyperspaceJump()
-    if tabletFormat {
-      let offset = controlSize
-      joystick.position = CGPoint(x: fullFrame.minX + offset, y: fullFrame.minY + offset)
-      fireButton.position = CGPoint(x: fullFrame.maxX - offset, y: fullFrame.minY + offset)
-      hyperspaceButton.position = CGPoint(x: fullFrame.maxX - offset, y: fullFrame.minY + 2.25 * offset)
-    } else {
-      let xOffset = 0.5 * 0.5 * (fullFrame.width - gameFrame.width)
-      let yOffset = 1.25 * controlSize
-      joystick.position = CGPoint(x: fullFrame.minX + xOffset, y: fullFrame.midY - 0.5 * yOffset)
-      fireButton.position = CGPoint(x: fullFrame.maxX - xOffset, y: fullFrame.midY - 0.5 * yOffset)
-      hyperspaceButton.position = CGPoint(x: fullFrame.maxX - xOffset, y: fullFrame.midY + 0.5 * yOffset)
-      setPositionsForSafeArea()
+    isUserInteractionEnabled = true
+  }
+  
+  override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    for touch in touches {
+      let location = touch.location(in: self)
+      if location.x > 0.5 * fullFrame.maxX {
+        if let fireLocation = averageFireLocation {
+          if (location - fireLocation).norm2() > 100 {
+            if Globals.lastUpdateTime >= lastJumpTime + Globals.gameConfig.hyperspaceCooldown {
+              hyperspaceJump()
+            }
+          } else {
+            fireLaser()
+            let alpha = CGFloat(0.1)
+            averageFireLocation = location.scale(by: alpha) + fireLocation.scale(by: 1 - alpha)
+          }
+        } else {
+          self.fireLaser()
+          averageFireLocation = location
+        }
+      } else if location.x < 0.5 * fullFrame.minX && joystickTouch == nil {
+        joystickLocation = location
+        joystickTouch = touch
+      }
     }
+  }
+  
+  override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+    for touch in touches {
+      guard touch == joystickTouch else { continue }
+      let location = touch.location(in: self)
+      let delta = (location - joystickLocation).rotate(by: -.pi / 2)
+      let offset = delta.norm2()
+      joystickDirection = delta.scale(by: min(offset / (0.5 * 100), 1.0) / offset)
+    }
+  }
+  
+  override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+    for touch in touches {
+      guard touch == joystickTouch else { continue }
+      joystickDirection = .zero
+      joystickTouch = nil
+    }
+  }
+  
+  override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+    touchesEnded(touches, with: event)
   }
 
   override func setPositionsForSafeArea() {
     super.setPositionsForSafeArea()
-    guard let _ = joystick, !tabletFormat else { return }
+    guard !tabletFormat else { return }
     // Because of the shape of our controls, we don't need the full safe areas
     let left = 0.67 * safeAreaLeft
     let right = 0.67 * safeAreaRight
@@ -73,15 +88,6 @@ class GameScene: BasicScene {
     // want to push midX in the positive direction.
     let midX = 0.5 * (left - right)
     gameArea.position = CGPoint(x: midX, y: 0)
-    let gameAreaLeft = midX - 0.5 * gameFrame.width
-    // Middle of space between edge of left safe area and left edge of playing area
-    let leftAlleyMidX = 0.5 * ((-0.5 * size.width + left) + gameAreaLeft)
-    joystick.position = CGPoint(x: leftAlleyMidX, y: joystick.position.y)
-    // Middle of space between edge of right safe area and right edge of playing area
-    let gameAreaRight = midX + 0.5 * gameFrame.width
-    let rightAlleyMidX = 0.5 * (gameAreaRight + (0.5 * size.width - right))
-    fireButton.position = CGPoint(x: rightAlleyMidX, y: fireButton.position.y)
-    hyperspaceButton.position = CGPoint(x: rightAlleyMidX, y: hyperspaceButton.position.y)
   }
 
   func initInfo() {
@@ -264,9 +270,7 @@ class GameScene: BasicScene {
   }
 
   func enableHyperspaceJump() {
-    // Ensure that the button stays enabled
     lastJumpTime = -Globals.gameConfig.hyperspaceCooldown
-    hyperspaceButton.enable()
   }
 
   func spawnPlayer(safeTime: CGFloat = Globals.gameConfig.safeTime) {
@@ -510,11 +514,6 @@ class GameScene: BasicScene {
     if player.parent == nil {
       lastWarpInTime = currentTime
     }
-    if currentTime >= lastJumpTime + Globals.gameConfig.hyperspaceCooldown {
-      hyperspaceButton.enable()
-    } else {
-      hyperspaceButton.disable()
-    }
     ufos.forEach {
       $0.fly(player: player, playfield: playfield) {
         (angle, position, speed) in self.fireUFOLaser(angle: angle, position: position, speed: speed)
@@ -531,7 +530,7 @@ class GameScene: BasicScene {
     initInfo()
     initControls()
     initFutureShader()
-    player = Ship(color: "blue", joystick: joystick)
+    player = Ship(color: "blue", getJoystickDirection: { [unowned self] in return self.joystickDirection })
     name = "gameScene"
     physicsWorld.contactDelegate = self
   }

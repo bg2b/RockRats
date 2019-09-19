@@ -11,6 +11,7 @@
 		6523C0822316E5400071AB4B /* ufo2loop.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6523C0812316E5400071AB4B /* ufo2loop.wav */; };
 		6523C0842316E54E0071AB4B /* ufo1loop.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6523C0832316E54D0071AB4B /* ufo1loop.wav */; };
 		6523C0862316FBAD0071AB4B /* alternate_heartbeat.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6523C0852316FBAD0071AB4B /* alternate_heartbeat.wav */; };
+		65348C7223319FB90074455D /* InvisiButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65348C7123319FB90074455D /* InvisiButtons.swift */; };
 		6565DA11232E6818008EA85B /* Achievments.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6565DA10232E6818008EA85B /* Achievments.swift */; };
 		659CC03A230EC9FE00AA087C /* UFO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 659CC039230EC9FE00AA087C /* UFO.swift */; };
 		659CC040230EDA3500AA087C /* ufo_explosion.wav in Resources */ = {isa = PBXBuildFile; fileRef = 659CC03F230EDA3500AA087C /* ufo_explosion.wav */; };
@@ -99,6 +100,7 @@
 		6523C0812316E5400071AB4B /* ufo2loop.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo2loop.wav; sourceTree = "<group>"; };
 		6523C0832316E54D0071AB4B /* ufo1loop.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo1loop.wav; sourceTree = "<group>"; };
 		6523C0852316FBAD0071AB4B /* alternate_heartbeat.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = alternate_heartbeat.wav; sourceTree = "<group>"; };
+		65348C7123319FB90074455D /* InvisiButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvisiButtons.swift; sourceTree = "<group>"; };
 		6565DA10232E6818008EA85B /* Achievments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Achievments.swift; sourceTree = "<group>"; };
 		659CC039230EC9FE00AA087C /* UFO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UFO.swift; sourceTree = "<group>"; };
 		659CC03F230EDA3500AA087C /* ufo_explosion.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo_explosion.wav; sourceTree = "<group>"; };
@@ -287,6 +289,7 @@
 				FD4D53C623080E7300718938 /* Sounds.swift */,
 				FDE04B2A22D745470011A529 /* Joystick.swift */,
 				6513D66B22DC0B4E00B4BD57 /* Button.swift */,
+				65348C7123319FB90074455D /* InvisiButtons.swift */,
 				FDDF488622D2A700006FB86F /* SpriteCache.swift */,
 				FDE04B2C22D753240011A529 /* TextureCache.swift */,
 				FDCF8CA422DA7296008EDFD1 /* Globals.swift */,
@@ -503,6 +506,7 @@
 				FDE04B2D22D753240011A529 /* TextureCache.swift in Sources */,
 				FD79323C22D20FE600E7D336 /* BasicScene.swift in Sources */,
 				FD79323E22D20FE600E7D336 /* GameViewController.swift in Sources */,
+				65348C7223319FB90074455D /* InvisiButtons.swift in Sources */,
 				FDD831F622F187D200CA4EC6 /* GameConfig.swift in Sources */,
 				FD79323622D20FE600E7D336 /* AppDelegate.swift in Sources */,
 				FDE04B2B22D745470011A529 /* Joystick.swift in Sources */,
