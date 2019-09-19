@@ -92,9 +92,9 @@ class MenuScene: BasicScene {
 
   required init(size: CGSize) {
     super.init(size: size)
+    name = "menuScene"
     initGameArea(limitAspectRatio: false)
     initMenu()
-    name = "menuScene"
     physicsWorld.contactDelegate = self
   }
 

@@ -33,6 +33,7 @@
 		FD28DB5822DFFA87009446A2 /* ufo_red@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD28DB5122DFFA87009446A2 /* ufo_red@2x.png */; };
 		FD28DB5922DFFA87009446A2 /* ufo_blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD28DB5222DFFA87009446A2 /* ufo_blue@2x.png */; };
 		FD28DB5A22DFFA87009446A2 /* ufo_green@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD28DB5322DFFA87009446A2 /* ufo_green@2x.png */; };
+		FD3E02082333B1C20057A766 /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD3E02072333B1C20057A766 /* Logging.swift */; };
 		FD46BD72231415B7008C1F99 /* Playfield.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD46BD71231415B7008C1F99 /* Playfield.swift */; };
 		FD4D53C02306B47900718938 /* LivesDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4D53BF2306B47900718938 /* LivesDisplay.swift */; };
 		FD4D53C22306B60F00718938 /* life_blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53C12306B60F00718938 /* life_blue@2x.png */; };
@@ -133,6 +134,7 @@
 		FD3AF4F12317D0570059392A /* asteroids-ipad-76x76@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "asteroids-ipad-76x76@2x.png"; sourceTree = "<group>"; };
 		FD3AF4F22317D0570059392A /* asteroids-iphone-60x60@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "asteroids-iphone-60x60@2x.png"; sourceTree = "<group>"; };
 		FD3AF4F32317D0570059392A /* asteroids-iphone-60x60@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "asteroids-iphone-60x60@3x.png"; sourceTree = "<group>"; };
+		FD3E02072333B1C20057A766 /* Logging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
 		FD46BD71231415B7008C1F99 /* Playfield.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Playfield.swift; sourceTree = "<group>"; };
 		FD4D53BF2306B47900718938 /* LivesDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivesDisplay.swift; sourceTree = "<group>"; };
 		FD4D53C12306B60F00718938 /* life_blue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "life_blue@2x.png"; sourceTree = "<group>"; };
@@ -275,6 +277,7 @@
 			children = (
 				FD79323522D20FE600E7D336 /* AppDelegate.swift */,
 				FD79323B22D20FE600E7D336 /* BasicScene.swift */,
+				FD3E02072333B1C20057A766 /* Logging.swift */,
 				FDD8FB90232B99BE00A83EB5 /* GameScene.swift */,
 				6565DA10232E6818008EA85B /* Achievments.swift */,
 				659CC039230EC9FE00AA087C /* UFO.swift */,
@@ -505,6 +508,7 @@
 				FDD8FB93232CF4FC00A83EB5 /* MenuScene.swift in Sources */,
 				FDE04B2D22D753240011A529 /* TextureCache.swift in Sources */,
 				FD79323C22D20FE600E7D336 /* BasicScene.swift in Sources */,
+				FD3E02082333B1C20057A766 /* Logging.swift in Sources */,
 				FD79323E22D20FE600E7D336 /* GameViewController.swift in Sources */,
 				65348C7223319FB90074455D /* InvisiButtons.swift in Sources */,
 				FDD831F622F187D200CA4EC6 /* GameConfig.swift in Sources */,
