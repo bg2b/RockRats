@@ -10,11 +10,14 @@ import SpriteKit
 
 class Button: SKNode {
   let child: SKNode
+  let border: SKShapeNode
   var enabled = true
+  var clicked = false
   var action: (() -> Void)? = nil
 
-  required init(withChild child: SKNode) {
+  required init(withChild child: SKNode, border: SKShapeNode) {
     self.child = child
+    self.border = border
     super.init()
     name = "button"
     addChild(child)
@@ -37,7 +40,7 @@ class Button: SKNode {
       sprite.zPosition = 1
       buttonShape.addChild(sprite)
     }
-    self.init(withChild: buttonShape)
+    self.init(withChild: buttonShape, border: buttonBorder)
   }
 
   convenience init(forText text: String, size: CGSize, fontName: String, fontColor: UIColor) {
@@ -59,7 +62,7 @@ class Button: SKNode {
     label.horizontalAlignmentMode = .center
     label.verticalAlignmentMode = .center
     buttonShape.addChild(label)
-    self.init(withChild: buttonShape)
+    self.init(withChild: buttonShape, border: buttonBorder)
   }
 
   required init(coder aDecoder: NSCoder) {
@@ -77,19 +80,22 @@ class Button: SKNode {
   }
 
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-    guard let _ = touches.first else { return }
-    if enabled {
-      action?()
-    }
+    clicked = true
+    border.strokeColor = .yellow
   }
 
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
   }
 
   override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+    guard let _ = touches.first else { return }
+    if enabled && clicked {
+      action?()
+      border.strokeColor = .green
+      clicked = false
+    }
   }
 
   override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-    touchesEnded(touches, with: event)
   }
 }
