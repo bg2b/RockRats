@@ -18,13 +18,18 @@ class MenuScene: BasicScene {
     menu.name = "menu"
     menu.zPosition = LevelZs.info.rawValue
     addChild(menu)
-    let title = SKLabelNode(fontNamed: "Kenney Future Narrow")
-    title.fontSize = 125
-    title.fontColor = highlightTextColor
-    title.text = "ASTEROIDS"
-    title.verticalAlignmentMode = .center
-    title.position = CGPoint(x: fullFrame.midX, y: 0.875 * fullFrame.midY + 0.125 * fullFrame.maxY)
-    menu.addChild(title)
+    let titleText = ["DINO", "DEFENDER"]
+    var titleY = 0.5 * fullFrame.midY + 0.5 * fullFrame.maxY
+    for text in titleText {
+      let title = SKLabelNode(fontNamed: "Kenney Future Narrow")
+      title.fontSize = 125
+      title.fontColor = highlightTextColor
+      title.text = text
+      title.verticalAlignmentMode = .center
+      title.position = CGPoint(x: fullFrame.midX, y: titleY)
+      titleY -= title.fontSize + 10
+      menu.addChild(title)
+    }
     let playButton = Button(forText: "Play", size: CGSize(width: 250, height: 75), fontName: "Kenney Future Narrow", fontColor: textColor)
     playButton.position = CGPoint(x: fullFrame.midX, y: 0.75 * fullFrame.midY + 0.25 * fullFrame.minY)
     playButton.action = { [unowned self] in self.startGame() }
