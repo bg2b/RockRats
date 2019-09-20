@@ -12,7 +12,6 @@ class GameScene: BasicScene {
   var player: Ship!
   var score = 0
   var scoreDisplay: SKLabelNode!
-  var lastJumpTime = 0.0
   var lastWarpInTime = 0.0
   var ufosToAvenge = 0
   var ufosKilledWithoutDying = 0
@@ -21,6 +20,7 @@ class GameScene: BasicScene {
   var livesRemaining = 0
   var extraLivesAwarded = 0
   var livesDisplay: LivesDisplay!
+  var energyBar: EnergyBar!
   var gameOver = false
   var joystickLocation = CGPoint.zero
   var joystickDirection = CGVector.zero
@@ -62,9 +62,7 @@ class GameScene: BasicScene {
         guard let startLocation = fireOrWarpTouches.removeValue(forKey: touch) else { continue }
         let location = touch.location(in: self)
         if (location - startLocation).norm2() > 100 {
-          if Globals.lastUpdateTime >= lastJumpTime + Globals.gameConfig.hyperspaceCooldown {
-            hyperspaceJump()
-          }
+          hyperspaceJump()
         } else {
           fireLaser()
         }
@@ -80,10 +78,12 @@ class GameScene: BasicScene {
     scoreDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.maxY - 50)
     centralDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.midY)
     livesDisplay.position = CGPoint(x: gameFrame.minX + 20, y: gameFrame.maxY - 20)
+    energyBar.position = CGPoint(x: gameFrame.maxX - 20, y: gameFrame.maxY - 20)
     logging("\(name!) positions display items")
     logging("scoreDisplay at \(scoreDisplay.position.x),\(scoreDisplay.position.y)")
     logging("centralDisplay at \(centralDisplay.position.x),\(centralDisplay.position.y)")
     logging("livesDisplay at \(livesDisplay.position.x),\(livesDisplay.position.y)")
+    logging("energyBar at \(energyBar.position.x),\(energyBar.position.y)")
   }
 
   override func setPositionsForSafeArea() {
@@ -115,6 +115,8 @@ class GameScene: BasicScene {
     info.addChild(centralDisplay)
     livesDisplay = LivesDisplay(extraColor: textColor)
     info.addChild(livesDisplay)
+    energyBar = EnergyBar(maxLength: 20)
+    info.addChild(energyBar)
     setPositionsOfInfoItems()
   }
 
@@ -271,10 +273,6 @@ class GameScene: BasicScene {
     return true
   }
 
-  func enableHyperspaceJump() {
-    lastJumpTime = -Globals.gameConfig.hyperspaceCooldown
-  }
-
   func spawnPlayer(safeTime: CGFloat = Globals.gameConfig.safeTime) {
     var spawnPosition = CGPoint(x: gameFrame.midX, y: gameFrame.midY)
     var attemptsRemaining = 5
@@ -290,7 +288,7 @@ class GameScene: BasicScene {
       wait(for: 0.5) { self.spawnPlayer(safeTime: max(safeTime - 0.25, 0)) }
     } else {
       ufosToAvenge /= 2
-      enableHyperspaceJump()
+      energyBar.fill()
       Globals.sounds.soundEffect(.warpIn)
       player.reset()
       player.warpIn(to: spawnPosition, atAngle: player.zRotation, addTo: playfield)
@@ -300,7 +298,7 @@ class GameScene: BasicScene {
   }
 
   func fireLaser() {
-    guard player.canShoot() else { return }
+    guard player.canShoot(), energyBar.useEnergy(3) else { return }
     let laser = Globals.spriteCache.findSprite(imageNamed: "lasersmall_green") { sprite in
       guard let texture = sprite.texture else { fatalError("Where is the laser texture?") }
       // Physics body is just a little circle at the front end of the laser, since
@@ -334,9 +332,8 @@ class GameScene: BasicScene {
   }
   
   func hyperspaceJump() {
-    guard player.canJump() else { return }
+    guard player.canJump(), energyBar.useEnergy(40) else { return }
     let backToTheFuture = (score % 100 == 79)
-    lastJumpTime = Globals.lastUpdateTime
     let effects = player.warpOut()
     playfield.addWithScaling(effects[0])
     playfield.addWithScaling(effects[1])
@@ -437,11 +434,17 @@ class GameScene: BasicScene {
     }
   }
 
+  func replenishEnergy() {
+    if player.parent != nil {
+      energyBar.addToLevel(5)
+    }
+    wait(for: 0.5) { self.replenishEnergy() }
+  }
+
   func destroyPlayer() {
     if Globals.lastUpdateTime - lastWarpInTime <= 0.1 {
       reportAchievement(achievement: .rightPlaceWrongTime)
     }
-    enableHyperspaceJump()
     ufosKilledWithoutDying = 0
     let pieces = player.explode()
     addExplosion(pieces)
@@ -500,13 +503,14 @@ class GameScene: BasicScene {
     Globals.gameConfig.currentWaveNumber = 0
     score = 0
     addToScore(0)
-    lastJumpTime = 0
     lastWarpInTime = 0
     timesUFOsShot = 0
     livesRemaining = Globals.gameConfig.initialLives
     extraLivesAwarded = 0
     updateLives(0)
     gameOver = false
+    energyBar.fill()
+    replenishEnergy()
     wait(for: 1) {
       Globals.sounds.startHearbeat()
       self.nextWave()
