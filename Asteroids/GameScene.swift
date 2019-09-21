@@ -8,6 +8,22 @@
 
 import SpriteKit
 
+struct SpecialScore {
+  let score: Int
+  let display: String
+  let achievement: Achievement
+}
+
+let specialScores = [
+  SpecialScore(score: 42, display: "Don't Panic", achievement: .dontPanic),
+  SpecialScore(score: 404, display: "404: Not Found", achievement: .score404),
+  SpecialScore(score: 612, display: "B-612", achievement: .littlePrince),
+  SpecialScore(score: 1138, display: "3720 to 1", achievement: .whatAreTheOdds),
+  SpecialScore(score: 1701, display: "NCC-1701", achievement: .keepOnTrekking),
+  SpecialScore(score: 1984, display: "I'm watching you", achievement: .bigBrother),
+  SpecialScore(score: 2001, display: "A Space Oddity", achievement: .spaceOddity),
+]
+
 class GameScene: BasicScene {
   var player: Ship!
   var score = 0
@@ -195,11 +211,20 @@ class GameScene: BasicScene {
       extraLivesAwarded += 1
     }
     scoreDisplay.text = "\(score)"
-    if score == 404 {
-      wait(for: 1.5) {
-        if self.score == 404 {
-          self.scoreDisplay.text = "\(self.score): Not Found"
-          reportAchievement(achievement: .score404)
+    for special in specialScores {
+      if score == special.score {
+        // We don't display the special message immediately in case the player is in the
+        // middle of blasting a bunch of stuff and will zoom past it.
+        self.wait(for: 0.75) {
+          if self.score == special.score {
+            self.scoreDisplay.text = special.display
+            // Then we wait a bit more to make sure they've had time to notice the message.
+            self.wait(for: 1.5) {
+              if self.score == special.score {
+                reportAchievement(achievement: special.achievement)
+              }
+            }
+          }
         }
       }
     }
