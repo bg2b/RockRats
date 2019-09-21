@@ -52,6 +52,18 @@ class Playfield: SKNode {
     physics.speed = newSpeed
   }
 
+  func isQuiescent(transient: UInt32) -> Bool {
+    for child in children {
+      // Anything without a physicsBody is some sort of effect that's running.
+      guard let body = child.physicsBody else { return false }
+      if body.isOneOf(transient) {
+        // Fragments, shots, whatever must finish their lives before we're quiescent.
+        return false
+      }
+    }
+    return true
+  }
+
   func wrapCoordinates() {
     for child in children {
       guard let body = child.physicsBody else { continue }

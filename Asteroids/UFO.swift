@@ -215,6 +215,7 @@ class UFO: SKNode {
     effect.zRotation = zRotation
     effect.shader = warpOutShader
     setStartTimeAttrib(effect)
+    effect.run(SKAction.sequence([SKAction.wait(forDuration: warpTime), SKAction.removeFromParent()]))
     let star = starBlink(at: position, throughAngle: -.pi, duration: 2 * warpTime)
     cleanup()
     return [effect, star]
