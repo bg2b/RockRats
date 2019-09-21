@@ -20,6 +20,12 @@ enum Achievement: String {
   case hanShotFirst = "hanShotFirst"
   case quickFingers = "quickFingers"
   case rightPlaceWrongTime = "rightPlaceWrongTime"
+  case littlePrince = "littlePrince"
+  case spaceOddity = "spaceOddity"
+  case dontPanic = "dontPanic"
+  case bigBrother = "bigBrother"
+  case whatAreTheOdds = "whatAreTheOdds"
+  case keepOnTrekking = "keepOnTrekking"
 }
 
 func reportAchievement(achievement: Achievement) {
