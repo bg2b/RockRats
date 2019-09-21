@@ -101,6 +101,21 @@ class MenuScene: BasicScene {
     initGameArea(limitAspectRatio: false)
     initMenu()
     physicsWorld.contactDelegate = self
+    isUserInteractionEnabled = true
+  }
+  
+  override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    guard let touch = touches.first else { return }
+    let location = touch.location(in: self)
+    for touched in nodes(at: location) {
+      guard let body = touched.physicsBody else { continue }
+      if body.isA(.asteroid) {
+        splitAsteroid(touched as! SKSpriteNode)
+        return
+      } else if body.isA(.ufo) {
+        destroyUFO(touched as! UFO)
+      }
+    }
   }
 
   required init(coder aDecoder: NSCoder) {
