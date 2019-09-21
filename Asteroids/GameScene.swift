@@ -101,19 +101,19 @@ class GameScene: BasicScene {
     gameArea.addChild(info)
     scoreDisplay = SKLabelNode(fontNamed: "Kenney Future")
     scoreDisplay.fontSize = 50
-    scoreDisplay.fontColor = textColor
+    scoreDisplay.fontColor = AppColors.textColor
     scoreDisplay.text = "0"
     scoreDisplay.name = "score"
     info.addChild(scoreDisplay)
     centralDisplay = SKLabelNode(fontNamed: "Kenney Future")
     centralDisplay.fontSize = 100
-    centralDisplay.fontColor = highlightTextColor
+    centralDisplay.fontColor = AppColors.highlightTextColor
     centralDisplay.text = ""
     centralDisplay.name = "centralDisplay"
     centralDisplay.isHidden = true
     centralDisplay.verticalAlignmentMode = .center
     info.addChild(centralDisplay)
-    livesDisplay = LivesDisplay(extraColor: textColor)
+    livesDisplay = LivesDisplay(extraColor: AppColors.textColor)
     info.addChild(livesDisplay)
     energyBar = EnergyBar(maxLength: 20)
     info.addChild(energyBar)

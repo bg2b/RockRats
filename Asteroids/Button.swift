@@ -24,32 +24,13 @@ class Button: SKNode {
     isUserInteractionEnabled = true
   }
 
-  convenience init(circleOfSize size: CGFloat, borderColor: UIColor, fillColor: UIColor, texture: SKTexture?) {
-    let buttonShape = SKNode()
-    buttonShape.name = "buttonShape"
-    let buttonBorder = SKShapeNode(circleOfRadius: 0.5 * size)
-    buttonBorder.name = "buttonBorder"
-    buttonBorder.fillColor = fillColor
-    buttonBorder.strokeColor = borderColor
-    buttonBorder.lineWidth = 0.05 * size
-    buttonBorder.isAntialiased = true
-    buttonShape.addChild(buttonBorder)
-    if let texture = texture {
-      let sprite = SKSpriteNode(texture: texture, size: texture.size().scale(to: 0.6 * size))
-      sprite.name = "buttonTexture"
-      sprite.zPosition = 1
-      buttonShape.addChild(sprite)
-    }
-    self.init(withChild: buttonShape, border: buttonBorder)
-  }
-
-  convenience init(forText text: String, size: CGSize, fontName: String, fontColor: UIColor) {
+  convenience init(forText text: String, size: CGSize, fontName: String) {
     let buttonShape = SKNode()
     buttonShape.name = "buttonShape"
     let buttonBorder = SKShapeNode(rectOf: size, cornerRadius: 0.1 * min(size.width, size.height))
     buttonBorder.name = "buttonBorder"
     buttonBorder.fillColor = .clear
-    buttonBorder.strokeColor = .green
+    buttonBorder.strokeColor = AppColors.green
     buttonBorder.lineWidth = 2
     buttonBorder.glowWidth = 1
     buttonBorder.isAntialiased = true
@@ -58,7 +39,7 @@ class Button: SKNode {
     label.name = "buttonText"
     label.fontName = fontName
     label.fontSize = 0.9 * size.height
-    label.fontColor = fontColor
+    label.fontColor = AppColors.textColor
     label.horizontalAlignmentMode = .center
     label.verticalAlignmentMode = .center
     buttonShape.addChild(label)
@@ -81,7 +62,7 @@ class Button: SKNode {
 
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     clicked = true
-    border.strokeColor = .yellow
+    border.glowWidth = 3
   }
 
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -91,7 +72,7 @@ class Button: SKNode {
     guard let _ = touches.first else { return }
     if enabled && clicked {
       action?()
-      border.strokeColor = .green
+      border.glowWidth = 1
       clicked = false
     }
   }

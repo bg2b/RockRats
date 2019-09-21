@@ -50,10 +50,6 @@ func setOf(_ categories: [ObjectCategories]) -> UInt32 {
   return categories.reduce(0) { $0 | $1.rawValue }
 }
 
-func RGB(_ red: Int, _ green: Int, _ blue: Int) -> UIColor {
-  return UIColor(red: CGFloat(red)/255.0, green: CGFloat(green)/255.0, blue: CGFloat(blue)/255.0, alpha: 1.0)
-}
-
 extension SKNode {
   func wait(for time: Double, then action: SKAction) {
     run(SKAction.sequence([SKAction.wait(forDuration: time), action]))
@@ -76,9 +72,6 @@ extension Globals {
 
 class BasicScene: SKScene, SKPhysicsContactDelegate {
   var fullFrame: CGRect!
-  let textColor = RGB(101, 185, 240)
-  let highlightTextColor = RGB(246, 205, 68)
-  let buttonColor = RGB(137, 198, 79)
   var gameFrame: CGRect!
   var gameArea = SKCropNode()
   var playfield: Playfield!
@@ -577,8 +570,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
 
   func switchScene(to newScene: SKScene) {
     logging("\(name!) switchScene to \(newScene.name!)")
-    let transitionColor = RGB(43, 45, 50)
-    let transition = SKTransition.fade(with: transitionColor, duration: 1)
+    let transition = SKTransition.fade(with: AppColors.transitionColor, duration: 1)
     newScene.removeAllActions()
     logging("\(name!) about to call presentScene")
     view?.presentScene(newScene, transition: transition)
