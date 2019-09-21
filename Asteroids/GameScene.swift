@@ -65,7 +65,7 @@ class GameScene: BasicScene {
       let location = touch.location(in: self)
       let delta = (location - joystickLocation).rotate(by: -.pi / 2)
       let offset = delta.norm2()
-      joystickDirection = delta.scale(by: min(offset / (0.5 * 100), 1.0) / offset)
+      joystickDirection = delta.scale(by: min(offset / (Globals.ptsToGameUnits * 0.5 * 100), 1.0) / offset)
     }
   }
   
@@ -77,7 +77,7 @@ class GameScene: BasicScene {
       } else {
         guard let startLocation = fireOrWarpTouches.removeValue(forKey: touch) else { continue }
         let location = touch.location(in: self)
-        if (location - startLocation).norm2() > 100 {
+        if (location - startLocation).norm2() > Globals.ptsToGameUnits * 100 {
           hyperspaceJump()
         } else {
           fireLaser()
