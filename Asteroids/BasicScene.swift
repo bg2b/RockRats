@@ -24,6 +24,7 @@ enum ObjectCategories: UInt32 {
   case ufoShot = 16
   case fragment = 32
   case offScreen = 32768
+  case hasWrapped = 65536
 }
 
 extension SKPhysicsBody {
@@ -41,6 +42,16 @@ extension SKPhysicsBody {
       categoryBitMask &= ~ObjectCategories.offScreen.rawValue
       } else {
       categoryBitMask |= ObjectCategories.offScreen.rawValue
+      }
+    }
+  }
+  
+  var hasWrapped: Bool {
+    get { return categoryBitMask & ObjectCategories.hasWrapped.rawValue != 0 }
+    set { if newValue {
+      categoryBitMask |= ObjectCategories.hasWrapped.rawValue
+    } else {
+      categoryBitMask &= ~ObjectCategories.hasWrapped.rawValue
       }
     }
   }

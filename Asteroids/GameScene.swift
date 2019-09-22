@@ -412,6 +412,9 @@ class GameScene: BasicScene {
     if !ufo.requiredPhysicsBody().isOnScreen {
       reportAchievement(achievement: .hanShotFirst)
     }
+    if laser.requiredPhysicsBody().hasWrapped {
+      reportAchievement(achievement: .trickShot)
+    }
     addToScore(ufoPoints(ufo))
     removeLaser(laser as! SKSpriteNode)
     destroyUFO(ufo as! UFO)
@@ -490,6 +493,9 @@ class GameScene: BasicScene {
   func ufoLaserHit(laser: SKNode, player: SKNode) {
     if timesUFOsShot == 1 {
       reportAchievement(achievement: .redShirt)
+    }
+    if laser.requiredPhysicsBody().hasWrapped && !gameFrame.insetBy(dx: 200, dy: 200).contains(player.position) {
+      reportAchievement(achievement: .itsATrap)
     }
     removeUFOLaser(laser as! SKSpriteNode)
     destroyPlayer()
