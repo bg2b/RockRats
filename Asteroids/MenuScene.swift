@@ -21,7 +21,7 @@ class MenuScene: BasicScene {
     let title = SKLabelNode(fontNamed: "Kenney Future Narrow")
     title.fontSize = 125
     title.fontColor = AppColors.highlightTextColor
-    title.text = "ROCK RAT"
+    title.text = "ROCK RATS"
     title.verticalAlignmentMode = .center
     title.position = CGPoint(x: fullFrame.midX, y: 0.875 * fullFrame.midY + 0.125 * fullFrame.maxY)
     menu.addChild(title)
