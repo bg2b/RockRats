@@ -12,6 +12,9 @@ import SpriteKit
 class GameViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
+    if let lang = Locale.preferredLanguages.first {
+      logging("Preferred language \(lang)")
+    }
     if let view = self.view as! SKView? {
       let aspect = view.frame.width / view.frame.height
       // Save the scaling for use with control motions.  We want to specify motions
@@ -22,8 +25,9 @@ class GameViewController: UIViewController {
       let size = CGSize(width: 768 * aspect, height: 768)
       Globals.gameScene = GameScene(size: size)
       Globals.menuScene = MenuScene(size: size)
-      logging("viewDidLoad will present \(Globals.menuScene.name!)")
-      view.presentScene(Globals.menuScene)
+      let introScene = IntroScene(size: size)
+      logging("viewDidLoad will present \(introScene.name!)")
+      view.presentScene(introScene)
       view.preferredFramesPerSecond = 120
       view.ignoresSiblingOrder = true
       view.showsFPS = true

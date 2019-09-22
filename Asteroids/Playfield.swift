@@ -23,7 +23,9 @@ class Playfield: SKNode {
 
   func addWithScaling(_ child: SKNode) {
     addChild(child)
-    guard speed != 1, let body = child.physicsBody, body.isA(.fragment) else { return }
+    guard let body = child.physicsBody else { return }
+    body.hasWrapped = false
+    guard speed != 1, body.isA(.fragment) else { return }
     // Fragments are not affected by slow-motion
     body.velocity = body.velocity.scale(by: 1 / speed)
     body.angularVelocity /= speed
@@ -79,13 +81,17 @@ class Playfield: SKNode {
         let hysteresis = CGFloat(3)
         if child.position.x < bounds.minX - hysteresis {
           child.position.x += bounds.width
+          body.hasWrapped = true
         } else if child.position.x > bounds.maxX + hysteresis {
           child.position.x -= bounds.width
+          body.hasWrapped = true
         }
         if child.position.y < bounds.minY - hysteresis {
           child.position.y += bounds.height
+          body.hasWrapped = true
         } else if child.position.y > bounds.maxY + hysteresis {
           child.position.y -= bounds.height
+          body.hasWrapped = true
         }
       }
     }

@@ -10,7 +10,6 @@ import SpriteKit
 import GameKit
 
 enum Achievement: String {
-  case score404 = "score404"
   case leeroyJenkins = "leeroyJenkins"
   case spinalTap = "spinalTap"
   case redShirt = "redShirt"
@@ -20,6 +19,9 @@ enum Achievement: String {
   case hanShotFirst = "hanShotFirst"
   case quickFingers = "quickFingers"
   case rightPlaceWrongTime = "rightPlaceWrongTime"
+  case trickShot = "trickShot"
+  case itsATrap = "itsATrap"
+  case score404 = "notFound"
   case littlePrince = "littlePrince"
   case spaceOddity = "spaceOddity"
   case dontPanic = "dontPanic"

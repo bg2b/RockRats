@@ -24,6 +24,7 @@ enum ObjectCategories: UInt32 {
   case ufoShot = 16
   case fragment = 32
   case offScreen = 32768
+  case hasWrapped = 65536
 }
 
 extension SKPhysicsBody {
@@ -41,6 +42,16 @@ extension SKPhysicsBody {
       categoryBitMask &= ~ObjectCategories.offScreen.rawValue
       } else {
       categoryBitMask |= ObjectCategories.offScreen.rawValue
+      }
+    }
+  }
+  
+  var hasWrapped: Bool {
+    get { return categoryBitMask & ObjectCategories.hasWrapped.rawValue != 0 }
+    set { if newValue {
+      categoryBitMask |= ObjectCategories.hasWrapped.rawValue
+    } else {
+      categoryBitMask &= ~ObjectCategories.hasWrapped.rawValue
       }
     }
   }
@@ -567,9 +578,9 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     }
   }
 
-  func switchScene(to newScene: SKScene) {
+  func switchScene(to newScene: SKScene, withDuration duration: Double = 1) {
     logging("\(name!) switchScene to \(newScene.name!)")
-    let transition = SKTransition.fade(with: AppColors.transitionColor, duration: 1)
+    let transition = SKTransition.fade(with: AppColors.transitionColor, duration: duration)
     newScene.removeAllActions()
     logging("\(name!) about to call presentScene")
     view?.presentScene(newScene, transition: transition)

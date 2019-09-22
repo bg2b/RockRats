@@ -27,7 +27,7 @@ class Button: SKNode {
   convenience init(forText text: String, size: CGSize, fontName: String) {
     let buttonShape = SKNode()
     buttonShape.name = "buttonShape"
-    let buttonBorder = SKShapeNode(rectOf: size, cornerRadius: 0.1 * min(size.width, size.height))
+    let buttonBorder = SKShapeNode(rectOf: size, cornerRadius: 0.1 * min(size.width, size.height  / 0.9))
     buttonBorder.name = "buttonBorder"
     buttonBorder.fillColor = .clear
     buttonBorder.strokeColor = AppColors.green
@@ -38,7 +38,7 @@ class Button: SKNode {
     let label = SKLabelNode(text: text)
     label.name = "buttonText"
     label.fontName = fontName
-    label.fontSize = 0.9 * size.height
+    label.fontSize = size.height
     label.fontColor = AppColors.textColor
     label.horizontalAlignmentMode = .center
     label.verticalAlignmentMode = .center
