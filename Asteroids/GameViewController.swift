@@ -12,6 +12,9 @@ import SpriteKit
 class GameViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
+    if let lang = Locale.preferredLanguages.first {
+      logging("Preferred language \(lang)")
+    }
     if let view = self.view as! SKView? {
       let aspect = view.frame.width / view.frame.height
       // Save the scaling for use with control motions.  We want to specify motions
