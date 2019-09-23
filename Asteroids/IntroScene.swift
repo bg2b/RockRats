@@ -105,14 +105,6 @@ class IntroScene: BasicScene {
     transmissionSounds.numberOfLoops = -1
   }
 
-  func startAudio() {
-    // This is an ugly hack, but we're the first scene and the audio doesn't seem to
-    // be fully going yet.  Doing this initial play seems to wake it up.
-    transmissionSounds.volume = 0
-    transmissionSounds.play()
-    wait(for: 0.1) { self.transmissionSounds.stop() }
-  }
-
   func incoming() {
     transmissionSounds.volume = 1
     transmissionSounds.play()
@@ -183,7 +175,6 @@ class IntroScene: BasicScene {
   override func didMove(to view: SKView) {
     super.didMove(to: view)
     initSounds()
-    startAudio()
     wait(for: 1) {
       self.incoming()
     }

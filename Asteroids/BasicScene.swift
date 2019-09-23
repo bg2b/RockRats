@@ -261,6 +261,10 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
 
   func initSounds() {
     Globals.sounds.stereoEffectsFrame = gameFrame
+    let transmissionSounds = Globals.sounds.audioPlayerFor(.transmission)
+    transmissionSounds.volume = 0
+    transmissionSounds.play()
+    wait(for: 0.1) { transmissionSounds.stop() }
   }
   
   func fireUFOLaser(angle: CGFloat, position: CGPoint, speed: CGFloat) {
