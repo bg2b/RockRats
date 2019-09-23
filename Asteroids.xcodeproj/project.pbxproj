@@ -82,6 +82,7 @@
 		FDCF8CA522DA7296008EDFD1 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDCF8CA422DA7296008EDFD1 /* Globals.swift */; };
 		FDD44F932336113F00C13609 /* AppColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD44F922336113F00C13609 /* AppColors.swift */; };
 		FDD44F95233787ED00C13609 /* IntroScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD44F94233787ED00C13609 /* IntroScene.swift */; };
+		FDD44F972338C60700C13609 /* transmission.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDD44F962338C60700C13609 /* transmission.wav */; };
 		FDD831F222EDB50200CA4EC6 /* Explosions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD831F122EDB50200CA4EC6 /* Explosions.swift */; };
 		FDD831F622F187D200CA4EC6 /* GameConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD831F522F187D200CA4EC6 /* GameConfig.swift */; };
 		FDD831F922F1AE0D00CA4EC6 /* confignormal.json in Resources */ = {isa = PBXBuildFile; fileRef = FDD831F822F1AE0D00CA4EC6 /* confignormal.json */; };
@@ -186,6 +187,7 @@
 		FDCF8CA422DA7296008EDFD1 /* Globals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
 		FDD44F922336113F00C13609 /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
 		FDD44F94233787ED00C13609 /* IntroScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroScene.swift; sourceTree = "<group>"; };
+		FDD44F962338C60700C13609 /* transmission.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = transmission.wav; sourceTree = "<group>"; };
 		FDD831F122EDB50200CA4EC6 /* Explosions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Explosions.swift; sourceTree = "<group>"; };
 		FDD831F522F187D200CA4EC6 /* GameConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameConfig.swift; sourceTree = "<group>"; };
 		FDD831F822F1AE0D00CA4EC6 /* confignormal.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = confignormal.json; sourceTree = "<group>"; };
@@ -250,6 +252,7 @@
 				FD4D53CA2308206D00718938 /* player_laser.wav */,
 				FD4D53D423085AF800718938 /* player_engines.wav */,
 				FD4D53C423080D3600718938 /* player_explosion.wav */,
+				FDD44F962338C60700C13609 /* transmission.wav */,
 				FDA43B29230C2A1D00A29347 /* warpin.wav */,
 				FDA43B27230C1DC600A29347 /* warpout.wav */,
 				FDA43B1D2308A1A600A29347 /* extra_life.wav */,
@@ -481,6 +484,7 @@
 				FD53168322DB445100F09E57 /* meteorbig4@2x.png in Resources */,
 				FD79324322D20FE700E7D336 /* Assets.xcassets in Resources */,
 				FD28DB5622DFFA87009446A2 /* meteorhuge3@2x.png in Resources */,
+				FDD44F972338C60700C13609 /* transmission.wav in Resources */,
 				FDA43B24230A111D00A29347 /* meteorhuge_hit.wav in Resources */,
 				FD4D53D0230843C900718938 /* meteormed_hit.wav in Resources */,
 				FD28DB5922DFFA87009446A2 /* ufo_blue@2x.png in Resources */,
