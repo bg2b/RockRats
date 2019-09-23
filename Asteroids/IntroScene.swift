@@ -7,6 +7,7 @@
 //
 
 import SpriteKit
+import AVFoundation
 
 class IntroScene: BasicScene {
   let typeInDelay = 2.0 / 60
@@ -32,7 +33,7 @@ class IntroScene: BasicScene {
   you @MIGHT@ survive. At least if the UFOs don't get you... Do you \
   think you've got what it takes to become one of us, the @Rock Rats@?
   """
-  var transmissionSounds: SKAudioNode!
+  var transmissionSounds: AVAudioPlayer!
   var incomingLabel: SKLabelNode!
   var introLabel: SKLabelNode!
   var goButton: Button!
@@ -100,10 +101,8 @@ class IntroScene: BasicScene {
     print(introLabel.position)
     // Put the bottom of the button at desiredBottomY
     goButton.position = goButton.position + CGVector(dx: 0, dy: desiredBottomY - goFrame.minY)
-    transmissionSounds = Globals.sounds.audioNodeFor(.transmission)
-    transmissionSounds.autoplayLooped = true
-    addChild(transmissionSounds)
-    transmissionSounds.run(SKAction.pause())
+    transmissionSounds = Globals.sounds.audioPlayerFor(.transmission)
+    transmissionSounds.numberOfLoops = -1
 //    wait(for: typeInDelay) {
 //      self.transmissionSounds.run(SKAction.play())
 //      self.typeIn(text: self.messageHeader, at: self.messageHeader.startIndex, label: self.incomingLabel) {}
@@ -116,15 +115,24 @@ class IntroScene: BasicScene {
 //    }
   }
 
+  func startAudio() {
+    // This is an ugly hack, but we're the first scene and the audio doesn't seem to
+    // be fully going yet.  Doing this initial play seems to wake it up.
+    transmissionSounds.volume = 0
+    transmissionSounds.play()
+    wait(for: 0.1) { self.transmissionSounds.stop() }
+  }
+
   func incoming() {
-    transmissionSounds.run(SKAction.play())
+    transmissionSounds.volume = 1
+    transmissionSounds.play()
     typeIn(text: self.standBy, at: self.standBy.startIndex, label: self.incomingLabel) {
       self.wait(for: 3) { self.header() }
     }
   }
 
   func header() {
-    transmissionSounds.run(SKAction.play())
+    transmissionSounds.play()
     typeIn(text: self.messageHeader, at: self.messageHeader.startIndex, label: self.incomingLabel) {
       self.wait(for: 5) {
         self.incomingLabel.isHidden = true
@@ -135,7 +143,7 @@ class IntroScene: BasicScene {
 
   func intro() {
     introLabel.isHidden = false
-    transmissionSounds.run(SKAction.play())
+    transmissionSounds.play()
     typeIn(text: self.introduction, at: self.introduction.startIndex, label: self.introLabel) {
       self.goButton.run(SKAction.sequence([SKAction.unhide(), SKAction.fadeIn(withDuration: 0.5)]))
     }
@@ -167,23 +175,25 @@ class IntroScene: BasicScene {
         muteAudio = true
       }
       if muteAudio {
-        transmissionSounds.run(SKAction.pause())
+        transmissionSounds.pause()
       }
       wait(for: delay) {
         if muteAudio {
-          self.transmissionSounds.run(SKAction.play())
+          self.transmissionSounds.play()
         }
         self.typeIn(text: text, at: text.index(after: index), label: label, whenDone: whenDone)
       }
     } else {
       label.attributedText = makeAttributed(text: text, until: index)
-      transmissionSounds.run(SKAction.stop())
+      transmissionSounds.stop()
       whenDone?()
     }
   }
 
   override func didMove(to view: SKView) {
     super.didMove(to: view)
+    initSounds()
+    startAudio()
     wait(for: 1) {
       self.incoming()
     }
