@@ -31,7 +31,7 @@ class IntroScene: BasicScene {
   from mining debris is a @dangerous@ job; the pay's good for a reason... \
   You're here because you're a @hotshot@ pilot, and Central suspects \
   you @MIGHT@ survive. At least if the UFOs don't get you... Do you \
-  think you've got what it takes to become one of us, the @Rock Rats@?
+  have what it takes to become one of us, the @Rock Rats@?
   """
   var transmissionSounds: AVAudioPlayer!
   var incomingLabel: SKLabelNode!
@@ -103,16 +103,6 @@ class IntroScene: BasicScene {
     goButton.position = goButton.position + CGVector(dx: 0, dy: desiredBottomY - goFrame.minY)
     transmissionSounds = Globals.sounds.audioPlayerFor(.transmission)
     transmissionSounds.numberOfLoops = -1
-//    wait(for: typeInDelay) {
-//      self.transmissionSounds.run(SKAction.play())
-//      self.typeIn(text: self.messageHeader, at: self.messageHeader.startIndex, label: self.incomingLabel) {}
-//    }
-//    wait(for: typeInDelay) {
-//      self.transmissionSounds.run(SKAction.play())
-//      self.typeIn(text: self.introduction, at: self.introduction.startIndex, label: self.introLabel) {
-//        self.goButton.run(SKAction.sequence([SKAction.unhide(), SKAction.fadeIn(withDuration: 0.5)]))
-//      }
-//    }
   }
 
   func startAudio() {
