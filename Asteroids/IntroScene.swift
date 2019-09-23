@@ -18,18 +18,18 @@ class IntroScene: BasicScene {
   Please stand by.
   """
   let messageHeader = """
-  From: Lt Cmdr @Ivanova@
+  From: @Lt Cmdr Ivanova@
     Sector Head
   To: All @new recruits@
   CC: Central Command
-  Subject: Intro Briefing
+  Subject: @Intro Briefing@
   """
   let introduction = """
   It's tough working in the belt. Whether you're from Luna City, Mars Colony, \
   or good old Terra, out here you're a @long way@ from home. Cleaning the fields \
   from mining debris is a @dangerous@ job; the pay's good for a reason... \
   You're here because you're a @hotshot@ pilot, and Central suspects \
-  you @MIGHT@ survive. At least if the UFOs don't get you... Do you \
+  you @MIGHT@ survive. At least if the @UFOs@ don't get you... Do you \
   have what it takes to become one of us, the @Rock Rats@?
   """
   var transmissionSounds: SKAudioNode!
