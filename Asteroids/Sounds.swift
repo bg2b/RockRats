@@ -28,6 +28,7 @@ enum SoundEffect: String, CaseIterable {
   case ufoEnginesSmall = "ufo2loop"
   case ufoShot = "ufo_laser"
   case ufoWarpOut = "ufo_warpout"
+  case transmission = "transmission"
 
   var url: URL {
     guard let url = Bundle.main.url(forResource: self.rawValue, withExtension: "wav") else {
