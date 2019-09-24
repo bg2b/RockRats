@@ -102,7 +102,15 @@ extension SKLabelNode {
     let delay = 2.0 / 60
     // This is incredibly ugly, but for some reason if I don't kick the audio by
     // trying to play it and then waiting a bit and stopping, the first instance of
-    // using typeIn will stutter.
+    // using typeIn will stutter.  After the fist call everything would work without
+    // this hackery, though it doesn't hurt.  But that's just because audioPlayerFor
+    // is returning the same (cached) player for every new call.  I can reproduce the
+    // problem on every call if I get a completely new audio player each time;
+    // instead of calling audioPlayerFor, just use SoundEffect.transmission.player().
+    // So presumably it's something I don't understand about the AVAudioPlayer
+    // itself.  It somehow gets created in a state that makes it not start playing
+    // cleanly until after I call stop() on it.  After that, it's fine on play().  I
+    // tried dumping the prepareToPlay() in the creation, but that didn't help.
     wait(for: 3 * delay) {
       sounds.stop()
       sounds.volume = 1
