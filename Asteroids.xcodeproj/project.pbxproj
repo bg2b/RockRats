@@ -70,6 +70,7 @@
 		FD79324622D20FE700E7D336 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FD79324422D20FE700E7D336 /* LaunchScreen.storyboard */; };
 		FD808FCA2328FE5F0025A71E /* kenneyfuture.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FD808FC92328FE5F0025A71E /* kenneyfuture.ttf */; };
 		FD808FCC2328FE6E0025A71E /* kenneyfuturenarrow.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FD808FCB2328FE6E0025A71E /* kenneyfuturenarrow.ttf */; };
+		FD96AE1C2339A93300D4CAFA /* TypeIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD96AE1B2339A93300D4CAFA /* TypeIn.swift */; };
 		FDA43B1E2308A1A600A29347 /* extra_life.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B1D2308A1A600A29347 /* extra_life.wav */; };
 		FDA43B202308AB9600A29347 /* heartbeat.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B1F2308AB9600A29347 /* heartbeat.wav */; };
 		FDA43B222308C11E00A29347 /* gameover.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B212308C11E00A29347 /* gameover.wav */; };
@@ -175,6 +176,7 @@
 		FD79324722D20FE700E7D336 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FD808FC92328FE5F0025A71E /* kenneyfuture.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = kenneyfuture.ttf; sourceTree = "<group>"; };
 		FD808FCB2328FE6E0025A71E /* kenneyfuturenarrow.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = kenneyfuturenarrow.ttf; sourceTree = "<group>"; };
+		FD96AE1B2339A93300D4CAFA /* TypeIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeIn.swift; sourceTree = "<group>"; };
 		FDA43B1D2308A1A600A29347 /* extra_life.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = extra_life.wav; sourceTree = "<group>"; };
 		FDA43B1F2308AB9600A29347 /* heartbeat.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = heartbeat.wav; sourceTree = "<group>"; };
 		FDA43B212308C11E00A29347 /* gameover.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = gameover.wav; sourceTree = "<group>"; };
@@ -302,6 +304,7 @@
 				FD4D53C623080E7300718938 /* Sounds.swift */,
 				FDDF488622D2A700006FB86F /* SpriteCache.swift */,
 				FDE04B2C22D753240011A529 /* TextureCache.swift */,
+				FD96AE1B2339A93300D4CAFA /* TypeIn.swift */,
 				659CC039230EC9FE00AA087C /* UFO.swift */,
 				FD79324222D20FE700E7D336 /* Assets.xcassets */,
 				FD79324722D20FE700E7D336 /* Info.plist */,
@@ -525,6 +528,7 @@
 				FDD831F222EDB50200CA4EC6 /* Explosions.swift in Sources */,
 				FDCF8CA322DA175F008EDFD1 /* CGHelpers.swift in Sources */,
 				FD4D53C02306B47900718938 /* LivesDisplay.swift in Sources */,
+				FD96AE1C2339A93300D4CAFA /* TypeIn.swift in Sources */,
 				FDCF8CA522DA7296008EDFD1 /* Globals.swift in Sources */,
 				FDD8FB91232B99BE00A83EB5 /* GameScene.swift in Sources */,
 				FD4D53C723080E7300718938 /* Sounds.swift in Sources */,

@@ -11,9 +11,7 @@ import AVFoundation
 
 class IntroScene: BasicScene {
   let typeInDelay = 2.0 / 60
-  var textAttributes = [NSAttributedString.Key: Any]()
-  var highlightTextAttributes = [NSAttributedString.Key: Any]()
-  var hiddenAttributes = [NSAttributedString.Key: Any]()
+  let attributes = AttrStyles(fontName: "Kenney Future Narrow", fontSize: 40)
   let standBy = """
   Incoming transmission...
   Please stand by.
@@ -30,32 +28,13 @@ class IntroScene: BasicScene {
   or good old Terra, out here you're a @long way@ from home. Cleaning the fields \
   from mining debris is a @dangerous@ job; the pay's good for a reason... \
   You're here because you're a @hotshot@ pilot, and Central suspects \
-  you @MIGHT@ survive. At least if the @UFOs@ don't get you... Do you \
+  you @MIGHT@ survive. At least if the pesky @UFOs@ don't get you... Do you \
   have what it takes to become one of us, the @Rock Rats@?
   """
   var transmissionSounds: AVAudioPlayer!
   var incomingLabel: SKLabelNode!
   var introLabel: SKLabelNode!
   var goButton: Button!
-
-  func makeAttributed(text: String, until visibleIndex: String.Index) -> NSAttributedString {
-    var highlighted = false
-    let result = NSMutableAttributedString(string: "")
-    var index = text.startIndex
-    while index < text.endIndex {
-      if text[index] == "@" {
-        highlighted = !highlighted
-      } else {
-        if index < visibleIndex {
-          result.append(NSAttributedString(string: String(text[index]), attributes: highlighted ? highlightTextAttributes : textAttributes))
-        } else {
-          result.append(NSAttributedString(string: String(text[index]), attributes: hiddenAttributes))
-        }
-      }
-      index = text.index(after: index)
-    }
-    return result
-  }
 
   func initIntro() {
     let intro = SKNode()
@@ -65,7 +44,7 @@ class IntroScene: BasicScene {
     // It seems that numberOfLines needs to be set to something just to do the word
     // breaking on SKLabelNodes.  The value doesn't really matter though, and we'll
     // adjust the position of the node after computing sizes.
-    incomingLabel = SKLabelNode(attributedText: makeAttributed(text: standBy, until: standBy.startIndex))
+    incomingLabel = SKLabelNode(attributedText: makeAttributed(text: standBy, until: standBy.startIndex, attributes: attributes))
     incomingLabel.numberOfLines = 5
     incomingLabel.lineBreakMode = .byWordWrapping
     incomingLabel.preferredMaxLayoutWidth = 600
@@ -74,7 +53,7 @@ class IntroScene: BasicScene {
     incomingLabel.position = CGPoint(x: gameFrame.midX, y: 0)
     intro.addChild(incomingLabel)
     //incomingLabel.isHidden = true
-    introLabel = SKLabelNode(attributedText: makeAttributed(text: introduction, until: introduction.startIndex))
+    introLabel = SKLabelNode(attributedText: makeAttributed(text: introduction, until: introduction.startIndex, attributes: attributes))
     introLabel.numberOfLines = 2
     introLabel.lineBreakMode = .byWordWrapping
     introLabel.preferredMaxLayoutWidth = 900
@@ -106,16 +85,15 @@ class IntroScene: BasicScene {
   }
 
   func incoming() {
-    transmissionSounds.volume = 1
-    transmissionSounds.play()
-    typeIn(text: self.standBy, at: self.standBy.startIndex, label: self.incomingLabel) {
+    incomingLabel.typeIn(text: standBy, at: standBy.startIndex, attributes: attributes,
+                         sounds: transmissionSounds, typeInDelay: typeInDelay) {
       self.wait(for: 3) { self.header() }
     }
   }
 
   func header() {
-    transmissionSounds.play()
-    typeIn(text: self.messageHeader, at: self.messageHeader.startIndex, label: self.incomingLabel) {
+    incomingLabel.typeIn(text: messageHeader, at: messageHeader.startIndex, attributes: attributes,
+                         sounds: transmissionSounds, typeInDelay: typeInDelay) {
       self.wait(for: 5) {
         self.incomingLabel.isHidden = true
         self.intro()
@@ -125,51 +103,14 @@ class IntroScene: BasicScene {
 
   func intro() {
     introLabel.isHidden = false
-    transmissionSounds.play()
-    typeIn(text: self.introduction, at: self.introduction.startIndex, label: self.introLabel) {
+    introLabel.typeIn(text: introduction, at: introduction.startIndex, attributes: attributes,
+                      sounds: transmissionSounds, typeInDelay: typeInDelay) {
       self.goButton.run(SKAction.sequence([SKAction.unhide(), SKAction.fadeIn(withDuration: 0.5)]))
     }
   }
 
   func toMenu() {
     wait(for: 0.25) { self.switchScene(to: Globals.menuScene, withDuration: 3) }
-  }
-
-  func typeIn(text: String, at index: String.Index, label: SKLabelNode, whenDone: (() -> Void)?) {
-    if index < text.endIndex {
-      // Probably it's not very efficient to regenerate the attributed text
-      // constantly, but it's easy to understand and doesn't require too much mucking
-      // with NSwhatevs...
-      label.attributedText = makeAttributed(text: text, until: index)
-      var delay = typeInDelay
-      var muteAudio = false
-      if index > text.startIndex && text[index] == " " {
-        let previousChar = text[text.index(before: index)]
-        if previousChar == "." || previousChar == ";" {
-          delay = 50 * typeInDelay
-          muteAudio = true
-        } else if previousChar == "," {
-          delay = 10 * typeInDelay
-          muteAudio = true
-        }
-      } else if text[index] == "\n" {
-        delay = 50 * typeInDelay
-        muteAudio = true
-      }
-      if muteAudio {
-        transmissionSounds.pause()
-      }
-      wait(for: delay) {
-        if muteAudio {
-          self.transmissionSounds.play()
-        }
-        self.typeIn(text: text, at: text.index(after: index), label: label, whenDone: whenDone)
-      }
-    } else {
-      label.attributedText = makeAttributed(text: text, until: index)
-      transmissionSounds.stop()
-      whenDone?()
-    }
   }
 
   override func didMove(to view: SKView) {
@@ -187,12 +128,6 @@ class IntroScene: BasicScene {
 
   required init(size: CGSize) {
     super.init(size: size)
-    textAttributes[.font] = UIFont(name: "Kenney Future Narrow", size: 40)
-    textAttributes[.foregroundColor] = AppColors.textColor
-    highlightTextAttributes = textAttributes
-    highlightTextAttributes[.foregroundColor] = AppColors.highlightTextColor
-    hiddenAttributes = textAttributes
-    hiddenAttributes[.foregroundColor] = UIColor.clear
     name = "introScene"
     initGameArea(limitAspectRatio: false)
     initIntro()
