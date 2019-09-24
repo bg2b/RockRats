@@ -9,7 +9,6 @@
 import SpriteKit
 
 class IntroScene: BasicScene {
-  let typeInDelay = 2.0 / 60
   let attributes = AttrStyles(fontName: "Kenney Future Narrow", fontSize: 40)
   let standBy = """
   Incoming transmission...
@@ -30,7 +29,6 @@ class IntroScene: BasicScene {
   you @MIGHT@ survive. At least if the pesky @UFOs@ don't get you... Do you \
   have what it takes to become one of us, the @Rock Rats@?
   """
-  var transmissionSounds: SKAudioNode!
   var incomingLabel: SKLabelNode!
   var introLabel: SKLabelNode!
   var goButton: Button!
@@ -79,22 +77,16 @@ class IntroScene: BasicScene {
     print(introLabel.position)
     // Put the bottom of the button at desiredBottomY
     goButton.position = goButton.position + CGVector(dx: 0, dy: desiredBottomY - goFrame.minY)
-    transmissionSounds = Globals.sounds.audioNodeFor(.transmission)
-    transmissionSounds.autoplayLooped = true
-    addChild(transmissionSounds)
-    transmissionSounds.run(SKAction.pause())
   }
 
   func incoming() {
-    incomingLabel.typeIn(text: standBy, at: standBy.startIndex, attributes: attributes,
-                         sounds: transmissionSounds, typeInDelay: typeInDelay) {
+    incomingLabel.typeIn(text: standBy, attributes: attributes) {
       self.wait(for: 3) { self.header() }
     }
   }
 
   func header() {
-    incomingLabel.typeIn(text: messageHeader, at: messageHeader.startIndex, attributes: attributes,
-                         sounds: transmissionSounds, typeInDelay: typeInDelay) {
+    incomingLabel.typeIn(text: messageHeader, attributes: attributes) {
       self.wait(for: 5) {
         self.incomingLabel.isHidden = true
         self.intro()
@@ -104,8 +96,7 @@ class IntroScene: BasicScene {
 
   func intro() {
     introLabel.isHidden = false
-    introLabel.typeIn(text: introduction, at: introduction.startIndex, attributes: attributes,
-                      sounds: transmissionSounds, typeInDelay: typeInDelay) {
+    introLabel.typeIn(text: introduction, attributes: attributes) {
       self.goButton.run(SKAction.sequence([SKAction.unhide(), SKAction.fadeIn(withDuration: 0.5)]))
     }
   }

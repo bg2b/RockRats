@@ -52,7 +52,7 @@ extension SKLabelNode {
   // This method reveals the (formatted) text in a label node while playing some sound.
   // It's supposed to give an incoming-transmission type of effect.
   func typeIn(text: String, at index: String.Index, attributes: AttrStyles,
-              sounds: SKAudioNode, typeInDelay: Double, whenDone: (() -> Void)?) {
+              sounds: SKAudioNode, delay: Double, whenDone: (() -> Void)?) {
     if index == text.startIndex {
       sounds.run(SKAction.play())
     }
@@ -61,35 +61,45 @@ extension SKLabelNode {
       // constantly, but it's easy to understand and doesn't require too much mucking
       // with NSwhatevs...
       attributedText = makeAttributed(text: text, until: index, attributes: attributes)
-      var delay = typeInDelay
+      var duration = delay
       var muteAudio = false
       if index > text.startIndex && text[index] == " " {
         let previousChar = text[text.index(before: index)]
         if previousChar == "." || previousChar == ";" {
-          delay = 50 * typeInDelay
+          duration *= 50
           muteAudio = true
         } else if previousChar == "," {
-          delay = 10 * typeInDelay
+          duration *= 10
           muteAudio = true
         }
       } else if text[index] == "\n" {
-        delay = 50 * typeInDelay
+        duration *= 50
         muteAudio = true
       }
       if muteAudio {
         sounds.run(SKAction.pause())
       }
-      wait(for: delay) {
+      wait(for: duration) {
         if muteAudio {
           sounds.run(SKAction.play())
         }
         self.typeIn(text: text, at: text.index(after: index), attributes: attributes,
-                    sounds: sounds, typeInDelay: typeInDelay, whenDone: whenDone)
+                    sounds: sounds, delay: delay, whenDone: whenDone)
       }
     } else {
       attributedText = makeAttributed(text: text, until: index, attributes: attributes)
       sounds.run(SKAction.stop())
+      sounds.removeFromParent()
       whenDone?()
     }
+  }
+
+  func typeIn(text: String, attributes: AttrStyles, whenDone: (() -> Void)?) {
+    let sounds = Globals.sounds.audioNodeFor(.transmission)
+    sounds.autoplayLooped = true
+    addChild(sounds)
+    sounds.run(SKAction.pause())
+    let delay = 2.0 / 60
+    typeIn(text: text, at: text.startIndex, attributes: attributes, sounds: sounds, delay: delay, whenDone: whenDone)
   }
 }
