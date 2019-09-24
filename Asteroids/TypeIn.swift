@@ -7,6 +7,7 @@
 //
 
 import SpriteKit
+import AVFoundation
 
 struct AttrStyles {
   let textAttributes: [NSAttributedString.Key: Any]
@@ -52,44 +53,60 @@ extension SKLabelNode {
   // This method reveals the (formatted) text in a label node while playing some sound.
   // It's supposed to give an incoming-transmission type of effect.
   func typeIn(text: String, at index: String.Index, attributes: AttrStyles,
-              sounds: SKAudioNode, typeInDelay: Double, whenDone: (() -> Void)?) {
+              sounds: AVAudioPlayer, delay: Double, whenDone: (() -> Void)?) {
     if index == text.startIndex {
-      sounds.run(SKAction.play())
+      sounds.play()
     }
     if index < text.endIndex {
       // Probably it's not very efficient to regenerate the attributed text
       // constantly, but it's easy to understand and doesn't require too much mucking
       // with NSwhatevs...
       attributedText = makeAttributed(text: text, until: index, attributes: attributes)
-      var delay = typeInDelay
+      var duration = delay
       var muteAudio = false
       if index > text.startIndex && text[index] == " " {
         let previousChar = text[text.index(before: index)]
         if previousChar == "." || previousChar == ";" {
-          delay = 50 * typeInDelay
+          duration *= 50
           muteAudio = true
         } else if previousChar == "," {
-          delay = 10 * typeInDelay
+          duration *= 10
           muteAudio = true
         }
       } else if text[index] == "\n" {
-        delay = 50 * typeInDelay
+        duration *= 50
         muteAudio = true
       }
       if muteAudio {
-        sounds.run(SKAction.pause())
+        sounds.pause()
       }
-      wait(for: delay) {
+      wait(for: duration) {
         if muteAudio {
-          sounds.run(SKAction.play())
+          sounds.play()
         }
         self.typeIn(text: text, at: text.index(after: index), attributes: attributes,
-                    sounds: sounds, typeInDelay: typeInDelay, whenDone: whenDone)
+                    sounds: sounds, delay: delay, whenDone: whenDone)
       }
     } else {
       attributedText = makeAttributed(text: text, until: index, attributes: attributes)
-      sounds.run(SKAction.stop())
+      sounds.stop()
       whenDone?()
+    }
+  }
+
+  func typeIn(text: String, attributes: AttrStyles, whenDone: (() -> Void)?) {
+    let sounds = Globals.sounds.audioPlayerFor(.transmission)
+    sounds.numberOfLoops = -1
+    sounds.volume = 0
+    sounds.play()
+    let delay = 2.0 / 60
+    // This is incredibly ugly, but for some reason if I don't kick the audio by
+    // trying to play it and then waiting a bit and stopping, the first instance of
+    // using typeIn will stutter.
+    wait(for: 3 * delay) {
+      sounds.stop()
+      sounds.volume = 1
+      self.typeIn(text: text, at: text.startIndex, attributes: attributes, sounds: sounds, delay: delay, whenDone: whenDone)
     }
   }
 }
