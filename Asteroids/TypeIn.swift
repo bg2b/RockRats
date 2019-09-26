@@ -65,7 +65,7 @@ extension SKLabelNode {
       var muteAudio = false
       if index > text.startIndex && text[index] == " " {
         let previousChar = text[text.index(before: index)]
-        if previousChar == "." || previousChar == ";" {
+        if previousChar == "." || previousChar == ";" || previousChar == "!" || previousChar == "?" {
           duration *= 50
           muteAudio = true
         } else if previousChar == "," {
