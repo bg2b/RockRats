@@ -153,7 +153,7 @@ class TutorialScene: GameTutorialScene {
   func tutorial1() {
     instructionGeometry(width: 600, horizontal: .center, vertical: .center, position: CGPoint(x: gameFrame.midX, y: gameFrame.midY))
     let instructions = """
-    I'm @Lt Starbuck@, welcome aboard! I'm going to show you the ropes. \
+    I'm @Lt Carla Grace@, welcome aboard! I'm going to show you the ropes. \
     Touch here when you're ready to begin your training.
     """
     giveSimpleInstructions(text: instructions) { self.tutorial2() }
@@ -166,7 +166,7 @@ class TutorialScene: GameTutorialScene {
     instructionGeometry(width: (instructionX - gameFrame.minX - 100) * 2, horizontal: .center, vertical: .center,
                         position: CGPoint(x: instructionX, y: gameFrame.midY))
     let instructions = """
-    This is your ship, a @Viper Mark II@. They're old, but reliable. If you \
+    This is your ship, a @Piper Mark II@. They're old, but reliable. If you \
     prove competent (and don't die), maybe someday you'll be trusted with a new \
     @Mark VII@.
     """
@@ -178,8 +178,8 @@ class TutorialScene: GameTutorialScene {
   func tutorial3() {
     let instructions = """
     In this exercise, I'll activate your ship's systems one by one so that you \
-    can get the feel of them.  Follow my instructions to try them out.  Don't worry, \
-    there's nothing @too@ dangerous around, so you should be OK.
+    can get the feel of them. Follow my instructions to try them out. Don't worry, \
+    there's @nothing dangerous@ around, so you'll be OK.
     """
     giveSimpleInstructions(text: instructions) { self.tutorial4() }
   }
@@ -212,8 +212,8 @@ class TutorialScene: GameTutorialScene {
   func tutorial5() {
     let instructions = """
     You also need to be able to move, so I'm going to enable the engines. \
-    @Touch and swipe upwards@ to thrust forward.  Build up a bit of speed and \
-    and then you'll be able to continue.
+    @Touch and swipe upwards@ to thrust forward. Build up some speed \
+    and then we'll continue.
     """
     giveInstructions(text: instructions) {
       self.maxThrust = .infinity
@@ -223,7 +223,7 @@ class TutorialScene: GameTutorialScene {
 
   func observeThrust() {
     wait(for: 1) {
-      if self.observedMaxThrust > 0.5 && self.player.requiredPhysicsBody().velocity.norm2() > 100 {
+      if self.observedMaxThrust > 0.75 && self.player.requiredPhysicsBody().velocity.norm2() > 200 {
         (self.continueThen { self.tutorial6() })()
       } else {
         self.observeThrust()
@@ -232,7 +232,70 @@ class TutorialScene: GameTutorialScene {
   }
 
   func tutorial6() {
+    let instructions = """
+    Notice that you'll keep moving even if you stop thrusting. To stop, \
+    @turn around and thrust@ in the opposite direction. Try to slow down to a \
+    near stop now.
+    """
+    giveInstructions(text: instructions) {
+      self.observeStop()
+    }
+  }
 
+  func observeStop() {
+    wait(for: 1) {
+      if self.player.requiredPhysicsBody().velocity.norm2() < 50 {
+        (self.continueThen { self.tutorial7() })()
+      } else {
+        self.observeStop()
+      }
+    }
+  }
+
+  func tutorial7() {
+    let instructions = """
+    You're doing well! It's best to go easy on the thrust most of the time. \
+    Get going too fast and you'll probably be a @rock splat@ instead of a Rock Rat.
+    """
+    giveSimpleInstructions(text: instructions) { self.tutorial8() }
+  }
+
+  func tutorial8() {
+    let instructions = """
+    You also have reverse thrusters, though they're relatively weak. I'll \
+    enable them now. @Touch and swipe down@ to try them.
+    """
+    giveInstructions(text: instructions) {
+      self.minThrust = -.infinity
+      self.observeReverse()
+    }
+  }
+
+  func observeReverse() {
+    wait(for: 1) {
+      if self.observedMinThrust < -0.75 {
+        (self.continueThen { self.tutorial9() })()
+      } else {
+        self.observeReverse()
+      }
+    }
+  }
+
+  func tutorial9() {
+
+  }
+
+  func startInTheMiddleOfTheTutorial() {
+    // This is just for testing.  It has the various controls things enabled in the
+    // order that matches the tutorial.  Comment out whatever is not appropriate and
+    // then call this before jumping to an intermediate tutorial stage.
+    instructionGeometry(width: 600, horizontal: .left, vertical: .top,
+                        position: CGPoint(x: gameFrame.minX + 50, y: gameFrame.maxY - 50))
+    let spawnX = 0.25 * gameFrame.minX + 0.75 * gameFrame.maxX
+    spawnPlayer(at: CGPoint(x: spawnX, y: gameFrame.midY))
+    maxRotate = .infinity
+    maxThrust = .infinity
+    minThrust = -.infinity
   }
 
   override func didMove(to view: SKView) {
