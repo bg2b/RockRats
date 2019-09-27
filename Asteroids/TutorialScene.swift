@@ -28,11 +28,31 @@ class TutorialScene: GameTutorialScene {
     instructionsLabel.lineBreakMode = .byWordWrapping
     instructionsLabel.zPosition = LevelZs.info.rawValue
     addChild(instructionsLabel)
-    instructionGeometry(width: 600, horizontal: .center, vertical: .center, position: CGPoint(x: gameFrame.midX, y: gameFrame.midY))
   }
 
-  func instructionGeometry(width: CGFloat, horizontal: SKLabelHorizontalAlignmentMode, vertical: SKLabelVerticalAlignmentMode, position: CGPoint) {
+  func instructionGeometry(text: String, maxWidth: CGFloat, wantedHeight: CGFloat, horizontal: SKLabelHorizontalAlignmentMode, vertical: SKLabelVerticalAlignmentMode, position: CGPoint) {
+    var width = maxWidth
+    let attrText = makeAttributed(text: text, until: text.endIndex, attributes: attributes)
+    let reset = ""
+    let resetText = makeAttributed(text: reset, until: reset.endIndex, attributes: attributes)
     instructionsLabel.preferredMaxLayoutWidth = width
+    instructionsLabel.attributedText = attrText
+    let targetHeight = max(wantedHeight, instructionsLabel.frame.height + 1)
+    while instructionsLabel.frame.height <= targetHeight {
+      width -= 25
+      instructionsLabel.preferredMaxLayoutWidth = width
+      // It's necessary to muck in a nontrivial way with the text in order to get the
+      // label to recalculate its size.
+      instructionsLabel.attributedText = resetText
+      instructionsLabel.attributedText = attrText
+    }
+    while width + 25 <= maxWidth && instructionsLabel.frame.height > targetHeight {
+      width += 25
+      instructionsLabel.preferredMaxLayoutWidth = width
+      instructionsLabel.attributedText = resetText
+      instructionsLabel.attributedText = attrText
+    }
+    print("final height \(instructionsLabel.frame.height) at width \(width)")
     instructionsLabel.horizontalAlignmentMode = horizontal
     instructionsLabel.verticalAlignmentMode = vertical
     instructionsLabel.position = position
@@ -114,6 +134,7 @@ class TutorialScene: GameTutorialScene {
   func showContinueButton(action: @escaping () -> Void) {
     removeContinueButton()
     let labelFrame = instructionsLabel.frame
+    print("label frame \(labelFrame)")
     // Because the instructionsLabel is multi-line and left justified, it looks more
     // balanced with a small amount of extra space on the left.
     let button = Button(around: instructionsLabel, minSize: labelFrame.size, extraLeft: 5)
@@ -150,49 +171,62 @@ class TutorialScene: GameTutorialScene {
     giveInstructions(text: text, whenDone: continueThen(action: action))
   }
 
+  func topInstructions(_ instructions: String) {
+    instructionGeometry(text: instructions, maxWidth: gameFrame.width - 100, wantedHeight: 200,
+                        horizontal: .center, vertical: .top, position: CGPoint(x: gameFrame.midX, y: gameFrame.maxY - 50))
+  }
+
   func tutorial1() {
-    instructionGeometry(width: 600, horizontal: .center, vertical: .center, position: CGPoint(x: gameFrame.midX, y: gameFrame.midY))
     let instructions = """
     I'm @Lt Carla Grace@, welcome aboard! I'm going to show you the ropes. \
     Touch here when you're ready to begin your training.
     """
+    instructionGeometry(text: instructions, maxWidth: gameFrame.width - 100, wantedHeight: 300,
+                        horizontal: .center, vertical: .center, position: CGPoint(x: gameFrame.midX, y: gameFrame.midY))
     giveSimpleInstructions(text: instructions) { self.tutorial2() }
   }
 
   func tutorial2() {
-    let spawnX = 0.25 * gameFrame.minX + 0.75 * gameFrame.maxX
-    spawnPlayer(at: CGPoint(x: spawnX, y: gameFrame.midY))
-    let instructionX = 0.5 * (gameFrame.minX + spawnX)
-    instructionGeometry(width: (instructionX - gameFrame.minX - 100) * 2, horizontal: .center, vertical: .center,
-                        position: CGPoint(x: instructionX, y: gameFrame.midY))
+    let spawn = CGPoint(x: gameFrame.midX, y: gameFrame.midY)
+    spawnPlayer(at: spawn)
+//    let instructionX = 0.5 * (gameFrame.minX + spawnX)
+//    instructionGeometry(width: (instructionX - gameFrame.minX - 100) * 2, horizontal: .center, vertical: .center,
+//                        position: CGPoint(x: instructionX, y: gameFrame.midY))
     let instructions = """
-    This is your ship, a @Piper Mark II@. They're old, but reliable. If you \
+    This is your ship, an old @Piper Mark II@. If you \
     prove competent (and don't die), maybe someday you'll be trusted with a new \
     @Mark VII@.
     """
-    wait(for: 1) {
-      self.giveSimpleInstructions(text: instructions) { self.tutorial3() }
-    }
+    topInstructions(instructions)
+    giveSimpleInstructions(text: instructions) { self.tutorial3() }
   }
 
   func tutorial3() {
     let instructions = """
-    In this exercise, I'll activate your ship's systems one by one so that you \
-    can get the feel of them. Follow my instructions to try them out. Don't worry, \
-    there's @nothing dangerous@ around, so you'll be OK.
+    I'll activate your ship's systems @one by one@ so that you \
+    can get the feel of them. @Follow my instructions@ to try them out.
     """
+    topInstructions(instructions)
     giveSimpleInstructions(text: instructions) { self.tutorial4() }
   }
 
   func tutorial4() {
-    instructionGeometry(width: 600, horizontal: .left, vertical: .top,
-                        position: CGPoint(x: gameFrame.minX + 50, y: gameFrame.maxY - 50))
     let instructions = """
-    Touch and swipe on this side of the screen somewhere below these \
-    instructions to control the ship. \
-    @Swipe left and right@ to rotate. Do that now. After you succeed \
-    you'll be able to continue.
+    You @touch and swipe on this side of the screen@ to control the ship. \
+    The position where you initially touch doesn't matter. @The direction of \
+    the swipe@ is what determines how the ship responds.
     """
+    instructionGeometry(text: instructions, maxWidth: gameFrame.width / 2 - 100, wantedHeight: 200,
+                        horizontal: .left, vertical: .center, position: CGPoint(x: gameFrame.minX + 50, y: gameFrame.midY))
+    giveSimpleInstructions(text: instructions) { self.tutorial5() }
+  }
+
+  func tutorial5() {
+    let instructions = """
+    @Touch and swipe left and right@ to rotate. Try out both directions. \
+    When you succeed, we'll continue.
+    """
+    topInstructions(instructions)
     giveInstructions(text: instructions) {
       self.maxRotate = .infinity
       self.observeRotate()
@@ -202,19 +236,19 @@ class TutorialScene: GameTutorialScene {
   func observeRotate() {
     wait(for: 1) {
       if self.observedMinRotate < -0.75 && self.observedMaxRotate > 0.75 {
-        (self.continueThen { self.tutorial5() })()
+        (self.continueThen { self.tutorial6() })()
       } else {
         self.observeRotate()
       }
     }
   }
 
-  func tutorial5() {
+  func tutorial6() {
     let instructions = """
-    You also need to be able to move, so I'm going to enable the engines. \
-    @Touch and swipe upwards@ to thrust forward. Build up some speed \
-    and then we'll continue.
+    @Touch and swipe upwards@ to thrust forward. Larger swipes give more throttle. \
+    Build up some speed in order to move on.
     """
+    topInstructions(instructions)
     giveInstructions(text: instructions) {
       self.maxThrust = .infinity
       self.observeThrust()
@@ -224,19 +258,19 @@ class TutorialScene: GameTutorialScene {
   func observeThrust() {
     wait(for: 1) {
       if self.observedMaxThrust > 0.75 && self.player.requiredPhysicsBody().velocity.norm2() > 200 {
-        (self.continueThen { self.tutorial6() })()
+        (self.continueThen { self.tutorial7() })()
       } else {
         self.observeThrust()
       }
     }
   }
 
-  func tutorial6() {
+  func tutorial7() {
     let instructions = """
     Notice that you'll keep moving even if you stop thrusting. To stop, \
-    @turn around and thrust@ in the opposite direction. Try to slow down to a \
-    near stop now.
+    @turn around and thrust@ in the opposite direction. Try to stop now.
     """
+    topInstructions(instructions)
     giveInstructions(text: instructions) {
       self.observeStop()
     }
@@ -245,26 +279,27 @@ class TutorialScene: GameTutorialScene {
   func observeStop() {
     wait(for: 1) {
       if self.player.requiredPhysicsBody().velocity.norm2() < 50 {
-        (self.continueThen { self.tutorial7() })()
+        (self.continueThen { self.tutorial8() })()
       } else {
         self.observeStop()
       }
     }
   }
 
-  func tutorial7() {
-    let instructions = """
-    You're doing well! It's best to go easy on the thrust most of the time. \
-    Get going too fast and you'll probably be a @rock splat@ instead of a Rock Rat.
-    """
-    giveSimpleInstructions(text: instructions) { self.tutorial8() }
-  }
-
   func tutorial8() {
     let instructions = """
-    You also have reverse thrusters, though they're relatively weak. I'll \
-    enable them now. @Touch and swipe down@ to try them.
+    It's best to go easy on the thrust most of the time. \
+    Get going too fast and you'll probably be a @rock splat@ instead of a Rock Rat.
     """
+    topInstructions(instructions)
+    giveSimpleInstructions(text: instructions) { self.tutorial9() }
+  }
+
+  func tutorial9() {
+    let instructions = """
+    You also have reverse thrusters, though they're weak. @Touch and swipe down@ to try them.
+    """
+    topInstructions(instructions)
     giveInstructions(text: instructions) {
       self.minThrust = -.infinity
       self.observeReverse()
@@ -274,14 +309,14 @@ class TutorialScene: GameTutorialScene {
   func observeReverse() {
     wait(for: 1) {
       if self.observedMinThrust < -0.75 {
-        (self.continueThen { self.tutorial9() })()
+        (self.continueThen { self.tutorial10() })()
       } else {
         self.observeReverse()
       }
     }
   }
 
-  func tutorial9() {
+  func tutorial10() {
 
   }
 
@@ -289,8 +324,6 @@ class TutorialScene: GameTutorialScene {
     // This is just for testing.  It has the various controls things enabled in the
     // order that matches the tutorial.  Comment out whatever is not appropriate and
     // then call this before jumping to an intermediate tutorial stage.
-    instructionGeometry(width: 600, horizontal: .left, vertical: .top,
-                        position: CGPoint(x: gameFrame.minX + 50, y: gameFrame.maxY - 50))
     let spawnX = 0.25 * gameFrame.minX + 0.75 * gameFrame.maxX
     spawnPlayer(at: CGPoint(x: spawnX, y: gameFrame.midY))
     maxRotate = .infinity
