@@ -21,6 +21,7 @@ enum Achievement: String {
   case rightPlaceWrongTime = "rightPlaceWrongTime"
   case trickShot = "trickShot"
   case itsATrap = "itsATrap"
+  case hanYolo = "hanYolo"
   case score404 = "notFound"
   case littlePrince = "littlePrince"
   case spaceOddity = "spaceOddity"

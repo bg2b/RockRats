@@ -87,8 +87,8 @@ class TutorialScene: GameTutorialScene {
     }
   }
 
-  func spawnPlayer(at preferredPosition: CGPoint) {
-    var spawnPosition = preferredPosition
+  func spawnPlayer() {
+    var spawnPosition = CGPoint(x: gameFrame.midX, y: gameFrame.midY)
     var attemptsRemaining = 5
     while attemptsRemaining > 0 && !isSafe(point: spawnPosition, forDuration: 5) {
       let spawnRegion = gameFrame.insetBy(dx: 0.33 * gameFrame.width, dy: 0.33 * gameFrame.height)
@@ -99,7 +99,7 @@ class TutorialScene: GameTutorialScene {
     if attemptsRemaining == 0 {
       // We didn't find a safe position so wait a bit and try again.  This should't
       // really happen in the tutorial.
-      wait(for: 0.5) { self.spawnPlayer(at: preferredPosition) }
+      wait(for: 0.5) { self.spawnPlayer() }
     } else {
       energyBar.fill()
       Globals.sounds.soundEffect(.warpIn)
@@ -117,6 +117,31 @@ class TutorialScene: GameTutorialScene {
     let pieces = player.explode()
     addExplosion(pieces)
     Globals.sounds.soundEffect(.playerExplosion)
+    let messages = [
+      "@No problem@, that'll buff right out. Take another ship.",
+      "That's gotta be @painful@... Oh well, there's more ships where @that@ came from.",
+      "You know they @dock your pay@ for that sort of thing? Just @sayin'@...",
+      "Spacecraft get hit by @small@ debris all the time. @Unfortunately@, that wasn't small.",
+      "@Much to learn@ you still have, hmmm?",
+      "I think we'll give you the call sign @\"Crash\"@...",
+      "It's usually better @NOT@ to destroy asteroids by @ramming@...",
+      "Let me guess, you want to be known as @Han #YOLO@?"
+    ]
+    var message = messages[deathCount]
+    deathCount += 1
+    if asteroids.isEmpty {
+      if deathCount != messages.count {
+        message += " At least you cleared the debris."
+      } else {
+        reportAchievement(achievement: .hanYolo)
+      }
+    }
+    wait(for: 2) {
+      self.topInstructions(message, height: 150)
+      self.giveInstructions(text: message) {
+        self.spawnPlayer()
+      }
+    }
   }
 
   func playerCollided(asteroid: SKNode) {
@@ -176,8 +201,8 @@ class TutorialScene: GameTutorialScene {
     giveInstructions(text: text, whenDone: continueThen(action: action))
   }
 
-  func topInstructions(_ instructions: String) {
-    instructionGeometry(text: instructions, maxWidth: gameFrame.width - 100, wantedHeight: 200,
+  func topInstructions(_ instructions: String, height: CGFloat = 200) {
+    instructionGeometry(text: instructions, maxWidth: gameFrame.width - 100, wantedHeight: height,
                         horizontal: .center, vertical: .top, position: CGPoint(x: gameFrame.midX, y: gameFrame.maxY - 50))
   }
 
@@ -192,8 +217,7 @@ class TutorialScene: GameTutorialScene {
   }
 
   func tutorial2() {
-    let spawn = CGPoint(x: gameFrame.midX, y: gameFrame.midY)
-    spawnPlayer(at: spawn)
+    spawnPlayer()
     let instructions = """
     This is your ship, an old @Piper Mark II@. If you \
     prove competent (and don't die), maybe someday you'll be trusted with a new \
@@ -384,7 +408,7 @@ class TutorialScene: GameTutorialScene {
   
   func observeAsteroids(_ whenCleared: @escaping () -> Void) {
     wait(for: 1) {
-      if self.asteroids.isEmpty {
+      if self.asteroids.isEmpty && self.player.parent != nil{
         (self.continueThen { whenCleared() })()
       } else {
         self.observeAsteroids(whenCleared)
@@ -502,7 +526,7 @@ class TutorialScene: GameTutorialScene {
     // This is just for testing.  It has the various controls things enabled in the
     // order that matches the tutorial.  Comment out whatever is not appropriate and
     // then call this before jumping to an intermediate tutorial stage.
-    spawnPlayer(at: CGPoint(x: gameFrame.midX, y: gameFrame.midY))
+    spawnPlayer()
     maxRotate = .infinity
     maxThrust = .infinity
     minThrust = -.infinity
@@ -526,6 +550,7 @@ class TutorialScene: GameTutorialScene {
     energyBar.fill()
     replenishEnergy()
     livesDisplay.showLives(3)
+    deathCount = 0
     wait(for: 1) {
       self.tutorial1()
     }
