@@ -25,6 +25,7 @@ class GameViewController: UIViewController {
       let size = CGSize(width: 768 * aspect, height: 768)
       Globals.gameScene = GameScene(size: size)
       Globals.menuScene = MenuScene(size: size)
+      Globals.tutorialScene = TutorialScene(size: size)
       let introScene = IntroScene(size: size)
       logging("viewDidLoad will present \(introScene.name!)")
       view.presentScene(introScene)
@@ -67,4 +68,5 @@ extension Globals {
   static var ptsToGameUnits = CGFloat(1)
   static var menuScene: MenuScene!
   static var gameScene: GameScene!
+  static var tutorialScene: TutorialScene!
 }

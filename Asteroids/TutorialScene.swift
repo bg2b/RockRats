@@ -209,7 +209,7 @@ class TutorialScene: GameTutorialScene {
   func tutorial1() {
     let instructions = """
     I'm @Lt Carla Grace@, welcome aboard! I'm going to show you the ropes. \
-    Touch here when you're ready to begin your training.
+    @Touch here@ when you're ready to @begin your training@.
     """
     instructionGeometry(text: instructions, maxWidth: gameFrame.width - 100, wantedHeight: 300,
                         horizontal: .center, vertical: .center, position: CGPoint(x: gameFrame.midX, y: gameFrame.midY))
@@ -220,7 +220,7 @@ class TutorialScene: GameTutorialScene {
     spawnPlayer()
     let instructions = """
     This is your ship, an old @Piper Mark II@. If you \
-    prove competent (and don't die), maybe someday you'll be trusted with a new \
+    prove competent (and @don't die@), maybe someday you'll be trusted with a new \
     @Mark VII@.
     """
     topInstructions(instructions)
@@ -239,8 +239,8 @@ class TutorialScene: GameTutorialScene {
   func tutorial4() {
     let instructions = """
     You @touch and swipe on this side of the screen@ to control the ship. \
-    The position where you initially touch doesn't matter. @The direction of \
-    the swipe@ is what determines how the ship responds.
+    @The position@ where you initially touch @doesn't matter@. @The direction of \
+    the swipe@ is what determines how the ship @responds@.
     """
     instructionGeometry(text: instructions, maxWidth: gameFrame.width / 2 - 100, wantedHeight: 200,
                         horizontal: .left, vertical: .center, position: CGPoint(x: gameFrame.minX + 50, y: gameFrame.midY))
@@ -249,8 +249,8 @@ class TutorialScene: GameTutorialScene {
 
   func tutorial5() {
     let instructions = """
-    @Touch and swipe left and right@ to rotate. Try out both directions. \
-    When you succeed, we'll continue.
+    @Touch and swipe left and right@ to rotate. Try out @both directions@. \
+    When you @succeed@, we'll continue.
     """
     topInstructions(instructions)
     giveInstructions(text: instructions) {
@@ -271,8 +271,8 @@ class TutorialScene: GameTutorialScene {
 
   func tutorial6() {
     let instructions = """
-    @Touch and swipe upwards@ to thrust forward. Larger swipes give more throttle. \
-    Build up some speed in order to move on.
+    @Touch and swipe upwards@ to thrust forward. @Larger@ swipes give @more throttle@. \
+    @Build up some speed@ in order to move on.
     """
     topInstructions(instructions)
     giveInstructions(text: instructions) {
@@ -293,8 +293,8 @@ class TutorialScene: GameTutorialScene {
 
   func tutorial7() {
     let instructions = """
-    Notice that you'll keep moving even if you stop thrusting. To stop, \
-    @turn around and thrust@ in the opposite direction. Try to stop now.
+    Notice that @you'll keep moving@ even if you @stop thrusting@. To stop, \
+    @turn around and thrust@ in the @opposite@ direction. Try to stop now.
     """
     topInstructions(instructions)
     giveInstructions(text: instructions) {
@@ -314,8 +314,8 @@ class TutorialScene: GameTutorialScene {
 
   func tutorial8() {
     let instructions = """
-    It's best to go easy on the thrust most of the time. \
-    Get going too fast and you'll probably be a @rock splat@ instead of a Rock Rat.
+    It's best to @go easy on the thrust@ most of the time. \
+    Get going @too@ fast and you'll probably be a @rock splat@ instead of a @Rock Rat@.
     """
     topInstructions(instructions)
     giveSimpleInstructions(text: instructions) { self.tutorial9() }
@@ -323,7 +323,7 @@ class TutorialScene: GameTutorialScene {
 
   func tutorial9() {
     let instructions = """
-    You also have reverse thrusters, though they're weak. @Touch and swipe down@ to try them.
+    You also have @reverse@ thrusters, though they're @weak@. @Touch and swipe down@ to try them.
     """
     topInstructions(instructions)
     giveInstructions(text: instructions) {
@@ -483,9 +483,11 @@ class TutorialScene: GameTutorialScene {
     let instructions = """
     Ok, you are @go for launch@. Assuming no @spontaneous combustion@ occurs, we'll continue when you're back.
     """
-    hyperspaceEnabled = true
     topInstructions(instructions)
-    giveInstructions(text: instructions) { self.observeJump() }
+    giveInstructions(text: instructions) {
+      self.hyperspaceEnabled = true
+      self.observeJump()
+    }
   }
   
   func observeJump() {
@@ -501,7 +503,7 @@ class TutorialScene: GameTutorialScene {
   func tutorial23() {
     let instructions = """
     We do have @quite a few@ Mark II's, so you're allocated some @reserve \
-    ships@, and if you're performing well @Central@ will provide \
+    ships@, and if you're performing well, @Central@ will provide \
     @more@.
     """
     topInstructions(instructions)

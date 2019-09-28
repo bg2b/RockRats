@@ -59,9 +59,9 @@ class IntroScene: BasicScene {
     introLabel.position = CGPoint(x: gameFrame.midX, y: 0)
     intro.addChild(introLabel)
     introLabel.isHidden = true
-    goButton = Button(forText: "Find Out", size: CGSize(width: 250, height: 50), fontName: "Kenney Future Narrow")
+    goButton = Button(forText: "Flight Training", size: CGSize(width: 350, height: 50), fontName: "Kenney Future Narrow")
     goButton.position = CGPoint(x: fullFrame.midX, y: 0)
-    goButton.action = { [unowned self] in self.toMenu() }
+    goButton.action = { [unowned self] in self.toTutorial() }
     intro.addChild(goButton)
     goButton.alpha = 0
     goButton.isHidden = true
@@ -101,8 +101,8 @@ class IntroScene: BasicScene {
     }
   }
 
-  func toMenu() {
-    wait(for: 0.25) { self.switchScene(to: Globals.menuScene, withDuration: 3) }
+  func toTutorial() {
+    wait(for: 0.25) { self.switchScene(to: Globals.tutorialScene, withDuration: 3) }
   }
 
   override func didMove(to view: SKView) {
