@@ -19,8 +19,11 @@ class TutorialScene: GameTutorialScene {
   var observedMinThrust = CGFloat(0)
   var observedMinRotate = CGFloat(0)
   var observedMaxRotate = CGFloat(0)
+  var observedLasersFired = 0
   var shootingEnabled = false
   var hyperspaceEnabled = false
+  var deathCount = 0
+  var hasJumped = false
 
   func initInstructions() {
     instructionsLabel = SKLabelNode(text: "")
@@ -72,6 +75,7 @@ class TutorialScene: GameTutorialScene {
 
   override func hyperspaceJump() {
     if hyperspaceEnabled {
+      hasJumped = true
       super.hyperspaceJump()
     }
   }
@@ -79,6 +83,7 @@ class TutorialScene: GameTutorialScene {
   override func fireLaser() {
     if shootingEnabled {
       super.fireLaser()
+      observedLasersFired += 1
     }
   }
 
@@ -189,9 +194,6 @@ class TutorialScene: GameTutorialScene {
   func tutorial2() {
     let spawn = CGPoint(x: gameFrame.midX, y: gameFrame.midY)
     spawnPlayer(at: spawn)
-//    let instructionX = 0.5 * (gameFrame.minX + spawnX)
-//    instructionGeometry(width: (instructionX - gameFrame.minX - 100) * 2, horizontal: .center, vertical: .center,
-//                        position: CGPoint(x: instructionX, y: gameFrame.midY))
     let instructions = """
     This is your ship, an old @Piper Mark II@. If you \
     prove competent (and don't die), maybe someday you'll be trusted with a new \
@@ -317,18 +319,197 @@ class TutorialScene: GameTutorialScene {
   }
 
   func tutorial10() {
-
+    let instuctions = """
+    Space in this quadrant has some @weird curvature@, \
+    so objects wrap across edges. Probably nothing to do with the nearby @black holes@.
+    """
+    topInstructions(instuctions)
+    giveSimpleInstructions(text: instuctions) { self.tutorial11() }
+  }
+  
+  func tutorial11() {
+    
+  }
+  
+  func tutorial12() {
+    let instructions = """
+    We also gave you a bit of @weaponry@, which you control using @this side@ of the screen... \
+    And please, do be careful.
+    I get a raise if my @mortality rate@ is low.
+    """
+    instructionGeometry(text: instructions, maxWidth: gameFrame.width / 2 - 100, wantedHeight: 200,
+                        horizontal: .right, vertical: .center, position: CGPoint(x: gameFrame.maxX - 50, y: gameFrame.midY))
+    giveSimpleInstructions(text: instructions) { self.tutorial13() }
+  }
+  
+  func tutorial13() {
+    let instructions = """
+    @Single taps@ will fire the lasers. @Fire some shots@ to get a feel for it, and then we'll continue.
+    """
+    topInstructions(instructions)
+    giveInstructions(text: instructions) {
+      self.shootingEnabled = true
+      self.observeFiring()
+    }
+  }
+  
+  func observeFiring() {
+    wait(for: 1) {
+      if self.observedLasersFired > 5 {
+        (self.continueThen { self.tutorial14() })()
+      } else {
+        self.observeFiring()
+      }
+    }
+  }
+  
+  func tutorial14() {
+    let instuctions = """
+    Regulations limit the number of @simultaneous@ laser pulses per ship, to avoid @crossing the streams@. Why? @It would be bad@...
+    """
+    topInstructions(instuctions)
+    giveSimpleInstructions(text: instuctions) { self.tutorial15() }
+  }
+  
+  func tutorial15() {
+    let instructions = """
+    You'll use the lasers primarily to @clear asteroid debris@. Speaking of such, here comes some now. @Cleanup on aisle 6@ please.
+    """
+    topInstructions(instructions)
+    giveInstructions(text: instructions) {
+      self.spawnAsteroid(size: "med")
+      self.observeAsteroids { self.tutorial16() }
+    }
+  }
+  
+  func observeAsteroids(_ whenCleared: @escaping () -> Void) {
+    wait(for: 1) {
+      if self.asteroids.isEmpty {
+        (self.continueThen { whenCleared() })()
+      } else {
+        self.observeAsteroids(whenCleared)
+      }
+    }
+  }
+  
+  func tutorial16() {
+    let instructions = """
+    @Small@ debris is not much trouble, but some pieces are @bigger@. You'll \
+    need @multiple shots@ to @completely@ destroy them.
+    """
+    topInstructions(instructions)
+      giveInstructions(text: instructions) {
+        self.spawnAsteroid(size: "huge")
+        self.observeAsteroids { self.tutorial17() }
+      }
+  }
+  
+  func tutorial17() {
+    let instructions = """
+    One other minor tidbit. Producing @laser pulses@ \
+    takes @energy@, and your reactor has a @limited generation@ rate.
+    """
+    topInstructions(instructions)
+    giveSimpleInstructions(text: instructions) { self.tutorial18() }
+  }
+  
+  func tutorial18() {
+    let instructions = """
+    This bar shows your @energy reserves@. Fire some shots and @observe the bar@.
+    """
+    instructionGeometry(text: instructions, maxWidth: gameFrame.width / 2 - 100, wantedHeight: 200,
+                        horizontal: .right, vertical: .top, position: CGPoint(x: gameFrame.maxX - 50, y: energyBar.position.y - 50))
+    giveSimpleInstructions(text: instructions) { self.tutorial19() }
+    energyBar.isHidden = false
+  }
+  
+  func tutorial19() {
+    let instructions = """
+    Energy for shooting won't usually be a @problem@, but there's one @other@ \
+    capability that I @hesitate@ to mention...
+    """
+    topInstructions(instructions)
+    giveSimpleInstructions(text: instructions) { self.tutorial20() }
+  }
+  
+  func tutorial20() {
+    let instructions = """
+    If you get into a @tight@ spot, you can try jumping into @hyperspace@. You might \
+    @become one with an asteroid@ though, and it needs a lot of @energy@.
+    """
+    topInstructions(instructions)
+    giveSimpleInstructions(text: instructions) { self.tutorial21() }
+  }
+  
+  func tutorial21() {
+    let instructions = """
+    A quick @swipe-and-release@ on this side will activate the @jump@.  Watch your @energy \
+    bar@ and see what happens. Just let me @get clear@ and I'll enable the @hyperdrive@.
+    """
+    instructionGeometry(text: instructions, maxWidth: gameFrame.width / 2 - 100, wantedHeight: 200,
+                        horizontal: .right, vertical: .center, position: CGPoint(x: gameFrame.maxX - 50, y: gameFrame.midY))
+    giveSimpleInstructions(text: instructions) { self.tutorial22() }
+  }
+  
+  func tutorial22() {
+    let instructions = """
+    Ok, you are @go for launch@. Assuming no @spontaneous combustion@ occurs, we'll continue when you're back.
+    """
+    hyperspaceEnabled = true
+    topInstructions(instructions)
+    giveInstructions(text: instructions) { self.observeJump() }
+  }
+  
+  func observeJump() {
+    wait(for: 1) {
+      if self.hasJumped {
+        (self.continueThen { self.tutorial23() })()
+      } else {
+        self.observeJump()
+      }
+    }
+  }
+  
+  func tutorial23() {
+    let instructions = """
+    We do have @quite a few@ Mark II's, so you're allocated some @reserve \
+    ships@, and if you're performing well @Central@ will provide \
+    @more@.
+    """
+    topInstructions(instructions)
+    giveSimpleInstructions(text: instructions) { self.tutorial24() }
+  }
+  
+  func tutorial24() {
+    let instructions = """
+    The @number@ of reserves you have is @shown@ up in this corner.
+    """
+    livesDisplay.isHidden = false
+    instructionGeometry(text: instructions, maxWidth: gameFrame.width / 2 - 100, wantedHeight: 200,
+                        horizontal: .left, vertical: .top, position: CGPoint(x: gameFrame.minX + 50, y: livesDisplay.position.y - 50))
+    giveSimpleInstructions(text: instructions) { self.finishTutorial() }
+  }
+  
+  func finishTutorial() {
+    let instructions = """
+    That concludes your training. @Good luck@, and I'll see you out in the fields!
+    """
+    topInstructions(instructions)
+    giveSimpleInstructions(text: instructions) { self.switchScene(to: Globals.menuScene) }
   }
 
   func startInTheMiddleOfTheTutorial() {
     // This is just for testing.  It has the various controls things enabled in the
     // order that matches the tutorial.  Comment out whatever is not appropriate and
     // then call this before jumping to an intermediate tutorial stage.
-    let spawnX = 0.25 * gameFrame.minX + 0.75 * gameFrame.maxX
-    spawnPlayer(at: CGPoint(x: spawnX, y: gameFrame.midY))
+    spawnPlayer(at: CGPoint(x: gameFrame.midX, y: gameFrame.midY))
     maxRotate = .infinity
     maxThrust = .infinity
     minThrust = -.infinity
+    shootingEnabled = true
+    energyBar.isHidden = false
+    hyperspaceEnabled = true
+    livesDisplay.isHidden = false
   }
 
   override func didMove(to view: SKView) {
@@ -340,10 +521,11 @@ class TutorialScene: GameTutorialScene {
     livesDisplay.isHidden = true
     initSounds()
     Globals.gameConfig = loadGameConfig(forMode: "normal")
-    Globals.gameConfig.currentWaveNumber = 0
+    Globals.gameConfig.currentWaveNumber = 1
     score = 0
     energyBar.fill()
     replenishEnergy()
+    livesDisplay.showLives(3)
     wait(for: 1) {
       self.tutorial1()
     }
