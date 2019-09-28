@@ -352,7 +352,11 @@ class TutorialScene: GameTutorialScene {
   }
   
   func tutorial11() {
-    
+    let instuctions = """
+    It's @nothing to worry about@, but it can be @disorienting@. Try to stay near the @center@ to avoid getting @blindsided@.
+    """
+    topInstructions(instuctions)
+    giveSimpleInstructions(text: instuctions) { self.tutorial12() }
   }
   
   func tutorial12() {
