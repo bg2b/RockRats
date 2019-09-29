@@ -12,6 +12,7 @@ class MenuScene: BasicScene {
   var asteroidsHit = 0
   var gameStarting = false
   var menu: SKNode!
+  var highScore: SKLabelNode!
 
   func initMenu() {
     menu = SKNode()
@@ -25,8 +26,14 @@ class MenuScene: BasicScene {
     title.verticalAlignmentMode = .center
     title.position = CGPoint(x: fullFrame.midX, y: 0.875 * fullFrame.midY + 0.125 * fullFrame.maxY)
     menu.addChild(title)
+    highScore = SKLabelNode(fontNamed: "Kenney Future Narrow")
+    highScore.fontSize = 50
+    highScore.fontColor = AppColors.highlightTextColor
+    highScore.verticalAlignmentMode = .center
+    highScore.position = CGPoint(x: fullFrame.midX, y: 0.75 * fullFrame.midY + 0.125 * fullFrame.minY)
+    menu.addChild(highScore)
     let playButton = Button(forText: "Play", size: CGSize(width: 250, height: 75), fontName: "Kenney Future Narrow")
-    playButton.position = CGPoint(x: fullFrame.midX, y: 0.75 * fullFrame.midY + 0.25 * fullFrame.minY)
+    playButton.position = CGPoint(x: fullFrame.midX, y: 0.625 * fullFrame.midY + 0.375 * fullFrame.minY)
     playButton.action = { [unowned self] in self.startGame() }
     menu.addChild(playButton)
   }
@@ -76,6 +83,7 @@ class MenuScene: BasicScene {
     initSounds()
     Globals.gameConfig = loadGameConfig(forMode: "menu")
     Globals.gameConfig.currentWaveNumber = 1
+    highScore.text = "High Score: \(Globals.userData.highScore)"
     wait(for: 1) { self.spawnAsteroids() }
     gameStarting = false
     wait(for: 10) { self.spawnUFOs() }
