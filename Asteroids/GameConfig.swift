@@ -21,6 +21,7 @@ class WaveConfig: Decodable {
   var ufoShotSpeed: [CGFloat]? = nil
   var ufoMaxSpeed: [CGFloat]? = nil
   var asteroidSpeedBoost: CGFloat? = nil
+  var kamikazeAcceleration: CGFloat? = nil
 
   required init(waveNumber: Int) {
     self.waveNumber = waveNumber

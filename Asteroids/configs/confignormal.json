@@ -27,6 +27,7 @@
       "ufoShotSpeed": [300, 400],
       "ufoMeanShotTime": [4, 3],
       "ufoMaxSpeed": [200, 300]
+      "kamikazeAcceleration": 5
     },
     {
       "waveNumber": 3,

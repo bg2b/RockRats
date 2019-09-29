@@ -260,7 +260,7 @@ class GameScene: GameTutorialScene {
   func maybeSpawnUFO() {
     guard player.parent != nil else { return }
     guard ufos.count < Globals.gameConfig.value(for: \.maxUFOs) else { return }
-    spawnUFO(ufo: UFO(brothersKilled: ufosToAvenge))
+    spawnUFO(ufo: KamikazeUFO(brothersKilled: ufosToAvenge))
     if ufos.count == 2 {
       reportAchievement(achievement: .doubleTrouble)
     }

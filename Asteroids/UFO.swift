@@ -236,3 +236,132 @@ class UFO: SKNode {
 
   var size: CGSize { return ufoTexture.size() }
 }
+
+
+class KamikazeUFO: SKNode {
+  let ufoTexture: SKTexture
+  let turningSpeed: CGFloat
+  var engineSounds: SKAudioNode?
+  let warpTime = 0.5
+  let warpOutShader: SKShader
+
+  required init(brothersKilled: Int, withSounds: Bool = true) {
+    ufoTexture = Globals.textureCache.findTexture(imageNamed: "ufo_blue")
+    if withSounds {
+      let engineSounds = Globals.sounds.audioNodeFor(.ufoEnginesBig)
+      engineSounds.autoplayLooped = true
+      engineSounds.run(SKAction.changeVolume(to: 0.5, duration: 0))
+      Globals.sounds.addChild(engineSounds)
+      self.engineSounds = engineSounds
+    } else {
+      self.engineSounds = nil
+    }
+    let revengeFactor = max(brothersKilled - 3, 0)
+    turningSpeed = CGFloat(Globals.gameConfig.value(for: \.kamikazeAcceleration) * log(CGFloat(revengeFactor)))
+    // When delayOfFirstShot is nonnegative, it means that the UFO hasn't gotten on
+    // to the screen yet.  When it appears, we schedule an action after that delay to
+    // enable firing.  When revenge factor starts increasing, the UFOs start shooting
+    // faster, getting much quicker on the draw initially, and being much more
+    // accurate in their shooting.
+    warpOutShader = fanFoldShader(forTexture: ufoTexture, warpTime: warpTime)
+    super.init()
+    name = "ufo"
+    let ufo = SKSpriteNode(texture: ufoTexture)
+    ufo.name = "ufoImage"
+    addChild(ufo)
+    let body = SKPhysicsBody(circleOfRadius: 0.5 * ufoTexture.size().width)
+    body.mass = 1
+    body.categoryBitMask = ObjectCategories.ufo.rawValue
+    body.collisionBitMask = 0
+    body.contactTestBitMask = setOf([.asteroid, .player, .playerShot])
+    body.linearDamping = 0
+    body.angularDamping = 0
+    body.restitution = 0.9
+    body.isOnScreen = false
+    // Don't move initially; GameScene will launch us after positioning us at an appropriate spot.
+    body.isDynamic = false
+    body.angularVelocity = .pi * 2
+    physicsBody = body
+  }
+  
+  required init(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented by UFO")
+  }
+
+  func fly(player: Ship?, playfield: Playfield, addLaser: ((CGFloat, CGPoint, CGFloat) -> Void)) {
+    guard parent != nil else { return }
+    let bounds = playfield.bounds
+    let body = requiredPhysicsBody()
+    guard body.isOnScreen else { return }
+    let a = atan2(position.y - player!.position.y, position.x - player!.position.x)
+    body.applyForce(CGVector(dx: turningSpeed * cos(a), dy: turningSpeed * sin(a)))
+    if Int.random(in: 0...100) == 0 {
+      body.angularVelocity = copysign(.pi * 2, -body.angularVelocity)
+    }
+    let ourRadius = 0.5 * size.diagonal()
+    let forceScale = Globals.gameConfig.value(for: \.ufoDodging) * 1000
+    let shotAnticipation = Globals.gameConfig.value(for: \.ufoShotAnticipation)
+    var totalForce = CGVector.zero
+    let interesting = (shotAnticipation > 0 ?
+      setOf([.asteroid, .playerShot]) :
+      setOf([.asteroid]))
+    // By default, shoot at the player.  If there's an asteroid that's notably closer
+    // though, shoot that instead.  In addition to the revenge factor increase in UFO
+    // danger, that helps ensure that the player can't sit around and farm UFOs for
+    // points forever.
+    let interestingDistance = 0.33 * min(bounds.width, bounds.height)
+    for node in playfield.children {
+      // Be sure not to consider off-screen things.  That happens if the last asteroid is
+      // destroyed while the UFO is flying around and a new wave spawns.
+      guard let body = node.physicsBody, body.isOnScreen else { continue }
+      if body.isOneOf(interesting) {
+        var r = wrappedDisplacement(direct: node.position - position, bounds: bounds)
+        if body.isA(.playerShot) {
+          // Shots travel fast, so emphasize dodging to the side.  We do this by projecting out
+          // some of the displacement along the direction of the shot.
+          let vhat = body.velocity.scale(by: 1 / body.velocity.norm2())
+          r = r - r.project(unitVector: vhat).scale(by: shotAnticipation)
+        }
+        var d = r.norm2()
+        // Ignore stuff that's too far away
+        guard d <= interestingDistance else { continue }
+        var objectRadius = CGFloat(0)
+        if body.isA(.asteroid) {
+          objectRadius = 0.5 * (node as! SKSpriteNode).size.diagonal()
+        }
+        d -= ourRadius + objectRadius
+        // Limit the force so that we don't poke the UFO by an enormous amount
+        let dmin = CGFloat(20)
+        let dlim = 0.5 * (sqrt((d - dmin) * (d - dmin) + dmin) + d)
+        totalForce = totalForce + r.scale(by: -forceScale / (dlim * dlim))
+      }
+    }
+    body.applyForce(totalForce)
+  }
+
+  func cleanup() {
+    engineSounds?.removeFromParent()
+    removeAllActions()
+    removeFromParent()
+  }
+
+  func warpOut() -> [SKNode] {
+    let effect = SKSpriteNode(texture: ufoTexture)
+    effect.position = position
+    effect.zRotation = zRotation
+    effect.shader = warpOutShader
+    setStartTimeAttrib(effect)
+    effect.run(SKAction.sequence([SKAction.wait(forDuration: warpTime), SKAction.removeFromParent()]))
+    let star = starBlink(at: position, throughAngle: -.pi, duration: 2 * warpTime)
+    cleanup()
+    return [effect, star]
+  }
+  
+  func explode() -> [SKNode] {
+    let velocity = physicsBody!.velocity
+    cleanup()
+    return makeExplosion(texture: ufoTexture, angle: zRotation, velocity: velocity, at: position, duration: 2)
+  }
+
+  var size: CGSize { return ufoTexture.size() }
+}
