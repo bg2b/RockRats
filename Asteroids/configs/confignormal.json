@@ -16,7 +16,7 @@
   "waveConfigs": [
     {
       "waveNumber": 1,
-      "meanUFOTime": 20,
+      "meanUFOTime": 5,
       "smallUFOChance": 0,
       "maxUFOs": 1,
       "ufoDodging": 2,
@@ -26,8 +26,8 @@
       "asteroidSpeedBoost": 1.1,
       "ufoShotSpeed": [300, 400],
       "ufoMeanShotTime": [4, 3],
-      "ufoMaxSpeed": [200, 300]
-      "kamikazeAcceleration": 5
+      "ufoMaxSpeed": [200, 300],
+      "kamikazeAcceleration": 0.2
     },
     {
       "waveNumber": 3,
