@@ -213,64 +213,6 @@ class GameScene: GameTutorialScene {
     }
   }
 
-  func fireLaser() {
-    guard player.canShoot(), energyBar.useEnergy(3) else { return }
-    let laser = Globals.spriteCache.findSprite(imageNamed: "lasersmall_green") { sprite in
-      guard let texture = sprite.texture else { fatalError("Where is the laser texture?") }
-      // Physics body is just a little circle at the front end of the laser, since
-      // that's likely to be the first and only thing that will hit an object anyway.
-      let ht = texture.size().height
-      let body = SKPhysicsBody(circleOfRadius: 0.5 * ht,
-                               center: CGPoint(x: 0.5 * (texture.size().width - ht), y: 0))
-      body.allowsRotation = false
-      body.linearDamping = 0
-      body.categoryBitMask = ObjectCategories.playerShot.rawValue
-      body.collisionBitMask = 0
-      body.contactTestBitMask = setOf([.asteroid, .ufo])
-      sprite.physicsBody = body
-      sprite.zPosition = -1
-    }
-    laser.wait(for: 0.9) { self.removeLaser(laser) }
-    playfield.addWithScaling(laser)
-    player.shoot(laser: laser)
-    Globals.sounds.soundEffect(.playerShot, at: player.position)
-  }
-
-  func removeLaser(_ laser: SKSpriteNode) {
-    assert(laser.name == "lasersmall_green")
-    laser.removeAllActions()
-    recycleSprite(laser)
-    player.laserDestroyed()
-  }
-
-  func setFutureFilter(enabled: Bool) {
-    shouldEnableEffects = enabled && (shader != nil)
-  }
-  
-  func hyperspaceJump() {
-    guard player.canJump(), energyBar.useEnergy(40) else { return }
-    let backToTheFuture = (score % 100 == 79)
-    let effects = player.warpOut()
-    playfield.addWithScaling(effects[0])
-    playfield.addWithScaling(effects[1])
-    Globals.sounds.soundEffect(.warpOut, at: player.position)
-    let jumpRegion = gameFrame.insetBy(dx: 0.05 * gameFrame.width, dy: 0.05 * gameFrame.height)
-    let jumpPosition = CGPoint(x: .random(in: jumpRegion.minX...jumpRegion.maxX),
-                               y: .random(in: jumpRegion.minY...jumpRegion.maxY))
-    wait(for: 1) {
-      if backToTheFuture {
-        self.setFutureFilter(enabled: true)
-        self.player.setAppearance(to: .retro)
-        reportAchievement(achievement: .backToTheFuture)
-      } else {
-        self.player.setAppearance(to: .modern)
-        self.setFutureFilter(enabled: false)
-      }
-      Globals.sounds.soundEffect(.warpIn, at: jumpPosition)
-      self.player.warpIn(to: jumpPosition, atAngle: .random(in: 0 ... 2 * .pi), addTo: self.playfield)
-    }
-  }
-
   func asteroidPoints(_ asteroid: SKNode) -> Int {
     guard let name = asteroid.name else { fatalError("Asteroid should have a name") }
     if name.contains("small") { return 20 }

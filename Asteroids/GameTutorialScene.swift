@@ -153,7 +153,7 @@ class GameTutorialScene: BasicScene {
     laser.wait(for: 0.9) { self.removeLaser(laser) }
     playfield.addWithScaling(laser)
     player.shoot(laser: laser)
-    Globals.sounds.soundEffect(.playerShot)
+    Globals.sounds.soundEffect(.playerShot, at: player.position)
   }
 
   func removeLaser(_ laser: SKSpriteNode) {
@@ -186,7 +186,7 @@ class GameTutorialScene: BasicScene {
         self.player.setAppearance(to: .modern)
         self.setFutureFilter(enabled: false)
       }
-      Globals.sounds.soundEffect(.warpIn)
+      Globals.sounds.soundEffect(.warpIn, at: jumpPosition)
       self.player.warpIn(to: jumpPosition, atAngle: .random(in: 0 ... 2 * .pi), addTo: self.playfield)
     }
   }
