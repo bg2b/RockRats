@@ -9,32 +9,40 @@
 import SpriteKit
 
 class Button: SKNode {
-  let child: SKNode
   let border: SKShapeNode
   var enabled = true
-  var clicked = false
+  var clickTouch: UITouch? = nil
   var action: (() -> Void)? = nil
 
-  required init(withChild child: SKNode, border: SKShapeNode) {
-    self.child = child
-    self.border = border
-    super.init()
-    name = "button"
-    addChild(child)
-    isUserInteractionEnabled = true
-  }
-
-  convenience init(forText text: String, size: CGSize, fontName: String) {
-    let buttonShape = SKNode()
-    buttonShape.name = "buttonShape"
-    let buttonBorder = SKShapeNode(rectOf: size, cornerRadius: 0.1 * min(size.width, size.height  / 0.9))
+  init(around label: SKLabelNode, minSize: CGSize, extraLeft: CGFloat = 0) {
+    // This one is for managing the label separately.  For example during the
+    // tutorial we show some instructions using a type-in effect, and that requires
+    // more label gymnastics than we deal with here.  Note that the label is not a
+    // child of the button.  If you're going to move the label, the border showing
+    // the button doesn't move along with it.  And once you've made the button, the
+    // border size is fixed.  If you want to change the text, you'll probably need to
+    // throw the button away and make a new one.
+    let labelSize = label.frame.size
+    let padding = CGFloat(20)
+    let size = CGSize(width: max(labelSize.width + padding + extraLeft, minSize.width), height: max(labelSize.height + padding, minSize.height))
+    let buttonBorder = SKShapeNode(rectOf: size, cornerRadius: 0.5 * padding)
     buttonBorder.name = "buttonBorder"
     buttonBorder.fillColor = .clear
     buttonBorder.strokeColor = AppColors.green
     buttonBorder.lineWidth = 2
     buttonBorder.glowWidth = 1
     buttonBorder.isAntialiased = true
-    buttonShape.addChild(buttonBorder)
+    buttonBorder.position = CGPoint(x: -extraLeft, y: 0)
+    self.border = buttonBorder
+    super.init()
+    addChild(buttonBorder)
+    name = "button"
+    isUserInteractionEnabled = true
+  }
+
+  convenience init(forText text: String, size: CGSize, fontName: String) {
+    // The size here means minWidth x fontSize.  The actual button will probably be a
+    // bit taller because of padding, but maybe not depending on the font?
     let label = SKLabelNode(text: text)
     label.name = "buttonText"
     label.fontName = fontName
@@ -42,8 +50,8 @@ class Button: SKNode {
     label.fontColor = AppColors.textColor
     label.horizontalAlignmentMode = .center
     label.verticalAlignmentMode = .center
-    buttonShape.addChild(label)
-    self.init(withChild: buttonShape, border: buttonBorder)
+    self.init(around: label, minSize: size)
+    addChild(label)
   }
 
   required init(coder aDecoder: NSCoder) {
@@ -52,31 +60,49 @@ class Button: SKNode {
 
   func enable() {
     enabled = true
-    alpha = 1.0
   }
 
   func disable() {
     enabled = false
-    alpha = 0.5
   }
 
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-    clicked = true
-    border.glowWidth = 3
+    guard enabled else { return }
+    for touch in touches {
+      if clickTouch == nil {
+        clickTouch = touch
+        border.glowWidth = 3
+      }
+    }
   }
 
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+    for touch in touches {
+      guard touch == clickTouch else { continue }
+      if border.frame.contains(touch.location(in: self)) {
+        border.glowWidth = 3
+      } else {
+        border.glowWidth = 1
+      }
+    }
   }
 
   override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-    guard let _ = touches.first else { return }
-    if enabled && clicked {
-      action?()
+    for touch in touches {
+      guard touch == clickTouch else { continue }
+      if border.frame.contains(touch.location(in: self)), enabled {
+        action?()
+      }
       border.glowWidth = 1
-      clicked = false
+      clickTouch = nil
     }
   }
 
   override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+    for touch in touches {
+      guard touch == clickTouch else { continue }
+      clickTouch = nil
+      border.glowWidth = 1
+    }
   }
 }

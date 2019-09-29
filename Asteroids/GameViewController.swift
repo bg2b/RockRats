@@ -12,6 +12,22 @@ import SpriteKit
 class GameViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
+    /*
+    let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+    let file = directory.appendingPathComponent("ourdata.txt")
+    do {
+      try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+      try "hello world".write(to: file, atomically: true, encoding: String.Encoding.utf8)
+    } catch {
+      print(error)
+    }
+    do {
+      let contents = try String(contentsOf: file)
+      print(contents)
+    } catch {
+      print(error)
+    }
+     */
     if let lang = Locale.preferredLanguages.first {
       logging("Preferred language \(lang)")
     }
@@ -25,9 +41,10 @@ class GameViewController: UIViewController {
       let size = CGSize(width: 768 * aspect, height: 768)
       Globals.gameScene = GameScene(size: size)
       Globals.menuScene = MenuScene(size: size)
+      Globals.tutorialScene = TutorialScene(size: size)
       let introScene = IntroScene(size: size)
       logging("viewDidLoad will present \(introScene.name!)")
-      view.presentScene(introScene)
+      view.presentScene(Globals.menuScene)
       view.preferredFramesPerSecond = 120
       view.ignoresSiblingOrder = true
       view.showsFPS = true
@@ -67,4 +84,5 @@ extension Globals {
   static var ptsToGameUnits = CGFloat(1)
   static var menuScene: MenuScene!
   static var gameScene: GameScene!
+  static var tutorialScene: TutorialScene!
 }
