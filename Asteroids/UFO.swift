@@ -42,19 +42,24 @@ func wrappedDisplacement(direct: CGVector, bounds: CGRect) -> CGVector {
 
 class UFO: SKNode {
   let isBig: Bool
+  let isKamikaze: Bool
   let ufoTexture: SKTexture
   var currentSpeed: CGFloat
   var engineSounds: AVAudioPlayer?
   let meanShotTime: Double
   var delayOfFirstShot: Double
-  var shootingEnabled = false
+  var attackEnabled = false
   var shotAccuracy: CGFloat
+  var kamikazeAcceleration: CGFloat
   let warpTime = 0.5
   let warpOutShader: SKShader
 
   required init(brothersKilled: Int, withSounds: Bool = true) {
-    isBig = .random(in: 0...1) >= Globals.gameConfig.value(for: \.smallUFOChance)
-    ufoTexture = Globals.textureCache.findTexture(imageNamed: isBig ? "ufo_green" : "ufo_red")
+    let typeChoice = Double.random(in: 0...1)
+    let chances = Globals.gameConfig.value(for: \.ufoChances)
+    isBig = typeChoice <= chances[0] + chances[1]
+    isKamikaze = isBig && typeChoice > chances[0]
+    ufoTexture = Globals.textureCache.findTexture(imageNamed: isBig ? (isKamikaze ? "ufo_blue" : "ufo_green") : "ufo_red")
     if withSounds {
       let engineSounds = Globals.sounds.audioPlayerFor(isBig ? .ufoEnginesBig : .ufoEnginesSmall)
       engineSounds.numberOfLoops = -1
@@ -75,6 +80,7 @@ class UFO: SKNode {
     meanShotTime = Globals.gameConfig.value(for: \.ufoMeanShotTime)[isBig ? 0 : 1] * pow(0.75, Double(revengeFactor))
     delayOfFirstShot = Double.random(in: 0 ... meanShotTime * pow(0.75, Double(revengeFactor)))
     shotAccuracy = Globals.gameConfig.value(for: \.ufoAccuracy)[isBig ? 0 : 1] * pow(0.75, CGFloat(revengeFactor))
+    kamikazeAcceleration = Globals.gameConfig.value(for: \.kamikazeAcceleration) * pow(1.25, CGFloat(revengeFactor))
     warpOutShader = fanFoldShader(forTexture: ufoTexture, warpTime: warpTime)
     super.init()
     name = "ufo"
@@ -109,13 +115,17 @@ class UFO: SKNode {
     let body = requiredPhysicsBody()
     guard body.isOnScreen else { return }
     if delayOfFirstShot >= 0 {
-      // Just moved onto the screen, enable shooting after a delay
-      wait(for: delayOfFirstShot) { [unowned self] in self.shootingEnabled = true }
+      // Just moved onto the screen, enable shooting after a delay.
+      // Kamikazes never shoot, but we use the same mechanism to turn off
+      // their homing behavior initially.
+      wait(for: delayOfFirstShot) { [unowned self] in self.attackEnabled = true }
       delayOfFirstShot = -1
     }
     let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[isBig ? 0 : 1]
     if Int.random(in: 0...100) == 0 {
-      currentSpeed = .random(in: 0.3 * maxSpeed ... maxSpeed)
+      if !isKamikaze {
+        currentSpeed = .random(in: 0.3 * maxSpeed ... maxSpeed)
+      }
       body.angularVelocity = copysign(.pi * 2, -body.angularVelocity)
     }
     let ourRadius = 0.5 * size.diagonal()
@@ -138,9 +148,6 @@ class UFO: SKNode {
       // destroyed while the UFO is flying around and a new wave spawns.
       guard let body = node.physicsBody, body.isOnScreen else { continue }
       if body.isOneOf(interesting) {
-        // This can maybe be done better.  We need to think about how to do the
-        // different cases more fluidly rather than in one big loop with a bunch of
-        // conditionals for the different types.
         var r = wrappedDisplacement(direct: node.position - position, bounds: bounds)
         if body.isA(.playerShot) {
           // Shots travel fast, so emphasize dodging to the side.  We do this by projecting out
@@ -149,6 +156,14 @@ class UFO: SKNode {
           r = r - r.project(unitVector: vhat).scale(by: shotAnticipation)
         }
         var d = r.norm2()
+        if isKamikaze && body.isA(.player) {
+          // Kamikazes are alway attracted to the player no matter where they are, but we'll
+          // give an initial delay using the same first-shot mechanism before this kicks in.
+          if attackEnabled {
+            totalForce = totalForce + r.scale(by: kamikazeAcceleration * 1000 / d)
+          }
+          continue
+        }
         // Ignore stuff that's too far away
         guard d <= interestingDistance else { continue }
         var objectRadius = CGFloat(0)
@@ -170,22 +185,26 @@ class UFO: SKNode {
       }
     }
     body.applyForce(totalForce)
-    if body.velocity.norm2() > currentSpeed {
-      body.velocity = body.velocity.scale(by: 0.95)
-    }
-    else if body.velocity.norm2() < currentSpeed {
-      body.velocity = body.velocity.scale(by: 1.05)
+    // Regular UFOs have a desired cruising speed
+    if !isKamikaze {
+      if body.velocity.norm2() > currentSpeed {
+        body.velocity = body.velocity.scale(by: 0.95)
+      }
+      else if body.velocity.norm2() < currentSpeed {
+        body.velocity = body.velocity.scale(by: 1.05)
+      }
     }
     if body.velocity.norm2() > maxSpeed {
       body.velocity = body.velocity.scale(by: maxSpeed / body.velocity.norm2())
     }
+    guard !isKamikaze else { return }
     if playerDistance < 1.5 * targetDistance || (player?.parent != nil && Int.random(in: 0..<100) >= 25) {
       // Override closest-object targetting if the player is about at the same
       // distance.  Also bias towards randomly shooting at the player even if they're
       // pretty far.
       potentialTarget = player
     }
-    guard let target = potentialTarget, shootingEnabled else { return }
+    guard let target = potentialTarget, attackEnabled else { return }
     let shotSpeed = Globals.gameConfig.value(for: \.ufoShotSpeed)[isBig ? 0 : 1]
     let useBounds = Globals.gameConfig.value(for: \.ufoShotWrapping)
     guard var angle = aimAt(target, shotSpeed: shotSpeed, bounds: useBounds ? bounds : nil) else { return }
@@ -199,8 +218,8 @@ class UFO: SKNode {
     let shotDirection = CGVector(angle: angle)
     let shotPosition = position + shotDirection.scale(by: 0.5 * ufoTexture.size().width)
     addLaser(angle, shotPosition, shotSpeed)
-    shootingEnabled = false
-    wait(for: .random(in: 0.5 * meanShotTime ... 1.5 * meanShotTime)) { [unowned self] in self.shootingEnabled = true }
+    attackEnabled = false
+    wait(for: .random(in: 0.5 * meanShotTime ... 1.5 * meanShotTime)) { [unowned self] in self.attackEnabled = true }
   }
 
   func cleanup() {
