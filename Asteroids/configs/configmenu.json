@@ -17,7 +17,7 @@
     {
       "waveNumber": 1,
       "meanUFOTime": 20,
-      "smallUFOChance": 0.5,
+      "ufoChances": [0.5, 0, 0.5],
       "maxUFOs": 1,
       "ufoDodging": 4,
       "ufoShotAnticipation": 0,
@@ -26,7 +26,8 @@
       "asteroidSpeedBoost": 1.1,
       "ufoShotSpeed": [300, 400],
       "ufoMeanShotTime": [1, 1],
-      "ufoMaxSpeed": [200, 300]
+      "ufoMaxSpeed": [200, 300],
+      "kamikazeAcceleration": 0.1
     }
   ]
 }

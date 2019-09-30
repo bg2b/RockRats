@@ -54,8 +54,10 @@ class UFO: SKNode {
   let warpOutShader: SKShader
 
   required init(brothersKilled: Int, withSounds: Bool = true) {
-    isBig = .random(in: 0...1) >= Globals.gameConfig.value(for: \.smallUFOChance)
-    isKamikaze = isBig && .random(in: 0...1) >= 0.5
+    let typeChoice = Double.random(in: 0...1)
+    let chances = Globals.gameConfig.value(for: \.ufoChances)
+    isBig = typeChoice <= chances[0] + chances[1]
+    isKamikaze = isBig && typeChoice > chances[0]
     ufoTexture = Globals.textureCache.findTexture(imageNamed: isBig ? (isKamikaze ? "ufo_blue" : "ufo_green") : "ufo_red")
     if withSounds {
       let engineSounds = Globals.sounds.audioNodeFor(isBig ? .ufoEnginesBig : .ufoEnginesSmall)

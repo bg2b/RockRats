@@ -16,8 +16,8 @@
   "waveConfigs": [
     {
       "waveNumber": 1,
-      "meanUFOTime": 5,
-      "smallUFOChance": 0,
+      "meanUFOTime": 20,
+      "ufoChances": [1, 0, 0],
       "maxUFOs": 1,
       "ufoDodging": 2,
       "ufoShotAnticipation": 0,
@@ -27,49 +27,54 @@
       "ufoShotSpeed": [300, 400],
       "ufoMeanShotTime": [4, 3],
       "ufoMaxSpeed": [200, 300],
-      "kamikazeAcceleration": 0.2
+      "kamikazeAcceleration": 0.1
     },
     {
       "waveNumber": 3,
       "ufoDodging": 4,
       "ufoShotAnticipation": 0,
-      "smallUFOChance": 0.25,
+      "ufoChances": [0.75, 0.125, 0.125],
       "ufoAccuracy": [0.4, 0.2],
       "ufoMeanShotTime": [3, 2.25],
-      "asteroidSpeedBoost": 1.1
+      "asteroidSpeedBoost": 1.1,
+      "kamikazeAcceleration": 0.15
     },
     {
       "waveNumber": 5,
       "ufoDodging": 6,
       "ufoShotAnticipation": 0,
-      "smallUFOChance": 0.5,
+      "ufoChances": [0.5, 0.25, 0.25],
       "ufoAccuracy": [0.3, 0.2],
       "ufoMeanShotTime": [2, 1.5],
-      "asteroidSpeedBoost": 1.1
+      "asteroidSpeedBoost": 1.1,
+      "kamikazeAcceleration": 0.2
     },
     {
       "waveNumber": 7,
       "maxUFOs": 2,
       "ufoDodging": 8,
       "ufoShotAnticipation": 0.1,
-      "smallUFOChance": 0.75,
+      "ufoChances": [0.25, 0.325, 0.325],
       "ufoAccuracy": [0.2, 0.15],
       "ufoMeanShotTime": [1.5, 1.125],
-      "asteroidSpeedBoost": 1.15
+      "asteroidSpeedBoost": 1.15,
+      "kamikazeAcceleration": 0.25
     },
     {
       "waveNumber": 9,
       "ufoDodging": 11,
       "ufoShotAnticipation": 0.2,
-      "smallUFOChance": 1,
+      "ufoChances": [0, 0.5, 0.5],
       "ufoShotWrapping": true,
       "ufoAccuracy": [0.2, 0.15],
       "ufoMeanShotTime": [1, 0.75],
-      "asteroidSpeedBoost": 1.2
+      "asteroidSpeedBoost": 1.2,
+      "kamikazeAcceleration": 0.3
     },
     {
       "waveNumber": 10,
       "ufoDodging": 13,
+      "ufoChances": [0, 0.25, 0.75],
       "ufoShotAnticipation": 0.3,
       "ufoAccuracy": [0.2, 0.15],
       "asteroidSpeedBoost": 1.25
@@ -78,6 +83,7 @@
       "waveNumber": 11,
       "maxUFOs": 3,
       "ufoDodging": 15,
+      "ufoChances": [0, 0, 1],
       "ufoShotAnticipation": 0.4,
       "ufoAccuracy": [0.2, 0.1],
       "ufoMeanShotTime": [0.75, 0.5],

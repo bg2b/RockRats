@@ -11,7 +11,7 @@ import SpriteKit
 class WaveConfig: Decodable {
   let waveNumber: Int
   var meanUFOTime: Double? = nil
-  var smallUFOChance: Double? = nil
+  var ufoChances: [Double]? = nil
   var maxUFOs: Int? = nil
   var ufoDodging: CGFloat? = nil
   var ufoShotAnticipation: CGFloat? = nil
