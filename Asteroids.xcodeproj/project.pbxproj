@@ -63,6 +63,7 @@
 		FD53169222DC1A0600F09E57 /* lasersmall_green@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53168C22DC1A0500F09E57 /* lasersmall_green@2x.png */; };
 		FD53169322DC1A0600F09E57 /* lasersmall_red@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53168D22DC1A0500F09E57 /* lasersmall_red@2x.png */; };
 		FD537DD6231BE385003312B3 /* ufo_laser.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD537DD5231BE384003312B3 /* ufo_laser.wav */; };
+		FD6F23DE234357710083A913 /* ConvexHull.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD6F23DD234357710083A913 /* ConvexHull.swift */; };
 		FD79323622D20FE600E7D336 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD79323522D20FE600E7D336 /* AppDelegate.swift */; };
 		FD79323C22D20FE600E7D336 /* BasicScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD79323B22D20FE600E7D336 /* BasicScene.swift */; };
 		FD79323E22D20FE600E7D336 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD79323D22D20FE600E7D336 /* GameViewController.swift */; };
@@ -170,6 +171,7 @@
 		FD53168C22DC1A0500F09E57 /* lasersmall_green@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "lasersmall_green@2x.png"; sourceTree = "<group>"; };
 		FD53168D22DC1A0500F09E57 /* lasersmall_red@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "lasersmall_red@2x.png"; sourceTree = "<group>"; };
 		FD537DD5231BE384003312B3 /* ufo_laser.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo_laser.wav; sourceTree = "<group>"; };
+		FD6F23DD234357710083A913 /* ConvexHull.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConvexHull.swift; sourceTree = "<group>"; };
 		FD79323222D20FE600E7D336 /* Asteroids.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Asteroids.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD79323522D20FE600E7D336 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		FD79323B22D20FE600E7D336 /* BasicScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasicScene.swift; sourceTree = "<group>"; };
@@ -309,6 +311,7 @@
 				FDD8FB92232CF4FC00A83EB5 /* MenuScene.swift */,
 				FD46BD71231415B7008C1F99 /* Playfield.swift */,
 				FD53167422DB24EC00F09E57 /* Ship.swift */,
+				FD6F23DD234357710083A913 /* ConvexHull.swift */,
 				FD4D53C623080E7300718938 /* Sounds.swift */,
 				FDDF488622D2A700006FB86F /* SpriteCache.swift */,
 				FDE04B2C22D753240011A529 /* TextureCache.swift */,
@@ -527,6 +530,7 @@
 				FDD8FB93232CF4FC00A83EB5 /* MenuScene.swift in Sources */,
 				FDE04B2D22D753240011A529 /* TextureCache.swift in Sources */,
 				FD79323C22D20FE600E7D336 /* BasicScene.swift in Sources */,
+				FD6F23DE234357710083A913 /* ConvexHull.swift in Sources */,
 				FD3E02082333B1C20057A766 /* Logging.swift in Sources */,
 				FD79323E22D20FE600E7D336 /* GameViewController.swift in Sources */,
 				FDD44F95233787ED00C13609 /* IntroScene.swift in Sources */,

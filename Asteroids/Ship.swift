@@ -26,7 +26,7 @@ class ShipAppearanceAlternative {
     sprite.name = "shipImage"
     warpOutShader = swirlShader(forTexture: texture, inward: true, warpTime: warpTime)
     warpInShader = swirlShader(forTexture: texture, inward: false, warpTime: warpTime)
-    body = SKPhysicsBody(texture: texture, size: texture.size())
+    body = conformingPhysicsBody(texture: texture)
   }
 }
 
