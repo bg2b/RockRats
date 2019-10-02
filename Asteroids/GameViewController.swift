@@ -12,22 +12,6 @@ import SpriteKit
 class GameViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
-    /*
-    let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-    let file = directory.appendingPathComponent("ourdata.txt")
-    do {
-      try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-      try "hello world".write(to: file, atomically: true, encoding: String.Encoding.utf8)
-    } catch {
-      print(error)
-    }
-    do {
-      let contents = try String(contentsOf: file)
-      print(contents)
-    } catch {
-      print(error)
-    }
-     */
     if let lang = Locale.preferredLanguages.first {
       logging("Preferred language \(lang)")
     }

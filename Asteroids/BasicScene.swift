@@ -308,7 +308,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
       // circle.
       let body = (type == numTypes || size == "med" || size == "small" ?
         SKPhysicsBody(circleOfRadius: 0.5 * texture.size().width) :
-        SKPhysicsBody(texture: texture, size: texture.size()))
+        conformingPhysicsBody(texture: texture))
       body.angularDamping = 0
       body.linearDamping = 0
       body.categoryBitMask = ObjectCategories.asteroid.rawValue
