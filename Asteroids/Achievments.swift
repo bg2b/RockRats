@@ -29,6 +29,10 @@ enum Achievement: String {
   case bigBrother = "bigBrother"
   case whatAreTheOdds = "whatAreTheOdds"
   case keepOnTrekking = "keepOnTrekking"
+  case archer = "archer"
+  case sniper = "sniper"
+  case sharpshooter = "sharpshooter"
+  case hawkeye = "hawkeye"
 }
 
 func reportAchievement(achievement: Achievement) {
