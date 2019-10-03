@@ -150,7 +150,7 @@ class GameTutorialScene: BasicScene {
       sprite.physicsBody = body
       sprite.zPosition = -1
     }
-    laser.wait(for: 0.9) { self.removeLaser(laser) }
+    laser.wait(for: 0.9) { self.laserExpired(laser) }
     playfield.addWithScaling(laser)
     player.shoot(laser: laser)
     Globals.sounds.soundEffect(.playerShot, at: player.position)
@@ -161,6 +161,12 @@ class GameTutorialScene: BasicScene {
     laser.removeAllActions()
     recycleSprite(laser)
     player.laserDestroyed()
+  }
+  
+  func laserExpired(_ laser: SKSpriteNode) {
+    // Override this if special processing needs to happen when a laser gets
+    // removed without hitting anything.
+    removeLaser(laser)
   }
 
   func setFutureFilter(enabled: Bool) {

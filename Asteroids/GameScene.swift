@@ -34,6 +34,7 @@ class GameScene: GameTutorialScene {
   var livesRemaining = 0
   var extraLivesAwarded = 0
   var gameOver = false
+  var consecutiveHits = 0
 
   override func setPositionsOfInfoItems() {
     super.setPositionsOfInfoItems()
@@ -210,6 +211,7 @@ class GameScene: GameTutorialScene {
       Globals.sounds.soundEffect(.warpIn, at: spawnPosition)
       spawnUFOs()
       updateLives(-1)
+      consecutiveHits = 0
     }
   }
 
@@ -227,7 +229,30 @@ class GameScene: GameTutorialScene {
     return ufo.isBig ? 20 : 100
   }
 
+  override func laserExpired(_ laser: SKSpriteNode) {
+    consecutiveHits = 0
+    super.laserExpired(laser)
+  }
+  
+  func consecutiveHit() {
+    consecutiveHits += 1
+    switch consecutiveHits
+    {
+    case 10:
+      reportAchievement(achievement: .archer)
+    case 15:
+      reportAchievement(achievement: .sniper)
+    case 20:
+      reportAchievement(achievement: .sharpshooter)
+    case 30:
+      reportAchievement(achievement: .hawkeye)
+    default:
+      break
+    }
+  }
+  
   func laserHit(laser: SKNode, asteroid: SKNode) {
+    consecutiveHit()
     if !asteroid.requiredPhysicsBody().isOnScreen {
       reportAchievement(achievement: .quickFingers)
     }
@@ -239,6 +264,7 @@ class GameScene: GameTutorialScene {
   func laserHit(laser: SKNode, ufo: SKNode) {
     ufosToAvenge += 1
     ufosKilledWithoutDying += 1
+    consecutiveHit()
     if ufosKilledWithoutDying == 12 {
       reportAchievement(achievement: .armedAndDangerous)
     }
