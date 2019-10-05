@@ -69,32 +69,17 @@ class GameTutorialScene: BasicScene {
     touchesEnded(touches, with: event)
   }
 
-  func setPositionsOfInfoItems() {
-    livesDisplay.position = CGPoint(x: gameFrame.minX + 20, y: gameFrame.maxY - 20)
-    energyBar.position = CGPoint(x: gameFrame.maxX - 20, y: gameFrame.maxY - 20)
-    logging("\(name!) positions display items")
-    logging("livesDisplay at \(livesDisplay.position.x),\(livesDisplay.position.y)")
-    logging("energyBar at \(energyBar.position.x),\(energyBar.position.y)")
-  }
-
-  override func setPositionsForSafeArea() {
-    super.setPositionsForSafeArea()
-    let midX = 0.5 * (safeAreaLeft - safeAreaRight)
-    logging("\(name!) repositions gameArea to \(midX),0 for new safe area")
-    gameArea.position = CGPoint(x: midX, y: 0)
-    setPositionsOfInfoItems()
-  }
-
   func initInfo() {
     let info = SKNode()
     info.name = "info"
     info.zPosition = LevelZs.info.rawValue
     gameArea.addChild(info)
     livesDisplay = LivesDisplay(extraColor: AppColors.textColor)
+    livesDisplay.position = CGPoint(x: gameFrame.minX + 20, y: gameFrame.maxY - 20)
     info.addChild(livesDisplay)
     energyBar = EnergyBar(maxLength: 20)
     info.addChild(energyBar)
-    setPositionsOfInfoItems()
+    energyBar.position = CGPoint(x: gameFrame.maxX - 20, y: gameFrame.maxY - 20)
   }
 
   func isSafe(point: CGPoint, pathStart: CGPoint, pathEnd: CGPoint, clearance: CGFloat) -> Bool {
@@ -210,10 +195,10 @@ class GameTutorialScene: BasicScene {
   required init(size: CGSize) {
     super.init(size: size)
     name = "gameTutorialScene"
-    initGameArea(limitAspectRatio: true)
+    initGameArea(avoidSafeArea: true)
     initInfo()
     initControls()
-    setSafeArea(left: Globals.safeAreaPaddingLeft, right: Globals.safeAreaPaddingRight)
+//    setSafeArea(left: Globals.safeAreaPaddingLeft, right: Globals.safeAreaPaddingRight)
     physicsWorld.contactDelegate = self
   }
 

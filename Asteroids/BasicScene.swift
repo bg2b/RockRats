@@ -86,8 +86,6 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   var gameFrame: CGRect!
   var gameArea = SKCropNode()
   var playfield: Playfield!
-  var safeAreaLeft = CGFloat(0.0)
-  var safeAreaRight = CGFloat(0.0)
   var asteroids = Set<SKSpriteNode>()
   var ufos = Set<UFO>()
 
@@ -196,51 +194,25 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     gameArea.addChild(playfield)
   }
 
-  func setPositionsForSafeArea() {
-    // Subclasses that need to do something when the safe area changes should
-    // override this.
-    logging("setPositionsForSafeArea called")
-  }
-
-  func maybeResizeGameFrame() {
-    // This is used to set the gameFrame in response to notifications about the safe
-    // area.
-    guard safeAreaLeft != 0 || safeAreaRight != 0 else {
-      gameFrame = fullFrame
-      gameArea.maskNode = nil
-      return
+  func initGameArea(avoidSafeArea: Bool, maxAspectRatio: CGFloat = .infinity) {
+    var width = size.width
+    if avoidSafeArea {
+      width -= Globals.safeAreaPaddingLeft
+      width -= Globals.safeAreaPaddingRight
     }
-    let gameAreaWidth = size.width - (safeAreaLeft + safeAreaRight)
-    logging("maybeResizeGameFrame using width \(gameAreaWidth)")
-    gameFrame = CGRect(x: -0.5 * gameAreaWidth, y: -0.5 * size.height, width: gameAreaWidth, height: size.height)
-    let mask = SKShapeNode(rect: gameFrame)
-    mask.fillColor = .white
-    mask.strokeColor = .clear
-    gameArea.maskNode = mask
-  }
-
-  func setSafeArea(left: CGFloat, right: CGFloat) {
-    logging("setSafeArea called with \(left) and \(right)")
-    safeAreaLeft = left
-    safeAreaRight = right
-    maybeResizeGameFrame()
-    if let playfield = playfield {
-      playfield.setBounds(to: gameFrame)
+    if width / size.height > maxAspectRatio {
+      width = size.height * maxAspectRatio
     }
-    setPositionsForSafeArea()
-  }
-
-  func initGameArea(limitAspectRatio: Bool) {
-    let aspect = size.width / size.height
-    if aspect < 1.6 || !limitAspectRatio {
-      // Playfield will fill the complete frame.
-      gameFrame = fullFrame
-    } else {
-      // This is probably a phone.  We may want to limit the aspect ratio, but even
-      // if not there might be a nontrivial safe area.
-      maybeResizeGameFrame()
-    }
+    gameFrame = CGRect(x: -0.5 * width, y: -0.5 * size.height, width: width, height: size.height)
     gameArea.name = "gameArea"
+    if gameFrame.width == fullFrame.width {
+      gameArea.maskNode = nil
+    } else {
+      let mask = SKShapeNode(rect: gameFrame)
+      mask.fillColor = .white
+      mask.strokeColor = .clear
+      gameArea.maskNode = mask
+    }
     addChild(gameArea)
     initBackground()
     initStars()

@@ -121,7 +121,7 @@ class IntroScene: BasicScene {
   required init(size: CGSize) {
     super.init(size: size)
     name = "introScene"
-    initGameArea(limitAspectRatio: false)
+    initGameArea(avoidSafeArea: false)
     initIntro()
   }
 

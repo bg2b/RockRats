@@ -40,20 +40,9 @@ class GameScene: GameTutorialScene {
   var gameOver = false
   var consecutiveHits = 0
 
-  override func setPositionsOfInfoItems() {
-    super.setPositionsOfInfoItems()
-    scoreDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.maxY - 50)
-    centralDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.midY)
-    logging("\(name!) positions display items")
-    logging("scoreDisplay at \(scoreDisplay.position.x),\(scoreDisplay.position.y)")
-    logging("centralDisplay at \(centralDisplay.position.x),\(centralDisplay.position.y)")
-    pauseButton.position = CGPoint(x: gameFrame.minX + pauseButton.size.width / 2 + 10,
-                                   y: livesDisplay.position.y - pauseButton.size.height / 2 - 20)
-    continueButton.position = pauseButton.position
-    quitButton.position = CGPoint(x: gameFrame.maxX - quitButton.size.width / 2 - 10, y: pauseButton.position.y)
-  }
-
   override func initInfo() {
+    super.initInfo()
+    // Score and central display
     let moreInfo = SKNode()
     moreInfo.name = "moreInfo"
     moreInfo.zPosition = LevelZs.info.rawValue
@@ -63,6 +52,7 @@ class GameScene: GameTutorialScene {
     scoreDisplay.fontColor = AppColors.textColor
     scoreDisplay.text = "0"
     scoreDisplay.name = "score"
+    scoreDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.maxY - 50)
     moreInfo.addChild(scoreDisplay)
     centralDisplay = SKLabelNode(fontNamed: "Kenney Future")
     centralDisplay.fontSize = 100
@@ -71,8 +61,9 @@ class GameScene: GameTutorialScene {
     centralDisplay.name = "centralDisplay"
     centralDisplay.isHidden = true
     centralDisplay.verticalAlignmentMode = .center
+    centralDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.midY)
     moreInfo.addChild(centralDisplay)
-
+    // Pause, resume, and quit controls
     let pauseControls = SKNode()
     addChild(pauseControls)
     pauseControls.name = "pauseControls"
@@ -81,12 +72,15 @@ class GameScene: GameTutorialScene {
     pauseButton = TouchableSprite(texture: pauseTexture, size: pauseTexture.size())
     pauseButton.action = { [unowned self] in self.doPause() }
     pauseButton.alpha = 0.1
+    pauseButton.position = CGPoint(x: gameFrame.minX + pauseButton.size.width / 2 + 10,
+                                   y: livesDisplay.position.y - pauseButton.size.height / 2 - 20)
     pauseControls.addChild(pauseButton)
     let continueTexture = Globals.textureCache.findTexture(imageNamed: "continue")
     continueButton = TouchableSprite(texture: continueTexture, size: continueTexture.size())
     continueButton.action = { [unowned self] in self.doContinue() }
     continueButton.color = AppColors.green
     continueButton.colorBlendFactor = 1
+    continueButton.position = pauseButton.position
     continueButton.isHidden = true
     pauseControls.addChild(continueButton)
     let quitTexture = Globals.textureCache.findTexture(imageNamed: "quit")
@@ -94,11 +88,9 @@ class GameScene: GameTutorialScene {
     quitButton.action = { [unowned self] in self.doQuit() }
     quitButton.color = AppColors.red
     quitButton.colorBlendFactor = 1
+    quitButton.position = CGPoint(x: gameFrame.maxX - quitButton.size.width / 2 - 10, y: pauseButton.position.y)
     quitButton.isHidden = true
     pauseControls.addChild(quitButton)
-
-    super.initInfo()
-    //setPositionsOfInfoItems()
   }
 
   func doPause() {
