@@ -91,18 +91,6 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   var asteroids = Set<SKSpriteNode>()
   var ufos = Set<UFO>()
 
-  func makeSprite(imageNamed name: String, initializer: ((SKSpriteNode) -> Void)? = nil) -> SKSpriteNode {
-    return Globals.spriteCache.findSprite(imageNamed: name, initializer: initializer)
-  }
-
-  func recycleSprite(_ sprite: SKSpriteNode) {
-    // Speed may have been altered by the slow-motion effect in the playfield.  Be
-    // sure that when we give back the recycled sprite for a new object that the
-    // speed is reset to the default 1.
-    sprite.speed = 1
-    Globals.spriteCache.recycleSprite(sprite)
-  }
-
   func tilingShader(forTexture texture: SKTexture) -> SKShader {
     // Do not to assume that the texture has v_tex_coord ranging in (0, 0) to (1, 1)!
     // If the texture is part of a texture atlas, this is not true.  Since we only
@@ -288,8 +276,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   
   func removeUFOLaser(_ laser: SKSpriteNode) {
     assert(laser.name == "lasersmall_red")
-    laser.removeAllActions()
-    recycleSprite(laser)
+    Globals.spriteCache.recycleSprite(laser)
   }
   
   func makeAsteroid(position pos: CGPoint, size: String, velocity: CGVector, onScreen: Bool) {
@@ -373,16 +360,15 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func removeAsteroid(_ asteroid: SKSpriteNode) {
-    recycleSprite(asteroid)
+    Globals.spriteCache.recycleSprite(asteroid)
     asteroids.remove(asteroid)
     asteroidRemoved()
   }
 
   func clearPlayfield() {
-    // For clearing out the playfield when starting a new game
     asteroids.forEach {
       $0.removeFromParent()
-      recycleSprite($0)
+      Globals.spriteCache.recycleSprite($0)
     }
     asteroids.removeAll()
     ufos.removeAll()
@@ -633,11 +619,34 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   // Subclasses should override these too, typically to do something like starting a
   // new game or showing a menu.  When debugging, messages can go here.
   override func didMove(to view: SKView) {
+    logging("Cache stats:")
+    Globals.textureCache.stats()
+    Globals.spriteCache.stats()
+    Globals.explosionCache.stats()
     logging("\(name!) didMove to view")
   }
 
   override func willMove(from view: SKView) {
     logging("\(name!) willMove from view")
     removeAllActions()
+  }
+
+  func removeActionsForEverything(node: SKNode) {
+    node.removeAllActions()
+    for child in node.children {
+      removeActionsForEverything(node: child)
+    }
+  }
+
+  func cleanup() {
+    // Call this from willMove(from:) when a scene will be destroyed.  We use this
+    // for game scenes especially because it's hard to be sure we're in a consistent
+    // state at the time of scene transition because of the possibility that the
+    // player quit in the middle of the game.  At the time of the quit, the game is
+    // paused, so all kinds of actions and things may be running, the playfield may
+    // be full of sprites, etc.  We try to fix up everything so that the scene will
+    // get garbage collected cleanly.
+    playfield.recycle()
+    removeActionsForEverything(node: self)
   }
 }

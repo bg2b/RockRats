@@ -40,13 +40,15 @@ class SpriteCache {
       body.velocity = .zero
       body.angularVelocity = 0
     }
+    sprite.removeAllActions()
     sprite.position = .zero
+    sprite.speed = 1
     sprites[sprite.name!]!.append(sprite)
     recycled += 1
   }
 
   func stats() {
-    print("Created \(created) sprites; \(recycled) sprites are in the recycle bin")
+    logging("SpriteCache created \(created) sprites; \(recycled) sprites are in the recycle bin")
   }
 }
 

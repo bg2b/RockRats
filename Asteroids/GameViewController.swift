@@ -24,10 +24,11 @@ class GameViewController: UIViewController {
       logging("\(Globals.ptsToGameUnits) game units per pt")
       let size = CGSize(width: 768 * aspect, height: 768)
       Globals.menuScene = MenuScene(size: size)
-      Globals.tutorialScene = TutorialScene(size: size)
-      let introScene = IntroScene(size: size)
-      logging("viewDidLoad will present \(introScene.name!)")
-      view.presentScene(Globals.menuScene)
+      // let introScene = IntroScene(size: size)
+      // let toPresent = introScene
+      let toPresent = Globals.menuScene!
+      logging("viewDidLoad will present \(toPresent.name!)")
+      view.presentScene(toPresent)
       view.preferredFramesPerSecond = 120
       view.ignoresSiblingOrder = true
       view.showsFPS = true
@@ -63,7 +64,6 @@ class GameViewController: UIViewController {
 extension Globals {
   static var ptsToGameUnits = CGFloat(1)
   static var menuScene: MenuScene!
-  static var tutorialScene: TutorialScene!
   static var safeAreaPaddingLeft = CGFloat(0)
   static var safeAreaPaddingRight = CGFloat(0)
 }

@@ -162,8 +162,7 @@ class GameTutorialScene: BasicScene {
 
   func removeLaser(_ laser: SKSpriteNode) {
     assert(laser.name == "lasersmall_green")
-    laser.removeAllActions()
-    recycleSprite(laser)
+    Globals.spriteCache.recycleSprite(laser)
     player.laserDestroyed()
   }
   
@@ -220,5 +219,11 @@ class GameTutorialScene: BasicScene {
 
   required init(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented by GameTutorialScene")
+  }
+
+  override func willMove(from view: SKView) {
+    super.willMove(from: view)
+    cleanup()
+    logging("\(name!) finished willMove from view")
   }
 }
