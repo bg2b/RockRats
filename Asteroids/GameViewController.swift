@@ -23,12 +23,12 @@ class GameViewController: UIViewController {
       Globals.ptsToGameUnits = 768 / view.frame.height
       logging("\(Globals.ptsToGameUnits) game units per pt")
       let size = CGSize(width: 768 * aspect, height: 768)
-      Globals.gameScene = GameScene(size: size)
       Globals.menuScene = MenuScene(size: size)
-      Globals.tutorialScene = TutorialScene(size: size)
-      let introScene = IntroScene(size: size)
-      logging("viewDidLoad will present \(introScene.name!)")
-      view.presentScene(Globals.menuScene)
+      // let introScene = IntroScene(size: size)
+      // let toPresent = introScene
+      let toPresent = Globals.menuScene!
+      logging("viewDidLoad will present \(toPresent.name!)")
+      view.presentScene(toPresent)
       view.preferredFramesPerSecond = 120
       view.ignoresSiblingOrder = true
       view.showsFPS = true
@@ -39,12 +39,9 @@ class GameViewController: UIViewController {
 
   override func viewWillLayoutSubviews() {
     super.viewWillLayoutSubviews()
-    if let gameScene = Globals.gameScene {
-      logging("viewWillLayoutSubviews calling setSafeArea for gameScene")
-      let leftPadding = view.safeAreaInsets.left * gameScene.size.width / view.frame.width
-      let rightPadding = view.safeAreaInsets.right * gameScene.size.width / view.frame.width
-      gameScene.setSafeArea(left: leftPadding, right: rightPadding)
-    }
+    logging("viewWillLayoutSubviews saving safe area")
+    Globals.safeAreaPaddingLeft = view.safeAreaInsets.left * Globals.ptsToGameUnits
+    Globals.safeAreaPaddingRight = view.safeAreaInsets.right * Globals.ptsToGameUnits
   }
 
   override var shouldAutorotate: Bool {
@@ -67,6 +64,6 @@ class GameViewController: UIViewController {
 extension Globals {
   static var ptsToGameUnits = CGFloat(1)
   static var menuScene: MenuScene!
-  static var gameScene: GameScene!
-  static var tutorialScene: TutorialScene!
+  static var safeAreaPaddingLeft = CGFloat(0)
+  static var safeAreaPaddingRight = CGFloat(0)
 }

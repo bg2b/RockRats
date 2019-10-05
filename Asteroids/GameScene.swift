@@ -24,8 +24,12 @@ let specialScores = [
   SpecialScore(score: 2001, display: "A Space Oddity", achievement: .spaceOddity),
 ]
 
+
 class GameScene: GameTutorialScene {
   var scoreDisplay: SKLabelNode!
+  var pauseButton: TouchableSprite!
+  var continueButton: TouchableSprite!
+  var quitButton: TouchableSprite!
   var lastWarpInTime = 0.0
   var ufosToAvenge = 0
   var ufosKilledWithoutDying = 0
@@ -36,16 +40,9 @@ class GameScene: GameTutorialScene {
   var gameOver = false
   var consecutiveHits = 0
 
-  override func setPositionsOfInfoItems() {
-    super.setPositionsOfInfoItems()
-    scoreDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.maxY - 50)
-    centralDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.midY)
-    logging("\(name!) positions display items")
-    logging("scoreDisplay at \(scoreDisplay.position.x),\(scoreDisplay.position.y)")
-    logging("centralDisplay at \(centralDisplay.position.x),\(centralDisplay.position.y)")
-  }
-
   override func initInfo() {
+    super.initInfo()
+    // Score and central display
     let moreInfo = SKNode()
     moreInfo.name = "moreInfo"
     moreInfo.zPosition = LevelZs.info.rawValue
@@ -55,6 +52,7 @@ class GameScene: GameTutorialScene {
     scoreDisplay.fontColor = AppColors.textColor
     scoreDisplay.text = "0"
     scoreDisplay.name = "score"
+    scoreDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.maxY - 50)
     moreInfo.addChild(scoreDisplay)
     centralDisplay = SKLabelNode(fontNamed: "Kenney Future")
     centralDisplay.fontSize = 100
@@ -63,9 +61,59 @@ class GameScene: GameTutorialScene {
     centralDisplay.name = "centralDisplay"
     centralDisplay.isHidden = true
     centralDisplay.verticalAlignmentMode = .center
+    centralDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.midY)
     moreInfo.addChild(centralDisplay)
-    super.initInfo()
-    //setPositionsOfInfoItems()
+    // Pause, resume, and quit controls
+    let pauseControls = SKNode()
+    addChild(pauseControls)
+    pauseControls.name = "pauseControls"
+    pauseControls.zPosition = LevelZs.info.rawValue + 1
+    let pauseTexture = Globals.textureCache.findTexture(imageNamed: "pause")
+    pauseButton = TouchableSprite(texture: pauseTexture, size: pauseTexture.size())
+    pauseButton.action = { [unowned self] in self.doPause() }
+    pauseButton.alpha = 0.1
+    pauseButton.position = CGPoint(x: gameFrame.minX + pauseButton.size.width / 2 + 10,
+                                   y: livesDisplay.position.y - pauseButton.size.height / 2 - 20)
+    pauseControls.addChild(pauseButton)
+    let continueTexture = Globals.textureCache.findTexture(imageNamed: "continue")
+    continueButton = TouchableSprite(texture: continueTexture, size: continueTexture.size())
+    continueButton.action = { [unowned self] in self.doContinue() }
+    continueButton.color = AppColors.green
+    continueButton.colorBlendFactor = 1
+    continueButton.position = pauseButton.position
+    continueButton.isHidden = true
+    pauseControls.addChild(continueButton)
+    let quitTexture = Globals.textureCache.findTexture(imageNamed: "quit")
+    quitButton = TouchableSprite(texture: quitTexture, size: quitTexture.size())
+    quitButton.action = { [unowned self] in self.doQuit() }
+    quitButton.color = AppColors.red
+    quitButton.colorBlendFactor = 1
+    quitButton.position = CGPoint(x: gameFrame.maxX - quitButton.size.width / 2 - 10, y: pauseButton.position.y)
+    quitButton.isHidden = true
+    pauseControls.addChild(quitButton)
+  }
+
+  func doPause() {
+    pauseButton.isHidden = true
+    continueButton.isHidden = false
+    quitButton.isHidden = false
+    gameArea.alpha = 0.125
+    gamePaused = true
+    isPaused = true
+  }
+
+  func doContinue() {
+    pauseButton.isHidden = false
+    continueButton.isHidden = true
+    quitButton.isHidden = true
+    gameArea.alpha = 1
+    gamePaused = false
+    isPaused = false
+  }
+
+  func doQuit() {
+    Globals.sounds.stopHeartbeat()
+    switchScene(to: Globals.menuScene)
   }
 
   func initFutureShader() {
@@ -147,7 +195,7 @@ class GameScene: GameTutorialScene {
       if score == special.score {
         // We don't display the special message immediately in case the player is in the
         // middle of blasting a bunch of stuff and will zoom past it.
-        self.wait(for: 0.75) {
+        wait(for: 0.75) {
           if self.score == special.score {
             self.scoreDisplay.text = special.display
             // Then we wait a bit more to make sure they've had time to notice the message.
@@ -380,7 +428,7 @@ class GameScene: GameTutorialScene {
     super.didMove(to: view)
     joystickTouch = nil
     fireOrWarpTouches.removeAll()
-    removeAllAsteroids()
+    clearPlayfield()
     initSounds()
     Globals.gameConfig = loadGameConfig(forMode: "normal")
     Globals.gameConfig.currentWaveNumber = 0

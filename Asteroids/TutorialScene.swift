@@ -546,7 +546,7 @@ class TutorialScene: GameTutorialScene {
     super.didMove(to: view)
     joystickTouch = nil
     fireOrWarpTouches.removeAll()
-    removeAllAsteroids()
+    clearPlayfield()
     energyBar.isHidden = true
     livesDisplay.isHidden = true
     initSounds()

@@ -66,6 +66,19 @@ class Playfield: SKNode {
     return true
   }
 
+  func recycle() {
+    // Recycle anything that should go in the global sprite cache.  This gets called
+    // when a scene in a perhaps uncertain state should be prepared for garbage
+    // collection.
+    let recycleable = setOf([ObjectCategories.playerShot, .ufoShot, .asteroid])
+    for child in children {
+      guard let body = child.physicsBody else { continue }
+      if body.isOneOf(recycleable) {
+        Globals.spriteCache.recycleSprite(child as! SKSpriteNode)
+      }
+    }
+  }
+
   func wrapCoordinates() {
     for child in children {
       guard let body = child.physicsBody else { continue }

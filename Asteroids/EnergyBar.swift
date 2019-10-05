@@ -20,6 +20,10 @@ class EnergyBar: SKNode {
     addToLevel(maxLevel)
   }
 
+  deinit {
+    clearBar()
+  }
+  
   var levelIndex: Int { return Int(2.999 * level / maxLevel) }
 
   func segment(_ type: String, at x: CGFloat) -> CGFloat {
@@ -37,12 +41,16 @@ class EnergyBar: SKNode {
     x = segment("left", at: x)
   }
 
+  func clearBar() {
+    bar.forEach { Globals.spriteCache.recycleSprite($0) }
+    bar.removeAll()
+  }
+
   func addToLevel(_ amount: Double) {
     let newLevel = max(min(level + amount, maxLevel), 0)
     guard level != newLevel else { return }
     level = newLevel
-    bar.forEach { Globals.spriteCache.recycleSprite($0) }
-    bar.removeAll()
+    clearBar()
     buildSprites()
   }
 

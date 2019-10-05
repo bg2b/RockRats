@@ -9,6 +9,7 @@
 import SpriteKit
 
 class GameTutorialScene: BasicScene {
+  var gamePaused = false
   var player: Ship!
   var score = 0
   var livesDisplay: LivesDisplay!
@@ -23,6 +24,7 @@ class GameTutorialScene: BasicScene {
   }
 
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    guard !gamePaused else { return }
     for touch in touches {
       let location = touch.location(in: self)
       if location.x > fullFrame.midX {
@@ -35,6 +37,7 @@ class GameTutorialScene: BasicScene {
   }
 
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+    guard !gamePaused else { return }
     for touch in touches {
       guard touch == joystickTouch else { continue }
       let location = touch.location(in: self)
@@ -51,6 +54,7 @@ class GameTutorialScene: BasicScene {
         joystickTouch = nil
       } else {
         guard let startLocation = fireOrWarpTouches.removeValue(forKey: touch) else { continue }
+        guard !gamePaused else { continue }
         let location = touch.location(in: self)
         if (location - startLocation).norm2() > Globals.ptsToGameUnits * 100 {
           hyperspaceJump()
@@ -65,32 +69,17 @@ class GameTutorialScene: BasicScene {
     touchesEnded(touches, with: event)
   }
 
-  func setPositionsOfInfoItems() {
-    livesDisplay.position = CGPoint(x: gameFrame.minX + 20, y: gameFrame.maxY - 20)
-    energyBar.position = CGPoint(x: gameFrame.maxX - 20, y: gameFrame.maxY - 20)
-    logging("\(name!) positions display items")
-    logging("livesDisplay at \(livesDisplay.position.x),\(livesDisplay.position.y)")
-    logging("energyBar at \(energyBar.position.x),\(energyBar.position.y)")
-  }
-
-  override func setPositionsForSafeArea() {
-    super.setPositionsForSafeArea()
-    let midX = 0.5 * (safeAreaLeft - safeAreaRight)
-    logging("\(name!) repositions gameArea to \(midX),0 for new safe area")
-    gameArea.position = CGPoint(x: midX, y: 0)
-    setPositionsOfInfoItems()
-  }
-
   func initInfo() {
     let info = SKNode()
     info.name = "info"
     info.zPosition = LevelZs.info.rawValue
     gameArea.addChild(info)
     livesDisplay = LivesDisplay(extraColor: AppColors.textColor)
+    livesDisplay.position = CGPoint(x: gameFrame.minX + 20, y: gameFrame.maxY - 20)
     info.addChild(livesDisplay)
     energyBar = EnergyBar(maxLength: 20)
     info.addChild(energyBar)
-    setPositionsOfInfoItems()
+    energyBar.position = CGPoint(x: gameFrame.maxX - 20, y: gameFrame.maxY - 20)
   }
 
   func isSafe(point: CGPoint, pathStart: CGPoint, pathEnd: CGPoint, clearance: CGFloat) -> Bool {
@@ -158,8 +147,7 @@ class GameTutorialScene: BasicScene {
 
   func removeLaser(_ laser: SKSpriteNode) {
     assert(laser.name == "lasersmall_green")
-    laser.removeAllActions()
-    recycleSprite(laser)
+    Globals.spriteCache.recycleSprite(laser)
     player.laserDestroyed()
   }
   
@@ -207,13 +195,20 @@ class GameTutorialScene: BasicScene {
   required init(size: CGSize) {
     super.init(size: size)
     name = "gameTutorialScene"
-    initGameArea(limitAspectRatio: true)
+    initGameArea(avoidSafeArea: true)
     initInfo()
     initControls()
+//    setSafeArea(left: Globals.safeAreaPaddingLeft, right: Globals.safeAreaPaddingRight)
     physicsWorld.contactDelegate = self
   }
 
   required init(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented by GameTutorialScene")
+  }
+
+  override func willMove(from view: SKView) {
+    super.willMove(from: view)
+    cleanup()
+    logging("\(name!) finished willMove from view")
   }
 }

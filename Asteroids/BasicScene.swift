@@ -86,22 +86,8 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   var gameFrame: CGRect!
   var gameArea = SKCropNode()
   var playfield: Playfield!
-  var safeAreaLeft = CGFloat(0.0)
-  var safeAreaRight = CGFloat(0.0)
   var asteroids = Set<SKSpriteNode>()
   var ufos = Set<UFO>()
-
-  func makeSprite(imageNamed name: String, initializer: ((SKSpriteNode) -> Void)? = nil) -> SKSpriteNode {
-    return Globals.spriteCache.findSprite(imageNamed: name, initializer: initializer)
-  }
-
-  func recycleSprite(_ sprite: SKSpriteNode) {
-    // Speed may have been altered by the slow-motion effect in the playfield.  Be
-    // sure that when we give back the recycled sprite for a new object that the
-    // speed is reset to the default 1.
-    sprite.speed = 1
-    Globals.spriteCache.recycleSprite(sprite)
-  }
 
   func tilingShader(forTexture texture: SKTexture) -> SKShader {
     // Do not to assume that the texture has v_tex_coord ranging in (0, 0) to (1, 1)!
@@ -208,51 +194,25 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     gameArea.addChild(playfield)
   }
 
-  func setPositionsForSafeArea() {
-    // Subclasses that need to do something when the safe area changes should
-    // override this.
-    logging("setPositionsForSafeArea called")
-  }
-
-  func maybeResizeGameFrame() {
-    // This is used to set the gameFrame in response to notifications about the safe
-    // area.
-    guard safeAreaLeft != 0 || safeAreaRight != 0 else {
-      gameFrame = fullFrame
-      gameArea.maskNode = nil
-      return
+  func initGameArea(avoidSafeArea: Bool, maxAspectRatio: CGFloat = .infinity) {
+    var width = size.width
+    if avoidSafeArea {
+      width -= Globals.safeAreaPaddingLeft
+      width -= Globals.safeAreaPaddingRight
     }
-    let gameAreaWidth = size.width - (safeAreaLeft + safeAreaRight)
-    logging("maybeResizeGameFrame using width \(gameAreaWidth)")
-    gameFrame = CGRect(x: -0.5 * gameAreaWidth, y: -0.5 * size.height, width: gameAreaWidth, height: size.height)
-    let mask = SKShapeNode(rect: gameFrame)
-    mask.fillColor = .white
-    mask.strokeColor = .clear
-    gameArea.maskNode = mask
-  }
-
-  func setSafeArea(left: CGFloat, right: CGFloat) {
-    logging("setSafeArea called with \(left) and \(right)")
-    safeAreaLeft = left
-    safeAreaRight = right
-    maybeResizeGameFrame()
-    if let playfield = playfield {
-      playfield.setBounds(to: gameFrame)
+    if width / size.height > maxAspectRatio {
+      width = size.height * maxAspectRatio
     }
-    setPositionsForSafeArea()
-  }
-
-  func initGameArea(limitAspectRatio: Bool) {
-    let aspect = size.width / size.height
-    if aspect < 1.6 || !limitAspectRatio {
-      // Playfield will fill the complete frame.
-      gameFrame = fullFrame
-    } else {
-      // This is probably a phone.  We may want to limit the aspect ratio, but even
-      // if not there might be a nontrivial safe area.
-      maybeResizeGameFrame()
-    }
+    gameFrame = CGRect(x: -0.5 * width, y: -0.5 * size.height, width: width, height: size.height)
     gameArea.name = "gameArea"
+    if gameFrame.width == fullFrame.width {
+      gameArea.maskNode = nil
+    } else {
+      let mask = SKShapeNode(rect: gameFrame)
+      mask.fillColor = .white
+      mask.strokeColor = .clear
+      gameArea.maskNode = mask
+    }
     addChild(gameArea)
     initBackground()
     initStars()
@@ -287,8 +247,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   
   func removeUFOLaser(_ laser: SKSpriteNode) {
     assert(laser.name == "lasersmall_red")
-    laser.removeAllActions()
-    recycleSprite(laser)
+    Globals.spriteCache.recycleSprite(laser)
   }
   
   func makeAsteroid(position pos: CGPoint, size: String, velocity: CGVector, onScreen: Bool) {
@@ -372,18 +331,18 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func removeAsteroid(_ asteroid: SKSpriteNode) {
-    recycleSprite(asteroid)
+    Globals.spriteCache.recycleSprite(asteroid)
     asteroids.remove(asteroid)
     asteroidRemoved()
   }
 
-  func removeAllAsteroids() {
-    // For clearing out the playfield when starting a new game
+  func clearPlayfield() {
     asteroids.forEach {
       $0.removeFromParent()
-      recycleSprite($0)
+      Globals.spriteCache.recycleSprite($0)
     }
     asteroids.removeAll()
+    ufos.removeAll()
   }
 
   func addEmitter(_ emitter: SKEmitterNode) {
@@ -631,11 +590,34 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   // Subclasses should override these too, typically to do something like starting a
   // new game or showing a menu.  When debugging, messages can go here.
   override func didMove(to view: SKView) {
+    logging("Cache stats:")
+    Globals.textureCache.stats()
+    Globals.spriteCache.stats()
+    Globals.explosionCache.stats()
     logging("\(name!) didMove to view")
   }
 
   override func willMove(from view: SKView) {
     logging("\(name!) willMove from view")
     removeAllActions()
+  }
+
+  func removeActionsForEverything(node: SKNode) {
+    node.removeAllActions()
+    for child in node.children {
+      removeActionsForEverything(node: child)
+    }
+  }
+
+  func cleanup() {
+    // Call this from willMove(from:) when a scene will be destroyed.  We use this
+    // for game scenes especially because it's hard to be sure we're in a consistent
+    // state at the time of scene transition because of the possibility that the
+    // player quit in the middle of the game.  At the time of the quit, the game is
+    // paused, so all kinds of actions and things may be running, the playfield may
+    // be full of sprites, etc.  We try to fix up everything so that the scene will
+    // get garbage collected cleanly.
+    playfield.recycle()
+    removeActionsForEverything(node: self)
   }
 }

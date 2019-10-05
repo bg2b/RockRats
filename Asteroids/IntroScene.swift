@@ -103,7 +103,8 @@ class IntroScene: BasicScene {
   }
 
   func toTutorial() {
-    wait(for: 0.25) { self.switchScene(to: Globals.tutorialScene, withDuration: 3) }
+    let tutorialScene = TutorialScene(size: fullFrame.size)
+    wait(for: 0.25) { self.switchScene(to: tutorialScene, withDuration: 3) }
   }
 
   override func didMove(to view: SKView) {
@@ -122,7 +123,7 @@ class IntroScene: BasicScene {
   required init(size: CGSize) {
     super.init(size: size)
     name = "introScene"
-    initGameArea(limitAspectRatio: false)
+    initGameArea(avoidSafeArea: false)
     initIntro()
   }
 

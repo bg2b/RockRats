@@ -64,26 +64,37 @@ struct Explosion {
 
 class ExplosionCache {
   var explosions = [SKTexture: [Explosion]]()
+  var created = 0
+  var recycled = 0
 
   func findOrMakeExplosion(texture: SKTexture) -> Explosion {
     if explosions[texture] == nil {
       explosions[texture] = []
     }
     if explosions[texture]!.isEmpty {
+      created += 1
       return Explosion(texture: texture)
     }
+    recycled -= 1
     return explosions[texture]!.popLast()!
   }
 
   func doneWithExplosion(_ explosion: Explosion, texture: SKTexture) {
+    recycled += 1
     explosions[texture]!.append(explosion)
+  }
+
+  func stats() {
+    logging("ExplosionCache create \(created) explosions; \(recycled) are in the recycle bin")
   }
 }
 
-var explosionCache = ExplosionCache()
+extension Globals {
+  static var explosionCache = ExplosionCache()
+}
 
 func makeExplosion(texture: SKTexture, angle: CGFloat, velocity: CGVector, at position: CGPoint, duration: Double) -> [SKNode] {
-  let explosion = explosionCache.findOrMakeExplosion(texture: texture)
+  let explosion = Globals.explosionCache.findOrMakeExplosion(texture: texture)
   let waitAndRemove = SKAction.sequence([
     SKAction.wait(forDuration: 0.75 * duration),
     SKAction.fadeOut(withDuration: 0.25 * duration),
@@ -109,7 +120,7 @@ func makeExplosion(texture: SKTexture, angle: CGFloat, velocity: CGVector, at po
   recycler.run(SKAction.sequence([
     SKAction.wait(forDuration: duration + 0.5),
     SKAction.run {
-      explosionCache.doneWithExplosion(explosion, texture: texture)
+      Globals.explosionCache.doneWithExplosion(explosion, texture: texture)
     },
     SKAction.removeFromParent()]))
   return explosion.pieces

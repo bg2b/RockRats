@@ -25,7 +25,7 @@ class TextureCache {
   }
 
   func stats() {
-    print("Loaded \(textures.count) textures")
+    print("TextureCache loaded \(textures.count) textures")
   }
 }
 
