@@ -170,12 +170,13 @@ class GameTutorialScene: BasicScene {
   }
 
   func setFutureFilter(enabled: Bool) {
-    shouldEnableEffects = enabled && (shader != nil)
+    shouldEnableEffects = enabled
   }
 
   func hyperspaceJump() {
     guard player.canJump(), energyBar.useEnergy(40) else { return }
-    let backToTheFuture = (score % 100 == 79)
+    let blastFromThePast = (score % 100 == 79)
+    let backToTheFuture = (score % 100 == 88)
     let effects = player.warpOut()
     playfield.addWithScaling(effects[0])
     playfield.addWithScaling(effects[1])
@@ -184,13 +185,14 @@ class GameTutorialScene: BasicScene {
     let jumpPosition = CGPoint(x: .random(in: jumpRegion.minX...jumpRegion.maxX),
                                y: .random(in: jumpRegion.minY...jumpRegion.maxY))
     wait(for: 1) {
-      if backToTheFuture {
+      if blastFromThePast && !self.shouldEnableEffects {
         self.setFutureFilter(enabled: true)
         self.player.setAppearance(to: .retro)
-        reportAchievement(achievement: .backToTheFuture)
-      } else {
+        reportAchievement(achievement: .blastFromThePast)
+      } else if backToTheFuture && self.shouldEnableEffects {
         self.player.setAppearance(to: .modern)
         self.setFutureFilter(enabled: false)
+        reportAchievement(achievement: .backToTheFuture)
       }
       Globals.sounds.soundEffect(.warpIn)
       self.player.warpIn(to: jumpPosition, atAngle: .random(in: 0 ... 2 * .pi), addTo: self.playfield)

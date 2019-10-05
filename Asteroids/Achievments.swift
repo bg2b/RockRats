@@ -13,6 +13,7 @@ enum Achievement: String {
   case leeroyJenkins = "leeroyJenkins"
   case spinalTap = "spinalTap"
   case redShirt = "redShirt"
+  case blastFromThePast = "blastFromThePast"
   case backToTheFuture = "backToTheFuture"
   case doubleTrouble = "doubleTrouble"
   case armedAndDangerous = "armedAndDangerous"
