@@ -378,13 +378,14 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     asteroidRemoved()
   }
 
-  func removeAllAsteroids() {
+  func clearPlayfield() {
     // For clearing out the playfield when starting a new game
     asteroids.forEach {
       $0.removeFromParent()
       recycleSprite($0)
     }
     asteroids.removeAll()
+    ufos.removeAll()
   }
 
   func addEmitter(_ emitter: SKEmitterNode) {

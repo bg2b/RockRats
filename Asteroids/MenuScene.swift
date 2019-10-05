@@ -64,18 +64,19 @@ class MenuScene: BasicScene {
     when(contact, isBetween: .ufo, and: .asteroid) { ufoCollided(ufo: $0, asteroid: $1) }
   }
 
-  func switchWhenQuiescent() {
+  func switchWhenQuiescent(_ newScene: SKScene) {
     if playfield.isQuiescent(transient: setOf([.ufo, .ufoShot, .fragment])) {
-      wait(for: 0.25) { self.switchScene(to: Globals.gameScene) }
+      wait(for: 0.25) { self.switchScene(to: newScene) }
     } else {
-      wait(for: 0.25) { self.switchWhenQuiescent() }
+      wait(for: 0.25) { self.switchWhenQuiescent(newScene) }
     }
   }
 
   func startGame() {
     gameStarting = true
     let _ = warpOutUFOs(averageDelay: 0.25)
-    switchWhenQuiescent()
+    let newGame = GameScene(size: fullFrame.size)
+    switchWhenQuiescent(newGame)
   }
 
   override func didMove(to view: SKView) {

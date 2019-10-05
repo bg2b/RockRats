@@ -99,6 +99,7 @@
 		FDE04B2822D5FEA30011A529 /* star3@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FDE04B2522D5FEA30011A529 /* star3@2x.png */; };
 		FDE04B2922D5FEA30011A529 /* star2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FDE04B2622D5FEA30011A529 /* star2@2x.png */; };
 		FDE04B2D22D753240011A529 /* TextureCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE04B2C22D753240011A529 /* TextureCache.swift */; };
+		FDF32A6D23488F6D00785715 /* TouchableSprite.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDF32A6C23488F6D00785715 /* TouchableSprite.swift */; };
 		FDF92B422322456900CC4DFE /* Hyperspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDF92B412322456900CC4DFE /* Hyperspace.swift */; };
 		FDF92B442322666600CC4DFE /* ufo_warpout.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDF92B432322666600CC4DFE /* ufo_warpout.wav */; };
 /* End PBXBuildFile section */
@@ -209,6 +210,7 @@
 		FDE04B2522D5FEA30011A529 /* star3@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "star3@2x.png"; sourceTree = "<group>"; };
 		FDE04B2622D5FEA30011A529 /* star2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "star2@2x.png"; sourceTree = "<group>"; };
 		FDE04B2C22D753240011A529 /* TextureCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureCache.swift; sourceTree = "<group>"; };
+		FDF32A6C23488F6D00785715 /* TouchableSprite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchableSprite.swift; sourceTree = "<group>"; };
 		FDF92B412322456900CC4DFE /* Hyperspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hyperspace.swift; sourceTree = "<group>"; };
 		FDF92B432322666600CC4DFE /* ufo_warpout.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo_warpout.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -301,6 +303,7 @@
 				FDD831F522F187D200CA4EC6 /* GameConfig.swift */,
 				6506AD512340D3450006E8D6 /* UserData.swift */,
 				FDD8FB90232B99BE00A83EB5 /* GameScene.swift */,
+				FDF32A6C23488F6D00785715 /* TouchableSprite.swift */,
 				FD96AE1F233A4BE600D4CAFA /* GameTutorialScene.swift */,
 				FD79323D22D20FE600E7D336 /* GameViewController.swift */,
 				FDCF8CA422DA7296008EDFD1 /* Globals.swift */,
@@ -547,6 +550,7 @@
 				FDD8FB91232B99BE00A83EB5 /* GameScene.swift in Sources */,
 				FD4D53C723080E7300718938 /* Sounds.swift in Sources */,
 				6565DA11232E6818008EA85B /* Achievments.swift in Sources */,
+				FDF32A6D23488F6D00785715 /* TouchableSprite.swift in Sources */,
 				FD53167522DB24EC00F09E57 /* Ship.swift in Sources */,
 				659CC03A230EC9FE00AA087C /* UFO.swift in Sources */,
 				6506AD522340D3450006E8D6 /* UserData.swift in Sources */,

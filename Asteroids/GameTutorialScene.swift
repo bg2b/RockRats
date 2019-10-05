@@ -9,6 +9,7 @@
 import SpriteKit
 
 class GameTutorialScene: BasicScene {
+  var gamePaused = false
   var player: Ship!
   var score = 0
   var livesDisplay: LivesDisplay!
@@ -23,6 +24,7 @@ class GameTutorialScene: BasicScene {
   }
 
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    guard !gamePaused else { return }
     for touch in touches {
       let location = touch.location(in: self)
       if location.x > fullFrame.midX {
@@ -35,6 +37,7 @@ class GameTutorialScene: BasicScene {
   }
 
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+    guard !gamePaused else { return }
     for touch in touches {
       guard touch == joystickTouch else { continue }
       let location = touch.location(in: self)
@@ -51,6 +54,7 @@ class GameTutorialScene: BasicScene {
         joystickTouch = nil
       } else {
         guard let startLocation = fireOrWarpTouches.removeValue(forKey: touch) else { continue }
+        guard !gamePaused else { continue }
         let location = touch.location(in: self)
         if (location - startLocation).norm2() > Globals.ptsToGameUnits * 100 {
           hyperspaceJump()
@@ -210,6 +214,7 @@ class GameTutorialScene: BasicScene {
     initGameArea(limitAspectRatio: true)
     initInfo()
     initControls()
+    setSafeArea(left: Globals.safeAreaPaddingLeft, right: Globals.safeAreaPaddingRight)
     physicsWorld.contactDelegate = self
   }
 
