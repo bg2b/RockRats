@@ -62,7 +62,7 @@ class IntroScene: BasicScene {
     introLabel.isHidden = true
     goButton = Button(forText: "Flight Training", size: CGSize(width: 350, height: 50), fontName: "Kenney Future Narrow")
     goButton.position = CGPoint(x: fullFrame.midX, y: 0)
-    goButton.action = { [unowned self] in self.toTutorial() }
+    goButton.action = { [unowned self] in self.toMenu() }
     intro.addChild(goButton)
     goButton.alpha = 0
     goButton.isHidden = true
@@ -81,13 +81,13 @@ class IntroScene: BasicScene {
   }
 
   func incoming() {
-    incomingLabel.typeIn(text: standBy, attributes: attributes) {
+    incomingLabel.typeIn(text: standBy, attributes: attributes, audio: audio) {
       self.wait(for: 3) { self.header() }
     }
   }
 
   func header() {
-    incomingLabel.typeIn(text: messageHeader, attributes: attributes) {
+    incomingLabel.typeIn(text: messageHeader, attributes: attributes, audio: audio) {
       self.wait(for: 5) {
         self.incomingLabel.isHidden = true
         self.intro()
@@ -97,19 +97,21 @@ class IntroScene: BasicScene {
 
   func intro() {
     introLabel.isHidden = false
-    introLabel.typeIn(text: introduction, attributes: attributes) {
+    introLabel.typeIn(text: introduction, attributes: attributes, audio: audio) {
       self.goButton.run(SKAction.sequence([SKAction.unhide(), SKAction.fadeIn(withDuration: 0.5)]))
     }
   }
 
-  func toTutorial() {
-    let tutorialScene = TutorialScene(size: fullFrame.size)
-    wait(for: 0.25) { self.switchScene(to: tutorialScene, withDuration: 3) }
+  func toMenu() {
+    wait(for: 0.25) {
+      self.switchScene(to: Globals.menuScene, withDuration: 3)
+    }
+    // let tutorialScene = TutorialScene(size: fullFrame.size)
+    // wait(for: 0.25) { self.switchScene(to: tutorialScene, withDuration: 3) }
   }
 
   override func didMove(to view: SKView) {
     super.didMove(to: view)
-    initSounds()
     wait(for: 1) {
       self.incoming()
     }

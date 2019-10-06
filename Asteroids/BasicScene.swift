@@ -86,6 +86,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   var gameFrame: CGRect!
   var gameArea = SKCropNode()
   var playfield: Playfield!
+  var audio: SceneAudio!
   var asteroids = Set<SKSpriteNode>()
   var ufos = Set<UFO>()
 
@@ -217,10 +218,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     initBackground()
     initStars()
     initPlayfield()
-  }
-
-  func initSounds() {
-    Globals.sounds.stereoEffectsFrame = gameFrame
+    audio = SceneAudio(stereoEffectsFrame: gameFrame)
   }
   
   func fireUFOLaser(angle: CGFloat, position: CGPoint, speed: CGFloat) {
@@ -242,7 +240,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     laser.position = position
     laser.zRotation = angle
     laser.requiredPhysicsBody().velocity = CGVector(angle: angle).scale(by: speed)
-    Globals.sounds.soundEffect(.ufoShot, at: position)
+    audio.soundEffect(.ufoShot, at: position)
   }
   
   func removeUFOLaser(_ laser: SKSpriteNode) {
@@ -389,7 +387,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     let velocity = asteroid.requiredPhysicsBody().velocity
     let pos = asteroid.position
     makeAsteroidSplitEffect(asteroid, ofSize: size)
-    Globals.sounds.soundEffect(hitEffect[size], at: pos)
+    audio.soundEffect(hitEffect[size], at: pos)
     // Don't split med or small asteroids.  Size progression should go huge -> big -> med,
     // but we include small just for completeness in case we change our minds later.
     if size >= 2 {
@@ -445,7 +443,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
           SKAction.wait(forDuration: delay),
           SKAction.run({
             self.ufos.remove(ufo)
-            Globals.sounds.soundEffect(.ufoWarpOut, at: ufo.position)
+            self.audio.soundEffect(.ufoWarpOut, at: ufo.position)
             let effects = ufo.warpOut()
             self.playfield.addWithScaling(effects[0])
             self.playfield.addWithScaling(effects[1])
@@ -509,7 +507,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     // sure to cancel the warp.
     ufo.removeAction(forKey: "warpOut")
     ufos.remove(ufo)
-    Globals.sounds.soundEffect(.ufoExplosion, at: ufo.position)
+    audio.soundEffect(.ufoExplosion, at: ufo.position)
     addExplosion(ufo.explode())
   }
 

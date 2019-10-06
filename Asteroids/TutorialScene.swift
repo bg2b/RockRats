@@ -102,7 +102,7 @@ class TutorialScene: GameTutorialScene {
       wait(for: 0.5) { self.spawnPlayer() }
     } else {
       energyBar.fill()
-      Globals.sounds.soundEffect(.warpIn)
+      audio.soundEffect(.warpIn, at: spawnPosition)
       player.reset()
       player.warpIn(to: spawnPosition, atAngle: player.zRotation, addTo: playfield)
     }
@@ -116,7 +116,7 @@ class TutorialScene: GameTutorialScene {
   func destroyPlayer() {
     let pieces = player.explode()
     addExplosion(pieces)
-    Globals.sounds.soundEffect(.playerExplosion)
+    audio.soundEffect(.playerExplosion)
     let messages = [
       "@No problem@, that'll buff right out. Take another ship.",
       "That's gotta be @painful@... Oh well, there's more ships where @that@ came from.",
@@ -158,7 +158,7 @@ class TutorialScene: GameTutorialScene {
     instructionsLabel.attributedText = makeAttributed(text: text, until: text.startIndex, attributes: attributes)
     instructionsLabel.alpha = 1
     instructionsLabel.isHidden = false
-    instructionsLabel.typeIn(text: text, attributes: attributes, whenDone: whenDone)
+    instructionsLabel.typeIn(text: text, attributes: attributes, audio: audio, whenDone: whenDone)
   }
 
   func showContinueButton(action: @escaping () -> Void) {
@@ -549,7 +549,6 @@ class TutorialScene: GameTutorialScene {
     clearPlayfield()
     energyBar.isHidden = true
     livesDisplay.isHidden = true
-    initSounds()
     Globals.gameConfig = loadGameConfig(forMode: "normal")
     Globals.gameConfig.currentWaveNumber = 1
     score = 0
@@ -573,7 +572,7 @@ class TutorialScene: GameTutorialScene {
     super.init(size: size)
     name = "tutorialScene"
     initInstructions()
-    player = Ship(color: "blue", getJoystickDirection: { [unowned self] in return self.clampedJoystick() })
+    player = Ship(color: "blue", getJoystickDirection: { [unowned self] in return self.clampedJoystick() }, audio: audio)
     physicsWorld.contactDelegate = self
   }
 

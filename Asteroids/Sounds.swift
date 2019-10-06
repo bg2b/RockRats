@@ -52,10 +52,11 @@ let numSimultaneousSounds = [
   .asteroidBigHit: 5,
   .asteroidMedHit: 5,
   .ufoExplosion: 3,
-  .ufoEnginesBig: 3,
-  .ufoEnginesSmall: 3,
   .ufoShot: 3,
-  .ufoWarpOut: 3
+  .ufoWarpOut: 3,
+  .ufoEnginesBig: 0,
+  .ufoEnginesSmall: 0,
+  .playerEngines: 0
 ]
 
 class SoundEffectPlayers {
@@ -75,20 +76,9 @@ class SoundEffectPlayers {
   }
 }
 
-struct PositionalEffect {
-  weak var player: AVAudioPlayer?
-  weak var atNode: SKNode?
-}
-
 class Sounds {
-  let heartbeatRateInitial = 2.0
-  let heartbeatRateMax = 0.5
-  var currentHeartbeatRate = 0.0
-  var heartbeatVolume: Float = 0.0
-  var heartbeatOn = false
   var audioPlayerCache = [SoundEffect: SoundEffectPlayers]()
-  var positionalEffects = [PositionalEffect]()
-  var stereoEffectsFrame = CGRect(origin: .zero, size: .zero)
+  var gameAudio = [SceneAudioInfo]()
   let soundQueue: DispatchQueue
 
   init() {
@@ -96,44 +86,85 @@ class Sounds {
     for effect in SoundEffect.allCases {
       preload(effect)
     }
-    normalHeartbeatRate()
   }
 
-  func wait(for duration: Double, execute closure: @escaping () -> Void) {
-    let dispatchTime = DispatchTime.now() + duration
-    soundQueue.asyncAfter(deadline: dispatchTime, execute: closure)
+  func preload(_ sound: SoundEffect) {
+    audioPlayerCache[sound] = SoundEffectPlayers(forEffect: sound, count: numSimultaneousSounds[sound] ?? 1)
   }
 
-  func heartbeat() {
-    if heartbeatOn {
-      soundEffect(.heartbeatHigh, withVolume: heartbeatVolume)
-      let fractionBetween = 0.2
-      wait(for: fractionBetween * currentHeartbeatRate) {
-        self.soundEffect(.heartbeatLow, withVolume: self.heartbeatVolume)
-        self.heartbeatVolume = 0.5
-        self.currentHeartbeatRate = max(0.98 * self.currentHeartbeatRate, self.heartbeatRateMax)
-        self.wait(for: (1 - fractionBetween) * self.currentHeartbeatRate) { self.heartbeat() }
+  func cachedPlayer(_ sound: SoundEffect) -> AVAudioPlayer {
+    guard let players = Globals.sounds.audioPlayerCache[sound] else { fatalError("No players created for \(sound)") }
+    return players.getNextPlayer()
+  }
+
+  func execute(_ soundActions: @escaping () -> Void) {
+    soundQueue.async(execute: soundActions)
+  }
+}
+
+extension Globals {
+  static let sounds = Sounds()
+}
+
+class SceneAudioInfo {
+  weak var player: AVAudioPlayer?
+  weak var atNode: SKNode? = nil
+  var wasPlayingWhenPaused = false
+
+  init(player: AVAudioPlayer, at node: SKNode? = nil) {
+    self.player = player
+    self.atNode = node
+  }
+}
+
+class SceneAudio {
+  let stereoEffectsFrame: CGRect
+  var sceneAudioInfo = [SceneAudioInfo]()
+
+  init(stereoEffectsFrame: CGRect) {
+    self.stereoEffectsFrame = stereoEffectsFrame
+  }
+
+  func playerFor(_ sound: SoundEffect, at node: SKNode? = nil) -> AVAudioPlayer {
+    let player = sound.player()
+    sceneAudioInfo.append(SceneAudioInfo(player: player, at: node))
+    return player
+  }
+
+  func soundEffect(_ sound: SoundEffect, at position: CGPoint = .zero, withVolume volume: Float = 1) {
+    let player = Globals.sounds.cachedPlayer(sound)
+    let balance = stereoBalance(position)
+    Globals.sounds.execute {
+      player.volume = volume
+      player.pan = balance
+      player.play()
+    }
+  }
+
+  func pause() {
+    for audioInfo in sceneAudioInfo {
+      guard let player = audioInfo.player else { continue }
+      audioInfo.wasPlayingWhenPaused = player.isPlaying
+      if audioInfo.wasPlayingWhenPaused {
+        player.pause()
       }
     }
   }
 
-  func startHearbeat() {
-    normalHeartbeatRate()
-    heartbeatOn = true
-    heartbeat()
+  func resume() {
+    for audioInfo in sceneAudioInfo {
+      guard let player = audioInfo.player else { continue }
+      if audioInfo.wasPlayingWhenPaused {
+        Globals.sounds.execute { player.play() }
+      }
+    }
   }
 
-  func stopHeartbeat() {
-    heartbeatOn = false
-  }
-
-  func normalHeartbeatRate() {
-    currentHeartbeatRate = heartbeatRateInitial
-  }
-
-  func audioPlayerFor(_ sound: SoundEffect) -> AVAudioPlayer {
-    guard let players = audioPlayerCache[sound] else { fatalError("No players created for \(sound)") }
-    return players.getNextPlayer()
+  func stop() {
+    for audioInfo in sceneAudioInfo {
+      guard let player = audioInfo.player else { continue }
+      player.stop()
+    }
   }
 
   func stereoBalance(_ position: CGPoint) -> Float {
@@ -143,42 +174,12 @@ class Sounds {
     return Float((position.x - stereoEffectsFrame.midX) / (0.5 * stereoEffectsFrame.width))
   }
 
-  func addPositional(player: AVAudioPlayer, at node: SKNode) {
-    positionalEffects.append(PositionalEffect(player: player, atNode: node))
-  }
-
-  func preload(_ sound: SoundEffect) {
-    audioPlayerCache[sound] = SoundEffectPlayers(forEffect: sound, count: numSimultaneousSounds[sound] ?? 1)
-  }
-
-  func startPlaying(_ player: AVAudioPlayer) {
-    soundQueue.async {
-      player.play()
-    }
-  }
-
-  func soundEffect(_ sound: SoundEffect, at position: CGPoint = .zero, withVolume volume: Float = 1) {
-    let player = audioPlayerFor(sound)
-    let balance = stereoBalance(position)
-    soundQueue.async {
-      player.volume = volume
-      player.pan = balance
-      player.play()
-    }
-  }
-
-  func adjustPositionalEffects() {
-    for positional in positionalEffects {
-      guard let player = positional.player, let node = positional.atNode else { continue }
+  func update() {
+    for audioInfo in sceneAudioInfo {
+      guard let player = audioInfo.player, let node = audioInfo.atNode else { continue }
       let balance = stereoBalance(node.position)
-      soundQueue.async {
-        player.pan = balance
-      }
+      Globals.sounds.execute { player.pan = balance }
     }
-    positionalEffects.removeAll { $0.player == nil || $0.atNode == nil }
+    sceneAudioInfo.removeAll { $0.player == nil }
   }
-}
-
-extension Globals {
-  static let sounds = Sounds()
 }

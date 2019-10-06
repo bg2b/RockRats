@@ -35,7 +35,7 @@ class Ship: SKNode {
   let getJoystickDirection: () -> CGVector
   var shipAppearances: [ShipAppearanceAlternative]
   var currentAppearance = ShipAppearance.modern
-  let engineSounds: AVAudioPlayer
+  var engineSounds: AVAudioPlayer!
   var engineSoundLevel = 0
   var forwardFlames = [SKSpriteNode]()
   var reverseFlames = [[SKSpriteNode]]()
@@ -63,19 +63,18 @@ class Ship: SKNode {
     return flames
   }
 
-  required init(color: String, getJoystickDirection: @escaping () -> CGVector) {
+  required init(color: String, getJoystickDirection: @escaping () -> CGVector, audio: SceneAudio) {
     self.getJoystickDirection = getJoystickDirection
     shipAppearances = []
     shipAppearances.append(ShipAppearanceAlternative(imageName: "ship_\(color)", warpTime: warpTime))
     shipAppearances.append(ShipAppearanceAlternative(imageName: "retroship", warpTime: warpTime))
-    engineSounds = Globals.sounds.audioPlayerFor(.playerEngines)
+    super.init()
+    engineSounds = audio.playerFor(.playerEngines, at: self)
     engineSounds.numberOfLoops = -1
     engineSounds.volume = 0
-    Globals.sounds.startPlaying(engineSounds)
-    super.init()
+    Globals.sounds.execute { self.engineSounds.play() }
     self.name = "ship"
     addChild(shipAppearance.sprite)
-    Globals.sounds.addPositional(player: engineSounds, at: self)
     forwardFlames = buildFlames(at: CGPoint(x: -shipTexture.size().width / 2, y: 0.0))
     for side in [-1, 1] {
       reverseFlames.append(buildFlames(at: CGPoint(x: 0, y: CGFloat(side) * shipTexture.size().height / 2.1),

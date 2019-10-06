@@ -94,8 +94,8 @@ extension SKLabelNode {
     }
   }
 
-  func typeIn(text: String, attributes: AttrStyles, whenDone: (() -> Void)?) {
-    let sounds = Globals.sounds.audioPlayerFor(.transmission)
+  func typeIn(text: String, attributes: AttrStyles, audio: SceneAudio, whenDone: (() -> Void)?) {
+    let sounds = audio.playerFor(.transmission)
     sounds.numberOfLoops = -1
     sounds.volume = 0
     sounds.play()

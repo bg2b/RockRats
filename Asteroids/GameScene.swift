@@ -39,6 +39,11 @@ class GameScene: GameTutorialScene {
   var extraLivesAwarded = 0
   var gameOver = false
   var consecutiveHits = 0
+  var heartbeatOn = false
+  let heartbeatRateInitial = 2.0
+  let heartbeatRateMax = 0.5
+  var currentHeartbeatRate = 0.0
+  var heartbeatVolume = Float(0)
 
   override func initInfo() {
     super.initInfo()
@@ -100,6 +105,7 @@ class GameScene: GameTutorialScene {
     gameArea.alpha = 0.125
     gamePaused = true
     isPaused = true
+    audio.pause()
   }
 
   func doContinue() {
@@ -109,10 +115,12 @@ class GameScene: GameTutorialScene {
     gameArea.alpha = 1
     gamePaused = false
     isPaused = false
+    audio.resume()
   }
 
   func doQuit() {
-    Globals.sounds.stopHeartbeat()
+    stopHeartbeat()
+    audio.stop()
     switchScene(to: Globals.menuScene)
   }
 
@@ -168,9 +176,36 @@ class GameScene: GameTutorialScene {
     }
   }
 
+  func heartbeat() {
+    if heartbeatOn {
+      audio.soundEffect(.heartbeatHigh, withVolume: 0.5 * heartbeatVolume)
+      let fractionBetween = 0.2
+      wait(for: fractionBetween * currentHeartbeatRate) {
+        self.audio.soundEffect(.heartbeatLow, withVolume: self.heartbeatVolume)
+        self.heartbeatVolume = 0.5
+        self.currentHeartbeatRate = max(0.98 * self.currentHeartbeatRate, self.heartbeatRateMax)
+        self.wait(for: (1 - fractionBetween) * self.currentHeartbeatRate) { self.heartbeat() }
+      }
+    }
+  }
+
+  func startHearbeat() {
+    normalHeartbeatRate()
+    heartbeatOn = true
+    heartbeat()
+  }
+
+  func stopHeartbeat() {
+    heartbeatOn = false
+  }
+
+  func normalHeartbeatRate() {
+    currentHeartbeatRate = heartbeatRateInitial
+  }
+
   override func asteroidRemoved() {
     if asteroids.isEmpty && !gameOver {
-      Globals.sounds.normalHeartbeatRate()
+      normalHeartbeatRate()
       stopSpawningUFOs()
       // If the player dies from colliding with the last asteroid, then we have to
       // wait long enough for any of the player's remaining lasers to possibly hit a
@@ -187,7 +222,7 @@ class GameScene: GameTutorialScene {
     let extraLivesEarned = score / Globals.gameConfig.extraLifeScore
     if extraLivesEarned > extraLivesAwarded {
       updateLives(+1)
-      Globals.sounds.soundEffect(.extraLife)
+      audio.soundEffect(.extraLife)
       extraLivesAwarded += 1
     }
     scoreDisplay.text = "\(score)"
@@ -256,7 +291,7 @@ class GameScene: GameTutorialScene {
       energyBar.fill()
       player.reset()
       player.warpIn(to: spawnPosition, atAngle: player.zRotation, addTo: playfield)
-      Globals.sounds.soundEffect(.warpIn, at: spawnPosition)
+      audio.soundEffect(.warpIn, at: spawnPosition)
       spawnUFOs()
       updateLives(-1)
       consecutiveHits = 0
@@ -334,7 +369,7 @@ class GameScene: GameTutorialScene {
   func maybeSpawnUFO() {
     guard player.parent != nil else { return }
     guard ufos.count < Globals.gameConfig.value(for: \.maxUFOs) else { return }
-    spawnUFO(ufo: UFO(brothersKilled: ufosToAvenge))
+    spawnUFO(ufo: UFO(brothersKilled: ufosToAvenge, audio: audio))
     if ufos.count == 2 {
       reportAchievement(achievement: .doubleTrouble)
     }
@@ -359,10 +394,10 @@ class GameScene: GameTutorialScene {
       wait(for: delay) { self.spawnPlayer() }
     } else {
       gameOver = true
-      Globals.sounds.stopHeartbeat()
+      stopHeartbeat()
       self.removeAction(forKey: "spawnWave")
       wait(for: delay) {
-        Globals.sounds.soundEffect(.gameOver)
+        self.audio.soundEffect(.gameOver)
         Globals.userData.highScore = max(self.score, Globals.userData.highScore)
         self.displayMessage("GAME OVER", forTime: 4)
         self.wait(for: 6) { self.switchScene(to: Globals.menuScene) }
@@ -375,7 +410,7 @@ class GameScene: GameTutorialScene {
       reportAchievement(achievement: .rightPlaceWrongTime)
     }
     ufosKilledWithoutDying = 0
-    Globals.sounds.soundEffect(.playerExplosion, at: player.position)
+    audio.soundEffect(.playerExplosion, at: player.position)
     addExplosion(player.explode())
     stopSpawningUFOs()
     playfield.changeSpeed(to: 0.25)
@@ -429,7 +464,6 @@ class GameScene: GameTutorialScene {
     joystickTouch = nil
     fireOrWarpTouches.removeAll()
     clearPlayfield()
-    initSounds()
     Globals.gameConfig = loadGameConfig(forMode: "normal")
     Globals.gameConfig.currentWaveNumber = 0
     score = 0
@@ -443,7 +477,7 @@ class GameScene: GameTutorialScene {
     energyBar.fill()
     replenishEnergy()
     wait(for: 1) {
-      Globals.sounds.startHearbeat()
+      self.startHearbeat()
       self.nextWave()
       self.wait(for: 3) { self.spawnPlayer() }
     }
@@ -463,14 +497,14 @@ class GameScene: GameTutorialScene {
     }
     player.fly()
     playfield.wrapCoordinates()
-    Globals.sounds.adjustPositionalEffects()
+    audio.update()
   }
 
   required init(size: CGSize) {
     super.init(size: size)
     name = "gameScene"
     initFutureShader()
-    player = Ship(color: "blue", getJoystickDirection: { [unowned self] in return self.joystickDirection })
+    player = Ship(color: "blue", getJoystickDirection: { [unowned self] in return self.joystickDirection }, audio: audio)
     physicsWorld.contactDelegate = self
   }
 

@@ -45,7 +45,7 @@ class UFO: SKNode {
   let isKamikaze: Bool
   let ufoTexture: SKTexture
   var currentSpeed: CGFloat
-  var engineSounds: AVAudioPlayer?
+  var engineSounds: AVAudioPlayer? = nil
   let meanShotTime: Double
   var delayOfFirstShot: Double
   var attackEnabled = false
@@ -54,21 +54,12 @@ class UFO: SKNode {
   let warpTime = 0.5
   let warpOutShader: SKShader
 
-  required init(brothersKilled: Int, withSounds: Bool = true) {
+  required init(brothersKilled: Int, audio: SceneAudio?) {
     let typeChoice = Double.random(in: 0...1)
     let chances = Globals.gameConfig.value(for: \.ufoChances)
     isBig = typeChoice <= chances[0] + chances[1]
     isKamikaze = isBig && typeChoice > chances[0]
     ufoTexture = Globals.textureCache.findTexture(imageNamed: isBig ? (isKamikaze ? "ufo_blue" : "ufo_green") : "ufo_red")
-    if withSounds {
-      let engineSounds = Globals.sounds.audioPlayerFor(isBig ? .ufoEnginesBig : .ufoEnginesSmall)
-      engineSounds.numberOfLoops = -1
-      engineSounds.volume = 0.5
-      Globals.sounds.startPlaying(engineSounds)
-      self.engineSounds = engineSounds
-    } else {
-      self.engineSounds = nil
-    }
     let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[isBig ? 0 : 1]
     currentSpeed = .random(in: 0.5 * maxSpeed ... maxSpeed)
     let revengeFactor = max(brothersKilled - 3, 0)
@@ -87,8 +78,12 @@ class UFO: SKNode {
     let ufo = SKSpriteNode(texture: ufoTexture)
     ufo.name = "ufoImage"
     addChild(ufo)
-    if let engineSounds = engineSounds {
-      Globals.sounds.addPositional(player: engineSounds, at: self)
+    if let audio = audio {
+      let engineSounds = audio.playerFor(isBig ? .ufoEnginesBig : .ufoEnginesSmall, at: self)
+      engineSounds.numberOfLoops = -1
+      engineSounds.volume = 0.5
+      Globals.sounds.execute { engineSounds.play() }
+      self.engineSounds = engineSounds
     }
     let body = SKPhysicsBody(circleOfRadius: 0.5 * ufoTexture.size().width)
     body.mass = isBig ? 1 : 0.75

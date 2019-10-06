@@ -47,7 +47,7 @@ class MenuScene: BasicScene {
 
   func spawnUFOs() {
     if !gameStarting && asteroids.count >= 3 && ufos.isEmpty {
-      spawnUFO(ufo: UFO(brothersKilled: 0, withSounds: false))
+      spawnUFO(ufo: UFO(brothersKilled: 0, audio: nil))
       asteroidsHit = 0
     }
     wait(for: 5) { self.spawnUFOs() }
@@ -81,7 +81,6 @@ class MenuScene: BasicScene {
 
   override func didMove(to view: SKView) {
     super.didMove(to: view)
-    initSounds()
     Globals.gameConfig = loadGameConfig(forMode: "menu")
     Globals.gameConfig.currentWaveNumber = 1
     highScore.text = "High Score: \(Globals.userData.highScore)"
