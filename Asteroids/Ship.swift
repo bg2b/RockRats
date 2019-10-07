@@ -27,7 +27,7 @@ class ShipAppearanceAlternative {
     sprite.name = "shipImage"
     warpOutShader = swirlShader(forTexture: texture, inward: true, warpTime: warpTime)
     warpInShader = swirlShader(forTexture: texture, inward: false, warpTime: warpTime)
-    body = conformingPhysicsBody(texture: texture)
+    body = Globals.conformingPhysicsCache.makeBody(texture: texture)
   }
 }
 

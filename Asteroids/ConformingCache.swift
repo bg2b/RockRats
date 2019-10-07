@@ -130,11 +130,49 @@ struct ImageMask {
   }
 }
 
-func conformingPhysicsBody(texture: SKTexture) -> SKPhysicsBody {
-  let os = ProcessInfo().operatingSystemVersion
-  if os.majorVersion != 13 {
-    return SKPhysicsBody(texture: texture, size: texture.size())
-  } else {
-    return ImageMask(texture: texture, alphaThreshold: 0.5).convexHull()
+class ConformingPhysicsCache {
+  var bodies = [SKTexture: SKPhysicsBody]()
+  var made = 0
+  var unique = 0
+
+  func makeBody(texture: SKTexture) -> SKPhysicsBody {
+    made += 1
+    if let body = bodies[texture] {
+      return body.copy() as! SKPhysicsBody
+    } else {
+      unique += 1
+      let os = ProcessInfo().operatingSystemVersion
+      if os.majorVersion != 13 {
+        let body = SKPhysicsBody(texture: texture, size: texture.size())
+        bodies[texture] = body
+        return body.copy() as! SKPhysicsBody
+      } else {
+        // iOS 13 has some bugs with creation from a texture
+        let body = ImageMask(texture: texture, alphaThreshold: 0.5).convexHull()
+        bodies[texture] = body
+        return body.copy() as! SKPhysicsBody
+      }
+    }
   }
+
+  func preload() {
+    // Make the main conforming physics bodies.  Things would get created on the fly
+    // anyway, but may as well try to reduce any lags.
+    let conformingTextures = [
+      "ship_blue", "retroship",
+      "meteorbig1", "meteorbig2", "meteorbig3",
+      "meteorhuge1", "meteorhuge2",
+    ]
+    for textureName in conformingTextures {
+      let _ = makeBody(texture: Globals.textureCache.findTexture(imageNamed: textureName))
+    }
+  }
+
+  func stats() {
+    logging("ConformingPhysicsCache made \(made) physicsBodies, \(unique) are unique")
+  }
+}
+
+extension Globals {
+  static var conformingPhysicsCache = ConformingPhysicsCache()
 }

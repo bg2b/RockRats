@@ -265,7 +265,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
       // circle.
       let body = (type == numTypes || size == "med" || size == "small" ?
         SKPhysicsBody(circleOfRadius: 0.5 * texture.size().width) :
-        conformingPhysicsBody(texture: texture))
+        Globals.conformingPhysicsCache.makeBody(texture: texture))
       body.angularDamping = 0
       body.linearDamping = 0
       body.categoryBitMask = ObjectCategories.asteroid.rawValue
@@ -592,6 +592,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     Globals.textureCache.stats()
     Globals.spriteCache.stats()
     Globals.explosionCache.stats()
+    Globals.conformingPhysicsCache.stats()
     logging("\(name!) didMove to view")
   }
 
