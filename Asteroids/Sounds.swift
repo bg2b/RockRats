@@ -117,6 +117,11 @@ class SceneAudioInfo {
   }
 }
 
+struct PanInfo {
+  let player: AVAudioPlayer
+  let pan: Float
+}
+
 class SceneAudio {
   let stereoEffectsFrame: CGRect
   var sceneAudioInfo = [SceneAudioInfo]()
@@ -133,10 +138,12 @@ class SceneAudio {
 
   func soundEffect(_ sound: SoundEffect, at position: CGPoint = .zero, withVolume volume: Float = 1) {
     let player = Globals.sounds.cachedPlayer(sound)
-    let balance = stereoBalance(position)
+    let pan = stereoBalance(position)
     Globals.sounds.execute {
       player.volume = volume
-      player.pan = balance
+      if player.pan != pan {
+        player.pan = pan
+      }
       player.play()
     }
   }
@@ -171,14 +178,30 @@ class SceneAudio {
     guard stereoEffectsFrame.width != 0 else { return 0 }
     guard position.x <= stereoEffectsFrame.maxX else { return 1 }
     guard position.x >= stereoEffectsFrame.minX else { return -1 }
-    return Float((position.x - stereoEffectsFrame.midX) / (0.5 * stereoEffectsFrame.width))
+    let ideal = Float((position.x - stereoEffectsFrame.midX) / (0.5 * stereoEffectsFrame.width))
+    return round(ideal * 8) / 8
   }
 
   func update() {
+    // We try to avoid setting pan since that seems to be somewhat CPU intensive.  We
+    // can leave it alone if either:
+    // 1. A player's volume is 0
+    // 2. The pan is already set to the right value (which often happens since
+    //    stereoBalance rounds to a smallish number of discrete values.
+    var panInfo = [PanInfo]()
     for audioInfo in sceneAudioInfo {
-      guard let player = audioInfo.player, let node = audioInfo.atNode else { continue }
-      let balance = stereoBalance(node.position)
-      Globals.sounds.execute { player.pan = balance }
+      guard let player = audioInfo.player, let node = audioInfo.atNode, player.volume > 0 else { continue }
+      let pan = stereoBalance(node.position)
+      if pan != player.pan {
+        panInfo.append(PanInfo(player: player, pan: pan))
+      }
+    }
+    if !panInfo.isEmpty {
+      Globals.sounds.execute {
+        for info in panInfo {
+          info.player.pan = info.pan
+        }
+      }
     }
     sceneAudioInfo.removeAll { $0.player == nil }
   }
