@@ -22,6 +22,12 @@ class GameViewController: UIViewController {
       // that the user's fingers should move.
       Globals.ptsToGameUnits = 768 / view.frame.height
       logging("\(Globals.ptsToGameUnits) game units per pt")
+      // Play a silent sound to warm up the audio engine
+      let player = Globals.sounds.cachedPlayer(.asteroidSmallHit)
+      Globals.sounds.execute {
+        player.volume = 0.01
+        player.play()
+      }
       let size = CGSize(width: 768 * aspect, height: 768)
       Globals.menuScene = MenuScene(size: size)
       // let introScene = IntroScene(size: size)

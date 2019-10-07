@@ -53,7 +53,7 @@ let numSimultaneousSounds = [
   .asteroidBigHit: 5,
   .asteroidMedHit: 5,
   .ufoExplosion: 3,
-  .ufoShot: 3,
+  .ufoShot: 5,
   .ufoWarpOut: 3,
   .ufoEnginesBig: 0,
   .ufoEnginesMed: 0,
@@ -84,6 +84,13 @@ class Sounds {
   let soundQueue: DispatchQueue
 
   init() {
+    do {
+      logging("Activating shared audio session")
+      try AVAudioSession.sharedInstance().setActive(true)
+    } catch {
+      logging("Couldn't activate AVAudioSession, but whatevs")
+      logging(error.localizedDescription)
+    }
     soundQueue = DispatchQueue.global(qos: .background)
     for effect in SoundEffect.allCases {
       preload(effect)
