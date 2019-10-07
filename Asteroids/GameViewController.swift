@@ -30,9 +30,8 @@ class GameViewController: UIViewController {
       }
       let size = CGSize(width: 768 * aspect, height: 768)
       Globals.menuScene = MenuScene(size: size)
-      // let introScene = IntroScene(size: size)
-      // let toPresent = introScene
-      let toPresent = Globals.menuScene!
+      let toPresent = IntroScene(size: size)
+      // let toPresent = Globals.menuScene!
       logging("viewDidLoad will present \(toPresent.name!)")
       view.presentScene(toPresent)
       view.preferredFramesPerSecond = 120

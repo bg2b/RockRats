@@ -36,14 +36,25 @@ class GameTutorialScene: BasicScene {
     }
   }
 
+  func isJumpRequest(_ touch: UITouch, startLocation: CGPoint) -> Bool {
+    return (touch.location(in: self) - startLocation).norm2() > Globals.ptsToGameUnits * 100
+  }
+
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
     guard !gamePaused else { return }
     for touch in touches {
-      guard touch == joystickTouch else { continue }
-      let location = touch.location(in: self)
-      let delta = (location - joystickLocation).rotate(by: -.pi / 2)
-      let offset = delta.norm2()
-      joystickDirection = delta.scale(by: min(offset / (Globals.ptsToGameUnits * 0.5 * 100), 1.0) / offset)
+      if touch == joystickTouch {
+        let location = touch.location(in: self)
+        let delta = (location - joystickLocation).rotate(by: -.pi / 2)
+        let offset = delta.norm2()
+        joystickDirection = delta.scale(by: min(offset / (Globals.ptsToGameUnits * 0.5 * 100), 1.0) / offset)
+      } else {
+        guard let startLocation = fireOrWarpTouches[touch], !gamePaused else { continue }
+        if isJumpRequest(touch, startLocation: startLocation) {
+          fireOrWarpTouches.removeValue(forKey: touch)
+          hyperspaceJump()
+        }
+      }
     }
   }
 
@@ -55,8 +66,7 @@ class GameTutorialScene: BasicScene {
       } else {
         guard let startLocation = fireOrWarpTouches.removeValue(forKey: touch) else { continue }
         guard !gamePaused else { continue }
-        let location = touch.location(in: self)
-        if (location - startLocation).norm2() > Globals.ptsToGameUnits * 100 {
+        if isJumpRequest(touch, startLocation: startLocation) {
           hyperspaceJump()
         } else {
           fireLaser()
