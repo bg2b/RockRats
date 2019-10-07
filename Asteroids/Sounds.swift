@@ -25,6 +25,7 @@ enum SoundEffect: String, CaseIterable {
   case gameOver = "gameover"
   case ufoExplosion = "ufo_explosion"
   case ufoEnginesBig = "ufo1loop"
+  case ufoEnginesMed = "ufo3loop"
   case ufoEnginesSmall = "ufo2loop"
   case ufoShot = "ufo_laser"
   case ufoWarpOut = "ufo_warpout"
@@ -55,6 +56,7 @@ let numSimultaneousSounds = [
   .ufoShot: 3,
   .ufoWarpOut: 3,
   .ufoEnginesBig: 0,
+  .ufoEnginesMed: 0,
   .ufoEnginesSmall: 0,
   .playerEngines: 0
 ]

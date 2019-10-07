@@ -79,7 +79,7 @@ class UFO: SKNode {
     ufo.name = "ufoImage"
     addChild(ufo)
     if let audio = audio {
-      let engineSounds = audio.playerFor(isBig ? .ufoEnginesBig : .ufoEnginesSmall, at: self)
+      let engineSounds = audio.playerFor(isBig ? (isKamikaze ? .ufoEnginesMed : .ufoEnginesBig) : .ufoEnginesSmall, at: self)
       engineSounds.numberOfLoops = -1
       engineSounds.volume = 0.5
       Globals.sounds.execute { engineSounds.play() }

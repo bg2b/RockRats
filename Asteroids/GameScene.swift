@@ -443,7 +443,9 @@ class GameScene: GameTutorialScene {
   }
 
   func playerHitUFO(ufo: SKNode) {
-    reportAchievement(achievement: .leeroyJenkins)
+    if !(ufo as! UFO).isKamikaze {
+      reportAchievement(achievement: .leeroyJenkins)
+    }
     addToScore(ufoPoints(ufo))
     destroyUFO(ufo as! UFO)
     destroyPlayer()
