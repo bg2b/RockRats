@@ -28,6 +28,7 @@ class GameViewController: UIViewController {
         player.volume = 0.01
         player.play()
       }
+      Globals.conformingPhysicsCache.preload()
       let size = CGSize(width: 768 * aspect, height: 768)
       Globals.menuScene = MenuScene(size: size)
       let toPresent = IntroScene(size: size)

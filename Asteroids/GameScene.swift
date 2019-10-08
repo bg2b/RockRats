@@ -43,7 +43,6 @@ class GameScene: GameTutorialScene {
   let heartbeatRateInitial = 2.0
   let heartbeatRateMax = 0.5
   var currentHeartbeatRate = 0.0
-  var heartbeatVolume = Float(0)
 
   override func initInfo() {
     super.initInfo()
@@ -72,7 +71,7 @@ class GameScene: GameTutorialScene {
     let pauseControls = SKNode()
     addChild(pauseControls)
     pauseControls.name = "pauseControls"
-    pauseControls.zPosition = LevelZs.info.rawValue + 1
+    pauseControls.zPosition = LevelZs.info.rawValue
     let pauseTexture = Globals.textureCache.findTexture(imageNamed: "pause")
     pauseButton = TouchableSprite(texture: pauseTexture, size: pauseTexture.size())
     pauseButton.action = { [unowned self] in self.doPause() }
@@ -178,11 +177,10 @@ class GameScene: GameTutorialScene {
 
   func heartbeat() {
     if heartbeatOn {
-      audio.soundEffect(.heartbeatHigh, withVolume: 0.5 * heartbeatVolume)
+      audio.soundEffect(.heartbeatHigh)
       let fractionBetween = 0.2
       wait(for: fractionBetween * currentHeartbeatRate) {
-        self.audio.soundEffect(.heartbeatLow, withVolume: self.heartbeatVolume)
-        self.heartbeatVolume = 0.5
+        self.audio.soundEffect(.heartbeatLow)
         self.currentHeartbeatRate = max(0.98 * self.currentHeartbeatRate, self.heartbeatRateMax)
         self.wait(for: (1 - fractionBetween) * self.currentHeartbeatRate) { self.heartbeat() }
       }

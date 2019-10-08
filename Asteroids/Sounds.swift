@@ -61,25 +61,8 @@ let numSimultaneousSounds = [
   .playerEngines: 0
 ]
 
-class SoundEffectPlayers {
-  let players: [AVAudioPlayer]
-  var nextPlayer = -1
-
-  init(forEffect effect: SoundEffect, count: Int) {
-    players = (0..<count).map { _ in effect.player() }
-  }
-
-  func getNextPlayer() -> AVAudioPlayer {
-    nextPlayer += 1
-    if nextPlayer >= players.count {
-      nextPlayer = 0
-    }
-    return players[nextPlayer]
-  }
-}
-
 class Sounds {
-  var audioPlayerCache = [SoundEffect: SoundEffectPlayers]()
+  var audioPlayerCache = CyclicCache<SoundEffect, AVAudioPlayer>()
   var gameAudio = [SceneAudioInfo]()
   let soundQueue: DispatchQueue
 
@@ -98,12 +81,11 @@ class Sounds {
   }
 
   func preload(_ sound: SoundEffect) {
-    audioPlayerCache[sound] = SoundEffectPlayers(forEffect: sound, count: numSimultaneousSounds[sound] ?? 1)
+    audioPlayerCache.load(count: numSimultaneousSounds[sound] ?? 1, forKey: sound) { sound.player() }
   }
 
   func cachedPlayer(_ sound: SoundEffect) -> AVAudioPlayer {
-    guard let players = Globals.sounds.audioPlayerCache[sound] else { fatalError("No players created for \(sound)") }
-    return players.getNextPlayer()
+    return audioPlayerCache.next(forKey: sound)
   }
 
   func execute(_ soundActions: @escaping () -> Void) {
@@ -145,11 +127,10 @@ class SceneAudio {
     return player
   }
 
-  func soundEffect(_ sound: SoundEffect, at position: CGPoint = .zero, withVolume volume: Float = 1) {
+  func soundEffect(_ sound: SoundEffect, at position: CGPoint = .zero) {
     let player = Globals.sounds.cachedPlayer(sound)
     let pan = stereoBalance(position)
     Globals.sounds.execute {
-      player.volume = volume
       if player.pan != pan {
         player.pan = pan
       }

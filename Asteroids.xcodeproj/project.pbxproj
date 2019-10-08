@@ -27,6 +27,7 @@
 		FD0C070E22D8925E00F19A55 /* ship_orange@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD0C070622D8925E00F19A55 /* ship_orange@2x.png */; };
 		FD0C070F22D8925E00F19A55 /* ship_red@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD0C070722D8925E00F19A55 /* ship_red@2x.png */; };
 		FD1B389E234ACC5E00674161 /* ufo3loop.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD1B389D234ACC5E00674161 /* ufo3loop.wav */; };
+		FD1B38A0234C904C00674161 /* CyclicCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD1B389F234C904C00674161 /* CyclicCache.swift */; };
 		FD28DB5422DFFA87009446A2 /* meteorhuge2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD28DB4D22DFFA87009446A2 /* meteorhuge2@2x.png */; };
 		FD28DB5522DFFA87009446A2 /* ufo_yellow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD28DB4E22DFFA87009446A2 /* ufo_yellow@2x.png */; };
 		FD28DB5622DFFA87009446A2 /* meteorhuge3@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD28DB4F22DFFA87009446A2 /* meteorhuge3@2x.png */; };
@@ -126,6 +127,7 @@
 		FD0C070622D8925E00F19A55 /* ship_orange@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ship_orange@2x.png"; sourceTree = "<group>"; };
 		FD0C070722D8925E00F19A55 /* ship_red@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ship_red@2x.png"; sourceTree = "<group>"; };
 		FD1B389D234ACC5E00674161 /* ufo3loop.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo3loop.wav; sourceTree = "<group>"; };
+		FD1B389F234C904C00674161 /* CyclicCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyclicCache.swift; sourceTree = "<group>"; };
 		FD28DB4D22DFFA87009446A2 /* meteorhuge2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "meteorhuge2@2x.png"; sourceTree = "<group>"; };
 		FD28DB4E22DFFA87009446A2 /* ufo_yellow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ufo_yellow@2x.png"; sourceTree = "<group>"; };
 		FD28DB4F22DFFA87009446A2 /* meteorhuge3@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "meteorhuge3@2x.png"; sourceTree = "<group>"; };
@@ -302,6 +304,7 @@
 				6513D66B22DC0B4E00B4BD57 /* Button.swift */,
 				FDCF8CA222DA175F008EDFD1 /* CGHelpers.swift */,
 				FD6F23DD234357710083A913 /* ConformingCache.swift */,
+				FD1B389F234C904C00674161 /* CyclicCache.swift */,
 				FDC6A7FB2334E054001A4774 /* EnergyBar.swift */,
 				FDD831F122EDB50200CA4EC6 /* Explosions.swift */,
 				FDD831F522F187D200CA4EC6 /* GameConfig.swift */,
@@ -550,6 +553,7 @@
 				FDCF8CA322DA175F008EDFD1 /* CGHelpers.swift in Sources */,
 				FD4D53C02306B47900718938 /* LivesDisplay.swift in Sources */,
 				FD96AE1C2339A93300D4CAFA /* TypeIn.swift in Sources */,
+				FD1B38A0234C904C00674161 /* CyclicCache.swift in Sources */,
 				FDCF8CA522DA7296008EDFD1 /* Globals.swift in Sources */,
 				FDD8FB91232B99BE00A83EB5 /* GameScene.swift in Sources */,
 				FD4D53C723080E7300718938 /* Sounds.swift in Sources */,

@@ -79,6 +79,7 @@ extension SKNode {
 
 extension Globals {
   static var lastUpdateTime = 0.0
+  static var asteroidSplitEffects = CyclicCache<Int, SKEmitterNode>()
 }
 
 class BasicScene: SKScene, SKPhysicsContactDelegate {
@@ -233,7 +234,6 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
       body.collisionBitMask = 0
       body.contactTestBitMask = setOf([.asteroid, .player])
       sprite.physicsBody = body
-      sprite.zPosition = -1
     }
     laser.wait(for: Double(0.9 * gameFrame.height / speed)) { self.removeUFOLaser(laser) }
     playfield.addWithScaling(laser)
@@ -343,18 +343,9 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     ufos.removeAll()
   }
 
-  func addEmitter(_ emitter: SKEmitterNode) {
-    emitter.name = "emitter"
-    let maxParticleLifetime = emitter.particleLifetime + 0.5 * emitter.particleLifetimeRange
-    let maxEmissionTime = CGFloat(emitter.numParticlesToEmit) / emitter.particleBirthRate
-    let maxTotalTime = Double(maxEmissionTime + maxParticleLifetime)
-    emitter.zPosition = 1
-    emitter.wait(for: maxTotalTime, then: SKAction.removeFromParent())
-    emitter.isPaused = false
-    playfield.addWithScaling(emitter)
-  }
-
-  func makeAsteroidSplitEffect(_ asteroid: SKSpriteNode, ofSize size: Int) {
+  func getAsteroidSplitEffect(size: Int) -> SKEmitterNode {
+    let textureNames = ["meteormed1", "meteorbig1", "meteorhuge1"]
+    let texture = Globals.textureCache.findTexture(imageNamed: textureNames[size - 1])
     let emitter = SKEmitterNode()
     emitter.particleTexture = Globals.textureCache.findTexture(imageNamed: "meteorsmall1")
     let effectDuration = CGFloat(0.25)
@@ -364,7 +355,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     emitter.particleScaleRange = 0.25
     emitter.numParticlesToEmit = 4 * size
     emitter.particleBirthRate = CGFloat(emitter.numParticlesToEmit) / (0.25 * effectDuration)
-    let radius = 0.75 * asteroid.texture!.size().width
+    let radius = 0.75 * texture.size().width
     emitter.particleSpeed = radius / effectDuration
     emitter.particleSpeedRange = 0.25 * emitter.particleSpeed
     emitter.particlePosition = .zero
@@ -374,8 +365,30 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     emitter.particleRotation = 0
     emitter.particleRotationRange = .pi
     emitter.particleRotationSpeed = 2 * .pi / effectDuration
+    emitter.particleRenderOrder = .dontCare
+    emitter.isPaused = true
+    emitter.name = "asteroidSplitEmitter"
+    return emitter
+  }
+
+  func preloadAsteroidSplitEffects() {
+    for size in 1...3 {
+      Globals.asteroidSplitEffects.load(count: 10, forKey: size) { getAsteroidSplitEffect(size: size) }
+    }
+  }
+
+  func makeAsteroidSplitEffect(_ asteroid: SKSpriteNode, ofSize size: Int) {
+    let emitter = Globals.asteroidSplitEffects.next(forKey: size)
+    if emitter.parent != nil {
+      emitter.removeFromParent()
+    }
+    emitter.removeAllActions()
+    emitter.run(SKAction.sequence([SKAction.wait(forDuration: 0.5), SKAction.removeFromParent()]))
     emitter.position = asteroid.position
-    addEmitter(emitter)
+    emitter.isPaused = true
+    emitter.resetSimulation()
+    emitter.isPaused = false
+    playfield.addWithScaling(emitter)
   }
 
   func splitAsteroid(_ asteroid: SKSpriteNode) {
@@ -579,6 +592,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     scaleMode = .aspectFill
     anchorPoint = CGPoint(x: 0.5, y: 0.5)
     physicsWorld.gravity = .zero
+    preloadAsteroidSplitEffects()
   }
 
   required init(coder aDecoder: NSCoder) {

@@ -147,7 +147,6 @@ class GameTutorialScene: BasicScene {
       body.collisionBitMask = 0
       body.contactTestBitMask = setOf([.asteroid, .ufo])
       sprite.physicsBody = body
-      sprite.zPosition = -1
     }
     laser.wait(for: 0.9) { self.laserExpired(laser) }
     playfield.addWithScaling(laser)
