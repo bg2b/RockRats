@@ -60,7 +60,7 @@ class IntroScene: BasicScene {
     introLabel.position = CGPoint(x: gameFrame.midX, y: 0)
     intro.addChild(introLabel)
     introLabel.isHidden = true
-    goButton = Button(forText: "Flight Training", size: CGSize(width: 350, height: 50), fontName: "Kenney Future Narrow")
+    goButton = Button(forText: "Find Out", size: CGSize(width: 350, height: 50), fontName: "Kenney Future Narrow")
     goButton.position = CGPoint(x: fullFrame.midX, y: 0)
     goButton.action = { [unowned self] in self.toMenu() }
     intro.addChild(goButton)
@@ -104,6 +104,7 @@ class IntroScene: BasicScene {
 
   func toMenu() {
     wait(for: 0.25) {
+      Globals.userData.hasDoneIntro.value = true
       self.switchScene(to: Globals.menuScene, withDuration: 3)
     }
     // let tutorialScene = TutorialScene(size: fullFrame.size)

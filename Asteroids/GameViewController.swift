@@ -31,8 +31,7 @@ class GameViewController: UIViewController {
       Globals.conformingPhysicsCache.preload()
       let size = CGSize(width: 768 * aspect, height: 768)
       Globals.menuScene = MenuScene(size: size)
-      let toPresent = IntroScene(size: size)
-      // let toPresent = Globals.menuScene!
+      let toPresent = Globals.userData.hasDoneIntro.value ? Globals.menuScene! : IntroScene(size: size)
       logging("viewDidLoad will present \(toPresent.name!)")
       view.presentScene(toPresent)
       view.preferredFramesPerSecond = 120

@@ -24,6 +24,7 @@ struct DefaultsValue<T> {
 
 class UserData {
   var highScore = DefaultsValue<Int>(name: "highScore", defaultValue: 0)
+  var hasDoneIntro = DefaultsValue<Bool>(name: "hasDoneIntro", defaultValue: false)
 }
 
 extension Globals {
