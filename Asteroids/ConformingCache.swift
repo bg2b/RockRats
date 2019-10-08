@@ -169,7 +169,7 @@ class ConformingPhysicsCache {
   }
 
   func stats() {
-    logging("ConformingPhysicsCache made \(made) physicsBodies, \(unique) are unique")
+    logging("Conforming physics cache made \(made) physicsBodies, \(unique) are unique")
   }
 }
 

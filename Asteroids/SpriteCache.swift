@@ -11,6 +11,7 @@ import SpriteKit
 class SpriteCache {
   var sprites = [String: [SKSpriteNode]]()
   var created = 0
+  var used = 0
   var recycled = 0
 
   func makeSprite(imageNamed name: String, initializer: ((SKSpriteNode) -> Void)?) -> SKSpriteNode {
@@ -22,6 +23,7 @@ class SpriteCache {
   }
 
   func findSprite(imageNamed name: String, initializer: ((SKSpriteNode) -> Void)? = nil) -> SKSpriteNode {
+    used += 1
     if sprites[name] == nil {
       sprites[name] = [SKSpriteNode]()
     }
@@ -48,7 +50,7 @@ class SpriteCache {
   }
 
   func stats() {
-    logging("SpriteCache created \(created) sprites; \(recycled) sprites are in the recycle bin")
+    logging("Sprite cache created \(created) unique sprites, used \(used); \(recycled) sprites are in the recycle bin")
   }
 }
 

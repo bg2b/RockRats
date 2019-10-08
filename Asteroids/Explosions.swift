@@ -85,7 +85,7 @@ class ExplosionCache {
   }
 
   func stats() {
-    logging("ExplosionCache created \(created) explosions; \(recycled) are in the recycle bin")
+    logging("Explosion cache created \(created) explosions; \(recycled) are in the recycle bin")
   }
 }
 

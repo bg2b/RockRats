@@ -28,7 +28,13 @@ class CyclicCacheEntries<T> {
 }
 
 class CyclicCache<Key: Hashable, Value> {
+  let cacheId: String
   var cache = [Key: CyclicCacheEntries<Value>]()
+  var itemsUsed = 0
+
+  init(cacheId: String) {
+    self.cacheId = cacheId
+  }
 
   func load(count: Int, forKey key: Key, creator: () -> Value) {
     if cache[key] == nil {
@@ -41,7 +47,16 @@ class CyclicCache<Key: Hashable, Value> {
   }
 
   func next(forKey key: Key) -> Value {
-    guard let entries = cache[key] else { fatalError("CyclicCache was not loaded for key \(key)") }
+    guard let entries = cache[key] else { fatalError("\(cacheId) was not loaded for key \(key)") }
+    itemsUsed += 1
     return entries.getNextItem()
+  }
+
+  func stats() {
+    var totalItems = 0
+    for (_, entries) in cache {
+      totalItems += entries.count
+    }
+    logging("\(cacheId) has \(totalItems) unique items, used \(itemsUsed)")
   }
 }

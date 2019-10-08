@@ -62,7 +62,7 @@ let numSimultaneousSounds = [
 ]
 
 class Sounds {
-  var audioPlayerCache = CyclicCache<SoundEffect, AVAudioPlayer>()
+  var audioPlayerCache = CyclicCache<SoundEffect, AVAudioPlayer>(cacheId: "Sound effects cache")
   var gameAudio = [SceneAudioInfo]()
   let soundQueue: DispatchQueue
 
@@ -90,6 +90,10 @@ class Sounds {
 
   func execute(_ soundActions: @escaping () -> Void) {
     soundQueue.async(execute: soundActions)
+  }
+
+  func stats() {
+    audioPlayerCache.stats()
   }
 }
 

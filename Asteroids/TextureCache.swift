@@ -9,9 +9,11 @@
 import SpriteKit
 
 class TextureCache {
+  var used = 0
   var textures = [String: SKTexture]()
 
   func findTexture(imageNamed name: String) -> SKTexture {
+    used += 1
     if let cached = textures[name] {
       return cached
     } else {
@@ -25,7 +27,7 @@ class TextureCache {
   }
 
   func stats() {
-    print("TextureCache loaded \(textures.count) textures")
+    print("Texture cache loaded \(textures.count) textures, used \(used)")
   }
 }
 

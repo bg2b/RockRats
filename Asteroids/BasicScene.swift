@@ -79,7 +79,7 @@ extension SKNode {
 
 extension Globals {
   static var lastUpdateTime = 0.0
-  static var asteroidSplitEffects = CyclicCache<Int, SKEmitterNode>()
+  static var asteroidSplitEffectsCache = CyclicCache<Int, SKEmitterNode>(cacheId: "Asteroid split effects cache")
 }
 
 class BasicScene: SKScene, SKPhysicsContactDelegate {
@@ -373,12 +373,12 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
 
   func preloadAsteroidSplitEffects() {
     for size in 1...3 {
-      Globals.asteroidSplitEffects.load(count: 10, forKey: size) { getAsteroidSplitEffect(size: size) }
+      Globals.asteroidSplitEffectsCache.load(count: 10, forKey: size) { getAsteroidSplitEffect(size: size) }
     }
   }
 
   func makeAsteroidSplitEffect(_ asteroid: SKSpriteNode, ofSize size: Int) {
-    let emitter = Globals.asteroidSplitEffects.next(forKey: size)
+    let emitter = Globals.asteroidSplitEffectsCache.next(forKey: size)
     if emitter.parent != nil {
       emitter.removeFromParent()
     }
@@ -607,6 +607,8 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     Globals.spriteCache.stats()
     Globals.explosionCache.stats()
     Globals.conformingPhysicsCache.stats()
+    Globals.asteroidSplitEffectsCache.stats()
+    Globals.sounds.stats()
     logging("\(name!) didMove to view")
   }
 
