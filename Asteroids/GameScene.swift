@@ -398,7 +398,7 @@ class GameScene: GameTutorialScene {
       self.removeAction(forKey: "spawnWave")
       wait(for: delay) {
         self.audio.soundEffect(.gameOver)
-        Globals.userData.highScore = max(self.score, Globals.userData.highScore)
+        Globals.userData.highScore.value = max(self.score, Globals.userData.highScore.value)
         self.displayMessage("GAME OVER", forTime: 4)
         self.wait(for: 6) { self.switchScene(to: Globals.menuScene) }
       }

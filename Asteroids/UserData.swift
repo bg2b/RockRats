@@ -6,43 +6,26 @@
 //  Copyright © 2019 David Long. All rights reserved.
 //
 
-import SpriteKit
+import Foundation
 
-class UserData: Codable {
-  var highScore: Int = 0
-}
+struct DefaultsValue<T> {
+  let name: String
+  let defaultValue: T
 
-func loadUserData() -> UserData {
-  let configName = "userdata"
-  do {
-    let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-    let file = directory.appendingPathComponent("\(configName).json")
-    let decoder = JSONDecoder()
-    let data = try Data(contentsOf: file)
-    print(data)
-    let result = try decoder.decode(UserData.self, from: data)
-    return result
-  } catch {
-    print(error)
-    return UserData()
+  var value: T {
+    get {
+      return UserDefaults.standard.object(forKey: name) as? T ?? defaultValue
+    }
+    set {
+      UserDefaults.standard.set(newValue, forKey: name)
+    }
   }
 }
 
-func saveUserData() {
-  let configName = "userdata"
-  let decoder = JSONEncoder()
-  guard let result = try? decoder.encode(Globals.userData) else { fatalError("Can't encode for \(configName) JSON") }
-  print(result)
-  let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-  let file = directory.appendingPathComponent("\(configName).json")
-  do {
-    try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-    try result.write(to: file)
-  } catch {
-    print(error)
-  }
+class UserData {
+  var highScore = DefaultsValue<Int>(name: "highScore", defaultValue: 0)
 }
 
 extension Globals {
-  static var userData = loadUserData()
+  static var userData = UserData()
 }

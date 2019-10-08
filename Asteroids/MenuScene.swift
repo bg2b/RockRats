@@ -83,7 +83,7 @@ class MenuScene: BasicScene {
     super.didMove(to: view)
     Globals.gameConfig = loadGameConfig(forMode: "menu")
     Globals.gameConfig.currentWaveNumber = 1
-    highScore.text = "High Score: \(Globals.userData.highScore)"
+    highScore.text = "High Score: \(Globals.userData.highScore.value)"
     wait(for: 1) { self.spawnAsteroids() }
     gameStarting = false
     wait(for: 10) { self.spawnUFOs() }
