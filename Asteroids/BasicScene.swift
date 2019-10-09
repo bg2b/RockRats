@@ -85,7 +85,8 @@ extension Globals {
 class BasicScene: SKScene, SKPhysicsContactDelegate {
   var fullFrame: CGRect!
   var gameFrame: CGRect!
-  var gameArea = SKCropNode()
+  var gameAreaCrop = SKCropNode()
+  var gameArea = SKEffectNode()
   var playfield: Playfield!
   var audio: SceneAudio!
   var asteroids = Set<SKSpriteNode>()
@@ -206,20 +207,31 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
       width = size.height * maxAspectRatio
     }
     gameFrame = CGRect(x: -0.5 * width, y: -0.5 * size.height, width: width, height: size.height)
-    gameArea.name = "gameArea"
+    gameAreaCrop.name = "gameAreaCrop"
     if gameFrame.width == fullFrame.width {
-      gameArea.maskNode = nil
+      gameAreaCrop.maskNode = nil
     } else {
       let mask = SKShapeNode(rect: gameFrame)
       mask.fillColor = .white
       mask.strokeColor = .clear
-      gameArea.maskNode = mask
+      gameAreaCrop.maskNode = mask
     }
-    addChild(gameArea)
+    addChild(gameAreaCrop)
+    gameArea.name = "gameArea"
+    if let filter = CIFilter(name: "CIGaussianBlur") {
+      filter.setValue(8, forKey: kCIInputRadiusKey)
+      gameArea.filter = filter
+    }
+    gameArea.shouldEnableEffects = false
+    gameAreaCrop.addChild(gameArea)
     initBackground()
     initStars()
     initPlayfield()
     audio = SceneAudio(stereoEffectsFrame: gameFrame)
+  }
+
+  func setGameAreaBlur(_ enable: Bool) {
+    gameArea.shouldEnableEffects = enable && gameArea.filter != nil
   }
   
   func fireUFOLaser(angle: CGFloat, position: CGPoint, speed: CGFloat) {
@@ -314,10 +326,10 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     // Find a random distance that places us beyond the screen by a reasonable amount
     var dist = .random(in: 0.25...0.5) * gameFrame.height
     let minExclusion = max(1.25 * speed, 50)
-    let maxExclusion = max(5 * speed, 200)
+    let maxExclusion = max(3.5 * speed, 200)
     let exclusion = -CGFloat.random(in: minExclusion...maxExclusion)
     while gameFrame.insetBy(dx: exclusion, dy: exclusion).contains(offset + dir.scale(by: dist)) {
-      dist *= 1.5
+      dist *= 1.1
     }
     makeAsteroid(position: offset + dir.scale(by: dist), size: size, velocity: velocity, onScreen: false)
   }
@@ -479,9 +491,8 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     // delay.
     let ufoSize = 0.6 * ufo.size.diagonal()
     let x = (Bool.random() ? gameFrame.maxX + ufoSize : gameFrame.minX - ufoSize)
-    // Audio depends only on left/right, i.e., x.  We have the y way off in the
-    // distance to avoid potential collisions in the time before launch.
-    ufo.position = CGPoint(x: x, y: -1e9)
+    // Audio depends only on left/right, i.e., x.
+    ufo.position = CGPoint(x: x, y: 0)
     wait(for: 1) { self.launchUFO(ufo) }
   }
   
@@ -530,6 +541,10 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   }
 
   func ufoCollided(ufo: SKNode, asteroid: SKNode) {
+    // I'm not sure if this check is needed anyway, but non-launched UFOs have
+    // isDynamic set to false so that they're holding.  Make sure that the UFO has
+    // been launched before we'll flag a collision.
+    guard ufo.requiredPhysicsBody().isDynamic else { return }
     splitAsteroid(asteroid as! SKSpriteNode)
     destroyUFO(ufo as! UFO)
   }
@@ -561,7 +576,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   // contactDelegate for physicsWorld.  E.g.
   //
   //  func didBegin(_ contact: SKPhysicsContact) {
-  //    when(contact, isBetween: .ufoShot, and: .asteroid) { ufoLaserHit(laser: $0, asteroid: $1)}
+  //    when(contact, isBetween: .ufoShot, and: .asteroid) { ufoLaserHit(laser: $0, asteroid: $1) }
   //    when(contact, isBetween: .ufo, and: .asteroid) { ufoCollided(ufo: $0, asteroid: $1) }
   //    ...
   //  }

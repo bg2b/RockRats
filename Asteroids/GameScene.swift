@@ -101,7 +101,7 @@ class GameScene: GameTutorialScene {
     pauseButton.isHidden = true
     continueButton.isHidden = false
     quitButton.isHidden = false
-    gameArea.alpha = 0.125
+    setGameAreaBlur(true)
     gamePaused = true
     isPaused = true
     audio.pause()
@@ -111,7 +111,7 @@ class GameScene: GameTutorialScene {
     pauseButton.isHidden = false
     continueButton.isHidden = true
     quitButton.isHidden = true
-    gameArea.alpha = 1
+    setGameAreaBlur(false)
     gamePaused = false
     isPaused = false
     audio.resume()
