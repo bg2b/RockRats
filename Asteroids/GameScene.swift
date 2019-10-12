@@ -27,9 +27,6 @@ let specialScores = [
 
 class GameScene: GameTutorialScene {
   var scoreDisplay: SKLabelNode!
-  var pauseButton: TouchableSprite!
-  var continueButton: TouchableSprite!
-  var quitButton: TouchableSprite!
   var lastWarpInTime = 0.0
   var ufosToAvenge = 0
   var ufosKilledWithoutDying = 0
@@ -67,60 +64,11 @@ class GameScene: GameTutorialScene {
     centralDisplay.verticalAlignmentMode = .center
     centralDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.midY)
     moreInfo.addChild(centralDisplay)
-    // Pause, resume, and quit controls
-    let pauseControls = SKNode()
-    addChild(pauseControls)
-    pauseControls.name = "pauseControls"
-    pauseControls.zPosition = LevelZs.info.rawValue
-    let pauseTexture = Globals.textureCache.findTexture(imageNamed: "pause")
-    pauseButton = TouchableSprite(texture: pauseTexture, size: pauseTexture.size())
-    pauseButton.action = { [unowned self] in self.doPause() }
-    pauseButton.alpha = 0.1
-    pauseButton.position = CGPoint(x: gameFrame.minX + pauseButton.size.width / 2 + 10,
-                                   y: livesDisplay.position.y - pauseButton.size.height / 2 - 20)
-    pauseControls.addChild(pauseButton)
-    let continueTexture = Globals.textureCache.findTexture(imageNamed: "continue")
-    continueButton = TouchableSprite(texture: continueTexture, size: continueTexture.size())
-    continueButton.action = { [unowned self] in self.doContinue() }
-    continueButton.color = AppColors.green
-    continueButton.colorBlendFactor = 1
-    continueButton.position = pauseButton.position
-    continueButton.isHidden = true
-    pauseControls.addChild(continueButton)
-    let quitTexture = Globals.textureCache.findTexture(imageNamed: "quit")
-    quitButton = TouchableSprite(texture: quitTexture, size: quitTexture.size())
-    quitButton.action = { [unowned self] in self.doQuit() }
-    quitButton.color = AppColors.red
-    quitButton.colorBlendFactor = 1
-    quitButton.position = CGPoint(x: gameFrame.maxX - quitButton.size.width / 2 - 10, y: pauseButton.position.y)
-    quitButton.isHidden = true
-    pauseControls.addChild(quitButton)
   }
 
-  func doPause() {
-    pauseButton.isHidden = true
-    continueButton.isHidden = false
-    quitButton.isHidden = false
-    setGameAreaBlur(true)
-    gamePaused = true
-    isPaused = true
-    audio.pause()
-  }
-
-  func doContinue() {
-    pauseButton.isHidden = false
-    continueButton.isHidden = true
-    quitButton.isHidden = true
-    setGameAreaBlur(false)
-    gamePaused = false
-    isPaused = false
-    audio.resume()
-  }
-
-  func doQuit() {
+  override func doQuit() {
     stopHeartbeat()
-    audio.stop()
-    switchScene(to: Globals.menuScene)
+    super.doQuit()
   }
 
   func initFutureShader() {

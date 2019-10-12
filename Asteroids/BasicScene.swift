@@ -218,9 +218,10 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     }
     addChild(gameAreaCrop)
     gameArea.name = "gameArea"
-    if let filter = CIFilter(name: "CIGaussianBlur") {
-      filter.setValue(8, forKey: kCIInputRadiusKey)
+    if let filter = CIFilter(name: "CICrystallize") {
+      filter.setValue(10, forKey: kCIInputRadiusKey)
       gameArea.filter = filter
+      gameArea.shouldCenterFilter = true
     }
     gameArea.shouldEnableEffects = false
     gameAreaCrop.addChild(gameArea)
@@ -233,7 +234,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   func setGameAreaBlur(_ enable: Bool) {
     gameArea.shouldEnableEffects = enable && gameArea.filter != nil
   }
-  
+
   func fireUFOLaser(angle: CGFloat, position: CGPoint, speed: CGFloat) {
     let laser = Globals.spriteCache.findSprite(imageNamed: "lasersmall_red") { sprite in
       guard let texture = sprite.texture else { fatalError("Where is the laser texture?") }

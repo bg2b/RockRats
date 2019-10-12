@@ -10,7 +10,7 @@ import SpriteKit
 
 class TutorialScene: GameTutorialScene {
   var instructionsLabel: SKLabelNode!
-  var continueButton: Button? = nil
+  var moveOnButton: Button? = nil
   let attributes = AttrStyles(fontName: "Kenney Future Narrow", fontSize: 40)
   var maxThrust = CGFloat(0)
   var minThrust = CGFloat(0)
@@ -161,8 +161,8 @@ class TutorialScene: GameTutorialScene {
     instructionsLabel.typeIn(text: text, attributes: attributes, audio: audio, whenDone: whenDone)
   }
 
-  func showContinueButton(action: @escaping () -> Void) {
-    removeContinueButton()
+  func showMoveOnButton(action: @escaping () -> Void) {
+    removeMoveOnButton()
     let labelFrame = instructionsLabel.frame
     print("label frame \(labelFrame)")
     // Because the instructionsLabel is multi-line and left justified, it looks more
@@ -176,29 +176,29 @@ class TutorialScene: GameTutorialScene {
     button.run(SKAction.sequence([SKAction.fadeIn(withDuration: 0.25),
                                   SKAction.run { button.enable() }]))
     addChild(button)
-    continueButton = button
+    moveOnButton = button
   }
 
-  func removeContinueButton() {
-    guard let button = continueButton else { return }
+  func removeMoveOnButton() {
+    guard let button = moveOnButton else { return }
     button.disable()
     button.run(SKAction.sequence([SKAction.fadeOut(withDuration: 0.25),
                                   SKAction.removeFromParent()]))
-    continueButton = nil
+    moveOnButton = nil
   }
 
   func fadeOutInstructions(then action: @escaping () -> Void) {
-    removeContinueButton()
+    removeMoveOnButton()
     instructionsLabel.run(SKAction.sequence([SKAction.fadeOut(withDuration: 0.25),
                                              SKAction.hide()]), completion: action)
   }
 
-  func continueThen(action: @escaping () -> Void) -> (() -> Void) {
-    return { self.showContinueButton { self.fadeOutInstructions { action() } } }
+  func moveOnThen(action: @escaping () -> Void) -> (() -> Void) {
+    return { self.showMoveOnButton { self.fadeOutInstructions { action() } } }
   }
 
   func giveSimpleInstructions(text: String, then action: @escaping () -> Void) {
-    giveInstructions(text: text, whenDone: continueThen(action: action))
+    giveInstructions(text: text, whenDone: moveOnThen(action: action))
   }
 
   func topInstructions(_ instructions: String, height: CGFloat = 200) {
@@ -262,7 +262,7 @@ class TutorialScene: GameTutorialScene {
   func observeRotate() {
     wait(for: 1) {
       if self.observedMinRotate < -0.75 && self.observedMaxRotate > 0.75 {
-        (self.continueThen { self.tutorial6() })()
+        (self.moveOnThen { self.tutorial6() })()
       } else {
         self.observeRotate()
       }
@@ -284,7 +284,7 @@ class TutorialScene: GameTutorialScene {
   func observeThrust() {
     wait(for: 1) {
       if self.observedMaxThrust > 0.75 && self.player.requiredPhysicsBody().velocity.norm2() > 200 {
-        (self.continueThen { self.tutorial7() })()
+        (self.moveOnThen { self.tutorial7() })()
       } else {
         self.observeThrust()
       }
@@ -305,7 +305,7 @@ class TutorialScene: GameTutorialScene {
   func observeStop() {
     wait(for: 1) {
       if self.player.requiredPhysicsBody().velocity.norm2() < 50 {
-        (self.continueThen { self.tutorial8() })()
+        (self.moveOnThen { self.tutorial8() })()
       } else {
         self.observeStop()
       }
@@ -335,7 +335,7 @@ class TutorialScene: GameTutorialScene {
   func observeReverse() {
     wait(for: 1) {
       if self.observedMinThrust < -0.75 {
-        (self.continueThen { self.tutorial10() })()
+        (self.moveOnThen { self.tutorial10() })()
       } else {
         self.observeReverse()
       }
@@ -384,7 +384,7 @@ class TutorialScene: GameTutorialScene {
   func observeFiring() {
     wait(for: 1) {
       if self.observedLasersFired > 5 {
-        (self.continueThen { self.tutorial14() })()
+        (self.moveOnThen { self.tutorial14() })()
       } else {
         self.observeFiring()
       }
@@ -413,7 +413,7 @@ class TutorialScene: GameTutorialScene {
   func observeAsteroids(_ whenCleared: @escaping () -> Void) {
     wait(for: 1) {
       if self.asteroids.isEmpty && self.player.parent != nil{
-        (self.continueThen { whenCleared() })()
+        (self.moveOnThen { whenCleared() })()
       } else {
         self.observeAsteroids(whenCleared)
       }
@@ -493,7 +493,7 @@ class TutorialScene: GameTutorialScene {
   func observeJump() {
     wait(for: 1) {
       if self.hasJumped {
-        (self.continueThen { self.tutorial23() })()
+        (self.moveOnThen { self.tutorial23() })()
       } else {
         self.observeJump()
       }

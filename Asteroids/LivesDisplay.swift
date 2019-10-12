@@ -12,18 +12,27 @@ class LivesDisplay: SKNode {
   let maxIcons = 5
   var lifeIcons = [SKSpriteNode]()
   let numericDisplay: SKLabelNode
+  let dontDie: SKLabelNode
 
-  required init(extraColor: UIColor) {
+  override required init() {
     numericDisplay = SKLabelNode(fontNamed: "Kenney Future")
     numericDisplay.name = "extraLives"
-    numericDisplay.fontColor = extraColor
+    numericDisplay.fontColor = AppColors.textColor
     numericDisplay.horizontalAlignmentMode = .left
     numericDisplay.verticalAlignmentMode = .center
     numericDisplay.isHidden = true
+    dontDie = SKLabelNode(fontNamed: "Kenney Future")
+    dontDie.name = "dontDie"
+    dontDie.text = "Don't die"
+    dontDie.fontColor = AppColors.textColor
+    dontDie.horizontalAlignmentMode = .left
+    dontDie.verticalAlignmentMode = .center
+    dontDie.isHidden = false
     super.init()
     let texture = Globals.textureCache.findTexture(imageNamed: "life_blue")
     let spacing = texture.size().width * 11 / 10
     numericDisplay.fontSize = texture.size().height
+    dontDie.fontSize = numericDisplay.fontSize
     var nextX = texture.size().width / 2
     for _ in 0..<maxIcons {
       let lifeIcon = SKSpriteNode(texture: texture)
@@ -35,6 +44,7 @@ class LivesDisplay: SKNode {
     }
     numericDisplay.position = CGPoint(x: nextX - spacing / 2, y: 0)
     addChild(numericDisplay)
+    addChild(dontDie)
   }
 
   required init(coder aDecoder: NSCoder) {
@@ -49,5 +59,6 @@ class LivesDisplay: SKNode {
     } else {
       numericDisplay.isHidden = true
     }
+    dontDie.isHidden = (numLives != 0)
   }
 }
