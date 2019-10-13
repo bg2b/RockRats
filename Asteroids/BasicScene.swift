@@ -626,13 +626,13 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     Globals.conformingPhysicsCache.stats()
     Globals.asteroidSplitEffectsCache.stats()
     Globals.sounds.stats()
-    resetUtimeOffset()
     logging("\(name!) didMove to view")
   }
 
   override func willMove(from view: SKView) {
     logging("\(name!) willMove from view")
     removeAllActions()
+    resetUtimeOffset()
   }
 
   func removeActionsForEverything(node: SKNode) {
