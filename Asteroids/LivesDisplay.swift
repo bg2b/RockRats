@@ -8,6 +8,19 @@
 
 import SpriteKit
 
+let dontDieMessages = [
+  "Don't die",
+  "Livin' on a prayer",
+  "Hold on, baby, hold on",
+  "Standing on the brink",
+  "Who wants to live forever?",
+  "Nothin' left to lose",
+  "Nothing lasts forever",
+  "Never say die",
+  "Die another day",
+  "I'm not dead yet"
+]
+
 class LivesDisplay: SKNode {
   let maxIcons = 5
   var lifeIcons = [SKSpriteNode]()
@@ -23,7 +36,7 @@ class LivesDisplay: SKNode {
     numericDisplay.isHidden = true
     dontDie = SKLabelNode(fontNamed: "Kenney Future")
     dontDie.name = "dontDie"
-    dontDie.text = "Don't die"
+    dontDie.text = dontDieMessages[0]
     dontDie.fontColor = AppColors.textColor
     dontDie.horizontalAlignmentMode = .left
     dontDie.verticalAlignmentMode = .center
@@ -59,6 +72,7 @@ class LivesDisplay: SKNode {
     } else {
       numericDisplay.isHidden = true
     }
+    dontDie.text = dontDieMessages.randomElement()!
     dontDie.isHidden = (numLives != 0)
   }
 }
