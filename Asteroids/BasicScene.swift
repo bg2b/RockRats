@@ -598,6 +598,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     super.update(currentTime)
     Globals.lastUpdateTime = currentTime
     logging("\(name!) update", "time \(currentTime)")
+    _ = getUtimeOffset(view: view)
   }
 
   // The initializers should also be overridden by subclasses, but be sure to call
@@ -625,6 +626,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     Globals.conformingPhysicsCache.stats()
     Globals.asteroidSplitEffectsCache.stats()
     Globals.sounds.stats()
+    resetUtimeOffset()
     logging("\(name!) didMove to view")
   }
 

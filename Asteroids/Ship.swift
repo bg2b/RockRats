@@ -202,7 +202,7 @@ class Ship: SKNode {
     effect.position = position
     effect.zRotation = zRotation
     effect.shader = shipAppearance[keyPath: direction]
-    setStartTimeAttrib(effect)
+    setStartTimeAttrib(effect, view: scene?.view)
     return effect
   }
 

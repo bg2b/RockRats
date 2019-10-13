@@ -8,6 +8,140 @@
 
 import SpriteKit
 
+struct TextureBitmap<T> {
+  let textureSize: CGSize
+  let width: Int
+  let height: Int
+  let pixels: [T]
+
+  init(texture: SKTexture, getPixelInfo: (UInt32) -> T) {
+    textureSize = texture.size()
+    let image = texture.cgImage()
+    width = image.width
+    height = image.height
+    let cgContext = CGContext(data: nil,
+                              width: width, height: height,
+                              bitsPerComponent: 8, bytesPerRow: 4 * width,
+                              space: CGColorSpaceCreateDeviceRGB(),
+                              bitmapInfo: CGBitmapInfo.byteOrder32Little.rawValue |
+                                CGImageAlphaInfo.premultipliedLast.rawValue)
+    guard let context = cgContext else { fatalError("Could not create graphics context") }
+    context.draw(image, in: CGRect(origin: .zero, size: CGSize(width: width, height: height)))
+    guard let data = context.data else { fatalError("Graphics context has no data") }
+    pixels = (0 ..< width * height).map {
+      return getPixelInfo((data + 4 * $0).load(as: UInt32.self))
+    }
+  }
+}
+
+// Notes about u_time...
+//
+// It seems that u_time is zero when it first gets used in some shader.  All well and
+// good.  When I write an effect like the hyperspace shaders, they'll do some sort of
+// warping over time.  For example, going into hyperspace has the sprite unwarped at
+// u_time = 0 and then start twisting as u_time increases.
+//
+// The problem is that when I use the shader a second time, u_time doesn't go back to
+// zero.  It's like a clock that started with the first shader use, and it just keeps
+// running in the background.
+//
+// Worse, it applies to all shaders, not just ones that I want to reuse.  So I can't
+// simply create a shader that wants u_time = 0, use it, and then throw it away.
+//
+// What I can do is learn the offset between u_time and the time passed to update(_:
+// TimeInterval).  The first time that a shader gets used (when u_time is guaranteed
+// to be 0), we can save the offset.  After that, when we need to invoke a shader
+// that would want u_time = 0, we instead refer to u_time - offset.  The offset can
+// be passed in by a shader attribute.  That's the whole a_start_time business.
+//
+// The one wrinkle is that it seems that it's somehow possible for there to be a
+// drift between u_time and the time passed to update().  How I don't know, but I had
+// at least one occasion where I had quit the app (gone to the iPad home screen) and
+// then come back to it a couple of days later.  When I did, the shader effects that
+// relied on u_time - offset = 0 were screwed up.  So I needed to come up with a way
+// to get whatever u_time the shaders were using.  That's done with the utimeShader
+// stuff.
+//
+// utimeShader is a shader that encodes u_time in the three components of a pixel
+// color.  I need fractions of a second, so I multiply u_time by 128 (iPad Pro
+// refresh is 120 Hz) and then peel off 24 bits of precision to store in R, G, and B.
+// To get that color out, I use SKView's texture(from: SKnode) method.  I make a tiny
+// sprite (a 2x2 square, but 1x1 might be OK too) and then render that into a
+// texture.  The texture is converted into a pixel array with the TextureBitmap
+// struct.  Then readUtime takes the first pixel and reverses the encoding process to
+// get the u_time that the utimeShader saw.  We reset the saved utimeOffset each time
+// we do a scene transition or when the app becomes active.  The update(_:
+// TimeInterval) in BasicScene calls getUtimeOffset each time through; that will do
+// readUtime once and then cache the value of the offset.
+
+var utimeShader = SKShader(source:
+  """
+  void main() {
+    float time = u_time * 128 + 0.5;
+    time /= 256;
+    float red = fract(time);
+    time = floor(time);
+    time /= 256;
+    float green = fract(time);
+    time = floor(time);
+    time /= 256;
+    float blue = fract(time);
+    gl_FragColor = vec4(red, green, blue, 1.0);
+  }
+  """
+)
+
+func readUtime(view: SKView) -> Double {
+  let dotTexture = Globals.textureCache.findTexture(imageNamed: "dot")
+  let sprite = SKSpriteNode(texture: dotTexture, size: dotTexture.size())
+  sprite.shader = utimeShader
+  guard let rendered = view.texture(from: sprite) else {
+    logging("readUtime failed to render shaded sprite")
+    return 0
+  }
+  let bitmap = TextureBitmap<UInt32>(texture: rendered) { $0 }
+  var pixel = bitmap.pixels[0]
+  var result = 0.0
+  pixel >>= 8
+  result += Double(pixel & 0xff)
+  pixel >>= 8
+  result *= 256
+  result += Double(pixel & 0xff)
+  pixel >>= 8
+  result *= 256
+  result += Double(pixel & 0xff)
+  result /= 128
+  logging("u_time in shaders is \(result)")
+  return result
+}
+
+var utimeOffset: Double?
+
+func getUtimeOffset(view: SKView?) -> Double {
+  if let utimeOffset = utimeOffset {
+    return utimeOffset
+  }
+  guard let view = view else {
+    logging("No view to set utime offset")
+    return 0
+  }
+  let newOffset = readUtime(view: view) - Globals.lastUpdateTime
+  logging("utimeOffset set to \(newOffset) at time \(Globals.lastUpdateTime)")
+  utimeOffset = newOffset
+  return newOffset
+}
+
+func resetUtimeOffset() {
+  utimeOffset = nil
+}
+
+func setStartTimeAttrib(_ effect: SKSpriteNode, view: SKView?) {
+  // The view parameter can only be nil if something else has already called
+  // getUtimeOffset with a real view.
+  let startUtime = Globals.lastUpdateTime + getUtimeOffset(view: view)
+  effect.setValue(SKAttributeValue(float: Float(startUtime)), forAttribute: "a_start_time")
+}
+
 func swirlShader(forTexture texture: SKTexture, inward: Bool, warpTime: Double) -> SKShader {
   // This one is a sort of down-the-drain effect (or the reverse of it).
   //
@@ -99,21 +233,6 @@ func fanFoldShader(forTexture texture: SKTexture, warpTime: Double) -> SKShader 
   let shader = SKShader(source: shaderSource)
   shader.attributes = [SKAttribute(name: "a_start_time", type: .float)]
   return shader
-}
-
-var firstUTimeRef: Double?
-
-func setStartTimeAttrib(_ effect: SKSpriteNode) {
-  if let firstUTimeRef = firstUTimeRef {
-    // u_time in the shaders started at 0 when the global time was firstUTimeRef.
-    // The global time is now Globals.lastUpdateTime.
-    // Therefore u_time now is Globals.lastUpdateTime - firstUTimeRef.
-    // We want set the offset a_start_time to this to shift the effective u_time to 0.
-    effect.setValue(SKAttributeValue(float: Float(Globals.lastUpdateTime - firstUTimeRef)), forAttribute: "a_start_time")
-  } else {
-    effect.setValue(SKAttributeValue(float: 0), forAttribute: "a_start_time")
-    firstUTimeRef = Globals.lastUpdateTime
-  }
 }
 
 func starBlink(at position: CGPoint, throughAngle angle: CGFloat, duration: Double) -> SKSpriteNode {

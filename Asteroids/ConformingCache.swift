@@ -8,28 +8,11 @@
 
 import SpriteKit
 
-struct ImageMask {
-  let textureSize: CGSize
-  let width: Int
-  let height: Int
-  let mask: [Bool]
+typealias ImageMask = TextureBitmap<Bool>
 
+extension ImageMask {
   init(texture: SKTexture, alphaThreshold: CGFloat) {
-    textureSize = texture.size()
-    let image = texture.cgImage()
-    width = image.width
-    height = image.height
-    let cgContext = CGContext(data: nil,
-                              width: width, height: height,
-                              bitsPerComponent: 8, bytesPerRow: 4 * width,
-                              space: CGColorSpaceCreateDeviceRGB(),
-                              bitmapInfo: CGBitmapInfo.byteOrder32Little.rawValue |
-                                CGImageAlphaInfo.premultipliedLast.rawValue)
-    guard let context = cgContext else { fatalError("Could not create graphics context") }
-    context.draw(image, in: CGRect(origin: .zero, size: CGSize(width: width, height: height)))
-    guard let data = context.data else { fatalError("Graphics context has no data") }
-    mask = (0 ..< width * height).map {
-      let pixel = (data + 4 * $0).load(as: UInt32.self)
+    self.init(texture: texture) { pixel in
       let alpha = pixel & 0xff
       return CGFloat(alpha) >= alphaThreshold * 256
     }
@@ -39,7 +22,7 @@ struct ImageMask {
     if x < 0 || x >= width || y < 0 || y >= height {
       return false
     } else {
-      return mask[x + y * width]
+      return pixels[x + y * width]
     }
   }
 
