@@ -77,15 +77,12 @@ struct TextureBitmap<T> {
 var utimeShader = SKShader(source:
   """
   void main() {
-    float time = u_time * 128 + 0.5;
-    time /= 256;
-    float red = fract(time);
-    time = floor(time);
-    time /= 256;
-    float green = fract(time);
-    time = floor(time);
-    time /= 256;
-    float blue = fract(time);
+    uint32_t time = round(u_time * 128 + 0.5);
+    float red = (time & 0xff) / 255.0;
+    time >>= 8;
+    float green = (time & 0xff) / 255.0;
+    time >>= 8;
+    float blue = (time & 0xff) / 255.0;
     gl_FragColor = vec4(red, green, blue, 1.0);
   }
   """
