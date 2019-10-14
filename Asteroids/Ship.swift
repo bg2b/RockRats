@@ -172,11 +172,22 @@ class Ship: SKNode {
     }
     thrustForce *= maxThrust
     let maxSpeed = Globals.gameConfig.playerMaxSpeed
-    let currentSpeed = body.velocity.norm2()
-    if currentSpeed > 0.5 * maxSpeed {
-      thrustForce *= (maxSpeed - currentSpeed) / (0.5 * maxSpeed)
+    var currentSpeed = body.velocity.norm2()
+    if currentSpeed > maxSpeed {
+      body.velocity = body.velocity.scale(by: maxSpeed / currentSpeed)
+      currentSpeed = maxSpeed
     }
-    body.applyForce(CGVector(angle: zRotation).scale(by: thrustForce))
+    var appliedForce = CGVector(angle: zRotation).scale(by: thrustForce)
+    if currentSpeed > 0.5 * maxSpeed {
+      let vhat = body.velocity.scale(by: 1 / currentSpeed)
+      var direct = appliedForce.dotProd(vhat)
+      let tangentialForce = appliedForce - vhat.scale(by: direct)
+      if direct > 0 {
+        direct *= (maxSpeed - currentSpeed) / (0.5 * maxSpeed)
+      }
+      appliedForce = tangentialForce + vhat.scale(by: direct)
+    }
+    body.applyForce(appliedForce)
     if thrustForce > 0 {
       forwardFlamesOn(thrustAmount)
     } else if thrustForce < 0 {
