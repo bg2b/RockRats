@@ -66,6 +66,8 @@
 		FD53169322DC1A0600F09E57 /* lasersmall_red@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53168D22DC1A0500F09E57 /* lasersmall_red@2x.png */; };
 		FD537DD6231BE385003312B3 /* ufo_laser.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD537DD5231BE384003312B3 /* ufo_laser.wav */; };
 		FD6F23DE234357710083A913 /* ConformingCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD6F23DD234357710083A913 /* ConformingCache.swift */; };
+		FD7635B02354A410000543E7 /* GameCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD7635AF2354A410000543E7 /* GameCenter.swift */; };
+		FD7635B32354AE1A000543E7 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FD7635B22354AE1A000543E7 /* GameKit.framework */; };
 		FD79323622D20FE600E7D336 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD79323522D20FE600E7D336 /* AppDelegate.swift */; };
 		FD79323C22D20FE600E7D336 /* BasicScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD79323B22D20FE600E7D336 /* BasicScene.swift */; };
 		FD79323E22D20FE600E7D336 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD79323D22D20FE600E7D336 /* GameViewController.swift */; };
@@ -177,6 +179,8 @@
 		FD53168D22DC1A0500F09E57 /* lasersmall_red@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "lasersmall_red@2x.png"; sourceTree = "<group>"; };
 		FD537DD5231BE384003312B3 /* ufo_laser.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo_laser.wav; sourceTree = "<group>"; };
 		FD6F23DD234357710083A913 /* ConformingCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConformingCache.swift; sourceTree = "<group>"; };
+		FD7635AF2354A410000543E7 /* GameCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCenter.swift; sourceTree = "<group>"; };
+		FD7635B22354AE1A000543E7 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
 		FD79323222D20FE600E7D336 /* Asteroids.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Asteroids.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD79323522D20FE600E7D336 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		FD79323B22D20FE600E7D336 /* BasicScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasicScene.swift; sourceTree = "<group>"; };
@@ -224,6 +228,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FD7635B32354AE1A000543E7 /* GameKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -277,12 +282,21 @@
 			path = sounds;
 			sourceTree = "<group>";
 		};
+		FD7635B12354AE19000543E7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				FD7635B22354AE1A000543E7 /* GameKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		FD79322922D20FE600E7D336 = {
 			isa = PBXGroup;
 			children = (
 				FD79325022D21AA000E7D336 /* Asset creation */,
 				FD79323422D20FE600E7D336 /* Asteroids */,
 				FD79323322D20FE600E7D336 /* Products */,
+				FD7635B12354AE19000543E7 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -307,6 +321,7 @@
 				FD1B389F234C904C00674161 /* CyclicCache.swift */,
 				FDC6A7FB2334E054001A4774 /* EnergyBar.swift */,
 				FDD831F122EDB50200CA4EC6 /* Explosions.swift */,
+				FD7635AF2354A410000543E7 /* GameCenter.swift */,
 				FDD831F522F187D200CA4EC6 /* GameConfig.swift */,
 				FDD8FB90232B99BE00A83EB5 /* GameScene.swift */,
 				FD96AE1F233A4BE600D4CAFA /* GameTutorialScene.swift */,
@@ -546,6 +561,7 @@
 				FDD44F95233787ED00C13609 /* IntroScene.swift in Sources */,
 				FDD831F622F187D200CA4EC6 /* GameConfig.swift in Sources */,
 				FD79323622D20FE600E7D336 /* AppDelegate.swift in Sources */,
+				FD7635B02354A410000543E7 /* GameCenter.swift in Sources */,
 				FDDF488722D2A700006FB86F /* SpriteCache.swift in Sources */,
 				FDF92B422322456900CC4DFE /* Hyperspace.swift in Sources */,
 				FD96AE20233A4BE600D4CAFA /* GameTutorialScene.swift in Sources */,

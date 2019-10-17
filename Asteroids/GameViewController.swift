@@ -34,6 +34,7 @@ class GameViewController: UIViewController {
       let toPresent = Globals.userData.hasDoneIntro.value ? Globals.menuScene! : IntroScene(size: size)
       logging("viewDidLoad will present \(toPresent.name!)")
       view.presentScene(toPresent)
+      Globals.gcInterface = GameCenterInterface(presenter: { vc in Globals.menuScene.setGameCenterAuth(viewController: vc) })
       view.preferredFramesPerSecond = 120
       view.ignoresSiblingOrder = true
       view.showsFPS = true
@@ -67,6 +68,7 @@ class GameViewController: UIViewController {
 }
 
 extension Globals {
+  static var gcInterface: GameCenterInterface!
   static var ptsToGameUnits = CGFloat(1)
   static var menuScene: MenuScene!
   static var safeAreaPaddingLeft = CGFloat(0)

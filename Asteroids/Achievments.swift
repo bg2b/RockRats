@@ -10,17 +10,15 @@ import SpriteKit
 import GameKit
 
 enum Achievement: String {
+  // Hidden
   case leeroyJenkins = "leeroyJenkins"
   case spinalTap = "spinalTap"
   case redShirt = "redShirt"
   case blastFromThePast = "blastFromThePast"
   case backToTheFuture = "backToTheFuture"
   case doubleTrouble = "doubleTrouble"
-  case armedAndDangerous = "armedAndDangerous"
   case hanShotFirst = "hanShotFirst"
-  case quickFingers = "quickFingers"
   case rightPlaceWrongTime = "rightPlaceWrongTime"
-  case trickShot = "trickShot"
   case itsATrap = "itsATrap"
   case hanYolo = "hanYolo"
   case score404 = "notFound"
@@ -30,18 +28,49 @@ enum Achievement: String {
   case bigBrother = "bigBrother"
   case whatAreTheOdds = "whatAreTheOdds"
   case keepOnTrekking = "keepOnTrekking"
+  // Normal
+  case spaceCadet = "spaceCadet"
+  case spaceRanger = "spaceRanger"
+  case spaceAce = "spaceAce"
+  case quickFingers = "quickFingers"
+  case trickShot = "trickShot"
   case archer = "archer"
   case sniper = "sniper"
   case sharpshooter = "sharpshooter"
   case hawkeye = "hawkeye"
+  case armedAndDangerous = "armedAndDangerous"
+  // Multi-level
+  case ufoHunter = "ufoHunter"
+
+  var gameCenterID: String { "org.davidlong.Asteroids." + rawValue }
+
+  func gameCenterLevelID(_ level: Int) -> String { return gameCenterID + String(level + 1) }
 }
 
+let achievementLevels = [
+  Achievement.ufoHunter: [25, 100, 300]
+]
+
 func reportAchievement(achievement: Achievement) {
-  logging("would send achievement \(achievement.rawValue) to gamecenter")
-    /*
-  GKAchievement.report([GKAchievement(identifier: achievement.rawValue)]) { error in
-    guard let e = error else { print("worked"); return }
-    print(e)
+  if let gc = Globals.gcInterface, gc.enabled {
+    if let levels = achievementLevels[achievement] {
+      logging("Reporting progress in multi-level achievement \(achievement.gameCenterID)")
+      for level in 0 ..< levels.count {
+        gc.reportProgress(achievement.gameCenterLevelID(level), amount: 100.0 / Double(levels[level]))
+      }
+    } else {
+      if let status = gc.statusOfAchievement(achievement.gameCenterID) {
+        if status == 100 {
+          logging("Achievement \(achievement.rawValue) already completed")
+        } else {
+          gc.reportCompletion(achievement.gameCenterID)
+        }
+      } else {
+        // We don't know the status for some reason
+        logging("Achievement \(achievement.rawValue) with no status (maybe not in Game Center yet)")
+      }
+    }
+  } else {
+    logging("Achievement \(achievement.rawValue) but Game Center is disabled")
   }
- */
 }

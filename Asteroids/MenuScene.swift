@@ -7,12 +7,15 @@
 //
 
 import SpriteKit
+import GameKit
 
-class MenuScene: BasicScene {
+class MenuScene: BasicScene, GKGameCenterControllerDelegate {
   var asteroidsHit = 0
   var gameStarting = false
   var menu: SKNode!
   var highScore: SKLabelNode!
+  weak var gameCenterAuthVC: UIViewController? = nil
+  var presentingGCAuth = false
 
   func initMenu() {
     menu = SKNode()
@@ -32,10 +35,15 @@ class MenuScene: BasicScene {
     highScore.verticalAlignmentMode = .center
     highScore.position = CGPoint(x: fullFrame.midX, y: 0.75 * fullFrame.midY + 0.125 * fullFrame.minY)
     menu.addChild(highScore)
-    let playButton = Button(forText: "Play", size: CGSize(width: 250, height: 75), fontName: "Kenney Future Narrow")
+    let buttonHeight = CGFloat(50)
+    let playButton = Button(forText: "Play", size: CGSize(width: 400, height: buttonHeight), fontName: "Kenney Future Narrow")
     playButton.position = CGPoint(x: fullFrame.midX, y: 0.625 * fullFrame.midY + 0.375 * fullFrame.minY)
     playButton.action = { [unowned self] in self.startGame() }
     menu.addChild(playButton)
+    let gcButton = Button(forText: "Game Center", size: CGSize(width: 400, height: buttonHeight), fontName: "Kenney Future Narrow")
+    gcButton.position = CGPoint(x: fullFrame.midX, y: playButton.position.y - buttonHeight - 25)
+    gcButton.action = { [unowned self] in self.showGameCenter() }
+    menu.addChild(gcButton)
   }
 
   func spawnAsteroids() {
@@ -79,6 +87,43 @@ class MenuScene: BasicScene {
     switchWhenQuiescent(newGame)
   }
 
+  func setGameCenterAuth(viewController: UIViewController?) {
+    gameCenterAuthVC = viewController
+    if gameCenterAuthVC == nil {
+      logging("\(name!) clears Game Center view controller")
+      presentingGCAuth = false
+      isPaused = false
+    } else {
+      logging("\(name!) sets Game Center view controller")
+    }
+  }
+
+  func gameCenterAuth() {
+    if let gcvc = gameCenterAuthVC, !presentingGCAuth, let rootVC = view?.window?.rootViewController {
+      logging("\(name!) will present Game Center view controller")
+      presentingGCAuth = true
+      isPaused = true
+      rootVC.present(gcvc, animated: true)
+    }
+  }
+
+  func showGameCenter() {
+    guard let rootVC = view?.window?.rootViewController, Globals.gcInterface.enabled else {
+      logging("Can't show Game Center")
+      return
+    }
+    let gcvc = GKGameCenterViewController()
+    gcvc.gameCenterDelegate = self
+    gcvc.viewState = .achievements
+    gcvc.leaderboardTimeScope = .week
+    isPaused = true
+    rootVC.present(gcvc, animated: true)
+  }
+
+  func gameCenterViewControllerDidFinish(_ gcvc: GKGameCenterViewController) {
+    gcvc.dismiss(animated: true) { self.isPaused = false }
+  }
+
   override func didMove(to view: SKView) {
     super.didMove(to: view)
     Globals.gameConfig = loadGameConfig(forMode: "menu")
@@ -100,6 +145,7 @@ class MenuScene: BasicScene {
       }
     }
     playfield.wrapCoordinates()
+    gameCenterAuth()
   }
 
   required init(size: CGSize) {

@@ -68,7 +68,16 @@ class GameScene: GameTutorialScene {
 
   override func doQuit() {
     stopHeartbeat()
+    endGameSaveProgress()
     super.doQuit()
+  }
+
+  func endGameSaveProgress() {
+    Globals.userData.highScore.value = max(self.score, Globals.userData.highScore.value)
+    if Globals.gcInterface.enabled {
+      Globals.gcInterface.flushProgress()
+      Globals.gcInterface.saveScore(score)
+    }
   }
 
   func initFutureShader() {
@@ -164,6 +173,7 @@ class GameScene: GameTutorialScene {
   }
 
   func addToScore(_ amount: Int) {
+    let initialScore = score
     score += amount
     let extraLivesEarned = score / Globals.gameConfig.extraLifeScore
     if extraLivesEarned > extraLivesAwarded {
@@ -172,6 +182,15 @@ class GameScene: GameTutorialScene {
       extraLivesAwarded += 1
     }
     scoreDisplay.text = "\(score)"
+    if initialScore < 2000 && score >= 2000 {
+      reportAchievement(achievement: .spaceCadet)
+    }
+    else if initialScore < 4000 && score >= 4000 {
+      reportAchievement(achievement: .spaceRanger)
+    }
+    else if initialScore < 6000 && score >= 6000 {
+      reportAchievement(achievement: .spaceAce)
+    }
     for special in specialScores {
       if score == special.score {
         // We don't display the special message immediately in case the player is in the
@@ -303,6 +322,7 @@ class GameScene: GameTutorialScene {
     if laser.requiredPhysicsBody().hasWrapped {
       reportAchievement(achievement: .trickShot)
     }
+    reportAchievement(achievement: .ufoHunter)
     addToScore(ufoPoints(ufo))
     removeLaser(laser as! SKSpriteNode)
     destroyUFO(ufo as! UFO)
@@ -344,7 +364,7 @@ class GameScene: GameTutorialScene {
       self.removeAction(forKey: "spawnWave")
       wait(for: delay) {
         self.audio.soundEffect(.gameOver)
-        Globals.userData.highScore.value = max(self.score, Globals.userData.highScore.value)
+        self.endGameSaveProgress()
         self.displayMessage("GAME OVER", forTime: 4)
         self.wait(for: 6) { self.switchScene(to: Globals.menuScene) }
       }
