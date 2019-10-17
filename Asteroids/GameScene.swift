@@ -17,7 +17,7 @@ struct SpecialScore {
 let specialScores = [
   SpecialScore(score: 42, display: "Don't Panic", achievement: .dontPanic),
   SpecialScore(score: 404, display: "404: Not Found", achievement: .score404),
-  SpecialScore(score: 612, display: "B-612", achievement: .littlePrince),
+  SpecialScore(score: 612, display: "B 612", achievement: .littlePrince),
   SpecialScore(score: 1138, display: "3720 to 1", achievement: .whatAreTheOdds),
   SpecialScore(score: 1701, display: "NCC-1701", achievement: .keepOnTrekking),
   SpecialScore(score: 1984, display: "I'm watching you", achievement: .bigBrother),
