@@ -22,6 +22,16 @@ class GameTutorialScene: BasicScene {
   var joystickTouch: UITouch? = nil
   var fireOrWarpTouches = [UITouch: CGPoint]()
 
+  override var isPaused: Bool {
+    get { super.isPaused }
+    set {
+      if gamePaused && !newValue {
+        logging("holding isPaused at true because gamePaused is true")
+      }
+      super.isPaused = newValue || gamePaused
+    }
+  }
+
   func initControls() {
     isUserInteractionEnabled = true
   }
