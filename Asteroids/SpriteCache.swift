@@ -45,6 +45,7 @@ class SpriteCache {
     sprite.removeAllActions()
     sprite.position = .zero
     sprite.speed = 1
+    sprite.isPaused = false
     sprites[sprite.name!]!.append(sprite)
     recycled += 1
   }
