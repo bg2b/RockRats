@@ -12,11 +12,9 @@ import GameKit
 enum Achievement: String {
   // Hidden
   case leeroyJenkins = "leeroyJenkins"
-  case spinalTap = "spinalTap"
   case redShirt = "redShirt"
   case blastFromThePast = "blastFromThePast"
   case backToTheFuture = "backToTheFuture"
-  case doubleTrouble = "doubleTrouble"
   case hanShotFirst = "hanShotFirst"
   case rightPlaceWrongTime = "rightPlaceWrongTime"
   case itsATrap = "itsATrap"
@@ -33,7 +31,9 @@ enum Achievement: String {
   case spaceRanger = "spaceRanger"
   case spaceAce = "spaceAce"
   case quickFingers = "quickFingers"
+  case spinalTap = "spinalTap"
   case trickShot = "trickShot"
+  case doubleTrouble = "doubleTrouble"
   case archer = "archer"
   case sniper = "sniper"
   case sharpshooter = "sharpshooter"

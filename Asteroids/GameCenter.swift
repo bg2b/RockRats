@@ -118,17 +118,17 @@ class GameCenterInterface {
     let achievement = GKAchievement(identifier: identifier)
     achievement.percentComplete = 100
     achievement.showsCompletionBanner = true
+    // Mark it so that statusOfAchievement will indicate that it's done and we won't
+    // report it multiple times.  If the report fails for some reason, we'll fall
+    // back by sticking it in playerAchievementsProgress so that hopefully it'll get
+    // reported to Game Center successfully when the game finishes.
+    playerAchievements[identifier] = 100
     GKAchievement.report([achievement]) { [weak self] error in
       if let error = error {
         logging("Error reporting achievement \(identifier) to Game Center: \(error.localizedDescription)")
         // We'll stick this in with the progress achievements and hope that the flush
         // after a game finishes manages to succeed.
         self?.playerAchievementsProgress[identifier] = 100
-      } else {
-        // If we successfully reported the achievement, mark it so that
-        // statusOfAchievement will indicate that it's done and we won't report it
-        // multiple times.
-        self?.playerAchievements[identifier] = 100
       }
     }
   }
