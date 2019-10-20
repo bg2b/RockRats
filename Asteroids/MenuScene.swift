@@ -10,7 +10,7 @@ import SpriteKit
 import GameKit
 
 class MenuScene: BasicScene, GKGameCenterControllerDelegate {
-  var asteroidsHit = 0
+  var shotsFired = [UFO: Int]()
   var gameStarting = false
   var menu: SKNode!
   var highScore: SKLabelNode!
@@ -54,22 +54,30 @@ class MenuScene: BasicScene, GKGameCenterControllerDelegate {
   }
 
   func spawnUFOs() {
-    if !gameStarting && asteroids.count >= 3 && ufos.isEmpty {
-      spawnUFO(ufo: UFO(brothersKilled: 0, audio: nil))
-      asteroidsHit = 0
+    if !gameStarting && asteroids.count >= 3 && ufos.count < Globals.gameConfig.value(for: \.maxUFOs) {
+      let ufo = UFO(brothersKilled: 0, audio: nil)
+      spawnUFO(ufo: ufo)
+      shotsFired[ufo] = 0
     }
     wait(for: 5) { self.spawnUFOs() }
+  }
+
+  override func warpOutUFO(_ ufo: UFO) {
+    shotsFired.removeValue(forKey: ufo)
+    super.warpOutUFO(ufo)
+  }
+
+  override func destroyUFO(_ ufo: UFO) {
+    shotsFired.removeValue(forKey: ufo)
+    super.destroyUFO(ufo)
   }
 
   func didBegin(_ contact: SKPhysicsContact) {
     when(contact, isBetween: .ufoShot, and: .asteroid) {
       ufoLaserHit(laser: $0, asteroid: $1)
-      asteroidsHit += 1
-      if asteroidsHit > 3 && Int.random(in: 0..<10) == 0 {
-        let _ = warpOutUFOs()
-      }
     }
     when(contact, isBetween: .ufo, and: .asteroid) { ufoCollided(ufo: $0, asteroid: $1) }
+    when(contact, isBetween: .ufo, and: .ufo) { ufosCollided(ufo1: $0, ufo2: $1) }
   }
 
   func switchWhenQuiescent(_ newScene: SKScene) {
@@ -82,7 +90,7 @@ class MenuScene: BasicScene, GKGameCenterControllerDelegate {
 
   func startGame() {
     gameStarting = true
-    let _ = warpOutUFOs(averageDelay: 0.25)
+    _ = warpOutUFOs(averageDelay: 0.25)
     let newGame = GameScene(size: fullFrame.size)
     switchWhenQuiescent(newGame)
   }
@@ -137,10 +145,14 @@ class MenuScene: BasicScene, GKGameCenterControllerDelegate {
 
   override func update(_ currentTime: TimeInterval) {
     super.update(currentTime)
-    ufos.forEach {
-      $0.fly(player: nil, playfield: playfield) { (angle, position, speed) in
+    ufos.forEach { ufo in
+      ufo.fly(player: nil, playfield: playfield) { (angle, position, speed) in
         if !self.gameStarting {
           self.fireUFOLaser(angle: angle, position: position, speed: speed)
+          self.shotsFired[ufo] = self.shotsFired[ufo]! + 1
+          if self.shotsFired[ufo]! > 3 && Int.random(in: 0 ..< 10) == 0 {
+            self.warpOutUFO(ufo)
+          }
         }
       }
     }

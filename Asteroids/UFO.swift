@@ -89,7 +89,7 @@ class UFO: SKNode {
     body.mass = isBig ? 1 : 0.75
     body.categoryBitMask = ObjectCategories.ufo.rawValue
     body.collisionBitMask = 0
-    body.contactTestBitMask = setOf([.asteroid, .player, .playerShot])
+    body.contactTestBitMask = setOf([.asteroid, .ufo, .player, .playerShot])
     body.linearDamping = 0
     body.angularDamping = 0
     body.restitution = 0.9
@@ -128,8 +128,8 @@ class UFO: SKNode {
     let shotAnticipation = Globals.gameConfig.value(for: \.ufoShotAnticipation)
     var totalForce = CGVector.zero
     let interesting = (shotAnticipation > 0 ?
-      setOf([.asteroid, .player, .playerShot]) :
-      setOf([.asteroid, .player]))
+      setOf([.asteroid, .ufo, .player, .playerShot]) :
+      setOf([.asteroid, .ufo, .player]))
     // By default, shoot at the player.  If there's an asteroid that's notably closer
     // though, shoot that instead.  In addition to the revenge factor increase in UFO
     // danger, that helps ensure that the player can't sit around and farm UFOs for
@@ -164,11 +164,13 @@ class UFO: SKNode {
         var objectRadius = CGFloat(0)
         if body.isA(.asteroid) {
           objectRadius = 0.5 * (node as! SKSpriteNode).size.diagonal()
+        } else if body.isA(.ufo) {
+          objectRadius = 0.5 * (node as! UFO).size.diagonal()
         } else if body.isA(.player) {
           objectRadius = 0.5 * (node as! Ship).size.diagonal()
           playerDistance = d
         }
-        if d < targetDistance {
+        if d < targetDistance && !body.isA(.ufo) {
           potentialTarget = node
           targetDistance = d
         }

@@ -437,6 +437,14 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     }
   }
 
+  func warpOutUFO(_ ufo: UFO) {
+    ufos.remove(ufo)
+    audio.soundEffect(.ufoWarpOut, at: ufo.position)
+    let effects = ufo.warpOut()
+    playfield.addWithScaling(effects[0])
+    playfield.addWithScaling(effects[1])
+  }
+
   func warpOutUFOs(averageDelay: Double = 1) -> Double {
     // This is a little involved, but here's the idea.  The player has just died and
     // we've delayed a bit to let any of his existing shots hit stuff.  After the
@@ -467,13 +475,8 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
         maxDelay = max(maxDelay, delay)
         ufo.run(SKAction.sequence([
           SKAction.wait(forDuration: delay),
-          SKAction.run({
-            self.ufos.remove(ufo)
-            self.audio.soundEffect(.ufoWarpOut, at: ufo.position)
-            let effects = ufo.warpOut()
-            self.playfield.addWithScaling(effects[0])
-            self.playfield.addWithScaling(effects[1])
-          })]), withKey: "warpOut")
+          SKAction.run({ self.warpOutUFO(ufo) })
+          ]), withKey: "warpOut")
       } else {
         logging("Cleanup on unlaunched ufo")
         ufo.cleanup()
@@ -548,6 +551,16 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     guard ufo.requiredPhysicsBody().isDynamic else { return }
     splitAsteroid(asteroid as! SKSpriteNode)
     destroyUFO(ufo as! UFO)
+  }
+
+  func ufosCollided(ufo1: SKNode, ufo2: SKNode) {
+    // I'm not sure if these check is needed anyway, but non-launched UFOs have
+    // isDynamic set to false so that they're holding.  Make sure that the UFO has
+    // been launched before we'll flag a collision.
+    guard ufo1.requiredPhysicsBody().isDynamic else { return }
+    guard ufo2.requiredPhysicsBody().isDynamic else { return }
+    destroyUFO(ufo1 as! UFO)
+    destroyUFO(ufo2 as! UFO)
   }
 
   func when(_ contact: SKPhysicsContact,
