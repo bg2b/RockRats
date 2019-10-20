@@ -9,37 +9,54 @@
 import SpriteKit
 
 // We have a texture that is the full thing that's supposed to explode, like a
-// spaceship or whatever.  We'll cut it up into an explosionSplits * explosionSplits
-// grid.  Each part will become a separate sprite with its own physics.  We place
-// them in a grid arrangement so that together they initially look like the object
+// spaceship or whatever.  We'll cut it up into smaller rectangles.  Each part will become a separate sprite with its own physics.  We place
+// the parts in an arrangement so that together they initially look like the object
 // that's exploding.  Add in some random velocity dispersion plus the exploding
 // object's velocity so that they fly apart realistically.  The physics bodies are a
 // separate class so we can have them just collide among themselves, though we
 // currently have them set to bounce off asteroids and ships too.
 
-let explosionSplits = 8
+func makeExplosionGrid(rect: CGRect, wantedSize: CGFloat, pieces: inout [CGRect]) {
+  if rect.width < wantedSize && rect.height < wantedSize {
+    pieces.append(rect)
+    return
+  }
+  var cutIsVertical = Bool.random()
+  if rect.width > 2 * rect.height || rect.height < wantedSize {
+    cutIsVertical = true
+  } else if rect.height > 2 * rect.width || rect.width < wantedSize {
+    cutIsVertical = false
+  }
+  let splitPos = CGFloat.random(in: 1.0 / 3.0 ... 2.0 / 3.0)
+  var halves: (CGRect,CGRect)
+  if cutIsVertical {
+    halves = rect.divided(atDistance: rect.width * splitPos, from: .minXEdge)
+  } else {
+    halves = rect.divided(atDistance: rect.height * splitPos, from: .minYEdge)
+  }
+  makeExplosionGrid(rect: halves.0, wantedSize: wantedSize, pieces: &pieces)
+  makeExplosionGrid(rect: halves.1, wantedSize: wantedSize, pieces: &pieces)
+}
 
 struct Explosion {
   let pieces: [SKNode]
   let deltas: [CGVector]
 
   init(texture: SKTexture) {
-    let d = 1 / CGFloat(explosionSplits)
-    let range = -explosionSplits / 2 ..< explosionSplits / 2
-    let xys = range.flatMap { x in range.map { y in CGVector(dx: x, dy: y).scale(by: d) } }
+    var subRects = [CGRect]()
+    makeExplosionGrid(rect: CGRect(origin: .zero, size: texture.size()), wantedSize: 8, pieces: &subRects)
+    let rect = texture.textureRect()
     var pieces = [SKNode]()
     var deltas = [CGVector]()
-    // We have to use textureRect!  Assuming (0,0) - (1,1) for the texture coordinates
-    // will give "interesting" results if you have a texture that's part of an atlas...
-    let rect = texture.textureRect()
-    let dwh = rect.size.scale(by: d)
-    let physicsSize2 = texture.size().scale(by: 0.5 * d)
-    for xy in xys {
-      let pieceOrigin = rect.origin + (xy + CGVector(dx: 0.5, dy: 0.5)).scale(by: rect.size)
+    let sizeScale = CGSize(width: rect.width / texture.size().width, height: rect.height / texture.size().height)
+    for subRect in subRects {
+      let pieceOrigin = rect.origin + (subRect.origin - .zero).scale(by: sizeScale)
+      let dwh = CGSize(width: rect.width * subRect.width / texture.size().width,
+                       height: rect.height * subRect.height / texture.size().height)
       let pieceTexture = SKTexture(rect: CGRect(origin: pieceOrigin, size: dwh), in: texture)
       let piece = SKSpriteNode(texture: pieceTexture)
       piece.name = "fragment"
-      let body = SKPhysicsBody(circleOfRadius: physicsSize2.diagonal())
+      let body = SKPhysicsBody(circleOfRadius: pieceTexture.size().diagonal() / 2)
       body.mass = 0
       body.categoryBitMask = ObjectCategories.fragment.rawValue
       body.contactTestBitMask = 0
@@ -48,7 +65,12 @@ struct Explosion {
       body.angularDamping = 0
       body.restitution = 0.9
       piece.physicsBody = body
-      let delta = (xy.scale(by: texture.size()) + CGVector(dx: physicsSize2.width, dy: physicsSize2.height))
+      // delta should be computed to put the subtexture at the same position it was in
+      // the original sprite.  The sprite's texture is centered at 0.5 * texture.size().
+      // So a subRect at (0,0) should be offset by -0.5 * texture.size(), and then to
+      // center that subRect, we have to add back 0.5 * subRect.size.
+      let delta = CGVector(dx: subRect.origin.x - texture.size().width / 2 + subRect.width / 2,
+                           dy: subRect.origin.y - texture.size().height / 2 + subRect.height / 2)
       pieces.append(piece)
       deltas.append(delta)
     }

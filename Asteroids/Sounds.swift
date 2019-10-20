@@ -173,7 +173,7 @@ class SceneAudio {
     guard position.x <= stereoEffectsFrame.maxX else { return 1 }
     guard position.x >= stereoEffectsFrame.minX else { return -1 }
     let ideal = Float((position.x - stereoEffectsFrame.midX) / (0.5 * stereoEffectsFrame.width))
-    return round(ideal * 2) / 2
+    return round(ideal * 4) / 4
   }
 
   func update() {
