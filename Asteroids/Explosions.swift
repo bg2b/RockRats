@@ -9,12 +9,13 @@
 import SpriteKit
 
 // We have a texture that is the full thing that's supposed to explode, like a
-// spaceship or whatever.  We'll cut it up into smaller rectangles.  Each part will become a separate sprite with its own physics.  We place
-// the parts in an arrangement so that together they initially look like the object
-// that's exploding.  Add in some random velocity dispersion plus the exploding
-// object's velocity so that they fly apart realistically.  The physics bodies are a
-// separate class so we can have them just collide among themselves, though we
-// currently have them set to bounce off asteroids and ships too.
+// spaceship or whatever.  We'll cut it up into smaller rectangles.  Each part will
+// become a separate sprite with its own physics.  We place the parts in an
+// arrangement so that together they initially look like the object that's exploding.
+// Add in some random velocity dispersion plus the exploding object's velocity so
+// that they fly apart realistically.  The physics bodies are a separate class so we
+// can have them just collide among themselves, though we currently have them set to
+// bounce off asteroids and ships too.
 
 func makeExplosionGrid(rect: CGRect, wantedSize: CGFloat, pieces: inout [CGRect]) {
   if rect.width < wantedSize && rect.height < wantedSize {
@@ -27,8 +28,8 @@ func makeExplosionGrid(rect: CGRect, wantedSize: CGFloat, pieces: inout [CGRect]
   } else if rect.height > 2 * rect.width || rect.width < wantedSize {
     cutIsVertical = false
   }
-  let splitPos = CGFloat.random(in: 1.0 / 3.0 ... 2.0 / 3.0)
-  var halves: (CGRect,CGRect)
+  let splitPos = CGFloat.random(in: 0.33 ... 0.67)
+  var halves: (CGRect, CGRect)
   if cutIsVertical {
     halves = rect.divided(atDistance: rect.width * splitPos, from: .minXEdge)
   } else {
@@ -44,16 +45,20 @@ struct Explosion {
 
   init(texture: SKTexture) {
     var subRects = [CGRect]()
-    makeExplosionGrid(rect: CGRect(origin: .zero, size: texture.size()), wantedSize: 8, pieces: &subRects)
-    let rect = texture.textureRect()
+    let textureSize = texture.size()
+    let textureWidth = textureSize.width
+    let textureHeight = textureSize.height
+    let cutSize = min(textureWidth, textureHeight) / 6
+    makeExplosionGrid(rect: CGRect(origin: .zero, size: textureSize), wantedSize: cutSize, pieces: &subRects)
     var pieces = [SKNode]()
     var deltas = [CGVector]()
-    let sizeScale = CGSize(width: rect.width / texture.size().width, height: rect.height / texture.size().height)
+    let rect = texture.textureRect()
+    let sizeScale = rect.size / textureSize
     for subRect in subRects {
-      let pieceOrigin = rect.origin + (subRect.origin - .zero).scale(by: sizeScale)
-      let dwh = CGSize(width: rect.width * subRect.width / texture.size().width,
-                       height: rect.height * subRect.height / texture.size().height)
-      let pieceTexture = SKTexture(rect: CGRect(origin: pieceOrigin, size: dwh), in: texture)
+      let subRectOffset = subRect.origin - .zero
+      let pieceOrigin = rect.origin + subRectOffset.scale(by: sizeScale)
+      let pieceSize = subRect.size * sizeScale
+      let pieceTexture = SKTexture(rect: CGRect(origin: pieceOrigin, size: pieceSize), in: texture)
       let piece = SKSpriteNode(texture: pieceTexture)
       piece.name = "fragment"
       let body = SKPhysicsBody(circleOfRadius: pieceTexture.size().diagonal() / 2)
@@ -69,8 +74,7 @@ struct Explosion {
       // the original sprite.  The sprite's texture is centered at 0.5 * texture.size().
       // So a subRect at (0,0) should be offset by -0.5 * texture.size(), and then to
       // center that subRect, we have to add back 0.5 * subRect.size.
-      let delta = CGVector(dx: subRect.origin.x - texture.size().width / 2 + subRect.width / 2,
-                           dy: subRect.origin.y - texture.size().height / 2 + subRect.height / 2)
+      let delta = subRectOffset + CGVector(dxy: subRect.size - textureSize).scale(by: 0.5)
       pieces.append(piece)
       deltas.append(delta)
     }

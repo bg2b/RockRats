@@ -26,9 +26,29 @@ extension CGSize {
   }
 }
 
+func +(left: CGSize, right: CGSize) -> CGSize {
+  return CGSize(width: left.width + right.width, height: left.height + right.height)
+}
+
+func -(left: CGSize, right: CGSize) -> CGSize {
+  return CGSize(width: left.width - right.width, height: left.height - right.height)
+}
+
+func *(left: CGSize, right: CGSize) -> CGSize {
+  return CGSize(width: left.width * right.width, height: left.height * right.height)
+}
+
+func /(left: CGSize, right: CGSize) -> CGSize {
+  return CGSize(width: left.width / right.width, height: left.height / right.height)
+}
+
 extension CGVector {
   init(angle: CGFloat) {
     self.init(dx: cos(angle), dy: sin(angle))
+  }
+
+  init(dxy: CGSize) {
+    self.init(dx: dxy.width, dy: dxy.height)
   }
 
   func norm2() -> CGFloat {
