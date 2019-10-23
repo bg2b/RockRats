@@ -45,35 +45,29 @@ enum SoundEffect: String, CaseIterable {
     result.prepareToPlay()
     return result
   }
+
+  func audioBuffer() -> AVAudioPCMBuffer {
+    guard let file = try? AVAudioFile(forReading: self.url) else {
+      fatalError("Unable to instantiate AVAudioFile")
+    }
+    guard let buffer = AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: AVAudioFrameCount(file.length)) else {
+      fatalError("Unable to instantiate AVAudioPCMBuffer")
+    }
+    do {
+      try file.read(into: buffer)
+    } catch {
+      fatalError("Unable to read audio file into buffer, \(error.localizedDescription)")
+    }
+    return buffer
+  }
 }
 
-let numSimultaneousSounds = [
-  SoundEffect.playerShot: 5,
-  .asteroidHugeHit: 5,
-  .asteroidBigHit: 5,
-  .asteroidMedHit: 5,
-  .ufoExplosion: 3,
-  .ufoShot: 5,
-  .ufoWarpOut: 3,
-  .ufoEnginesBig: 0,
-  .ufoEnginesMed: 0,
-  .ufoEnginesSmall: 0,
-  .playerEngines: 0
-]
-
 class Sounds {
-  var audioPlayerCache = CyclicCache<SoundEffect, AVAudioPlayer>(cacheId: "Sound effects cache")
+  var audioBuffers = [SoundEffect: AVAudioPCMBuffer]()
   var gameAudio = [SceneAudioInfo]()
   let soundQueue: DispatchQueue
 
   init() {
-    do {
-      logging("Activating shared audio session")
-      try AVAudioSession.sharedInstance().setActive(true)
-    } catch {
-      logging("Couldn't activate AVAudioSession, but whatevs")
-      logging(error.localizedDescription)
-    }
     soundQueue = DispatchQueue.global(qos: .background)
     for effect in SoundEffect.allCases {
       preload(effect)
@@ -81,11 +75,14 @@ class Sounds {
   }
 
   func preload(_ sound: SoundEffect) {
-    audioPlayerCache.load(count: numSimultaneousSounds[sound] ?? 1, forKey: sound) { sound.player() }
+    audioBuffers[sound] = sound.audioBuffer()
   }
 
-  func cachedPlayer(_ sound: SoundEffect) -> AVAudioPlayer {
-    return audioPlayerCache.next(forKey: sound)
+  func cachedAudioBuffer(_ sound: SoundEffect) -> AVAudioPCMBuffer {
+    guard let buffer = audioBuffers[sound] else {
+      fatalError("Audio buffer for \(sound.rawValue) was not preloaded")
+    }
+    return buffer
   }
 
   func execute(_ soundActions: @escaping () -> Void) {
@@ -93,7 +90,20 @@ class Sounds {
   }
 
   func stats() {
-    audioPlayerCache.stats()
+    var bytes = UInt32(0)
+    for (_, buffer) in audioBuffers {
+      if buffer.floatChannelData != nil {
+        bytes += buffer.frameCapacity * 4
+      }
+      if buffer.int16ChannelData != nil {
+        bytes += buffer.frameCapacity * 2
+      }
+      if buffer.int32ChannelData != nil {
+        bytes += buffer.frameCapacity * 4
+      }
+    }
+    bytes /= 1024
+    logging("Sound data \(bytes) KB for \(audioBuffers.count) sounds")
   }
 }
 
@@ -112,6 +122,16 @@ class SceneAudioInfo {
   }
 }
 
+class SceneAudioNodeInfo {
+  weak var playerNode: AVAudioPlayerNode?
+  weak var atNode: SKNode? = nil
+
+  init(playerNode: AVAudioPlayerNode, at node: SKNode? = nil) {
+    self.playerNode = playerNode
+    self.atNode = node
+  }
+}
+
 struct PanInfo {
   let player: AVAudioPlayer
   let pan: Float
@@ -119,10 +139,29 @@ struct PanInfo {
 
 class SceneAudio {
   let stereoEffectsFrame: CGRect
+  let audioEngine: AVAudioEngine
+  var playerNodes = [AVAudioPlayerNode]()
+  var nextPlayerNode = 0
   var sceneAudioInfo = [SceneAudioInfo]()
+  var sceneAudioNodeInfo = [SceneAudioNodeInfo]()
 
-  init(stereoEffectsFrame: CGRect) {
+  init(stereoEffectsFrame: CGRect, audioEngine: AVAudioEngine) {
     self.stereoEffectsFrame = stereoEffectsFrame
+    self.audioEngine = audioEngine
+    do {
+      try audioEngine.start()
+    } catch {
+      logging("Cannot start audio engine, \(error.localizedDescription)")
+    }
+    let buffer = Globals.sounds.cachedAudioBuffer(.playerExplosion)
+    // We got up to about 10 simultaneous sounds when really pushing the game
+    for _ in 0 ..< 10 {
+      let playerNode = AVAudioPlayerNode()
+      playerNodes.append(playerNode)
+      audioEngine.attach(playerNode)
+      audioEngine.connect(playerNode, to: audioEngine.mainMixerNode, format: buffer.format)
+      playerNode.play()
+    }
   }
 
   func playerFor(_ sound: SoundEffect, at node: SKNode? = nil) -> AVAudioPlayer {
@@ -132,14 +171,12 @@ class SceneAudio {
   }
 
   func soundEffect(_ sound: SoundEffect, at position: CGPoint = .zero) {
-    let player = Globals.sounds.cachedPlayer(sound)
+    let buffer = Globals.sounds.cachedAudioBuffer(sound)
+    let playerNode = playerNodes[nextPlayerNode]
+    nextPlayerNode = (nextPlayerNode + 1) % playerNodes.count
     let pan = stereoBalance(position)
-    Globals.sounds.execute {
-      if player.pan != pan {
-        player.pan = pan
-      }
-      player.play()
-    }
+    playerNode.pan = pan
+    playerNode.scheduleBuffer(buffer)
   }
 
   func pause() {
@@ -150,6 +187,7 @@ class SceneAudio {
         player.pause()
       }
     }
+    audioEngine.pause()
   }
 
   func resume() {
@@ -159,6 +197,11 @@ class SceneAudio {
         Globals.sounds.execute { player.play() }
       }
     }
+    do {
+      try audioEngine.start()
+    } catch {
+      logging("Unable to resume audio engine, \(error.localizedDescription)")
+    }
   }
 
   func stop() {
@@ -166,6 +209,7 @@ class SceneAudio {
       guard let player = audioInfo.player else { continue }
       player.stop()
     }
+    audioEngine.stop()
   }
 
   func stereoBalance(_ position: CGPoint) -> Float {

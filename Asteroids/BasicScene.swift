@@ -228,7 +228,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     initBackground()
     initStars()
     initPlayfield()
-    audio = SceneAudio(stereoEffectsFrame: gameFrame)
+    audio = SceneAudio(stereoEffectsFrame: gameFrame, audioEngine: audioEngine)
   }
 
   func setGameAreaBlur(_ enable: Bool) {
