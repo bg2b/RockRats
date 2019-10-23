@@ -150,33 +150,41 @@ class SceneAudio {
     self.audioEngine = audioEngine
     do {
       try audioEngine.start()
+      let buffer = Globals.sounds.cachedAudioBuffer(.playerExplosion)
+      // We got up to about 10 simultaneous sounds when really pushing the game
+      for _ in 0 ..< 10 {
+        let playerNode = AVAudioPlayerNode()
+        playerNodes.append(playerNode)
+        audioEngine.attach(playerNode)
+        audioEngine.connect(playerNode, to: audioEngine.mainMixerNode, format: buffer.format)
+        playerNode.play()
+      }
     } catch {
       logging("Cannot start audio engine, \(error.localizedDescription)")
     }
-    let buffer = Globals.sounds.cachedAudioBuffer(.playerExplosion)
-    // We got up to about 10 simultaneous sounds when really pushing the game
-    for _ in 0 ..< 10 {
-      let playerNode = AVAudioPlayerNode()
-      playerNodes.append(playerNode)
-      audioEngine.attach(playerNode)
-      audioEngine.connect(playerNode, to: audioEngine.mainMixerNode, format: buffer.format)
-      playerNode.play()
-    }
-  }
-
-  func playerFor(_ sound: SoundEffect, at node: SKNode? = nil) -> AVAudioPlayer {
-    let player = sound.player()
-    sceneAudioInfo.append(SceneAudioInfo(player: player, at: node))
-    return player
   }
 
   func soundEffect(_ sound: SoundEffect, at position: CGPoint = .zero) {
+    guard audioEngine.isRunning else { return }
     let buffer = Globals.sounds.cachedAudioBuffer(sound)
     let playerNode = playerNodes[nextPlayerNode]
     nextPlayerNode = (nextPlayerNode + 1) % playerNodes.count
     let pan = stereoBalance(position)
     playerNode.pan = pan
     playerNode.scheduleBuffer(buffer)
+  }
+
+  func stereoBalance(_ position: CGPoint) -> Float {
+    guard stereoEffectsFrame.width != 0 else { return 0 }
+    guard position.x <= stereoEffectsFrame.maxX else { return 1 }
+    guard position.x >= stereoEffectsFrame.minX else { return -1 }
+    return Float((position.x - stereoEffectsFrame.midX) / (0.5 * stereoEffectsFrame.width))
+  }
+
+  func playerFor(_ sound: SoundEffect, at node: SKNode? = nil) -> AVAudioPlayer {
+    let player = sound.player()
+    sceneAudioInfo.append(SceneAudioInfo(player: player, at: node))
+    return player
   }
 
   func pause() {
@@ -212,14 +220,6 @@ class SceneAudio {
     audioEngine.stop()
   }
 
-  func stereoBalance(_ position: CGPoint) -> Float {
-    guard stereoEffectsFrame.width != 0 else { return 0 }
-    guard position.x <= stereoEffectsFrame.maxX else { return 1 }
-    guard position.x >= stereoEffectsFrame.minX else { return -1 }
-    let ideal = Float((position.x - stereoEffectsFrame.midX) / (0.5 * stereoEffectsFrame.width))
-    return round(ideal * 4) / 4
-  }
-
   func update() {
     // We try to avoid setting pan since that seems to be somewhat CPU intensive.  We
     // can leave it alone if either:
@@ -230,7 +230,7 @@ class SceneAudio {
     for audioInfo in sceneAudioInfo {
       guard let player = audioInfo.player, let node = audioInfo.atNode, player.volume > 0 else { continue }
       let pan = stereoBalance(node.position)
-      if pan != player.pan {
+      if abs(pan - player.pan) > 0.125 {
         panInfo.append(PanInfo(player: player, pan: pan))
       }
     }
