@@ -45,7 +45,7 @@ class UFO: SKNode {
   let isKamikaze: Bool
   let ufoTexture: SKTexture
   var currentSpeed: CGFloat
-  var engineSounds: AVAudioPlayer? = nil
+  var engineSounds: ContinuousPositionalAudio? = nil
   let meanShotTime: Double
   var delayOfFirstShot: Double
   var attackEnabled = false
@@ -79,10 +79,9 @@ class UFO: SKNode {
     ufo.name = "ufoImage"
     addChild(ufo)
     if let audio = audio {
-      let engineSounds = audio.playerFor(isBig ? (isKamikaze ? .ufoEnginesMed : .ufoEnginesBig) : .ufoEnginesSmall, at: self)
-      engineSounds.numberOfLoops = -1
-      engineSounds.volume = 0.5
-      Globals.sounds.execute { engineSounds.play() }
+      let engineSounds = audio.continuousAudio(isBig ? (isKamikaze ? .ufoEnginesMed : .ufoEnginesBig) : .ufoEnginesSmall, at: self)
+      engineSounds.playerNode.volume = 0.5
+      engineSounds.playerNode.play()
       self.engineSounds = engineSounds
     }
     let body = SKPhysicsBody(circleOfRadius: 0.5 * ufoTexture.size().width)
@@ -220,7 +219,7 @@ class UFO: SKNode {
   }
 
   func cleanup() {
-    engineSounds?.stop()
+    engineSounds?.playerNode.stop()
     removeAllActions()
     removeFromParent()
   }

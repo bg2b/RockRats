@@ -64,11 +64,8 @@ enum SoundEffect: String, CaseIterable {
 
 class Sounds {
   var audioBuffers = [SoundEffect: AVAudioPCMBuffer]()
-  var gameAudio = [SceneAudioInfo]()
-  let soundQueue: DispatchQueue
 
   init() {
-    soundQueue = DispatchQueue.global(qos: .background)
     for effect in SoundEffect.allCases {
       preload(effect)
     }
@@ -83,10 +80,6 @@ class Sounds {
       fatalError("Audio buffer for \(sound.rawValue) was not preloaded")
     }
     return buffer
-  }
-
-  func execute(_ soundActions: @escaping () -> Void) {
-    soundQueue.async(execute: soundActions)
   }
 
   func stats() {
@@ -111,30 +104,9 @@ extension Globals {
   static let sounds = Sounds()
 }
 
-class SceneAudioInfo {
-  weak var player: AVAudioPlayer?
-  weak var atNode: SKNode? = nil
-  var wasPlayingWhenPaused = false
-
-  init(player: AVAudioPlayer, at node: SKNode? = nil) {
-    self.player = player
-    self.atNode = node
-  }
-}
-
-class SceneAudioNodeInfo {
-  weak var playerNode: AVAudioPlayerNode?
-  weak var atNode: SKNode? = nil
-
-  init(playerNode: AVAudioPlayerNode, at node: SKNode? = nil) {
-    self.playerNode = playerNode
-    self.atNode = node
-  }
-}
-
-struct PanInfo {
-  let player: AVAudioPlayer
-  let pan: Float
+struct ContinuousPositionalAudio {
+  let playerNode: AVAudioPlayerNode
+  weak var atNode: SKNode?
 }
 
 class SceneAudio {
@@ -142,8 +114,7 @@ class SceneAudio {
   let audioEngine: AVAudioEngine
   var playerNodes = [AVAudioPlayerNode]()
   var nextPlayerNode = 0
-  var sceneAudioInfo = [SceneAudioInfo]()
-  var sceneAudioNodeInfo = [SceneAudioNodeInfo]()
+  var sceneContinuousPositional = [ContinuousPositionalAudio]()
 
   init(stereoEffectsFrame: CGRect, audioEngine: AVAudioEngine) {
     self.stereoEffectsFrame = stereoEffectsFrame
@@ -181,30 +152,24 @@ class SceneAudio {
     return Float((position.x - stereoEffectsFrame.midX) / (0.5 * stereoEffectsFrame.width))
   }
 
-  func playerFor(_ sound: SoundEffect, at node: SKNode? = nil) -> AVAudioPlayer {
-    let player = sound.player()
-    sceneAudioInfo.append(SceneAudioInfo(player: player, at: node))
-    return player
+  func continuousAudio(_ sound: SoundEffect, at node: SKNode) -> ContinuousPositionalAudio {
+    let buffer = Globals.sounds.cachedAudioBuffer(sound)
+    let playerNode = AVAudioPlayerNode()
+    audioEngine.attach(playerNode)
+    logging("mixer next input is \(audioEngine.mainMixerNode.nextAvailableInputBus)")
+    audioEngine.connect(playerNode, to: audioEngine.mainMixerNode, format: buffer.format)
+    playerNode.pan = stereoBalance(node.position)
+    playerNode.scheduleBuffer(buffer, at: nil, options: [.loops])
+    let result = ContinuousPositionalAudio(playerNode: playerNode, atNode: node)
+    sceneContinuousPositional.append(result)
+    return result
   }
 
   func pause() {
-    for audioInfo in sceneAudioInfo {
-      guard let player = audioInfo.player else { continue }
-      audioInfo.wasPlayingWhenPaused = player.isPlaying
-      if audioInfo.wasPlayingWhenPaused {
-        player.pause()
-      }
-    }
     audioEngine.pause()
   }
 
   func resume() {
-    for audioInfo in sceneAudioInfo {
-      guard let player = audioInfo.player else { continue }
-      if audioInfo.wasPlayingWhenPaused {
-        Globals.sounds.execute { player.play() }
-      }
-    }
     do {
       try audioEngine.start()
     } catch {
@@ -213,34 +178,19 @@ class SceneAudio {
   }
 
   func stop() {
-    for audioInfo in sceneAudioInfo {
-      guard let player = audioInfo.player else { continue }
-      player.stop()
-    }
     audioEngine.stop()
   }
 
   func update() {
-    // We try to avoid setting pan since that seems to be somewhat CPU intensive.  We
-    // can leave it alone if either:
-    // 1. A player's volume is 0
-    // 2. The pan is already set to the right value (which often happens since
-    //    stereoBalance rounds to a smallish number of discrete values.
-    var panInfo = [PanInfo]()
-    for audioInfo in sceneAudioInfo {
-      guard let player = audioInfo.player, let node = audioInfo.atNode, player.volume > 0 else { continue }
-      let pan = stereoBalance(node.position)
-      if abs(pan - player.pan) > 0.125 {
-        panInfo.append(PanInfo(player: player, pan: pan))
+    for continuous in sceneContinuousPositional {
+      if let node = continuous.atNode {
+        guard continuous.playerNode.volume > 0 else { continue }
+        continuous.playerNode.pan = stereoBalance(node.position)
+      } else {
+        continuous.playerNode.stop()
+        audioEngine.detach(continuous.playerNode)
       }
     }
-    if !panInfo.isEmpty {
-      Globals.sounds.execute {
-        for info in panInfo {
-          info.player.pan = info.pan
-        }
-      }
-    }
-    sceneAudioInfo.removeAll { $0.player == nil }
+    sceneContinuousPositional.removeAll { $0.atNode == nil }
   }
 }

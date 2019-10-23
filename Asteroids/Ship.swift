@@ -35,7 +35,7 @@ class Ship: SKNode {
   let getJoystickDirection: () -> CGVector
   var shipAppearances: [ShipAppearanceAlternative]
   var currentAppearance = ShipAppearance.modern
-  var engineSounds: AVAudioPlayer!
+  var engineSounds: ContinuousPositionalAudio!
   var engineSoundLevel = 0
   var forwardFlames = [SKSpriteNode]()
   var reverseFlames = [[SKSpriteNode]]()
@@ -69,10 +69,9 @@ class Ship: SKNode {
     shipAppearances.append(ShipAppearanceAlternative(imageName: "ship_\(color)", warpTime: warpTime))
     shipAppearances.append(ShipAppearanceAlternative(imageName: "retroship", warpTime: warpTime))
     super.init()
-    engineSounds = audio.playerFor(.playerEngines, at: self)
-    engineSounds.numberOfLoops = -1
-    engineSounds.volume = 0
-    Globals.sounds.execute { self.engineSounds.play() }
+    engineSounds = audio.continuousAudio(.playerEngines, at: self)
+    engineSounds.playerNode.volume = 0
+    engineSounds.playerNode.play()
     self.name = "ship"
     addChild(shipAppearance.sprite)
     forwardFlames = buildFlames(at: CGPoint(x: -shipTexture.size().width / 2, y: 0.0))
@@ -122,7 +121,7 @@ class Ship: SKNode {
     if soundLevel != engineSoundLevel {
       // The first 0.25 * is to reduce the overall volume.  The second is to scale
       // soundLevel to 0...1
-      engineSounds.volume = 0.25 * 0.25 * Float(soundLevel)
+      engineSounds.playerNode.volume = 0.25 * 0.25 * Float(soundLevel)
       engineSoundLevel = soundLevel
     }
   }

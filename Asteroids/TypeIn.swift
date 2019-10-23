@@ -53,9 +53,9 @@ extension SKLabelNode {
   // This method reveals the (formatted) text in a label node while playing some sound.
   // It's supposed to give an incoming-transmission type of effect.
   func typeIn(text: String, at index: String.Index, attributes: AttrStyles,
-              sounds: AVAudioPlayer, delay: Double, whenDone: (() -> Void)?) {
+              sounds: ContinuousPositionalAudio, delay: Double, whenDone: (() -> Void)?) {
     if index == text.startIndex {
-      sounds.play()
+      sounds.playerNode.volume = 1
     }
     if index < text.endIndex {
       // Probably it's not very efficient to regenerate the attributed text
@@ -78,43 +78,33 @@ extension SKLabelNode {
         muteAudio = true
       }
       if muteAudio {
-        sounds.pause()
+        sounds.playerNode.volume = 0
       }
       wait(for: duration) {
         if muteAudio {
-          sounds.play()
+          sounds.playerNode.volume = 1
         }
         self.typeIn(text: text, at: text.index(after: index), attributes: attributes,
                     sounds: sounds, delay: delay, whenDone: whenDone)
       }
     } else {
       attributedText = makeAttributed(text: text, until: index, attributes: attributes)
-      sounds.stop()
+      sounds.playerNode.stop()
+      sounds.atNode?.removeFromParent()
       whenDone?()
     }
   }
 
   func typeIn(text: String, attributes: AttrStyles, audio: SceneAudio, whenDone: (() -> Void)?) {
-    let sounds = audio.playerFor(.transmission)
-    sounds.numberOfLoops = -1
-    sounds.volume = 0
-    sounds.play()
+    let audioPos = SKNode()
+    addChild(audioPos)
+    let sounds = audio.continuousAudio(.transmission, at: audioPos)
+    sounds.playerNode.volume = 0
+    sounds.playerNode.play()
     let delay = 2.0 / 60
-    // This is incredibly ugly, but for some reason if I don't kick the audio by
-    // trying to play it and then waiting a bit and stopping, the first instance of
-    // using typeIn will stutter.  After the fist call everything would work without
-    // this hackery, though it doesn't hurt.  But that's just because audioPlayerFor
-    // is returning the same (cached) player for every new call.  I can reproduce the
-    // problem on every call if I get a completely new audio player each time;
-    // instead of calling audioPlayerFor, just use SoundEffect.transmission.player().
-    // So presumably it's something I don't understand about the AVAudioPlayer
-    // itself.  It somehow gets created in a state that makes it not start playing
-    // cleanly until after I call stop() on it.  After that, it's fine on play().  I
-    // tried dumping the prepareToPlay() in the creation, but that didn't help.
-    wait(for: 3 * delay) {
-      sounds.stop()
-      sounds.volume = 1
-      self.typeIn(text: text, at: text.startIndex, attributes: attributes, sounds: sounds, delay: delay, whenDone: whenDone)
+    typeIn(text: text, at: text.startIndex, attributes: attributes, sounds: sounds, delay: delay) {
+      audioPos.removeFromParent()
+      whenDone?()
     }
   }
 }
