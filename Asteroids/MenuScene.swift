@@ -16,6 +16,7 @@ class MenuScene: BasicScene, GKGameCenterControllerDelegate {
   var highScore: SKLabelNode!
   weak var gameCenterAuthVC: UIViewController? = nil
   var presentingGCAuth = false
+  var newGame: GameScene? = nil
 
   func initMenu() {
     menu = SKNode()
@@ -80,19 +81,26 @@ class MenuScene: BasicScene, GKGameCenterControllerDelegate {
     when(contact, isBetween: .ufo, and: .ufo) { ufosCollided(ufo1: $0, ufo2: $1) }
   }
 
-  func switchWhenQuiescent(_ newScene: SKScene) {
-    if playfield.isQuiescent(transient: setOf([.ufo, .ufoShot, .fragment])) {
-      wait(for: 0.25) { self.switchScene(to: newScene) }
+  func startWhenQuienscent() {
+    if playfield.isQuiescent(transient: setOf([.ufo, .ufoShot, .fragment])), let newGame = newGame {
+      wait(for: 0.25) {
+        self.newGame = nil
+        self.switchScene(to: newGame)
+      }
     } else {
-      wait(for: 0.25) { self.switchWhenQuiescent(newScene) }
+      wait(for: 0.25) { self.startWhenQuienscent() }
     }
   }
 
   func startGame() {
     gameStarting = true
     _ = warpOutUFOs(averageDelay: 0.25)
-    let newGame = GameScene(size: fullFrame.size)
-    switchWhenQuiescent(newGame)
+    // The game creation is a little time-consuming and would cause the menu
+    // animation to lag, so run it in the background while UFOs are warping out and
+    // we're waiting for the playfield to become quiescent.
+    run(SKAction.run({ self.newGame = GameScene(size: self.fullFrame.size) },
+                     queue: DispatchQueue.global(qos: .utility)))
+    startWhenQuienscent()
   }
 
   func setGameCenterAuth(viewController: UIViewController?) {
