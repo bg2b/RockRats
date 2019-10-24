@@ -156,7 +156,6 @@ class SceneAudio {
     let buffer = Globals.sounds.cachedAudioBuffer(sound)
     let playerNode = AVAudioPlayerNode()
     audioEngine.attach(playerNode)
-    logging("mixer next input is \(audioEngine.mainMixerNode.nextAvailableInputBus)")
     audioEngine.connect(playerNode, to: audioEngine.mainMixerNode, format: buffer.format)
     playerNode.pan = stereoBalance(node.position)
     playerNode.scheduleBuffer(buffer, at: nil, options: [.loops])

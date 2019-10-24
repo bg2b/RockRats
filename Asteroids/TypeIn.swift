@@ -89,22 +89,13 @@ extension SKLabelNode {
       }
     } else {
       attributedText = makeAttributed(text: text, until: index, attributes: attributes)
-      sounds.playerNode.stop()
-      sounds.atNode?.removeFromParent()
+      sounds.playerNode.volume = 0
       whenDone?()
     }
   }
 
-  func typeIn(text: String, attributes: AttrStyles, audio: SceneAudio, whenDone: (() -> Void)?) {
-    let audioPos = SKNode()
-    addChild(audioPos)
-    let sounds = audio.continuousAudio(.transmission, at: audioPos)
-    sounds.playerNode.volume = 0
-    sounds.playerNode.play()
+  func typeIn(text: String, attributes: AttrStyles, sounds: ContinuousPositionalAudio, whenDone: (() -> Void)?) {
     let delay = 2.0 / 60
-    typeIn(text: text, at: text.startIndex, attributes: attributes, sounds: sounds, delay: delay) {
-      audioPos.removeFromParent()
-      whenDone?()
-    }
+    typeIn(text: text, at: text.startIndex, attributes: attributes, sounds: sounds, delay: delay, whenDone: whenDone)
   }
 }

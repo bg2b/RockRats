@@ -33,6 +33,7 @@ class IntroScene: BasicScene {
   var incomingLabel: SKLabelNode!
   var introLabel: SKLabelNode!
   var goButton: Button!
+  var transmissionSounds: ContinuousPositionalAudio!
 
   func initIntro() {
     let intro = SKNode()
@@ -75,19 +76,21 @@ class IntroScene: BasicScene {
     let desiredBottomY = gameFrame.minY + 0.5 * (gameFrame.height - totalHeight)
     // Put the top of the intro at desiredTopY
     introLabel.position = introLabel.position + CGVector(dx: 0, dy: desiredTopY - introFrame.maxY)
-    print(introLabel.position)
     // Put the bottom of the button at desiredBottomY
     goButton.position = goButton.position + CGVector(dx: 0, dy: desiredBottomY - goFrame.minY)
+    transmissionSounds = audio.continuousAudio(.transmission, at: self)
+    transmissionSounds.playerNode.volume = 0
+    transmissionSounds.playerNode.play()
   }
 
   func incoming() {
-    incomingLabel.typeIn(text: standBy, attributes: attributes, audio: audio) {
+    incomingLabel.typeIn(text: standBy, attributes: attributes, sounds: transmissionSounds) {
       self.wait(for: 3) { self.header() }
     }
   }
 
   func header() {
-    incomingLabel.typeIn(text: messageHeader, attributes: attributes, audio: audio) {
+    incomingLabel.typeIn(text: messageHeader, attributes: attributes, sounds: transmissionSounds) {
       self.wait(for: 5) {
         self.incomingLabel.isHidden = true
         self.intro()
@@ -97,7 +100,7 @@ class IntroScene: BasicScene {
 
   func intro() {
     introLabel.isHidden = false
-    introLabel.typeIn(text: introduction, attributes: attributes, audio: audio) {
+    introLabel.typeIn(text: introduction, attributes: attributes, sounds: transmissionSounds) {
       self.goButton.run(SKAction.sequence([SKAction.unhide(), SKAction.fadeIn(withDuration: 0.5)]))
     }
   }

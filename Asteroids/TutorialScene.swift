@@ -10,6 +10,7 @@ import SpriteKit
 
 class TutorialScene: GameTutorialScene {
   var instructionsLabel: SKLabelNode!
+  var transmissionSounds: ContinuousPositionalAudio!
   var moveOnButton: Button? = nil
   let attributes = AttrStyles(fontName: "Kenney Future Narrow", fontSize: 40)
   var maxThrust = CGFloat(0)
@@ -31,6 +32,9 @@ class TutorialScene: GameTutorialScene {
     instructionsLabel.lineBreakMode = .byWordWrapping
     instructionsLabel.zPosition = LevelZs.info.rawValue
     addChild(instructionsLabel)
+    transmissionSounds = audio.continuousAudio(.transmission, at: self)
+    transmissionSounds.playerNode.volume = 0
+    transmissionSounds.playerNode.play()
   }
 
   func instructionGeometry(text: String, maxWidth: CGFloat, wantedHeight: CGFloat, horizontal: SKLabelHorizontalAlignmentMode, vertical: SKLabelVerticalAlignmentMode, position: CGPoint) {
@@ -158,7 +162,7 @@ class TutorialScene: GameTutorialScene {
     instructionsLabel.attributedText = makeAttributed(text: text, until: text.startIndex, attributes: attributes)
     instructionsLabel.alpha = 1
     instructionsLabel.isHidden = false
-    instructionsLabel.typeIn(text: text, attributes: attributes, audio: audio, whenDone: whenDone)
+    instructionsLabel.typeIn(text: text, attributes: attributes, sounds: transmissionSounds, whenDone: whenDone)
   }
 
   func showMoveOnButton(action: @escaping () -> Void) {
