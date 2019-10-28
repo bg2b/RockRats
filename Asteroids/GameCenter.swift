@@ -9,16 +9,19 @@
 import GameKit
 
 class GameCenterInterface {
+  let leaderboardID: String
   let presenter: (UIViewController?) -> Void
   var lastPlayerID: String? = nil
   var achievementIdentifiers: Set<String>? = nil
-  var leaderboardIdentifiers: Set<String>? = nil
   var playerAchievements = [String: Double]()
   var playerAchievementsProgress = [String: Double]()
+  var conflictingGames = [GKSavedGame]()
+  var conflictsToResolve = 0
 
   var enabled: Bool { GKLocalPlayer.local.isAuthenticated }
 
-  init(presenter: @escaping (UIViewController?) -> Void) {
+  init(leaderboardID: String, presenter: @escaping (UIViewController?) -> Void) {
+    self.leaderboardID = leaderboardID
     self.presenter = presenter
     logging("GameCenterInterface init starts")
     GKLocalPlayer.local.authenticateHandler = { [unowned self] gcAuthorizationViewController, error in
@@ -34,12 +37,8 @@ class GameCenterInterface {
             self?.setAchievementIdentifiers(allAchievements, error: error)
           }
         }
-        if self.leaderboardIdentifiers == nil {
-          GKLeaderboard.loadLeaderboards { [weak self] leaderboards, error in
-            self?.setLeaderboardIdentifiers(leaderboards, error: error)
-          }
-        }
         if GKLocalPlayer.local.playerID != self.lastPlayerID {
+          setGameCountersForPlayer(GKLocalPlayer.local.playerID)
           self.playerAchievements.removeAll()
           self.playerAchievementsProgress.removeAll()
           self.lastPlayerID = GKLocalPlayer.local.playerID
@@ -63,24 +62,6 @@ class GameCenterInterface {
       logging("\(allAchievements.count) possible achievements:")
       achievementIdentifiers = Set<String>(allAchievements.map {
         logging($0.identifier)
-        return $0.identifier
-      })
-    }
-  }
-
-  func setLeaderboardIdentifiers(_ leaderboards: [GKLeaderboard]?, error: Error?) {
-    // We only need to set these once, since they're independent of the player
-    guard leaderboardIdentifiers == nil else { return }
-    if let error = error {
-      // Don't save a partial list
-      logging("Error loading Game Center leaderboards: \(error.localizedDescription)")
-    } else {
-      guard let leaderboards = leaderboards else { return }
-      logging("Leaderboards:")
-      leaderboardIdentifiers = Set<String>(leaderboards.compactMap {
-        if let id = $0.identifier {
-          logging(id)
-        }
         return $0.identifier
       })
     }
@@ -133,25 +114,20 @@ class GameCenterInterface {
     }
   }
 
-  func reportProgress(_ identifier: String, amount: Double) {
-    let currentProgress = playerAchievementsProgress[identifier] ?? (statusOfAchievement(identifier) ?? 0)
-    if currentProgress == 100 {
+  func reportProgress(_ identifier: String, knownProgress: Double) -> Double {
+    let reportedProgress = playerAchievementsProgress[identifier] ?? (statusOfAchievement(identifier) ?? 0)
+    if reportedProgress == 100 {
       // Already done
-      return
+      return 100
     }
-    let totalProgress = currentProgress + amount
-    if totalProgress > 99.999 {
-      // This achievement is completed.  The 99.999 is to allow for a little floating
-      // point error during the accumulation of the partial results.  After a game
-      // finishes we'll flush any partial progress in playerAchievementsProgress, but
-      // we'll report this achievement now so we can remove the partial progress for
-      // it.  (If there's an error in reportCompletion, the result will go back into
-      // playerAchievementsProgress for retry.)
+    let progress = max(reportedProgress, knownProgress)
+    if progress == 100 {
       playerAchievementsProgress.removeValue(forKey: identifier)
       reportCompletion(identifier)
     } else {
-       playerAchievementsProgress[identifier] = totalProgress
+       playerAchievementsProgress[identifier] = progress
     }
+    return progress
   }
 
   func flushProgress() {
@@ -168,6 +144,8 @@ class GameCenterInterface {
       guard let self = self else { return }
       if let error = error {
         logging("Error reporting progress achievements to Game Center: \(error.localizedDescription)")
+        // Leave playerAchievementsProgress alone.  Maybe the person will play
+        // another game and we'll have another go at flushProgress.
       } else {
         for (identifier, percent) in self.playerAchievementsProgress {
           self.playerAchievements[identifier] = percent
@@ -178,13 +156,39 @@ class GameCenterInterface {
   }
 
   func saveScore(_ score: Int) {
-    let gcScore = GKScore(leaderboardIdentifier: leaderboardIdentifiers!.first!)
+    let gcScore = GKScore(leaderboardIdentifier: leaderboardID)
     gcScore.value = Int64(score)
     GKScore.report([gcScore]) { error in
       if let error = error {
         logging("Error reporting score \(score) to Game Center: \(error.localizedDescription)")
       } else {
         logging("Reported score \(score) to Game Center")
+      }
+    }
+  }
+
+  func printScore(_ score: GKScore?) {
+    if let score = score {
+      let player = score.player
+      logging("player \(player.alias) \(player.displayName), score \(score.value), date \(score.date), rank \(score.rank)")
+    } else {
+      logging("none")
+    }
+  }
+
+  func loadLeaderboard() {
+    let leaderboard = GKLeaderboard()
+    leaderboard.identifier = leaderboardID
+    leaderboard.playerScope = .global
+    leaderboard.timeScope = .week
+    leaderboard.loadScores() { scores, error in
+      if let error = error {
+        logging("Error requesting scores from Game Center: \(error.localizedDescription)")
+      } else {
+        logging("Local player score:")
+        self.printScore(leaderboard.localPlayerScore)
+        logging("Top scores")
+        scores?.forEach { self.printScore($0) }
       }
     }
   }

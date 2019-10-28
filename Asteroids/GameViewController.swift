@@ -25,10 +25,11 @@ class GameViewController: UIViewController {
       Globals.conformingPhysicsCache.preload()
       let size = CGSize(width: 768 * aspect, height: 768)
       Globals.menuScene = MenuScene(size: size)
-      let toPresent = Globals.userData.hasDoneIntro.value ? Globals.menuScene! : IntroScene(size: size)
+      let toPresent = userDefaults.hasDoneIntro.value ? Globals.menuScene! : IntroScene(size: size)
       logging("viewDidLoad will present \(toPresent.name!)")
       view.presentScene(toPresent)
-      Globals.gcInterface = GameCenterInterface(presenter: { vc in Globals.menuScene.setGameCenterAuth(viewController: vc) })
+      Globals.gcInterface = GameCenterInterface(leaderboardID: "org.davidlong.Asteroids.normalScores",
+                                                presenter: { vc in Globals.menuScene.setGameCenterAuth(viewController: vc) })
       view.preferredFramesPerSecond = 120
       view.ignoresSiblingOrder = true
       view.showsFPS = true

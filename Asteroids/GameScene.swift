@@ -73,7 +73,8 @@ class GameScene: GameTutorialScene {
   }
 
   func endGameSaveProgress() {
-    Globals.userData.highScore.value = max(self.score, Globals.userData.highScore.value)
+    userDefaults.highScore.value = max(self.score, userDefaults.highScore.value)
+    updateGameCounters()
     if Globals.gcInterface.enabled {
       Globals.gcInterface.flushProgress()
       Globals.gcInterface.saveScore(score)
@@ -182,10 +183,13 @@ class GameScene: GameTutorialScene {
       extraLivesAwarded += 1
     }
     scoreDisplay.text = "\(score)"
-    if initialScore < 2000 && score >= 2000 {
+    if initialScore < 3000 && score >= 3000 {
       reportAchievement(achievement: .spaceCadet)
     }
     else if initialScore < 4000 && score >= 4000 {
+      reportAchievement(achievement: .spaceScout)
+    }
+    else if initialScore < 5000 && score >= 5000 {
       reportAchievement(achievement: .spaceRanger)
     }
     else if initialScore < 6000 && score >= 6000 {
@@ -304,6 +308,13 @@ class GameScene: GameTutorialScene {
     if !asteroid.requiredPhysicsBody().isOnScreen {
       reportAchievement(achievement: .quickFingers)
     }
+    userDefaults.asteroidsDestroyed.value += 1
+    if userDefaults.asteroidsDestroyed.value % 100 == 0 {
+      if let minDestroyed = reportAchievement(achievement: .rockRat, soFar: userDefaults.asteroidsDestroyed.value) {
+        logging("Bumping destroyed asteroids from \(userDefaults.asteroidsDestroyed.value) to \(minDestroyed) because of Game Center")
+        userDefaults.asteroidsDestroyed.value = minDestroyed
+      }
+    }
     addToScore(asteroidPoints(asteroid))
     removeLaser(laser as! SKSpriteNode)
     splitAsteroid(asteroid as! SKSpriteNode)
@@ -322,7 +333,13 @@ class GameScene: GameTutorialScene {
     if laser.requiredPhysicsBody().hasWrapped {
       reportAchievement(achievement: .trickShot)
     }
-    reportAchievement(achievement: .ufoHunter)
+    userDefaults.ufosDestroyed.value += 1
+    if userDefaults.ufosDestroyed.value % 5 == 0 {
+      if let minDestroyed = reportAchievement(achievement: .ufoHunter, soFar: userDefaults.ufosDestroyed.value) {
+        logging("Bumping destroyed UFOs from \(userDefaults.ufosDestroyed.value) to \(minDestroyed) because of Game Center")
+        userDefaults.ufosDestroyed.value = minDestroyed
+      }
+    }
     addToScore(ufoPoints(ufo))
     removeLaser(laser as! SKSpriteNode)
     destroyUFO(ufo as! UFO)

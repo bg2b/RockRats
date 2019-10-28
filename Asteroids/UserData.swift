@@ -22,11 +22,70 @@ struct DefaultsValue<T> {
   }
 }
 
-class UserData {
-  var highScore = DefaultsValue<Int>(name: "highScore", defaultValue: 0)
-  var hasDoneIntro = DefaultsValue<Bool>(name: "hasDoneIntro", defaultValue: false)
+// This is a counter that is keyed to the current Game Center player ID and
+// synchronized between devices that are signed in to iCloud.
+struct GameCounter {
+  let name: String
+
+  var value: Int {
+    get {
+      let playerID = userDefaults.currentPlayerID.value
+      let localDict = UserDefaults.standard.object(forKey: name) as? [String: Int] ?? [String: Int]()
+      let iCloudDict = NSUbiquitousKeyValueStore.default.object(forKey: name) as? [String: Int] ?? [String: Int]()
+      let local = localDict[playerID] ?? 0
+      let iCloud = iCloudDict[playerID] ?? 0
+      let result = max(local, iCloud)
+      logging("Read counter \(name) for \(playerID): local \(local), iCloud \(iCloud), result \(result)")
+      return result
+    }
+    set {
+      let playerID = userDefaults.currentPlayerID.value
+      logging("Set counter \(name) for \(playerID) to \(newValue)")
+      var mergedDict = UserDefaults.standard.object(forKey: name) as? [String: Int] ?? [String: Int]()
+      let iCloudDict = NSUbiquitousKeyValueStore.default.object(forKey: name) as? [String: Int] ?? [String: Int]()
+      for (iCloudKey, iCloudValue) in iCloudDict {
+        mergedDict[iCloudKey] = max(mergedDict[iCloudKey] ?? 0, iCloudValue)
+      }
+      mergedDict[playerID] = max(mergedDict[playerID] ?? 0, newValue)
+      for (key, value) in mergedDict {
+        logging("Merged: player \(key), count \(value)")
+      }
+      UserDefaults.standard.set(mergedDict, forKey: name)
+      NSUbiquitousKeyValueStore.default.set(mergedDict, forKey: name)
+    }
+  }
 }
 
-extension Globals {
-  static var userData = UserData()
+class SavedUserData {
+  var highScore = DefaultsValue<Int>(name: "highScore", defaultValue: 0)
+  var hasDoneIntro = DefaultsValue<Bool>(name: "hasDoneIntro", defaultValue: false)
+  var currentPlayerID = DefaultsValue<String>(name: "currentPlayerID", defaultValue: "")
+  // These values are local-only and are updated during a game.
+  var ufosDestroyed = DefaultsValue<Int>(name: "ufosDestroyed", defaultValue: 0)
+  var asteroidsDestroyed = DefaultsValue<Int>(name: "asteroidsDestroyed", defaultValue: 0)
+  // These are the persistent copies that get synced both locally (in case someone
+  // logs in as a new player in Game Center) and to iCloud.
+  var ufosDestroyedCounter = GameCounter(name: "ufosDestroyedCounter")
+  var asteroidsDestroyedCounter = GameCounter(name: "asteroidsDestroyedCounter")
+}
+
+var userDefaults = SavedUserData()
+
+func setGameCountersForPlayer(_ playerID: String) {
+  // Someone logged in on Game Center; make sure we have the right counters for them.
+  userDefaults.currentPlayerID.value = playerID
+  logging("Player is now \(playerID)")
+  userDefaults.ufosDestroyed.value = userDefaults.ufosDestroyedCounter.value
+  userDefaults.asteroidsDestroyed.value = userDefaults.asteroidsDestroyedCounter.value
+  logging("UFO counter \(userDefaults.ufosDestroyed.value), asteroid counter \(userDefaults.asteroidsDestroyed.value)")
+  // Synchronize in case either local or iCloud is out-of-date.
+  updateGameCounters()
+}
+
+func updateGameCounters() {
+  // The current counters have been updated by playing a game.  Sync them to
+  // persistent storage and iCloud.
+  logging("Updating game counters")
+  userDefaults.ufosDestroyedCounter.value = userDefaults.ufosDestroyed.value
+  userDefaults.asteroidsDestroyedCounter.value = userDefaults.asteroidsDestroyed.value
 }

@@ -107,7 +107,7 @@ class IntroScene: BasicScene {
 
   func toMenu() {
     wait(for: 0.25) {
-      Globals.userData.hasDoneIntro.value = true
+      userDefaults.hasDoneIntro.value = true
       self.switchScene(to: Globals.menuScene, withDuration: 3)
     }
     // let tutorialScene = TutorialScene(size: fullFrame.size)

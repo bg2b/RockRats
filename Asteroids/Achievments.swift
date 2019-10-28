@@ -28,6 +28,7 @@ enum Achievement: String {
   case keepOnTrekking = "keepOnTrekking"
   // Normal
   case spaceCadet = "spaceCadet"
+  case spaceScout = "spaceScout"
   case spaceRanger = "spaceRanger"
   case spaceAce = "spaceAce"
   case quickFingers = "quickFingers"
@@ -41,6 +42,7 @@ enum Achievement: String {
   case armedAndDangerous = "armedAndDangerous"
   // Multi-level
   case ufoHunter = "ufoHunter"
+  case rockRat = "rockRat"
 
   var gameCenterID: String { "org.davidlong.Asteroids." + rawValue }
 
@@ -48,29 +50,53 @@ enum Achievement: String {
 }
 
 let achievementLevels = [
-  Achievement.ufoHunter: [25, 100, 300]
+  Achievement.ufoHunter: [30, 100, 300, 1000],
+  .rockRat: [3000, 10000, 30000, 100000]
 ]
 
 func reportAchievement(achievement: Achievement) {
   if let gc = Globals.gcInterface, gc.enabled {
+    if let status = gc.statusOfAchievement(achievement.gameCenterID) {
+      if status == 100 {
+        logging("Achievement \(achievement.rawValue) already completed")
+      } else {
+        gc.reportCompletion(achievement.gameCenterID)
+      }
+    } else {
+      // We don't know the status for some reason
+      logging("Achievement \(achievement.rawValue) with no status (maybe not in Game Center yet)")
+    }
+  } else {
+    logging("Achievement \(achievement.rawValue) but Game Center is disabled")
+  }
+}
+
+func reportAchievement(achievement: Achievement, soFar: Int) -> Int? {
+  // Game Center will have some percent completion of a progress achievement, and
+  // from that we can sometimes tell that the level passed in as soFar is too low.
+  // For example suppose that Game Center has reported the player to be 37% through
+  // an achievement that is attained at level 1000.  If soFar is only 350, then we
+  // know that they must have been playing on some other device and made some
+  // progress on the achievement.  Normally this wouldn't happen since we'd have
+  // synchronized counters through the saved game feature in Game Center, but if the
+  // player isn't signed in to iCloud, saved games aren't available.  Anyway, we can
+  // use the achievement percentage as an approximate substitute for the saved games.
+  // We'll return nil if soFar already represents our best guess as to the correct
+  // level.
+  var result: Int? = nil
+  if let gc = Globals.gcInterface, gc.enabled {
     if let levels = achievementLevels[achievement] {
       logging("Reporting progress in multi-level achievement \(achievement.gameCenterID)")
       for level in 0 ..< levels.count {
-        gc.reportProgress(achievement.gameCenterLevelID(level), amount: 100.0 / Double(levels[level]))
-      }
-    } else {
-      if let status = gc.statusOfAchievement(achievement.gameCenterID) {
-        if status == 100 {
-          logging("Achievement \(achievement.rawValue) already completed")
-        } else {
-          gc.reportCompletion(achievement.gameCenterID)
+        let progress = gc.reportProgress(achievement.gameCenterLevelID(level), knownProgress: floor(Double(soFar) / Double(levels[level]) * 100))
+        let minSoFar = Int(floor(progress / 100.0 * Double(levels[level])))
+        if minSoFar > soFar {
+          result = max(result ?? 0, minSoFar)
         }
-      } else {
-        // We don't know the status for some reason
-        logging("Achievement \(achievement.rawValue) with no status (maybe not in Game Center yet)")
       }
     }
   } else {
     logging("Achievement \(achievement.rawValue) but Game Center is disabled")
   }
+  return result
 }

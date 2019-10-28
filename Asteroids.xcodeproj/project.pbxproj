@@ -98,6 +98,7 @@
 		FDD8FB91232B99BE00A83EB5 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD8FB90232B99BE00A83EB5 /* GameScene.swift */; };
 		FDD8FB93232CF4FC00A83EB5 /* MenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD8FB92232CF4FC00A83EB5 /* MenuScene.swift */; };
 		FDD8FB95232D120E00A83EB5 /* configmenu.json in Resources */ = {isa = PBXBuildFile; fileRef = FDD8FB94232D120E00A83EB5 /* configmenu.json */; };
+		FDDCB1462364874D00FF9F1C /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDDCB1452364874D00FF9F1C /* CloudKit.framework */; };
 		FDDF488722D2A700006FB86F /* SpriteCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDDF488622D2A700006FB86F /* SpriteCache.swift */; };
 		FDE04B2722D5FEA30011A529 /* star1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FDE04B2422D5FEA30011A529 /* star1@2x.png */; };
 		FDE04B2822D5FEA30011A529 /* star3@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FDE04B2522D5FEA30011A529 /* star3@2x.png */; };
@@ -213,6 +214,8 @@
 		FDD8FB90232B99BE00A83EB5 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
 		FDD8FB92232CF4FC00A83EB5 /* MenuScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuScene.swift; sourceTree = "<group>"; };
 		FDD8FB94232D120E00A83EB5 /* configmenu.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = configmenu.json; sourceTree = "<group>"; };
+		FDDCB1442364834A00FF9F1C /* Asteroids.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Asteroids.entitlements; sourceTree = "<group>"; };
+		FDDCB1452364874D00FF9F1C /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		FDDF488622D2A700006FB86F /* SpriteCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteCache.swift; sourceTree = "<group>"; };
 		FDE04B2422D5FEA30011A529 /* star1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "star1@2x.png"; sourceTree = "<group>"; };
 		FDE04B2522D5FEA30011A529 /* star3@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "star3@2x.png"; sourceTree = "<group>"; };
@@ -229,6 +232,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FD7635B32354AE1A000543E7 /* GameKit.framework in Frameworks */,
+				FDDCB1462364874D00FF9F1C /* CloudKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -285,6 +289,7 @@
 		FD7635B12354AE19000543E7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FDDCB1452364874D00FF9F1C /* CloudKit.framework */,
 				FD7635B22354AE1A000543E7 /* GameKit.framework */,
 			);
 			name = Frameworks;
@@ -311,6 +316,7 @@
 		FD79323422D20FE600E7D336 /* Asteroids */ = {
 			isa = PBXGroup;
 			children = (
+				FDDCB1442364834A00FF9F1C /* Asteroids.entitlements */,
 				6565DA10232E6818008EA85B /* Achievments.swift */,
 				FDD44F922336113F00C13609 /* AppColors.swift */,
 				FD79323522D20FE600E7D336 /* AppDelegate.swift */,
@@ -728,7 +734,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_ENTITLEMENTS = Asteroids/Asteroids.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 4NCA37UMUQ;
 				INFOPLIST_FILE = Asteroids/Info.plist;
@@ -748,7 +755,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_ENTITLEMENTS = Asteroids/Asteroids.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 4NCA37UMUQ;
 				INFOPLIST_FILE = Asteroids/Info.plist;
