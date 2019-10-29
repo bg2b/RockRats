@@ -11,7 +11,6 @@
 		6513D66C22DC0B4E00B4BD57 /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6513D66B22DC0B4E00B4BD57 /* Button.swift */; };
 		6523C0822316E5400071AB4B /* ufo2loop.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6523C0812316E5400071AB4B /* ufo2loop.wav */; };
 		6523C0842316E54E0071AB4B /* ufo1loop.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6523C0832316E54D0071AB4B /* ufo1loop.wav */; };
-		6523C0862316FBAD0071AB4B /* alternate_heartbeat.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6523C0852316FBAD0071AB4B /* alternate_heartbeat.wav */; };
 		6565DA11232E6818008EA85B /* Achievments.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6565DA10232E6818008EA85B /* Achievments.swift */; };
 		659CC03A230EC9FE00AA087C /* UFO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 659CC039230EC9FE00AA087C /* UFO.swift */; };
 		659CC040230EDA3500AA087C /* ufo_explosion.wav in Resources */ = {isa = PBXBuildFile; fileRef = 659CC03F230EDA3500AA087C /* ufo_explosion.wav */; };
@@ -79,6 +78,8 @@
 		FD96AE1C2339A93300D4CAFA /* TypeIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD96AE1B2339A93300D4CAFA /* TypeIn.swift */; };
 		FD96AE20233A4BE600D4CAFA /* GameTutorialScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD96AE1F233A4BE600D4CAFA /* GameTutorialScene.swift */; };
 		FD96AE22233A52BD00D4CAFA /* TutorialScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD96AE21233A52BD00D4CAFA /* TutorialScene.swift */; };
+		FD9BA03E23683B2B00468636 /* heartbeat1.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD9BA03C23683B2B00468636 /* heartbeat1.wav */; };
+		FD9BA03F23683B2B00468636 /* heartbeat2.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD9BA03D23683B2B00468636 /* heartbeat2.wav */; };
 		FDA43B1E2308A1A600A29347 /* extra_life.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B1D2308A1A600A29347 /* extra_life.wav */; };
 		FDA43B202308AB9600A29347 /* heartbeat.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B1F2308AB9600A29347 /* heartbeat.wav */; };
 		FDA43B222308C11E00A29347 /* gameover.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B212308C11E00A29347 /* gameover.wav */; };
@@ -114,7 +115,6 @@
 		6513D66B22DC0B4E00B4BD57 /* Button.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Button.swift; sourceTree = "<group>"; };
 		6523C0812316E5400071AB4B /* ufo2loop.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo2loop.wav; sourceTree = "<group>"; };
 		6523C0832316E54D0071AB4B /* ufo1loop.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo1loop.wav; sourceTree = "<group>"; };
-		6523C0852316FBAD0071AB4B /* alternate_heartbeat.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = alternate_heartbeat.wav; sourceTree = "<group>"; };
 		6565DA10232E6818008EA85B /* Achievments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Achievments.swift; sourceTree = "<group>"; };
 		659CC039230EC9FE00AA087C /* UFO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UFO.swift; sourceTree = "<group>"; };
 		659CC03F230EDA3500AA087C /* ufo_explosion.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo_explosion.wav; sourceTree = "<group>"; };
@@ -195,6 +195,8 @@
 		FD96AE1B2339A93300D4CAFA /* TypeIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeIn.swift; sourceTree = "<group>"; };
 		FD96AE1F233A4BE600D4CAFA /* GameTutorialScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameTutorialScene.swift; sourceTree = "<group>"; };
 		FD96AE21233A52BD00D4CAFA /* TutorialScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialScene.swift; sourceTree = "<group>"; };
+		FD9BA03C23683B2B00468636 /* heartbeat1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = heartbeat1.wav; sourceTree = "<group>"; };
+		FD9BA03D23683B2B00468636 /* heartbeat2.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = heartbeat2.wav; sourceTree = "<group>"; };
 		FDA43B1D2308A1A600A29347 /* extra_life.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = extra_life.wav; sourceTree = "<group>"; };
 		FDA43B1F2308AB9600A29347 /* heartbeat.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = heartbeat.wav; sourceTree = "<group>"; };
 		FDA43B212308C11E00A29347 /* gameover.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = gameover.wav; sourceTree = "<group>"; };
@@ -262,7 +264,8 @@
 			children = (
 				65A4CD692317362D006DEDB0 /* heartbeat_low.wav */,
 				65A4CD6723173624006DEDB0 /* heartbeat_high.wav */,
-				6523C0852316FBAD0071AB4B /* alternate_heartbeat.wav */,
+				FD9BA03C23683B2B00468636 /* heartbeat1.wav */,
+				FD9BA03D23683B2B00468636 /* heartbeat2.wav */,
 				6523C0832316E54D0071AB4B /* ufo1loop.wav */,
 				6523C0812316E5400071AB4B /* ufo2loop.wav */,
 				FD1B389D234ACC5E00674161 /* ufo3loop.wav */,
@@ -484,10 +487,10 @@
 				FD53167122DAA8EA00F09E57 /* fire1@2x.png in Resources */,
 				659CC040230EDA3500AA087C /* ufo_explosion.wav in Resources */,
 				65A4CD6823173624006DEDB0 /* heartbeat_high.wav in Resources */,
+				FD9BA03E23683B2B00468636 /* heartbeat1.wav in Resources */,
 				FD79324122D20FE600E7D336 /* Main.storyboard in Resources */,
 				FD0C070F22D8925E00F19A55 /* ship_red@2x.png in Resources */,
 				FD0C070B22D8925E00F19A55 /* starfield_black@2x.png in Resources */,
-				6523C0862316FBAD0071AB4B /* alternate_heartbeat.wav in Resources */,
 				FD53169322DC1A0600F09E57 /* lasersmall_red@2x.png in Resources */,
 				FD53168422DB445100F09E57 /* meteorbig3@2x.png in Resources */,
 				FD537DD6231BE385003312B3 /* ufo_laser.wav in Resources */,
@@ -527,6 +530,7 @@
 				FD0C070C22D8925E00F19A55 /* starfield_blue@2x.png in Resources */,
 				FD28DB5422DFFA87009446A2 /* meteorhuge2@2x.png in Resources */,
 				FD4D53C523080D3600718938 /* player_explosion.wav in Resources */,
+				FD9BA03F23683B2B00468636 /* heartbeat2.wav in Resources */,
 				FD53168322DB445100F09E57 /* meteorbig4@2x.png in Resources */,
 				FD79324322D20FE700E7D336 /* Assets.xcassets in Resources */,
 				FD28DB5622DFFA87009446A2 /* meteorhuge3@2x.png in Resources */,

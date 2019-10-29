@@ -38,7 +38,7 @@ class GameScene: GameTutorialScene {
   var consecutiveHits = 0
   var heartbeatOn = false
   let heartbeatRateInitial = 2.0
-  let heartbeatRateMax = 0.5
+  let heartbeatRateMax = 0.35
   var currentHeartbeatRate = 0.0
 
   override func initInfo() {
@@ -136,7 +136,7 @@ class GameScene: GameTutorialScene {
   func heartbeat() {
     if heartbeatOn {
       audio.soundEffect(.heartbeatHigh)
-      let fractionBetween = 0.2
+      let fractionBetween = 0.5
       wait(for: fractionBetween * currentHeartbeatRate) {
         self.audio.soundEffect(.heartbeatLow)
         self.currentHeartbeatRate = max(0.98 * self.currentHeartbeatRate, self.heartbeatRateMax)
