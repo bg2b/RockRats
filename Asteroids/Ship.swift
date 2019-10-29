@@ -119,9 +119,9 @@ class Ship: SKNode {
   func setEngineLevel(_ amount: CGFloat) {
     let soundLevel = Int((amount + 0.24) * 4)
     if soundLevel != engineSoundLevel {
-      // The first 0.25 * is to reduce the overall volume.  The second is to scale
+      // The first 0.5 * is to reduce the overall volume.  The second is to scale
       // soundLevel to 0...1
-      engineSounds.playerNode.volume = 0.25 * 0.25 * Float(soundLevel)
+      engineSounds.playerNode.volume = 0.5 * 0.25 * Float(soundLevel)
       engineSoundLevel = soundLevel
     }
   }
