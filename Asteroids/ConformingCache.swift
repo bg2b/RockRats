@@ -118,20 +118,28 @@ class ConformingPhysicsCache {
   var made = 0
   var unique = 0
 
-  func makeBody(texture: SKTexture) -> SKPhysicsBody {
+  func makeBody(texture: SKTexture, preloadName: String = "") -> SKPhysicsBody {
     made += 1
     if let body = bodies[texture] {
       return body.copy() as! SKPhysicsBody
     } else {
       unique += 1
       let os = ProcessInfo().operatingSystemVersion
-      if os.majorVersion != 13 {
-        let body = SKPhysicsBody(texture: texture, size: texture.size())
-        bodies[texture] = body
-        return body.copy() as! SKPhysicsBody
+      if os.majorVersion == 13 {
+        if os.minorVersion < 2 {
+          // iOS 13.0 and 13.1 had some bugs with creation from a texture
+          let body = ImageMask(texture: texture, alphaThreshold: 0.5).convexHull()
+          bodies[texture] = body
+          return body.copy() as! SKPhysicsBody
+        } else {
+          // 13.2 can make bodies from textures, but not if they're in an atlas
+          let preloadTexture = SKTexture(imageNamed: "nonatlas_" + preloadName)
+          let body = SKPhysicsBody(texture: preloadTexture, size: preloadTexture.size())
+          bodies[texture] = body
+          return body.copy() as! SKPhysicsBody
+        }
       } else {
-        // iOS 13 has some bugs with creation from a texture
-        let body = ImageMask(texture: texture, alphaThreshold: 0.5).convexHull()
+        let body = SKPhysicsBody(texture: texture, size: texture.size())
         bodies[texture] = body
         return body.copy() as! SKPhysicsBody
       }
@@ -147,7 +155,7 @@ class ConformingPhysicsCache {
       "meteorhuge1", "meteorhuge2",
     ]
     for textureName in conformingTextures {
-      let _ = makeBody(texture: Globals.textureCache.findTexture(imageNamed: textureName))
+      _ = makeBody(texture: Globals.textureCache.findTexture(imageNamed: textureName), preloadName: textureName)
     }
   }
 
