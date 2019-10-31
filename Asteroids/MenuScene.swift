@@ -171,7 +171,7 @@ class MenuScene: BasicScene, GKGameCenterControllerDelegate {
   required init(size: CGSize) {
     super.init(size: size)
     name = "menuScene"
-    initGameArea(avoidSafeArea: true)
+    initGameArea(avoidSafeArea: false)
     initMenu()
     physicsWorld.contactDelegate = self
     isUserInteractionEnabled = true
