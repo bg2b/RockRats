@@ -40,13 +40,21 @@ struct GameCounter {
     }
     set {
       let playerID = userDefaults.currentPlayerID.value
-      logging("Set counter \(name) for \(playerID) to \(newValue)")
+      let alternatePlayerID = userDefaults.currentAlternatePlayerID.value
+      logging("Set counter \(name) for \(playerID) (alternate \(alternatePlayerID) to \(newValue)")
       var mergedDict = UserDefaults.standard.object(forKey: name) as? [String: Int] ?? [String: Int]()
       let iCloudDict = NSUbiquitousKeyValueStore.default.object(forKey: name) as? [String: Int] ?? [String: Int]()
       for (iCloudKey, iCloudValue) in iCloudDict {
         mergedDict[iCloudKey] = max(mergedDict[iCloudKey] ?? 0, iCloudValue)
       }
-      mergedDict[playerID] = max(mergedDict[playerID] ?? 0, newValue)
+      let mergedValue = max(mergedDict[playerID] ?? 0, newValue)
+      mergedDict[playerID] = mergedValue
+      if alternatePlayerID != "<none>" {
+        // In the future, the Game Center ID we see may change to the alternate ID.
+        // Save the counter under both IDs so that when the day comes to switch, the
+        // player's progress won't reset.
+        mergedDict[alternatePlayerID] = mergedValue
+      }
       for (key, value) in mergedDict {
         logging("Merged: player \(key), count \(value)")
       }
@@ -60,6 +68,7 @@ class SavedUserData {
   var highScore = DefaultsValue<Int>(name: "highScore", defaultValue: 0)
   var hasDoneIntro = DefaultsValue<Bool>(name: "hasDoneIntro", defaultValue: false)
   var currentPlayerID = DefaultsValue<String>(name: "currentPlayerID", defaultValue: "")
+  var currentAlternatePlayerID = DefaultsValue<String>(name: "currentAlternatePlayerID", defaultValue: "<none>")
   // These values are local-only and are updated during a game.
   var ufosDestroyed = DefaultsValue<Int>(name: "ufosDestroyed", defaultValue: 0)
   var asteroidsDestroyed = DefaultsValue<Int>(name: "asteroidsDestroyed", defaultValue: 0)
@@ -71,10 +80,12 @@ class SavedUserData {
 
 var userDefaults = SavedUserData()
 
-func setGameCountersForPlayer(_ playerID: String) {
+func setGameCountersForPlayer(_ playerID: String, _ alternatePlayerID: String?) {
   // Someone logged in on Game Center; make sure we have the right counters for them.
   userDefaults.currentPlayerID.value = playerID
-  logging("Player is now \(playerID)")
+  let alternateID = alternatePlayerID ?? "<none>"
+  userDefaults.currentAlternatePlayerID.value = alternateID
+  logging("Player is now \(playerID) (alternate \(alternateID))")
   userDefaults.ufosDestroyed.value = userDefaults.ufosDestroyedCounter.value
   userDefaults.asteroidsDestroyed.value = userDefaults.asteroidsDestroyedCounter.value
   logging("UFO counter \(userDefaults.ufosDestroyed.value), asteroid counter \(userDefaults.asteroidsDestroyed.value)")

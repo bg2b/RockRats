@@ -15,10 +15,22 @@ class GameCenterInterface {
   var achievementIdentifiers: Set<String>? = nil
   var playerAchievements = [String: Double]()
   var playerAchievementsProgress = [String: Double]()
-  var conflictingGames = [GKSavedGame]()
-  var conflictsToResolve = 0
+  var localPlayerScore: GKScore? = nil
+  var leaderboardScores = [GKScore]()
 
   var enabled: Bool { GKLocalPlayer.local.isAuthenticated }
+  // At some point, playerID will become gamePlayerID on iOS ?? devices since
+  // playerID is deprecated.  The alternatePlayerID is to allow a smooth transition
+  // without losing player progress.  We assume that they'll upgrade to iOS 13
+  // sometime during the transition period so that the alternate ID is available.
+  var playerID: String { GKLocalPlayer.local.playerID }
+  var alternatePlayerID: String? {
+    if #available(iOS 13, *) {
+      return GKLocalPlayer.local.scopedIDsArePersistent() ? GKLocalPlayer.local.gamePlayerID : nil
+    } else {
+      return nil
+    }
+  }
 
   init(leaderboardID: String, presenter: @escaping (UIViewController?) -> Void) {
     self.leaderboardID = leaderboardID
@@ -37,15 +49,21 @@ class GameCenterInterface {
             self?.setAchievementIdentifiers(allAchievements, error: error)
           }
         }
-        if GKLocalPlayer.local.playerID != self.lastPlayerID {
-          setGameCountersForPlayer(GKLocalPlayer.local.playerID)
+        if self.playerID != self.lastPlayerID {
+          setGameCountersForPlayer(self.playerID, self.alternatePlayerID)
           self.playerAchievements.removeAll()
           self.playerAchievementsProgress.removeAll()
-          self.lastPlayerID = GKLocalPlayer.local.playerID
+          self.lastPlayerID = self.playerID
+          self.localPlayerScore = nil
+          self.leaderboardScores.removeAll()
         }
         GKAchievement.loadAchievements { [weak self] playerAchievements, error in
           self?.setPlayerAchievements(playerAchievements, error: error)
         }
+        self.loadLeaderboard()
+      } else {
+        self.localPlayerScore = nil
+        self.leaderboardScores.removeAll()
       }
     }
     logging("GameCenterInterface init finishes")
@@ -155,9 +173,22 @@ class GameCenterInterface {
     }
   }
 
+  func hashScore(_ score: Int) -> UInt64 {
+    // Stupid hash function to compute a context that will be associated with a
+    // score.  When we load a leaderboard, we toss out any scores that don't have the
+    // right hash.  We don't have any control over what scores may show in Game
+    // Center, but if someone has managed to somehow hack things and get a bogus
+    // score accepted there, this is at least an extra little speedbump that may help
+    // prevent such bogus scores from being displayed on the in-game leaderboards.
+    let prime64bit = UInt64(3_354_817_023_488_194_757)
+    // This will overflow and give a randomish 64-bit unsigned value
+    return prime64bit &* UInt64(score)
+  }
+
   func saveScore(_ score: Int) {
     let gcScore = GKScore(leaderboardIdentifier: leaderboardID)
     gcScore.value = Int64(score)
+    gcScore.context = hashScore(score)
     GKScore.report([gcScore]) { error in
       if let error = error {
         logging("Error reporting score \(score) to Game Center: \(error.localizedDescription)")
@@ -167,10 +198,15 @@ class GameCenterInterface {
     }
   }
 
+  func scoreIsValid(_ score: GKScore) -> Bool {
+    return score.context == hashScore(Int(score.value))
+  }
+
   func printScore(_ score: GKScore?) {
     if let score = score {
       let player = score.player
-      logging("player \(player.alias) \(player.displayName), score \(score.value), date \(score.date), rank \(score.rank)")
+      let valid = scoreIsValid(score) ? "valid" : "invalid"
+      logging("player \(player.displayName), score \(score.value), date \(score.date), rank \(score.rank), \(valid)")
     } else {
       logging("none")
     }
@@ -180,15 +216,16 @@ class GameCenterInterface {
     let leaderboard = GKLeaderboard()
     leaderboard.identifier = leaderboardID
     leaderboard.playerScope = .global
-    leaderboard.timeScope = .week
-    leaderboard.loadScores() { scores, error in
+    leaderboard.timeScope = .today
+    leaderboard.loadScores() { [weak self] scores, error in
+      guard let self = self else { return }
       if let error = error {
         logging("Error requesting scores from Game Center: \(error.localizedDescription)")
-      } else {
-        logging("Local player score:")
+      } else if let scores = scores {
         self.printScore(leaderboard.localPlayerScore)
-        logging("Top scores")
-        scores?.forEach { self.printScore($0) }
+        scores.forEach { self.printScore($0) }
+        self.localPlayerScore = leaderboard.localPlayerScore
+        self.leaderboardScores = scores.filter { self.scoreIsValid($0) }
       }
     }
   }
