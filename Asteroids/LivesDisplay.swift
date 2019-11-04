@@ -28,13 +28,13 @@ class LivesDisplay: SKNode {
   let dontDie: SKLabelNode
 
   override required init() {
-    numericDisplay = SKLabelNode(fontNamed: "Kenney Future")
+    numericDisplay = SKLabelNode(fontNamed: AppColors.font)
     numericDisplay.name = "extraLives"
     numericDisplay.fontColor = AppColors.textColor
     numericDisplay.horizontalAlignmentMode = .left
     numericDisplay.verticalAlignmentMode = .center
     numericDisplay.isHidden = true
-    dontDie = SKLabelNode(fontNamed: "Kenney Future")
+    dontDie = SKLabelNode(fontNamed: AppColors.font)
     dontDie.name = "dontDie"
     dontDie.text = dontDieMessages[0]
     dontDie.fontColor = AppColors.textColor

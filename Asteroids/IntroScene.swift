@@ -10,7 +10,7 @@ import SpriteKit
 import AVFoundation
 
 class IntroScene: BasicScene {
-  let attributes = AttrStyles(fontName: "Kenney Future Narrow", fontSize: 40)
+  let attributes = AttrStyles(fontName: AppColors.font, fontSize: 40)
   let standBy = """
   Incoming transmission...
   Please stand by.
@@ -61,7 +61,7 @@ class IntroScene: BasicScene {
     introLabel.position = CGPoint(x: gameFrame.midX, y: 0)
     intro.addChild(introLabel)
     introLabel.isHidden = true
-    goButton = Button(forText: "Find Out", size: CGSize(width: 350, height: 50), fontName: "Kenney Future Narrow")
+    goButton = Button(forText: "Find Out", size: CGSize(width: 350, height: 50), fontName: AppColors.font)
     goButton.position = CGPoint(x: fullFrame.midX, y: 0)
     goButton.action = { [unowned self] in self.toMenu() }
     intro.addChild(goButton)
@@ -126,7 +126,7 @@ class IntroScene: BasicScene {
     super.update(currentTime)
   }
 
-  required init(size: CGSize) {
+  override init(size: CGSize) {
     super.init(size: size)
     name = "introScene"
     initGameArea(avoidSafeArea: false)
@@ -134,6 +134,6 @@ class IntroScene: BasicScene {
   }
 
   required init(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented by IntroScene")
+    super.init(coder: aDecoder)
   }
 }

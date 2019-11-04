@@ -14,7 +14,7 @@ class Button: SKNode {
   var clickTouch: UITouch? = nil
   var action: (() -> Void)? = nil
 
-  init(around label: SKLabelNode, minSize: CGSize, extraLeft: CGFloat = 0) {
+  init(around node: SKNode, minSize: CGSize) {
     // This one is for managing the label separately.  For example during the
     // tutorial we show some instructions using a type-in effect, and that requires
     // more label gymnastics than we deal with here.  Note that the label is not a
@@ -22,9 +22,10 @@ class Button: SKNode {
     // the button doesn't move along with it.  And once you've made the button, the
     // border size is fixed.  If you want to change the text, you'll probably need to
     // throw the button away and make a new one.
-    let labelSize = label.frame.size
+    let nodeSize = node.frame.size
+    // Padding is total amount for both sides, so 20 = 10 points on each
     let padding = CGFloat(20)
-    let size = CGSize(width: max(labelSize.width + padding + extraLeft, minSize.width), height: max(labelSize.height + padding, minSize.height))
+    let size = CGSize(width: max(nodeSize.width + padding, minSize.width), height: max(nodeSize.height + padding, minSize.height))
     let buttonBorder = SKShapeNode(rectOf: size, cornerRadius: 0.5 * padding)
     buttonBorder.name = "buttonBorder"
     buttonBorder.fillColor = .clear
@@ -32,7 +33,7 @@ class Button: SKNode {
     buttonBorder.lineWidth = 2
     buttonBorder.glowWidth = 1
     buttonBorder.isAntialiased = true
-    buttonBorder.position = CGPoint(x: -extraLeft, y: 0)
+    buttonBorder.position = .zero
     self.border = buttonBorder
     super.init()
     addChild(buttonBorder)
@@ -52,6 +53,15 @@ class Button: SKNode {
     label.verticalAlignmentMode = .center
     self.init(around: label, minSize: size)
     addChild(label)
+  }
+
+  convenience init(imageNamed imageName: String, imageColor: UIColor, size: CGSize) {
+    let sprite = SKSpriteNode(imageNamed: imageName)
+    sprite.name = "buttonSprite"
+    sprite.color = imageColor
+    sprite.colorBlendFactor = 1
+    self.init(around: sprite, minSize: size)
+    addChild(sprite)
   }
 
   required init(coder aDecoder: NSCoder) {

@@ -28,13 +28,16 @@ struct AttrStyles {
 
 func makeAttributed(text: String, until invisibleIndex: String.Index, attributes: AttrStyles) -> NSAttributedString {
   var highlighted = false
+  var hidden = false
   let result = NSMutableAttributedString(string: "")
   var index = text.startIndex
   while index < text.endIndex {
     if text[index] == "@" {
       highlighted = !highlighted
+    } else if text[index] == "%" {
+      hidden = !hidden
     } else {
-      if index < invisibleIndex {
+      if index < invisibleIndex && !hidden {
         if highlighted {
           result.append(NSAttributedString(string: String(text[index]), attributes: attributes.highlightTextAttributes))
         } else {

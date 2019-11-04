@@ -40,6 +40,7 @@ class GameScene: GameTutorialScene {
   let heartbeatRateInitial = 2.0
   let heartbeatRateMax = 0.35
   var currentHeartbeatRate = 0.0
+  var highScoreScene: HighScoreScene? = nil
 
   override func initInfo() {
     super.initInfo()
@@ -48,14 +49,14 @@ class GameScene: GameTutorialScene {
     moreInfo.name = "moreInfo"
     moreInfo.zPosition = LevelZs.info.rawValue
     gameArea.addChild(moreInfo)
-    scoreDisplay = SKLabelNode(fontNamed: "Kenney Future")
+    scoreDisplay = SKLabelNode(fontNamed: AppColors.font)
     scoreDisplay.fontSize = 50
     scoreDisplay.fontColor = AppColors.textColor
     scoreDisplay.text = "0"
     scoreDisplay.name = "score"
     scoreDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.maxY - 50)
     moreInfo.addChild(scoreDisplay)
-    centralDisplay = SKLabelNode(fontNamed: "Kenney Future")
+    centralDisplay = SKLabelNode(fontNamed: AppColors.font)
     centralDisplay.fontSize = 100
     centralDisplay.fontColor = AppColors.highlightTextColor
     centralDisplay.text = ""
@@ -73,11 +74,44 @@ class GameScene: GameTutorialScene {
   }
 
   func endGameSaveProgress() {
-    userDefaults.highScore.value = max(self.score, userDefaults.highScore.value)
     updateGameCounters()
     if Globals.gcInterface.enabled {
       Globals.gcInterface.flushProgress()
-      Globals.gcInterface.saveScore(score)
+    }
+  }
+
+  func prepareHighScoreScene(gameScore: GameScore) {
+//    var scores = localHighScores
+//    if let gc = Globals.gcInterface, gc.enabled {
+//      // Mix in Game Center leaderboards
+//      let friendScores = gc.friendScores.map { GameScore(score: $0) }
+//      let globalScores = gc.leaderboardScores.map { GameScore(score: $0) }
+//      let allScores = Set(globalScores).union(friendScores)
+//      
+//    }
+    highScoreScene = HighScoreScene(size: fullFrame.size, score: gameScore)
+  }
+
+  func saveScoreAndPrepareHighScores() {
+    // When Game Center is active, we need to report the score and refresh
+    // leaderboards.  When game over calls this method, we have 6 seconds before the
+    // earliest possible transition to the high scores screen.  It doesn't take long
+    // to create the high scores scene, so we'll report the score immediately, then
+    // wait a couple of seconds to refresh Game Center leaderboards, and then a
+    // couple more seconds for the leaderboard data to load.  If the leaderboard data
+    // doesn't load in time, we'll wind up creating the high scores scene with
+    // somewhat out-of-date Game Center scores, but whatevs.
+    let gc = Globals.gcInterface!
+    let gameScore = gc.enabled ? gc.saveScore(score) : GameScore(points: score)
+    _ = userDefaults.highScores.addScore(gameScore)
+    if gc.enabled {
+      wait(for: 2) {
+        gc.loadLeaderboards()
+      }
+    }
+    highScoreScene = nil
+    wait(for: 4) {
+      self.prepareHighScoreScene(gameScore: gameScore)
     }
   }
 
@@ -382,8 +416,13 @@ class GameScene: GameTutorialScene {
       wait(for: delay) {
         self.audio.soundEffect(.gameOver)
         self.endGameSaveProgress()
+        self.saveScoreAndPrepareHighScores()
         self.displayMessage("GAME OVER", forTime: 4)
-        self.wait(for: 6) { self.switchScene(to: Globals.menuScene) }
+        self.wait(for: 6) {
+          let highScoreScene = self.highScoreScene!
+          self.highScoreScene = nil
+          self.switchScene(to: highScoreScene)
+        }
       }
     }
   }
@@ -486,7 +525,7 @@ class GameScene: GameTutorialScene {
     audio.update()
   }
 
-  required init(size: CGSize) {
+  override init(size: CGSize) {
     super.init(size: size)
     name = "gameScene"
     initFutureShader()
@@ -495,6 +534,6 @@ class GameScene: GameTutorialScene {
   }
 
   required init(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented by GameScene")
+    super.init(coder: aDecoder)
   }
 }

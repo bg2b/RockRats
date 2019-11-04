@@ -268,7 +268,7 @@ class GameTutorialScene: BasicScene {
     wait(for: 0.5) { self.replenishEnergy() }
   }
 
-  required init(size: CGSize) {
+  override init(size: CGSize) {
     super.init(size: size)
     name = "gameTutorialScene"
     initGameArea(avoidSafeArea: true)
@@ -279,7 +279,7 @@ class GameTutorialScene: BasicScene {
   }
 
   required init(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented by GameTutorialScene")
+    super.init(coder: aDecoder)
   }
 
   override func willMove(from view: SKView) {

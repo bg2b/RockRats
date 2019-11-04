@@ -616,7 +616,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
 
   // The initializers should also be overridden by subclasses, but be sure to call
   // super.init()
-  override required init(size: CGSize) {
+  override init(size: CGSize) {
     super.init(size: size)
     fullFrame = CGRect(x: -0.5 * size.width, y: -0.5 * size.height, width: size.width, height: size.height)
     scaleMode = .aspectFill
@@ -626,7 +626,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   }
 
   required init(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented by BasicScene")
+    fatalError("init(coder:) has not been implemented by BasicScene or its subclasses")
   }
 
   // Subclasses should override these too, typically to do something like starting a

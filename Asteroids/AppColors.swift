@@ -28,4 +28,6 @@ class AppColors {
   static let highlightTextColor = AppColors.yellow
   static let buttonColor = AppColors.green
   static let transitionColor = AppColors.darkBlue
+
+  static let font = "Kenney Future Narrow"
 }

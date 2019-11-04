@@ -77,12 +77,12 @@ func reportAchievement(achievement: Achievement, soFar: Int) -> Int? {
   // For example suppose that Game Center has reported the player to be 37% through
   // an achievement that is attained at level 1000.  If soFar is only 350, then we
   // know that they must have been playing on some other device and made some
-  // progress on the achievement.  Normally this wouldn't happen since we'd have
-  // synchronized counters through the saved game feature in Game Center, but if the
-  // player isn't signed in to iCloud, saved games aren't available.  Anyway, we can
-  // use the achievement percentage as an approximate substitute for the saved games.
-  // We'll return nil if soFar already represents our best guess as to the correct
-  // level.
+  // progress on the achievement.  Normally this wouldn't happen since we synchronize
+  // counters through iCloud.  But since iCloud accounts and Game Center accounts
+  // aren't the same, it's possible if a player logs into Game Center on someone
+  // else's device and plays there.  Anyway, we can use the achievement percentage as
+  // an approximate substitute for the synchronized counters.  We'll return nil if
+  // soFar already represents our best guess as to the correct level.
   var result: Int? = nil
   if let gc = Globals.gcInterface, gc.enabled {
     if let levels = achievementLevels[achievement] {

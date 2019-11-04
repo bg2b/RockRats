@@ -12,7 +12,7 @@ class TutorialScene: GameTutorialScene {
   var instructionsLabel: SKLabelNode!
   var transmissionSounds: ContinuousPositionalAudio!
   var moveOnButton: Button? = nil
-  let attributes = AttrStyles(fontName: "Kenney Future Narrow", fontSize: 40)
+  let attributes = AttrStyles(fontName: AppColors.font, fontSize: 40)
   var maxThrust = CGFloat(0)
   var minThrust = CGFloat(0)
   var maxRotate = CGFloat(0)
@@ -171,7 +171,7 @@ class TutorialScene: GameTutorialScene {
     print("label frame \(labelFrame)")
     // Because the instructionsLabel is multi-line and left justified, it looks more
     // balanced with a small amount of extra space on the left.
-    let button = Button(around: instructionsLabel, minSize: labelFrame.size, extraLeft: 5)
+    let button = Button(around: instructionsLabel, minSize: labelFrame.size)
     button.position = CGPoint(x: labelFrame.midX, y: labelFrame.midY)
     button.zPosition = instructionsLabel.zPosition
     button.action = action
@@ -572,7 +572,7 @@ class TutorialScene: GameTutorialScene {
     playfield.wrapCoordinates()
   }
 
-  required init(size: CGSize) {
+  override init(size: CGSize) {
     super.init(size: size)
     name = "tutorialScene"
     initInstructions()
@@ -581,6 +581,6 @@ class TutorialScene: GameTutorialScene {
   }
 
   required init(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented by TutorialScene")
+    super.init(coder: aDecoder)
   }
 }

@@ -64,11 +64,63 @@ struct GameCounter {
   }
 }
 
+// List of top scores synchronized via iCloud
+struct HighScores {
+  static let maxScores = 10
+
+  func writeBack(_ highScores: [GameScore]) {
+    logging("Saving \(highScores.count) high scores")
+    let encoded = highScores.map { $0.encode() }
+    UserDefaults.standard.set(encoded, forKey: "highScores")
+    NSUbiquitousKeyValueStore.default.set(encoded, forKey: "highScores")
+  }
+
+  func sortedAndTrimmed(_ highScores: [GameScore]) -> [GameScore] {
+    var sorted = highScores.sorted { $0.points > $1.points }
+    if sorted.count > HighScores.maxScores {
+      sorted.removeLast(sorted.count - HighScores.maxScores)
+    }
+    return sorted
+  }
+
+  var value: [GameScore] {
+    get {
+      let local = UserDefaults.standard.object(forKey: "highScores") as? [[String: Any]] ?? [[String: Any]]()
+      let localScores = local.compactMap { GameScore(fromDict: $0) }
+      let global = NSUbiquitousKeyValueStore.default.object(forKey: "highScores") as? [[String: Any]] ?? [[String: Any]]()
+      let globalScores = global.compactMap { GameScore(fromDict: $0) }
+      let highScores = sortedAndTrimmed(Array(Set(localScores).union(globalScores)))
+      if highScores != localScores || highScores != globalScores {
+        writeBack(highScores)
+      }
+      return highScores
+    }
+  }
+
+  var highest: Int {
+    let scores = value
+    return scores.first?.points ?? 0
+  }
+
+  func addScore(_ score: GameScore) -> [GameScore] {
+    var highScores = value
+    if (highScores.last?.points ?? 0) > score.points && highScores.count >= HighScores.maxScores {
+      // This score is not sufficient to make the high scores.
+      return highScores
+    }
+    highScores.append(score)
+    highScores = sortedAndTrimmed(highScores)
+    writeBack(highScores)
+    return highScores
+  }
+}
+
 class SavedUserData {
-  var highScore = DefaultsValue<Int>(name: "highScore", defaultValue: 0)
   var hasDoneIntro = DefaultsValue<Bool>(name: "hasDoneIntro", defaultValue: false)
+  var highScores = HighScores()
   var currentPlayerID = DefaultsValue<String>(name: "currentPlayerID", defaultValue: "")
   var currentAlternatePlayerID = DefaultsValue<String>(name: "currentAlternatePlayerID", defaultValue: "<none>")
+  var currentPlayerName = DefaultsValue<String>(name: "currentPlayerName", defaultValue: "Spaceman Spiff")
   // These values are local-only and are updated during a game.
   var ufosDestroyed = DefaultsValue<Int>(name: "ufosDestroyed", defaultValue: 0)
   var asteroidsDestroyed = DefaultsValue<Int>(name: "asteroidsDestroyed", defaultValue: 0)
@@ -91,6 +143,10 @@ func setGameCountersForPlayer(_ playerID: String, _ alternatePlayerID: String?) 
   logging("UFO counter \(userDefaults.ufosDestroyed.value), asteroid counter \(userDefaults.asteroidsDestroyed.value)")
   // Synchronize in case either local or iCloud is out-of-date.
   updateGameCounters()
+}
+
+func setCurrentPlayerName(_ playerName: String) {
+  userDefaults.currentPlayerName.value = playerName
 }
 
 func updateGameCounters() {
