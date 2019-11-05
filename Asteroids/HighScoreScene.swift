@@ -14,73 +14,91 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
   var gameStarting = false
   var newGame: GameScene? = nil
 
-  func rightAlignPoints(_ scoreStr: String) -> String {
-    var result = scoreStr
-    if result.count < 5 {
-      result = "%" + String(repeating: "0", count: 5 - result.count) + "%" + result
+  func highScoreLineLabels(_ highScore: GameScore, highlighted: GameScore) -> (SKLabelNode, SKLabelNode) {
+    let playerScore = SKLabelNode()
+    playerScore.name = "playerScore"
+    var playerScoreText = "\(highScore.points)"
+    let playerName = SKLabelNode()
+    playerName.name = "playerName"
+    var playerNameText = highScore.playerName.uppercased()
+    let maxLength = 20
+    if playerNameText.count > maxLength {
+      // Cut off names that are too long
+      playerNameText = playerNameText.prefix(maxLength - 3) + "..."
     }
-    return result
+    if highScore.playerName == highlighted.playerName {
+      // Boldface name of the current player
+      playerNameText = "@" + playerNameText + "@"
+      if highScore.points == highlighted.points {
+        // Also boldface the points if it matches the just-played game
+        playerScoreText = "@" + playerScoreText + "@"
+      }
+    }
+    let attributes = AttrStyles(fontName: AppColors.font, fontSize: 35)
+    playerName.attributedText = makeAttributed(text: playerNameText, until: playerNameText.endIndex, attributes: attributes)
+    playerName.horizontalAlignmentMode = .left
+    playerName.verticalAlignmentMode = .center
+    playerScore.attributedText = makeAttributed(text: playerScoreText, until: playerScoreText.endIndex, attributes: attributes)
+    playerScore.horizontalAlignmentMode = .right
+    playerScore.verticalAlignmentMode = .center
+    return (playerName, playerScore)
   }
 
-  func highScoreLine(_ scoreStr: String, playerName: String, highlightedPlayerName: String) -> String {
-    var result = ""
-    // Highlight line if it's for the player who just played a game.
-    if playerName == highlightedPlayerName {
-      result += "@"
+  func highScoreLines(_ highScores: [GameScore], highlighted: GameScore) -> SKNode {
+    let scores = SKNode()
+    scores.name = "highScoreLines"
+    var labels = highScores.map { highScoreLineLabels($0, highlighted: highlighted) }
+    if highScores.firstIndex(of: highlighted) == nil && highlighted.points > 0 {
+      // Add a final line for the just-played game if it's not a high score
+      labels.append(highScoreLineLabels(highlighted, highlighted: highlighted))
     }
-    result += rightAlignPoints(scoreStr)
-    result += "  "
-    result += playerName
-    if playerName == highlightedPlayerName {
-      result += "@"
+    let maxNameWidth = labels.reduce(CGFloat(0)) { max($0, $1.0.frame.width) }
+    let maxScoreWidth = labels.reduce(CGFloat(0)) { max($0, $1.1.frame.width) }
+    let paddingX = CGFloat(10)
+    let paddingY = CGFloat(3)
+    let width = max(paddingX + maxNameWidth + 10 * paddingX + maxScoreWidth + paddingX, 350)
+    let height = labels[0].0.frame.height + 2 * paddingY
+    var nextY = CGFloat(0)
+    for (i, (playerName, playerScore)) in labels.enumerated() {
+      let line = SKNode()
+      line.name = "highScoreLine"
+      line.position = CGPoint(x: 0, y: nextY)
+      let box = SKShapeNode(rect: CGRect(x: -0.5 * width, y: -0.5 * height, width: width, height: height), cornerRadius: 2 * paddingY)
+      box.name = "highScoreLineBox"
+      box.fillColor = .white
+      box.strokeColor = .clear
+      box.alpha = 0.1
+      box.zPosition = -1
+      line.addChild(box)
+      playerName.position = CGPoint(x: -0.5 * width + paddingX, y: 0)
+      line.addChild(playerName)
+      playerScore.position = CGPoint(x: 0.5 * width - paddingX, y: 0)
+      line.addChild(playerScore)
+      nextY -= height + paddingY
+      if (i + 1) % 5 == 0 {
+        nextY -= paddingY
+      }
+      scores.addChild(line)
     }
-    result += "\n"
-    return result
-  }
-
-  func highScoreLine(_ highScore: GameScore, highlightedPlayerName: String) -> String {
-    return highScoreLine("\(highScore.points)", playerName: highScore.playerName, highlightedPlayerName: highlightedPlayerName)
-  }
-
-  func highlightedPlayerName(_ score: GameScore?) -> String {
-    if let score = score {
-      return score.playerName
-    } else {
-      return userDefaults.currentPlayerName.value
-    }
+    return scores
   }
 
   func initScores(score: GameScore?, highScores: [GameScore]) {
-    let highlighted = highlightedPlayerName(score)
+    let highlighted = score ?? GameScore(points: 0)
     scores = SKNode()
     scores.name = "scores"
     scores.zPosition = LevelZs.info.rawValue
     addChild(scores)
     let title = SKLabelNode(fontNamed: AppColors.font)
-    title.fontSize = 75
+    title.fontSize = 100
     title.fontColor = AppColors.highlightTextColor
     title.text = "High Scores"
     title.verticalAlignmentMode = .center
     title.position = CGPoint(x: fullFrame.midX, y: fullFrame.maxY - title.fontSize)
     scores.addChild(title)
-    let highScoresLabel = SKLabelNode(fontNamed: AppColors.font)
-    highScoresLabel.fontSize = 33
-    highScoresLabel.numberOfLines = 0
-    highScoresLabel.fontColor = AppColors.textColor
-    highScoresLabel.verticalAlignmentMode = .center
-    highScoresLabel.position = CGPoint(x: fullFrame.midX, y: fullFrame.midY)
-    var highScoresText = ""
-    for highScore in highScores {
-      highScoresText += highScoreLine(highScore, highlightedPlayerName: highlighted)
-    }
-    if let score = score, !highScores.contains(score) {
-      highScoresText += highScoreLine("", playerName: "...", highlightedPlayerName: "")
-      highScoresText += highScoreLine(score, highlightedPlayerName: highlighted)
-    }
-    highScoresLabel.attributedText = makeAttributed(text: highScoresText, until: highScoresText.endIndex,
-                                                    attributes: AttrStyles(fontName: AppColors.font, fontSize: highScoresLabel.fontSize))
-    scores.addChild(highScoresLabel)
-
+    let highScores = highScoreLines(highScores, highlighted: highlighted)
+    highScores.position = CGPoint(x: fullFrame.midX, y: title.frame.minY - 50)
+    scores.addChild(highScores)
     let buttonSize = CGSize(width: 150, height: 100)
     let buttonSpacing = CGFloat(20)
     let buttonY = fullFrame.minY + buttonSize.height + buttonSpacing
@@ -96,31 +114,6 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     gcButton.position = CGPoint(x: playButton.position.x + buttonSize.width + buttonSpacing, y: playButton.position.y)
     gcButton.action = { [unowned self] in self.showGameCenter() }
     scores.addChild(gcButton)
-
-//    let buttonHeight = CGFloat(50)
-//    let buttons = SKNode()
-//    buttons.name = "highScoreButtons"
-//    buttons.position = CGPoint(x: fullFrame.midX, y: fullFrame.minY + 1.5 * buttonHeight)
-//    scores.addChild(buttons)
-//    var nextButtonY = 0 * buttonHeight
-//    let menuButton = Button(forText: "Main menu", size: CGSize(width: 400, height: buttonHeight), fontName: AppColors.font)
-//    menuButton.position = CGPoint(x: 0, y: nextButtonY)
-//    menuButton.action = { [unowned self] in self.mainMenu() }
-//    buttons.addChild(menuButton)
-//    nextButtonY += 1.5 * buttonHeight
-//    if Globals.gcInterface.enabled {
-//      let gcButton = Button(forText: "Game Center", size: CGSize(width: 400, height: buttonHeight), fontName: AppColors.font)
-//      gcButton.position = CGPoint(x: 0, y: nextButtonY)
-//      gcButton.action = { [unowned self] in self.showGameCenter() }
-//      buttons.addChild(gcButton)
-//      nextButtonY += 1.5 * buttonHeight
-//    }
-//    let playText = (score == nil ? "Play" : "Play again")
-//    let playButton = Button(forText: playText, size: CGSize(width: 400, height: buttonHeight), fontName: AppColors.font)
-//    playButton.position = CGPoint(x: 0, y: nextButtonY)
-//    playButton.action = { [unowned self] in self.startGame() }
-//    buttons.addChild(playButton)
-//    nextButtonY += 1.5 * buttonHeight
   }
 
   func showWhenQuiescent(_ newScene: SKScene) {
