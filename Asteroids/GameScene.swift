@@ -81,15 +81,8 @@ class GameScene: GameTutorialScene {
   }
 
   func prepareHighScoreScene(gameScore: GameScore) {
-//    var scores = localHighScores
-//    if let gc = Globals.gcInterface, gc.enabled {
-//      // Mix in Game Center leaderboards
-//      let friendScores = gc.friendScores.map { GameScore(score: $0) }
-//      let globalScores = gc.leaderboardScores.map { GameScore(score: $0) }
-//      let allScores = Set(globalScores).union(friendScores)
-//      
-//    }
-    highScoreScene = HighScoreScene(size: fullFrame.size, score: gameScore)
+    run(SKAction.run({ self.highScoreScene = HighScoreScene(size: self.fullFrame.size, score: gameScore) },
+                     queue: DispatchQueue.global(qos: .utility)))
   }
 
   func saveScoreAndPrepareHighScores() {
