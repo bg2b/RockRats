@@ -40,8 +40,7 @@ struct GameCounter {
     }
     set {
       let playerID = userDefaults.currentPlayerID.value
-      let alternatePlayerID = userDefaults.currentAlternatePlayerID.value
-      logging("Set counter \(name) for \(playerID) (alternate \(alternatePlayerID) to \(newValue)")
+      logging("Set counter \(name) for \(playerID) to \(newValue)")
       var mergedDict = UserDefaults.standard.object(forKey: name) as? [String: Int] ?? [String: Int]()
       let iCloudDict = NSUbiquitousKeyValueStore.default.object(forKey: name) as? [String: Int] ?? [String: Int]()
       for (iCloudKey, iCloudValue) in iCloudDict {
@@ -49,12 +48,6 @@ struct GameCounter {
       }
       let mergedValue = max(mergedDict[playerID] ?? 0, newValue)
       mergedDict[playerID] = mergedValue
-      if alternatePlayerID != "<none>" {
-        // In the future, the Game Center ID we see may change to the alternate ID.
-        // Save the counter under both IDs so that when the day comes to switch, the
-        // player's progress won't reset.
-        mergedDict[alternatePlayerID] = mergedValue
-      }
       for (key, value) in mergedDict {
         logging("Merged: player \(key), count \(value)")
       }
@@ -83,13 +76,30 @@ struct HighScores {
     return sorted
   }
 
+  func updateNames(_ highScores: [GameScore]) -> [GameScore] {
+    return highScores.map { score in
+      if let name = userDefaults.playerNames.value[score.playerID], score.playerName != name {
+        return GameScore(score: score, newName: name)
+      } else {
+        return score
+      }
+    }
+  }
+
   var value: [GameScore] {
     get {
       let local = UserDefaults.standard.object(forKey: "highScores") as? [[String: Any]] ?? [[String: Any]]()
       let localScores = local.compactMap { GameScore(fromDict: $0) }
       let global = NSUbiquitousKeyValueStore.default.object(forKey: "highScores") as? [[String: Any]] ?? [[String: Any]]()
       let globalScores = global.compactMap { GameScore(fromDict: $0) }
-      let highScores = sortedAndTrimmed(Array(Set(localScores).union(globalScores)))
+      var highScores = localScores
+      for score in globalScores {
+        if (highScores.firstIndex { sameScore(score, $0) }) == nil {
+          highScores.append(score)
+        }
+      }
+      highScores = sortedAndTrimmed(highScores)
+      highScores = updateNames(highScores)
       if highScores != localScores || highScores != globalScores {
         writeBack(highScores)
       }
@@ -118,9 +128,12 @@ struct HighScores {
 class SavedUserData {
   var hasDoneIntro = DefaultsValue<Bool>(name: "hasDoneIntro", defaultValue: false)
   var highScores = HighScores()
+  // Whoever logged into Game Center last
   var currentPlayerID = DefaultsValue<String>(name: "currentPlayerID", defaultValue: "")
-  var currentAlternatePlayerID = DefaultsValue<String>(name: "currentAlternatePlayerID", defaultValue: "<none>")
-  var currentPlayerName = DefaultsValue<String>(name: "currentPlayerName", defaultValue: "Spaceman Spiff")
+  // Mapping between current player IDs and new player IDs for whenever Game Center switches over
+  var newPlayerIDs = DefaultsValue<[String: String]>(name: "newPlayerIDs", defaultValue: [String: String]())
+  // Mapping between player IDs and display names for high score boards
+  var playerNames = DefaultsValue<[String: String]>(name: "playerNames", defaultValue: [String: String]())
   // These values are local-only and are updated during a game.
   var ufosDestroyed = DefaultsValue<Int>(name: "ufosDestroyed", defaultValue: 0)
   var asteroidsDestroyed = DefaultsValue<Int>(name: "asteroidsDestroyed", defaultValue: 0)
@@ -132,21 +145,23 @@ class SavedUserData {
 
 var userDefaults = SavedUserData()
 
-func setGameCountersForPlayer(_ playerID: String, _ alternatePlayerID: String?) {
+func savePlayerName(_ playerID: String, playerName: String) {
+  userDefaults.playerNames.value[playerID] = playerName
+}
+
+func setCurrentPlayer(_ playerID: String, playerName: String, alternatePlayerID: String?) {
   // Someone logged in on Game Center; make sure we have the right counters for them.
   userDefaults.currentPlayerID.value = playerID
-  let alternateID = alternatePlayerID ?? "<none>"
-  userDefaults.currentAlternatePlayerID.value = alternateID
-  logging("Player is now \(playerID) (alternate \(alternateID))")
+  savePlayerName(playerID, playerName: playerName)
+  if let alternatePlayerID = alternatePlayerID {
+    userDefaults.newPlayerIDs.value[playerID] = alternatePlayerID
+  }
+  logging("Player is now \(playerID) (alternate \(alternatePlayerID ?? "<none>")), name \(playerName)")
   userDefaults.ufosDestroyed.value = userDefaults.ufosDestroyedCounter.value
   userDefaults.asteroidsDestroyed.value = userDefaults.asteroidsDestroyedCounter.value
   logging("UFO counter \(userDefaults.ufosDestroyed.value), asteroid counter \(userDefaults.asteroidsDestroyed.value)")
   // Synchronize in case either local or iCloud is out-of-date.
   updateGameCounters()
-}
-
-func setCurrentPlayerName(_ playerName: String) {
-  userDefaults.currentPlayerName.value = playerName
 }
 
 func updateGameCounters() {

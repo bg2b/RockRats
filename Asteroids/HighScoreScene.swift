@@ -20,16 +20,16 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     var playerScoreText = "\(highScore.points)"
     let playerName = SKLabelNode()
     playerName.name = "playerName"
-    var playerNameText = highScore.playerName.uppercased()
+    var playerNameText = (highScore.playerName ?? "Space Ghost").uppercased()
     let maxLength = 20
     if playerNameText.count > maxLength {
       // Cut off names that are too long
       playerNameText = playerNameText.prefix(maxLength - 3) + "..."
     }
-    if highScore.playerName == highlighted.playerName {
+    if highScore.playerID == highlighted.playerID {
       // Boldface name of the current player
       playerNameText = "@" + playerNameText + "@"
-      if highScore.points == highlighted.points {
+      if highScore == highlighted {
         // Also boldface the points if it matches the just-played game
         playerScoreText = "@" + playerScoreText + "@"
       }
@@ -48,9 +48,14 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     let scores = SKNode()
     scores.name = "highScoreLines"
     var labels = highScores.map { highScoreLineLabels($0, highlighted: highlighted) }
+    let numHighScores = labels.count
     if highScores.firstIndex(of: highlighted) == nil && highlighted.points > 0 {
       // Add a final line for the just-played game if it's not a high score
       labels.append(highScoreLineLabels(highlighted, highlighted: highlighted))
+    }
+    if highScores.isEmpty {
+      let ghostly = GameScore()
+      labels.append(highScoreLineLabels(ghostly, highlighted: ghostly))
     }
     let maxNameWidth = labels.reduce(CGFloat(0)) { max($0, $1.0.frame.width) }
     let maxScoreWidth = labels.reduce(CGFloat(0)) { max($0, $1.1.frame.width) }
@@ -62,6 +67,10 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     for (i, (playerName, playerScore)) in labels.enumerated() {
       let line = SKNode()
       line.name = "highScoreLine"
+      if i == numHighScores {
+        // Extra space to separate the just-played game from the regular high scores
+        nextY -= 3 * paddingY
+      }
       line.position = CGPoint(x: 0, y: nextY)
       let box = SKShapeNode(rect: CGRect(x: -0.5 * width, y: -0.5 * height, width: width, height: height), cornerRadius: 2 * paddingY)
       box.name = "highScoreLineBox"
@@ -75,9 +84,6 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
       playerScore.position = CGPoint(x: 0.5 * width - paddingX, y: 0)
       line.addChild(playerScore)
       nextY -= height + paddingY
-      if (i + 1) % 5 == 0 {
-        nextY -= paddingY
-      }
       scores.addChild(line)
     }
     return scores
@@ -96,9 +102,6 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     title.verticalAlignmentMode = .center
     title.position = CGPoint(x: fullFrame.midX, y: fullFrame.maxY - title.fontSize)
     scores.addChild(title)
-    let highScores = highScoreLines(highScores, highlighted: highlighted)
-    highScores.position = CGPoint(x: fullFrame.midX, y: title.frame.minY - 50)
-    scores.addChild(highScores)
     let buttonSize = CGSize(width: 150, height: 100)
     let buttonSpacing = CGFloat(20)
     let buttonY = fullFrame.minY + buttonSize.height + buttonSpacing
@@ -114,6 +117,13 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     gcButton.position = CGPoint(x: playButton.position.x + buttonSize.width + buttonSpacing, y: playButton.position.y)
     gcButton.action = { [unowned self] in self.showGameCenter() }
     scores.addChild(gcButton)
+    let highScores = highScoreLines(highScores, highlighted: highlighted)
+    let wantedMidY = 0.5 * (title.frame.minY + playButton.calculateAccumulatedFrame().maxY)
+    // Center highScores vertically at wantedMidY
+    highScores.position = .zero
+    let highScoresY = round(wantedMidY - highScores.calculateAccumulatedFrame().midY)
+    highScores.position = CGPoint(x: fullFrame.midX, y: highScoresY)
+    scores.addChild(highScores)
   }
 
   func showWhenQuiescent(_ newScene: SKScene) {
@@ -206,7 +216,38 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
 
   convenience init(size: CGSize, score: GameScore?) {
     self.init(size: size)
-    let highScores = userDefaults.highScores.value
-    initScores(score: score, highScores: highScores)
+    var highScores = userDefaults.highScores.value
+    if let gc = Globals.gcInterface, gc.enabled, !gc.leaderboardScores.isEmpty {
+      var ranks = Array(1 ... gc.leaderboardScores.count)
+      if gc.leaderboardScores.count >= 5 {
+        ranks = [1, 3, 5]
+        if gc.leaderboardScores.count >= 10 {
+          ranks = [1, 3, 10]
+        }
+      }
+      for rank in ranks {
+        // This style keeps the Game Center names.
+        // let globalScore = GameScore(score: gc.leaderboardScores[rank - 1])
+        //
+        // This styles replaces the names with Weekly #1, Weekly #10, etc.  I think
+        // these are better for giving the player an idea of where they stand.  Note
+        // that the display name is not considered in the sameScore test for adding
+        // this score to highScores, so if the current player happens to be at one of
+        // those positions then their name will still be used.  (Actually if they get
+        // on to the global leaderboard at such a position but then reset their local
+        // device high scores and come look at the high score screen, they won't see
+        // their name, but it serves them right...)
+        let globalScore = GameScore(score: gc.leaderboardScores[rank - 1], displayName: "Weekly #\(rank)")
+        if (highScores.firstIndex { sameScore($0, globalScore) }) == nil {
+          highScores.append(globalScore)
+        }
+      }
+      highScores = highScores.sorted { $0.points > $1.points || ($0.points == $1.points && $0.date > $1.date) }
+      for score in highScores {
+        let date = Date(timeIntervalSinceReferenceDate: score.date)
+        print("\(score.playerName ?? "unknown") \(score.points) \(score.date) \(date)")
+      }
+    }
+    initScores(score: score, highScores: Array(highScores.prefix(10)))
   }
 }

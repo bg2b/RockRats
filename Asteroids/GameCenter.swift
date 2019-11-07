@@ -32,7 +32,6 @@ class GameCenterInterface {
   var playerAchievementsProgress = [String: Double]()
   var localPlayerScore: GKScore? = nil
   var leaderboardScores = [GKScore]()
-  var friendScores = [GKScore]()
 
   var enabled: Bool { GKLocalPlayer.local.isAuthenticated }
   var primaryPlayerID: String { GKLocalPlayer.local.primaryPlayerID }
@@ -56,15 +55,13 @@ class GameCenterInterface {
           }
         }
         if self.primaryPlayerID != self.lastPlayerID {
-          setGameCountersForPlayer(self.primaryPlayerID, self.alternatePlayerID)
+          setCurrentPlayer(self.primaryPlayerID, playerName: GKLocalPlayer.local.displayName, alternatePlayerID: self.alternatePlayerID)
           self.playerAchievements.removeAll()
           self.playerAchievementsProgress.removeAll()
           self.lastPlayerID = self.primaryPlayerID
           self.localPlayerScore = nil
           self.leaderboardScores.removeAll()
-          self.friendScores.removeAll()
         }
-        setCurrentPlayerName(GKLocalPlayer.local.displayName)
         GKAchievement.loadAchievements { [weak self] playerAchievements, error in
           self?.setPlayerAchievements(playerAchievements, error: error)
         }
@@ -72,7 +69,6 @@ class GameCenterInterface {
       } else {
         self.localPlayerScore = nil
         self.leaderboardScores.removeAll()
-        self.friendScores.removeAll()
       }
     }
     logging("GameCenterInterface init finishes")
@@ -223,26 +219,20 @@ class GameCenterInterface {
   }
 
   func loadLeaderboards() {
-    for global in [false, true] {
-      let leaderboard = GKLeaderboard()
-      leaderboard.identifier = leaderboardID
-      leaderboard.playerScope = global ? .global : .friendsOnly
-      leaderboard.range = NSRange(1...10)
-      leaderboard.timeScope = .week
-      leaderboard.loadScores() { [weak self] scores, error in
-        guard let self = self else { return }
-        if let error = error {
-          logging("Error requesting scores from Game Center: \(error.localizedDescription)")
-        } else if let scores = scores {
-          self.printScore(leaderboard.localPlayerScore)
-          scores.forEach { self.printScore($0) }
-          if global {
-            self.localPlayerScore = leaderboard.localPlayerScore
-            self.leaderboardScores = scores.filter { self.scoreIsValid($0) }
-          } else {
-            self.friendScores = scores.filter { self.scoreIsValid($0) }
-          }
-        }
+    let leaderboard = GKLeaderboard()
+    leaderboard.identifier = leaderboardID
+    leaderboard.playerScope = .global
+    leaderboard.range = NSRange(1 ... 15)
+    leaderboard.timeScope = .week
+    leaderboard.loadScores() { [weak self] scores, error in
+      guard let self = self else { return }
+      if let error = error {
+        logging("Error requesting scores from Game Center: \(error.localizedDescription)")
+      } else if let scores = scores {
+        self.printScore(leaderboard.localPlayerScore)
+        scores.forEach { self.printScore($0) }
+        self.localPlayerScore = leaderboard.localPlayerScore
+        self.leaderboardScores = scores.filter { self.scoreIsValid($0) }
       }
     }
   }
