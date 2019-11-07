@@ -100,6 +100,11 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     // v_tex_coord is from (0,0) to (1,1), since it corresponds to the coordinates in
     // the shape node that we're tiling.  The OUTPUT v_tex_coord has to be in the
     // space of the texture, so it needs a scale and shift.
+    //
+    // (Actually I moved the background texture out of the texture atlas because
+    // there seemed to be some weirdness that gave a slight green tinge to a border
+    // in the latest Xcode for an iOS 12 device.  Since we're tiling the whole
+    // background anyway, having it not in the atlas won't affect the draw count.)
     let rect = texture.textureRect()
     let shaderSource = """
     void main() {
