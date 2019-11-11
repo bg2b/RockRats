@@ -18,14 +18,15 @@ import SpriteKit
 // bounce off asteroids and ships too.
 
 func makeExplosionGrid(rect: CGRect, wantedSize: CGFloat, pieces: inout [CGRect]) {
-  if rect.width < wantedSize && rect.height < wantedSize {
+  let thisPieceLimit = max(CGFloat.random(in: 0.75 ... 1) * wantedSize, 4)
+  if rect.width < thisPieceLimit && rect.height < thisPieceLimit {
     pieces.append(rect)
     return
   }
   var cutIsVertical = Bool.random()
-  if rect.width > 2 * rect.height || rect.height < wantedSize {
+  if rect.width > 2 * rect.height || rect.height < thisPieceLimit {
     cutIsVertical = true
-  } else if rect.height > 2 * rect.width || rect.width < wantedSize {
+  } else if rect.height > 2 * rect.width || rect.width < thisPieceLimit {
     cutIsVertical = false
   }
   let splitPos = CGFloat.random(in: 0.33 ... 0.67)
