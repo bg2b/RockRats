@@ -8,11 +8,14 @@
 
 import SpriteKit
 
+/// Things common to game and tutorial (but not in the BasicScene superclass), like
+/// the player's ship and controls, the remaining ships display, and the energy
+/// reserve display.  Also handles game pausing and resuming/quitting.
 class GameTutorialScene: BasicScene {
   var gamePaused = false
   var pauseButton: TouchableSprite!
-  var continueButton: TouchableSprite!
-  var quitButton: TouchableSprite!
+  var continueButton: Button!
+  var quitButton: Button!
   var player: Ship!
   var score = 0
   var livesDisplay: LivesDisplay!
@@ -114,20 +117,15 @@ class GameTutorialScene: BasicScene {
     pauseButton.position = CGPoint(x: gameFrame.minX + pauseButton.size.width / 2 + 10,
                                    y: livesDisplay.position.y - pauseButton.size.height / 2 - 20)
     pauseControls.addChild(pauseButton)
-    let continueTexture = Globals.textureCache.findTexture(imageNamed: "continue")
-    continueButton = TouchableSprite(texture: continueTexture, size: continueTexture.size())
+    let buttonSize = CGSize(width: 250, height: 200)
+    continueButton = Button(imageNamed: "bigplaybutton", imageColor: AppColors.green, size: buttonSize)
     continueButton.action = { [unowned self] in self.doContinue() }
-    continueButton.color = AppColors.green
-    continueButton.colorBlendFactor = 1
-    continueButton.position = pauseButton.position
+    continueButton.position = CGPoint(x: gameFrame.midX - 0.5 * buttonSize.width - 50, y: gameFrame.midY)
     continueButton.isHidden = true
     pauseControls.addChild(continueButton)
-    let quitTexture = Globals.textureCache.findTexture(imageNamed: "quit")
-    quitButton = TouchableSprite(texture: quitTexture, size: quitTexture.size())
+    quitButton = Button(imageNamed: "bigcancelbutton", imageColor: AppColors.red, size: buttonSize)
     quitButton.action = { [unowned self] in self.doQuit() }
-    quitButton.color = AppColors.red
-    quitButton.colorBlendFactor = 1
-    quitButton.position = CGPoint(x: gameFrame.maxX - quitButton.size.width / 2 - 10, y: pauseButton.position.y)
+    quitButton.position = CGPoint(x: 2 * gameFrame.midX - continueButton.position.x, y: continueButton.position.y)
     quitButton.isHidden = true
     pauseControls.addChild(quitButton)
   }
