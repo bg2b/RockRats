@@ -30,6 +30,8 @@ class GameScene: GameTutorialScene {
   var lastWarpInTime = 0.0
   var ufosToAvenge = 0
   var ufosKilledWithoutDying = 0
+  var consecutiveUFOsKilled = 0
+  var ufoSpawningRate = 0.0
   var timesUFOsShot = 0
   var centralDisplay: SKLabelNode!
   var livesRemaining = 0
@@ -148,6 +150,10 @@ class GameScene: GameTutorialScene {
     for _ in 1...numAsteroids {
       spawnAsteroid(size: "huge")
     }
+    logging("Spawned next wave")
+    consecutiveUFOsKilled = 0
+    // UFOs will start appearing after a full duration period
+    ufoSpawningRate = 1
     spawnUFOs()
   }
 
@@ -190,6 +196,7 @@ class GameScene: GameTutorialScene {
     if asteroids.isEmpty && !gameOver {
       normalHeartbeatRate()
       stopSpawningUFOs()
+      logging("Last asteroid removed, going to spawn a wave")
       // If the player dies from colliding with the last asteroid, then we have to
       // wait long enough for any of the player's remaining lasers to possibly hit a
       // UFO and score enough points for an extra life.  That wait is currently 4
@@ -288,6 +295,8 @@ class GameScene: GameTutorialScene {
       player.reset()
       player.warpIn(to: spawnPosition, atAngle: player.zRotation, addTo: playfield)
       audio.soundEffect(.warpIn, at: spawnPosition)
+      // Give them a full duration period before UFOs start appearing
+      ufoSpawningRate = 1
       spawnUFOs()
       updateLives(-1)
       consecutiveHits = 0
@@ -332,6 +341,7 @@ class GameScene: GameTutorialScene {
   
   func laserHit(laser: SKNode, asteroid: SKNode) {
     consecutiveHit()
+    consecutiveUFOsKilled = 0
     if !asteroid.requiredPhysicsBody().isOnScreen {
       reportAchievement(achievement: .quickFingers)
     }
@@ -349,8 +359,9 @@ class GameScene: GameTutorialScene {
 
   func laserHit(laser: SKNode, ufo: SKNode) {
     ufosToAvenge += 1
-    ufosKilledWithoutDying += 1
     consecutiveHit()
+    consecutiveUFOsKilled += 1
+    ufosKilledWithoutDying += 1
     if ufosKilledWithoutDying == 12 {
       reportAchievement(achievement: .armedAndDangerous)
     }
@@ -370,10 +381,16 @@ class GameScene: GameTutorialScene {
     addToScore(ufoPoints(ufo))
     removeLaser(laser as! SKSpriteNode)
     destroyUFO(ufo as! UFO)
-    // This resets the time to the next UFO so that it doesn't show up immediately,
-    // but it's also not so long as the usual full duration like when the player is
-    // destroyed or a new wave starts.
-    spawnUFOs(relativeDuration: 0.5)
+    if ufoSpawningRate > 0 {
+      // UFO spawning is in effect (so, e.g., they didn't just kill a UFO after a
+      // wave was cleared and the new wave hasn't yet spawned).  Reset the time to
+      // the next UFO so that it doesn't show up immediately, but it's also not so
+      // long as the usual full duration like when the player is destroyed or a new
+      // wave starts.  Also, if it looks like they're just killing UFOs, go
+      // double-time.
+      ufoSpawningRate = consecutiveUFOsKilled >= 2 ? 0.25 : min(0.5, ufoSpawningRate)
+      spawnUFOs()
+    }
   }
 
   func maybeSpawnUFO() {
@@ -385,10 +402,14 @@ class GameScene: GameTutorialScene {
     }
   }
 
-  func spawnUFOs(relativeDuration: Double = 1) {
-    stopSpawningUFOs()  // Remove any existing scheduled spawn
-    let meanTimeToNextUFO = relativeDuration * Globals.gameConfig.value(for: \.meanUFOTime)
+  func spawnUFOs() {
+    guard ufoSpawningRate > 0 else {
+      fatalError("spawnUFOs called with ufoSpawningRate == 0")
+    }
+    removeAction(forKey: "spawnUFOs") // Remove any existing scheduled spawn
+    let meanTimeToNextUFO = ufoSpawningRate * Globals.gameConfig.value(for: \.meanUFOTime)
     let delay = Double.random(in: 0.75 * meanTimeToNextUFO ... 1.25 * meanTimeToNextUFO)
+    logging("Maybe spawn UFO in \(delay) seconds, relativeDuration \(ufoSpawningRate)")
     run(SKAction.sequence([SKAction.wait(forDuration: delay),
                            SKAction.run { self.maybeSpawnUFO(); self.spawnUFOs() }]),
         withKey: "spawnUFOs")
@@ -396,6 +417,8 @@ class GameScene: GameTutorialScene {
 
   func stopSpawningUFOs() {
     removeAction(forKey: "spawnUFOs")
+    // Spawning rate zero means "don't spawn UFOs"
+    ufoSpawningRate = 0
   }
 
   func respawnOrGameOver() {
@@ -425,6 +448,7 @@ class GameScene: GameTutorialScene {
       reportAchievement(achievement: .rightPlaceWrongTime)
     }
     ufosKilledWithoutDying = 0
+    consecutiveUFOsKilled = 0
     audio.soundEffect(.playerExplosion, at: player.position)
     addExplosion(player.explode())
     stopSpawningUFOs()
