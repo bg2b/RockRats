@@ -88,6 +88,7 @@ class GameCenterInterface {
         }
         self.loadLeaderboards()
       } else {
+        setCurrentPlayer("anon", playerName: "Anonymous", alternatePlayerID: nil)
         self.localPlayerScore = nil
         self.leaderboardScores.removeAll()
       }
