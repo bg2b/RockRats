@@ -213,4 +213,8 @@ func updateGameCounters() {
   logging("Updating game counters")
   userDefaults.ufosDestroyedCounter.value = userDefaults.ufosDestroyed.value
   userDefaults.asteroidsDestroyedCounter.value = userDefaults.asteroidsDestroyed.value
+  // If by some chance the same person has been playing on another device, store the
+  // new values back in the local counters.
+  userDefaults.ufosDestroyed.value = userDefaults.ufosDestroyedCounter.value
+  userDefaults.asteroidsDestroyed.value = userDefaults.asteroidsDestroyedCounter.value
 }
