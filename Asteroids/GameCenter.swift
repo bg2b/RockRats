@@ -13,9 +13,18 @@ import GameKit
 // losing player progress.  We assume that they'll upgrade to iOS 13 sometime during
 // the transition period so that the alternate ID is available.
 extension GKPlayer {
+  /// primaryPlayerID is a wrapper around the playerID/gamePlayerID stuff.  Currently
+  /// it just returns playerID, but in some future release when playerID is no longer
+  /// available, it will become gamePlayerID.
   var primaryPlayerID: String { playerID }
+  /// alternatePlayerID is either nil (unavailable / irrelevant) or will return
+  /// gamePlayerID when that is available and the app is currently using playerID as
+  /// the primaryPlayerID.  The alternatePlayerID should be saved in that case so
+  /// that persistent state associated with the player can be transitioned in newer
+  /// versions of the app.
   var alternatePlayerID: String? {
     if #available(iOS 13, *) {
+      // It would be nice if there was some documentation about the mysterious circumstances mentioned in s
       return scopedIDsArePersistent() ? gamePlayerID : nil
     } else {
       return nil
@@ -23,10 +32,22 @@ extension GKPlayer {
   }
 }
 
+/// GameCenterInterface is a wrapper around the Game Center functionality.  It
+/// interfaces with the authentication mechanism, informs the app of who's playing,
+/// keeps track of what achievements are available and what progress the player has
+/// made in them, loads leaderboards, and passes scores back to Game Center.
 class GameCenterInterface {
+  /// The Game Center leaderboard identifier (this interface only handles the
+  /// one-leaderboard case)
   let leaderboardID: String
+  /// A closure that will do something appropriate with the Game Center's
+  /// authentication view controller if there's no logged-in player.  Typically the
+  /// closure would squirrel the controller away so that it can be presented at some
+  /// appropriate point.
   let presenter: (UIViewController?) -> Void
+  /// The primary ID of whoever successfully logged in last
   var lastPlayerID: String? = nil
+  /// A set of all the valid achievement identifiers, retrieved from Game Center.
   var achievementIdentifiers: Set<String>? = nil
   var playerAchievements = [String: Double]()
   var playerAchievementsProgress = [String: Double]()

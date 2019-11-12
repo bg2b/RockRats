@@ -24,7 +24,13 @@ let specialScores = [
   SpecialScore(score: 3720, display: "3720 to 1", achievement: .whatAreTheOdds),
 ]
 
-
+/// The scene for playing a game (surprise!)
+///
+/// Most of the actual graphics and control stuff is in GameTutorialScene or its
+/// superclasses.  This is largely logic, e.g., starting a game, handling object
+/// collisions, updating the score, blowing up the player, sending achievements to
+/// Game Center, and reporting the achieved score and transitioning to the high score
+/// screen at the end of a game.
 class GameScene: GameTutorialScene {
   var scoreDisplay: SKLabelNode!
   var lastWarpInTime = 0.0

@@ -12,6 +12,10 @@ var showLogging = true
 var lastLogMessage = ""
 var lastLogMessageRepeated = 0
 
+/// Prints various info as the game runs, but is smart about duplicates.  Repeated
+/// calls to logging will show "(### repeats): ..." with decreasing frequency.
+/// - Parameter message: The first string is used to identify repeats, the remaining
+///   strings are just printed.
 func logging(_ message: String...) {
   if showLogging {
     switch message.count {
