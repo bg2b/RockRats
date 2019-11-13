@@ -329,7 +329,8 @@ class GameTutorialScene: BasicScene {
     let effects = player.warpOut()
     playfield.addWithScaling(effects[0])
     playfield.addWithScaling(effects[1])
-    audio.soundEffect(.warpOut)
+    audio.soundEffect(.warpOut, at: player.position)
+    // Don't stick them at the very edge of the screen since it looks odd.
     let jumpRegion = gameFrame.insetBy(dx: 0.05 * gameFrame.width, dy: 0.05 * gameFrame.height)
     let jumpPosition = CGPoint(x: .random(in: jumpRegion.minX ... jumpRegion.maxX),
                                y: .random(in: jumpRegion.minY ... jumpRegion.maxY))
