@@ -22,6 +22,7 @@
 	<true/>
 	<key>UIAppFonts</key>
 	<array>
+		<string>asteroids.ttf</string>
 		<string>kenneyfuture.ttf</string>
 		<string>kenneyfuturenarrow.ttf</string>
 	</array>

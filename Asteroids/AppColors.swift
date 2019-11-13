@@ -29,5 +29,5 @@ class AppColors {
   static let buttonColor = AppColors.green
   static let transitionColor = AppColors.darkBlue
 
-  static let font = "Kenney Future Narrow"
+  static let font = "Asteroids"
 }
