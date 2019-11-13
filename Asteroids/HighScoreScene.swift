@@ -93,7 +93,7 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     let highlighted = score ?? GameScore(points: 0)
     scores = SKNode()
     scores.name = "scores"
-    scores.zPosition = LevelZs.info.rawValue
+    scores.setZ(.info)
     addChild(scores)
     let title = SKLabelNode(fontNamed: AppColors.font)
     title.fontSize = 100

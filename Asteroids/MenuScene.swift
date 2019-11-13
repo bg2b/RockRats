@@ -21,7 +21,7 @@ class MenuScene: BasicScene { //, GKGameCenterControllerDelegate {
   func initMenu() {
     menu = SKNode()
     menu.name = "menu"
-    menu.zPosition = LevelZs.info.rawValue
+    menu.setZ(.info)
     addChild(menu)
     let title = SKLabelNode(fontNamed: AppColors.font)
     title.fontSize = 125

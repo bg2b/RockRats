@@ -38,7 +38,7 @@ class IntroScene: BasicScene {
   func initIntro() {
     let intro = SKNode()
     intro.name = "intro"
-    intro.zPosition = LevelZs.info.rawValue
+    intro.setZ(.info)
     addChild(intro)
     // It seems that numberOfLines needs to be set to something just to do the word
     // breaking on SKLabelNodes.  The value doesn't really matter though, and we'll

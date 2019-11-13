@@ -55,7 +55,7 @@ class GameScene: GameTutorialScene {
     // Score and central display
     let moreInfo = SKNode()
     moreInfo.name = "moreInfo"
-    moreInfo.zPosition = LevelZs.info.rawValue
+    moreInfo.setZ(.info)
     gameArea.addChild(moreInfo)
     scoreDisplay = SKLabelNode(fontNamed: AppColors.font)
     scoreDisplay.fontSize = 50

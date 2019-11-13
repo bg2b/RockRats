@@ -144,7 +144,9 @@ class GameTutorialScene: BasicScene {
     // All of the stuff in here sits above the playfield, at z == LevelZs.info.
     let info = SKNode()
     info.name = "info"
-    info.zPosition = LevelZs.info.rawValue
+    info.setZ(.info)
+    // info sits under gameArea in the hierarchy, so it's subject to whatever sort of
+    // blurring effect is used when the game is paused.
     gameArea.addChild(info)
     // Remaining ships in upper left.
     livesDisplay = LivesDisplay()
@@ -159,7 +161,7 @@ class GameTutorialScene: BasicScene {
     // and _not_ under gameArea, so they don't get blurred when the game pauses.
     addChild(pauseControls)
     pauseControls.name = "pauseControls"
-    pauseControls.zPosition = LevelZs.info.rawValue
+    pauseControls.setZ(.info)
     let pauseTexture = Globals.textureCache.findTexture(imageNamed: "pause")
     pauseButton = TouchableSprite(texture: pauseTexture, size: pauseTexture.size())
     pauseButton.action = { [unowned self] in self.doPause() }

@@ -12,8 +12,13 @@ enum LevelZs: CGFloat {
   case background = -200
   case stars = -100
   case playfield = 0
-  case controls = 100
-  case info = 200
+  case info = 100
+}
+
+extension SKNode {
+  func setZ(_ z: LevelZs) {
+    zPosition = z.rawValue
+  }
 }
 
 enum ObjectCategories: UInt32 {
@@ -71,9 +76,15 @@ extension SKNode {
   }
 
   func requiredPhysicsBody() -> SKPhysicsBody {
-    let printName = name ?? "<unknown name>"
-    guard let body = physicsBody else { fatalError("Node \(printName) is missing a physics body") }
+    guard let body = physicsBody else { fatalError("Node \(name ?? "<unknown name>") is missing a physics body") }
     return body
+  }
+}
+
+extension SKSpriteNode {
+  func requiredTexture() -> SKTexture {
+    guard let texture = texture else { fatalError("SpriteNode \(name ?? "<unknown name>") is missing a texture") }
+    return texture
   }
 }
 
@@ -132,7 +143,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     background.name = "background"
     background.strokeColor = .clear
     background.blendMode = .replace
-    background.zPosition = LevelZs.background.rawValue
+    background.setZ(.background)
     let stars = Globals.textureCache.findTexture(imageNamed: "starfield_blue")
     let tsize = stars.size()
     background.fillTexture = stars
@@ -171,7 +182,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   func initStars() {
     let stars = SKNode()
     stars.name = "stars"
-    stars.zPosition = LevelZs.stars.rawValue
+    stars.setZ(.stars)
     gameArea.addChild(stars)
     let dim = CGFloat(0.1)
     let bright = CGFloat(0.3)
@@ -198,7 +209,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
 
   func initPlayfield() {
     playfield = Playfield(bounds: gameFrame)
-    playfield.zPosition = LevelZs.playfield.rawValue
+    playfield.setZ(.playfield)
     gameArea.addChild(playfield)
   }
 

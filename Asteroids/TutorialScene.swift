@@ -30,7 +30,7 @@ class TutorialScene: GameTutorialScene {
     instructionsLabel = SKLabelNode(text: "")
     instructionsLabel.numberOfLines = 5
     instructionsLabel.lineBreakMode = .byWordWrapping
-    instructionsLabel.zPosition = LevelZs.info.rawValue
+    instructionsLabel.setZ(.info)
     addChild(instructionsLabel)
     transmissionSounds = audio.continuousAudio(.transmission, at: self)
     transmissionSounds.playerNode.volume = 0
