@@ -666,8 +666,10 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     // state at the time of scene transition because of the possibility that the
     // player quit in the middle of the game.  At the time of the quit, the game is
     // paused, so all kinds of actions and things may be running, the playfield may
-    // be full of sprites, etc.  We try to fix up everything so that the scene will
-    // get garbage collected cleanly.
+    // be full of sprites, etc.  We need to fix up everything so that the scene will
+    // get garbage collected cleanly.  First we tell the playfield to recycle
+    // sprites.  Then we cancel all actions so that any closures which may have
+    // captured something that would lead to a retain cycle get nuked from orbit.
     playfield.recycle()
     removeActionsForEverything(node: self)
   }
