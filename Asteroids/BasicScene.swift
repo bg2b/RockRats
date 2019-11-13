@@ -253,7 +253,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
 
   func fireUFOLaser(angle: CGFloat, position: CGPoint, speed: CGFloat) {
     let laser = Globals.spriteCache.findSprite(imageNamed: "lasersmall_red") { sprite in
-      guard let texture = sprite.texture else { fatalError("Where is the laser texture?") }
+      let texture = sprite.requiredTexture()
       let ht = texture.size().height
       let body = SKPhysicsBody(circleOfRadius: 0.5 * ht,
                                center: CGPoint(x: 0.5 * (texture.size().width - ht), y: 0))
@@ -288,7 +288,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     }
     let name = "meteor\(size)\(type)"
     let asteroid = Globals.spriteCache.findSprite(imageNamed: name) { sprite in
-      guard let texture = sprite.texture else { fatalError("Where is the asteroid texture?") }
+      let texture = sprite.requiredTexture()
       // Huge and big asteroids of all types except the default have irregular shape,
       // so we use a pixel-perfect physics body for those.  Everything else gets a
       // circle.

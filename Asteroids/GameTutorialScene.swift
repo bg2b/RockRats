@@ -263,7 +263,7 @@ class GameTutorialScene: BasicScene {
         // center of the screen isn't safe.
         let asteroidBody = asteroid.requiredPhysicsBody()
         guard asteroidBody.isOnScreen else { continue }
-        let asteroidRadius = 0.5 * asteroid.texture!.size().diagonal()
+        let asteroidRadius = 0.5 * asteroid.requiredTexture().size().diagonal()
         let pathStart = asteroid.position
         let pathEnd = asteroid.position + asteroidBody.velocity.scale(by: time)
         if !isSafe(point: point, pathStart: pathStart, pathEnd: pathEnd, clearance: asteroidRadius + playerRadius) {
