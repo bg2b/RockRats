@@ -75,8 +75,6 @@
 		FD79324122D20FE600E7D336 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FD79323F22D20FE600E7D336 /* Main.storyboard */; };
 		FD79324322D20FE700E7D336 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FD79324222D20FE700E7D336 /* Assets.xcassets */; };
 		FD79324622D20FE700E7D336 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FD79324422D20FE700E7D336 /* LaunchScreen.storyboard */; };
-		FD7AE4A8237C468200CAF082 /* kenneyfuture.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FD7AE4A6237C468200CAF082 /* kenneyfuture.ttf */; };
-		FD7AE4A9237C468200CAF082 /* kenneyfuturenarrow.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FD7AE4A7237C468200CAF082 /* kenneyfuturenarrow.ttf */; };
 		FD7AE4AD237C48CC00CAF082 /* asteroids.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FD7AE4AC237C48CC00CAF082 /* asteroids.ttf */; };
 		FD96AE1C2339A93300D4CAFA /* TypeIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD96AE1B2339A93300D4CAFA /* TypeIn.swift */; };
 		FD96AE20233A4BE600D4CAFA /* GameTutorialScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD96AE1F233A4BE600D4CAFA /* GameTutorialScene.swift */; };
@@ -195,8 +193,6 @@
 		FD79324222D20FE700E7D336 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FD79324522D20FE700E7D336 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FD79324722D20FE700E7D336 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		FD7AE4A6237C468200CAF082 /* kenneyfuture.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = kenneyfuture.ttf; sourceTree = "<group>"; };
-		FD7AE4A7237C468200CAF082 /* kenneyfuturenarrow.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = kenneyfuturenarrow.ttf; sourceTree = "<group>"; };
 		FD7AE4AC237C48CC00CAF082 /* asteroids.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = asteroids.ttf; sourceTree = "<group>"; };
 		FD96AE1B2339A93300D4CAFA /* TypeIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeIn.swift; sourceTree = "<group>"; };
 		FD96AE1F233A4BE600D4CAFA /* GameTutorialScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameTutorialScene.swift; sourceTree = "<group>"; };
@@ -420,8 +416,6 @@
 			isa = PBXGroup;
 			children = (
 				FD7AE4AC237C48CC00CAF082 /* asteroids.ttf */,
-				FD7AE4A6237C468200CAF082 /* kenneyfuture.ttf */,
-				FD7AE4A7237C468200CAF082 /* kenneyfuturenarrow.ttf */,
 			);
 			path = fonts;
 			sourceTree = "<group>";
@@ -521,13 +515,11 @@
 				FD0C070A22D8925E00F19A55 /* starfield_violet@2x.png in Resources */,
 				6523C0822316E5400071AB4B /* ufo2loop.wav in Resources */,
 				FDD831F922F1AE0D00CA4EC6 /* confignormal.json in Resources */,
-				FD7AE4A9237C468200CAF082 /* kenneyfuturenarrow.ttf in Resources */,
 				FD53169022DC1A0600F09E57 /* laserbig_blue@2x.png in Resources */,
 				FD4D53D1230843C900718938 /* meteorsmall_hit.wav in Resources */,
 				FD53168F22DC1A0600F09E57 /* laserbig_red@2x.png in Resources */,
 				FD0C070822D8925E00F19A55 /* ship_green@2x.png in Resources */,
 				FD53167322DAA8EA00F09E57 /* fire2@2x.png in Resources */,
-				FD7AE4A8237C468200CAF082 /* kenneyfuture.ttf in Resources */,
 				FDF92B442322666600CC4DFE /* ufo_warpout.wav in Resources */,
 				FD53168522DB445100F09E57 /* meteorbig2@2x.png in Resources */,
 				FDD8FB95232D120E00A83EB5 /* configmenu.json in Resources */,
