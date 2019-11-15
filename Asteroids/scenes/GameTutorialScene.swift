@@ -42,21 +42,6 @@ class GameTutorialScene: BasicScene {
   /// locations.
   var fireOrWarpTouches = [UITouch: CGPoint]()
 
-  /// Pauses the scene when set.  This is an override of SKScene's property of the
-  /// same name because SpriteKit's automatic pausing/unpausing would screw things up
-  /// if an explicitly paused game was put into the background and then brought back
-  /// to the foreground.  Clamping isPaused to true when gamePaused is set avoids
-  /// having the paused game start running.
-  override var isPaused: Bool {
-    get { super.isPaused }
-    set {
-      if gamePaused && !newValue {
-        logging("holding isPaused at true because gamePaused is true")
-      }
-      super.isPaused = newValue || gamePaused
-    }
-  }
-
   func initControls() {
     isUserInteractionEnabled = true
   }
@@ -186,6 +171,10 @@ class GameTutorialScene: BasicScene {
     pauseControls.addChild(quitButton)
   }
 
+  /// Enforce pausing when gamePaused is true so that SpriteKit's
+  /// auto-pausing/unpausing doesn't mess us up.
+  override var forcePause: Bool { gamePaused }
+  
   /// Pause the game, blur the playing area, hide the pause button, show the
   /// continue/quit buttons.
   func doPause() {

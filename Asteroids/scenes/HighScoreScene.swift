@@ -12,6 +12,7 @@ import GameKit
 class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
   var scores: SKNode!
   var gameStarting = false
+  var showingGCVC = false
   var newGame: GameScene? = nil
 
   func highScoreLineLabels(_ highScore: GameScore, highlighted: GameScore) -> (SKLabelNode, SKLabelNode) {
@@ -162,6 +163,9 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     showWhenQuiescent(Globals.menuScene)
   }
 
+  /// Enforce pausing when showing the Game Center view controller.
+  override var forcePause: Bool { showingGCVC }
+
   func showGameCenter() {
     guard let rootVC = view?.window?.rootViewController, Globals.gcInterface.enabled else {
       logging("Can't show Game Center")
@@ -172,11 +176,15 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     gcvc.viewState = .achievements
     gcvc.leaderboardTimeScope = .week
     isPaused = true
+    showingGCVC = true
     rootVC.present(gcvc, animated: true)
   }
 
   func gameCenterViewControllerDidFinish(_ gcvc: GKGameCenterViewController) {
-    gcvc.dismiss(animated: true) { self.isPaused = false }
+    gcvc.dismiss(animated: true) {
+      self.showingGCVC = false
+      self.isPaused = false
+    }
   }
 
   override func didMove(to view: SKView) {

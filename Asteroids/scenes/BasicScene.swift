@@ -103,6 +103,27 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   var asteroids = Set<SKSpriteNode>()
   var ufos = Set<UFO>()
 
+  /// Pauses the scene when set.  This is an override of SKScene's property of the
+  /// same name because SpriteKit's automatic pausing/unpausing for stuff like the
+  /// app going into the background/foreground can screw things up if the scene is
+  /// paused because it's doing something like presenting another view controller or
+  /// waiting to resume a paused game.  The subclass should override the forcePause
+  /// property to return true when it's in a state where the scene should not unpause
+  /// as a result of SpriteKit's behind-the-scenes mucking.
+  override var isPaused: Bool {
+    get { super.isPaused }
+    set {
+      if forcePause && !newValue {
+        logging("holding isPaused at true because forcePause is true")
+      }
+      super.isPaused = newValue || forcePause
+    }
+  }
+
+  /// Subclasses override this to indicate when they should remain paused despite
+  /// SpriteKit's best efforts to mess them up.
+  var forcePause: Bool { false }
+
   func tilingShader(forTexture texture: SKTexture) -> SKShader {
     // Do not to assume that the texture has v_tex_coord ranging in (0, 0) to (1, 1)!
     // If the texture is part of a texture atlas, this is not true.  Since we only
