@@ -14,8 +14,6 @@
 		6565DA11232E6818008EA85B /* Achievments.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6565DA10232E6818008EA85B /* Achievments.swift */; };
 		659CC03A230EC9FE00AA087C /* UFO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 659CC039230EC9FE00AA087C /* UFO.swift */; };
 		659CC040230EDA3500AA087C /* ufo_explosion.wav in Resources */ = {isa = PBXBuildFile; fileRef = 659CC03F230EDA3500AA087C /* ufo_explosion.wav */; };
-		65A4CD6823173624006DEDB0 /* heartbeat_high.wav in Resources */ = {isa = PBXBuildFile; fileRef = 65A4CD6723173624006DEDB0 /* heartbeat_high.wav */; };
-		65A4CD6A2317362D006DEDB0 /* heartbeat_low.wav in Resources */ = {isa = PBXBuildFile; fileRef = 65A4CD692317362D006DEDB0 /* heartbeat_low.wav */; };
 		65FA95EA23305FE100B6B4AF /* retroship@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 65FA95E923305FE000B6B4AF /* retroship@2x.png */; };
 		FD0C070822D8925E00F19A55 /* ship_green@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD0C070022D8925E00F19A55 /* ship_green@2x.png */; };
 		FD0C070922D8925E00F19A55 /* ship_blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD0C070122D8925E00F19A55 /* ship_blue@2x.png */; };
@@ -82,7 +80,6 @@
 		FD9BA03E23683B2B00468636 /* heartbeat1.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD9BA03C23683B2B00468636 /* heartbeat1.wav */; };
 		FD9BA03F23683B2B00468636 /* heartbeat2.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD9BA03D23683B2B00468636 /* heartbeat2.wav */; };
 		FDA43B1E2308A1A600A29347 /* extra_life.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B1D2308A1A600A29347 /* extra_life.wav */; };
-		FDA43B202308AB9600A29347 /* heartbeat.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B1F2308AB9600A29347 /* heartbeat.wav */; };
 		FDA43B222308C11E00A29347 /* gameover.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B212308C11E00A29347 /* gameover.wav */; };
 		FDA43B24230A111D00A29347 /* meteorhuge_hit.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B23230A111D00A29347 /* meteorhuge_hit.wav */; };
 		FDA43B26230C01C300A29347 /* warpedship_blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FDA43B25230C01C300A29347 /* warpedship_blue@2x.png */; };
@@ -119,8 +116,6 @@
 		6565DA10232E6818008EA85B /* Achievments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Achievments.swift; sourceTree = "<group>"; };
 		659CC039230EC9FE00AA087C /* UFO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UFO.swift; sourceTree = "<group>"; };
 		659CC03F230EDA3500AA087C /* ufo_explosion.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo_explosion.wav; sourceTree = "<group>"; };
-		65A4CD6723173624006DEDB0 /* heartbeat_high.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = heartbeat_high.wav; sourceTree = "<group>"; };
-		65A4CD692317362D006DEDB0 /* heartbeat_low.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = heartbeat_low.wav; sourceTree = "<group>"; };
 		65FA95E923305FE000B6B4AF /* retroship@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "retroship@2x.png"; sourceTree = "<group>"; };
 		FD0C070022D8925E00F19A55 /* ship_green@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ship_green@2x.png"; sourceTree = "<group>"; };
 		FD0C070122D8925E00F19A55 /* ship_blue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ship_blue@2x.png"; sourceTree = "<group>"; };
@@ -200,7 +195,6 @@
 		FD9BA03C23683B2B00468636 /* heartbeat1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = heartbeat1.wav; sourceTree = "<group>"; };
 		FD9BA03D23683B2B00468636 /* heartbeat2.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = heartbeat2.wav; sourceTree = "<group>"; };
 		FDA43B1D2308A1A600A29347 /* extra_life.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = extra_life.wav; sourceTree = "<group>"; };
-		FDA43B1F2308AB9600A29347 /* heartbeat.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = heartbeat.wav; sourceTree = "<group>"; };
 		FDA43B212308C11E00A29347 /* gameover.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = gameover.wav; sourceTree = "<group>"; };
 		FDA43B23230A111D00A29347 /* meteorhuge_hit.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = meteorhuge_hit.wav; sourceTree = "<group>"; };
 		FDA43B25230C01C300A29347 /* warpedship_blue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "warpedship_blue@2x.png"; sourceTree = "<group>"; };
@@ -264,8 +258,6 @@
 		FD4D53C323080BFD00718938 /* sounds */ = {
 			isa = PBXGroup;
 			children = (
-				65A4CD692317362D006DEDB0 /* heartbeat_low.wav */,
-				65A4CD6723173624006DEDB0 /* heartbeat_high.wav */,
 				FD9BA03C23683B2B00468636 /* heartbeat1.wav */,
 				FD9BA03D23683B2B00468636 /* heartbeat2.wav */,
 				6523C0832316E54D0071AB4B /* ufo1loop.wav */,
@@ -275,7 +267,6 @@
 				659CC03F230EDA3500AA087C /* ufo_explosion.wav */,
 				FDF92B432322666600CC4DFE /* ufo_warpout.wav */,
 				FDA43B212308C11E00A29347 /* gameover.wav */,
-				FDA43B1F2308AB9600A29347 /* heartbeat.wav */,
 				FDA43B23230A111D00A29347 /* meteorhuge_hit.wav */,
 				FD4D53CC230843C800718938 /* meteorbig_hit.wav */,
 				FD4D53CD230843C900718938 /* meteormed_hit.wav */,
@@ -497,7 +488,6 @@
 			files = (
 				FD53167122DAA8EA00F09E57 /* fire1@2x.png in Resources */,
 				659CC040230EDA3500AA087C /* ufo_explosion.wav in Resources */,
-				65A4CD6823173624006DEDB0 /* heartbeat_high.wav in Resources */,
 				FD9BA03E23683B2B00468636 /* heartbeat1.wav in Resources */,
 				FD79324122D20FE600E7D336 /* Main.storyboard in Resources */,
 				FD0C070F22D8925E00F19A55 /* ship_red@2x.png in Resources */,
@@ -505,7 +495,6 @@
 				FD53169322DC1A0600F09E57 /* lasersmall_red@2x.png in Resources */,
 				FD53168422DB445100F09E57 /* meteorbig3@2x.png in Resources */,
 				FD537DD6231BE385003312B3 /* ufo_laser.wav in Resources */,
-				65A4CD6A2317362D006DEDB0 /* heartbeat_low.wav in Resources */,
 				FD28DB5A22DFFA87009446A2 /* ufo_green@2x.png in Resources */,
 				FD4D53CB2308206D00718938 /* player_laser.wav in Resources */,
 				FDA43B26230C01C300A29347 /* warpedship_blue@2x.png in Resources */,
@@ -515,7 +504,6 @@
 				6523C0842316E54E0071AB4B /* ufo1loop.wav in Resources */,
 				FD53168222DB445100F09E57 /* meteorsmall1@2x.png in Resources */,
 				65FA95EA23305FE100B6B4AF /* retroship@2x.png in Resources */,
-				FDA43B202308AB9600A29347 /* heartbeat.wav in Resources */,
 				FD53168022DB445100F09E57 /* meteormed1@2x.png in Resources */,
 				FD53167F22DB445100F09E57 /* meteorbig1@2x.png in Resources */,
 				FD4D53CF230843C900718938 /* meteorbig_hit.wav in Resources */,
