@@ -127,6 +127,23 @@ class MenuScene: BasicScene { //, GKGameCenterControllerDelegate {
     switchToScene { return HighScoreScene(size: self.fullFrame.size, score: nil) }
   }
 
+  /// Pauses the scene when set.  This is an override of SKScene's property of the
+  /// same name because SpriteKit's automatic pausing/unpausing could screw things up
+  /// if the scene is paused because the Game Center authentication view controller
+  /// is being shown.  The normal authentication is fine, but if the user does
+  /// something like put the app in the background while authenticating or getting
+  /// their password from the password dialog picker instead of typing it, then the
+  /// scene would otherwise unpause.
+  override var isPaused: Bool {
+    get { super.isPaused }
+    set {
+      if presentingGCAuth && !newValue {
+        logging("holding isPaused at true because presentingGCAuth is true")
+      }
+      super.isPaused = newValue || presentingGCAuth
+    }
+  }
+
   func setGameCenterAuth(viewController: UIViewController?) {
     gameCenterAuthVC = viewController
     if gameCenterAuthVC == nil {
