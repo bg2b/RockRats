@@ -321,11 +321,11 @@
 		FD79323422D20FE600E7D336 /* Asteroids */ = {
 			isa = PBXGroup;
 			children = (
+				FD7AE4AE237EB82200CAF082 /* scenes */,
 				FDDCB1442364834A00FF9F1C /* Asteroids.entitlements */,
 				6565DA10232E6818008EA85B /* Achievments.swift */,
 				FDD44F922336113F00C13609 /* AppColors.swift */,
 				FD79323522D20FE600E7D336 /* AppDelegate.swift */,
-				FD79323B22D20FE600E7D336 /* BasicScene.swift */,
 				6513D66B22DC0B4E00B4BD57 /* Button.swift */,
 				FDCF8CA222DA175F008EDFD1 /* CGHelpers.swift */,
 				FD6F23DD234357710083A913 /* ConformingCache.swift */,
@@ -334,24 +334,18 @@
 				FDD831F122EDB50200CA4EC6 /* Explosions.swift */,
 				FD7635AF2354A410000543E7 /* GameCenter.swift */,
 				FDD831F522F187D200CA4EC6 /* GameConfig.swift */,
-				FDD8FB90232B99BE00A83EB5 /* GameScene.swift */,
 				FD40DE7D236C538B00544034 /* GameScore.swift */,
-				FD96AE1F233A4BE600D4CAFA /* GameTutorialScene.swift */,
 				FD79323D22D20FE600E7D336 /* GameViewController.swift */,
 				FDCF8CA422DA7296008EDFD1 /* Globals.swift */,
-				FD3B8484236ADE3C008F642B /* HighScoreScene.swift */,
 				FDF92B412322456900CC4DFE /* Hyperspace.swift */,
-				FDD44F94233787ED00C13609 /* IntroScene.swift */,
 				FD4D53BF2306B47900718938 /* LivesDisplay.swift */,
 				FD3E02072333B1C20057A766 /* Logging.swift */,
-				FDD8FB92232CF4FC00A83EB5 /* MenuScene.swift */,
 				FD46BD71231415B7008C1F99 /* Playfield.swift */,
 				FD53167422DB24EC00F09E57 /* Ship.swift */,
 				FD4D53C623080E7300718938 /* Sounds.swift */,
 				FDDF488622D2A700006FB86F /* SpriteCache.swift */,
 				FDE04B2C22D753240011A529 /* TextureCache.swift */,
 				FDF32A6C23488F6D00785715 /* TouchableSprite.swift */,
-				FD96AE21233A52BD00D4CAFA /* TutorialScene.swift */,
 				FD96AE1B2339A93300D4CAFA /* TypeIn.swift */,
 				659CC039230EC9FE00AA087C /* UFO.swift */,
 				6506AD512340D3450006E8D6 /* UserData.swift */,
@@ -410,6 +404,20 @@
 				FDA43B25230C01C300A29347 /* warpedship_blue@2x.png */,
 			);
 			path = "Asset creation";
+			sourceTree = "<group>";
+		};
+		FD7AE4AE237EB82200CAF082 /* scenes */ = {
+			isa = PBXGroup;
+			children = (
+				FD79323B22D20FE600E7D336 /* BasicScene.swift */,
+				FDD8FB90232B99BE00A83EB5 /* GameScene.swift */,
+				FD96AE1F233A4BE600D4CAFA /* GameTutorialScene.swift */,
+				FD3B8484236ADE3C008F642B /* HighScoreScene.swift */,
+				FDD44F94233787ED00C13609 /* IntroScene.swift */,
+				FDD8FB92232CF4FC00A83EB5 /* MenuScene.swift */,
+				FD96AE21233A52BD00D4CAFA /* TutorialScene.swift */,
+			);
+			path = scenes;
 			sourceTree = "<group>";
 		};
 		FD808FC82328FE380025A71E /* fonts */ = {
