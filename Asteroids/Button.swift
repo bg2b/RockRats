@@ -8,9 +8,13 @@
 
 import SpriteKit
 
+/// A basic clickable button
+///
+/// Shows something like an icon or some text with a frame around it.  When the user
+/// touches within the frame, it shows an active state.  If the touch is released
+/// while still inside the frame, the button's action triggers.
 class Button: SKNode {
   let border: SKShapeNode
-  var enabled = true
   var clickTouch: UITouch? = nil
   var action: (() -> Void)? = nil
 
@@ -68,12 +72,16 @@ class Button: SKNode {
     fatalError("init(coder:) has not been implemented by Button")
   }
 
+  var enabled: Bool { isUserInteractionEnabled }
+
   func enable() {
-    enabled = true
+    isUserInteractionEnabled = true
+    alpha = 1
   }
 
   func disable() {
-    enabled = false
+    isUserInteractionEnabled = false
+    alpha = 0.5
   }
 
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {

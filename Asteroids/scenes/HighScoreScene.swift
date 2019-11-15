@@ -116,6 +116,9 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     let gcButton = Button(imageNamed: "gamecenterbutton", imageColor: .white, size: buttonSize)
     gcButton.position = CGPoint(x: playButton.position.x + buttonSize.width + buttonSpacing, y: playButton.position.y)
     gcButton.action = { [unowned self] in self.showGameCenter() }
+    if !Globals.gcInterface.enabled {
+      gcButton.disable()
+    }
     scores.addChild(gcButton)
     let highScores = highScoreLines(highScores, highlighted: highlighted)
     let wantedMidY = 0.5 * (title.frame.minY + playButton.calculateAccumulatedFrame().maxY)
