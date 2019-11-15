@@ -15,17 +15,17 @@ import SpriteKit
 /// while still inside the frame, the button's action triggers.
 class Button: SKNode {
   let border: SKShapeNode
+  var decoration: SKNode? = nil
+  var confirmDecoration: SKNode? = nil
   var clickTouch: UITouch? = nil
   var action: (() -> Void)? = nil
 
-  init(around node: SKNode, minSize: CGSize) {
-    // This one is for managing the label separately.  For example during the
-    // tutorial we show some instructions using a type-in effect, and that requires
-    // more label gymnastics than we deal with here.  Note that the label is not a
-    // child of the button.  If you're going to move the label, the border showing
-    // the button doesn't move along with it.  And once you've made the button, the
-    // border size is fixed.  If you want to change the text, you'll probably need to
-    // throw the button away and make a new one.
+  init(around node: SKNode, minSize: CGSize, borderColor: UIColor = AppColors.green) {
+    // This one is for managing whatever is inside the button separately.  For
+    // example during the tutorial we show some instructions using a type-in effect,
+    // and that requires more label gymnastics than we deal with here.  Note that
+    // node is not added as a child of the button by this method, and once you've
+    // made the button, the border size is fixed.
     let nodeSize = node.frame.size
     // Padding is total amount for both sides, so 20 = 10 points on each
     let padding = CGFloat(20)
@@ -33,7 +33,7 @@ class Button: SKNode {
     let buttonBorder = SKShapeNode(rectOf: size, cornerRadius: 0.5 * padding)
     buttonBorder.name = "buttonBorder"
     buttonBorder.fillColor = .clear
-    buttonBorder.strokeColor = AppColors.green
+    buttonBorder.strokeColor = borderColor
     buttonBorder.lineWidth = 2
     buttonBorder.glowWidth = 1
     buttonBorder.isAntialiased = true
@@ -45,20 +45,6 @@ class Button: SKNode {
     isUserInteractionEnabled = true
   }
 
-  convenience init(forText text: String, size: CGSize, fontName: String) {
-    // The size here means minWidth x fontSize.  The actual button will probably be a
-    // bit taller because of padding, but maybe not depending on the font?
-    let label = SKLabelNode(text: text)
-    label.name = "buttonText"
-    label.fontName = fontName
-    label.fontSize = size.height
-    label.fontColor = AppColors.textColor
-    label.horizontalAlignmentMode = .center
-    label.verticalAlignmentMode = .center
-    self.init(around: label, minSize: size)
-    addChild(label)
-  }
-
   convenience init(imageNamed imageName: String, imageColor: UIColor, size: CGSize) {
     let sprite = SKSpriteNode(imageNamed: imageName)
     sprite.name = "buttonSprite"
@@ -66,6 +52,35 @@ class Button: SKNode {
     sprite.colorBlendFactor = 1
     self.init(around: sprite, minSize: size)
     addChild(sprite)
+    decoration = sprite
+  }
+
+  convenience init(forText text: String, fontSize: CGFloat, size: CGSize) {
+    let label = SKLabelNode(text: text)
+    label.name = "buttonText"
+    label.fontName = AppColors.font
+    label.fontSize = fontSize
+    label.fontColor = AppColors.textColor
+    label.horizontalAlignmentMode = .center
+    label.verticalAlignmentMode = .center
+    self.init(around: label, minSize: size)
+    addChild(label)
+    decoration = label
+  }
+
+  convenience init(forText text: String, confirmText: String, fontSize: CGFloat, size: CGSize) {
+    self.init(forText: text, fontSize: fontSize, size: size)
+    border.strokeColor = AppColors.red
+    let confirmLabel = SKLabelNode(text: confirmText)
+    confirmLabel.name = "buttonConfirmText"
+    confirmLabel.fontName = AppColors.font
+    confirmLabel.fontSize = fontSize
+    confirmLabel.fontColor = AppColors.red
+    confirmLabel.horizontalAlignmentMode = .center
+    confirmLabel.verticalAlignmentMode = .center
+    addChild(confirmLabel)
+    confirmLabel.isHidden = true
+    confirmDecoration = confirmLabel
   }
 
   required init(coder aDecoder: NSCoder) {
@@ -82,6 +97,43 @@ class Button: SKNode {
   func disable() {
     isUserInteractionEnabled = false
     alpha = 0.5
+  }
+
+  func resetTouch() {
+    clickTouch = nil
+    border.glowWidth = 1
+  }
+
+  func cancelConfirmation() {
+    decoration?.isHidden = false
+    confirmDecoration?.isHidden = true
+    removeAllActions()
+    resetTouch()
+  }
+
+  func wasConfirmed() -> Bool {
+    // No confirmDecoration => simple button, immediately confirmed
+    guard let confirmDecoration = confirmDecoration else { return true }
+    if confirmDecoration.isHidden {
+      // The button requires confirmation but the confirm state hasn't been shown
+      return false
+    } else {
+      // The action was confirmed, switch back to the regular state
+      cancelConfirmation()
+      return true
+    }
+  }
+
+  func requireConfirmation() {
+    // No confirmDecoration => no need for confirmation
+    guard let confirmDecoration = confirmDecoration else { return }
+    // Show the confirm prompt and set a timer to switch back after a bit if there's
+    // no confirmation.
+    decoration?.isHidden = true
+    confirmDecoration.isHidden = false
+    wait(for: 5) {
+      self.cancelConfirmation()
+    }
   }
 
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -109,18 +161,20 @@ class Button: SKNode {
     for touch in touches {
       guard touch == clickTouch else { continue }
       if border.frame.contains(touch.location(in: self)), enabled {
-        action?()
+        if wasConfirmed() {
+          action?()
+        } else {
+          requireConfirmation()
+        }
       }
-      border.glowWidth = 1
-      clickTouch = nil
+      resetTouch()
     }
   }
 
   override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
     for touch in touches {
       guard touch == clickTouch else { continue }
-      clickTouch = nil
-      border.glowWidth = 1
+      resetTouch()
     }
   }
 }

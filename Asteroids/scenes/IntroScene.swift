@@ -61,7 +61,7 @@ class IntroScene: BasicScene {
     introLabel.position = CGPoint(x: gameFrame.midX, y: 0)
     intro.addChild(introLabel)
     introLabel.isHidden = true
-    goButton = Button(forText: "Find Out", size: CGSize(width: 350, height: 50), fontName: AppColors.font)
+    goButton = Button(forText: "Find Out", fontSize: 50, size: CGSize(width: 350, height: 50))
     goButton.position = CGPoint(x: fullFrame.midX, y: 0)
     goButton.action = { [unowned self] in self.toMenu() }
     intro.addChild(goButton)
