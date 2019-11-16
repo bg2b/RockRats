@@ -83,9 +83,7 @@ class GameCenterInterface {
           self.localPlayerScore = nil
           self.leaderboardScores.removeAll()
         }
-        GKAchievement.loadAchievements { [weak self] playerAchievements, error in
-          self?.setPlayerAchievements(playerAchievements, error: error)
-        }
+        self.loadPlayerAchievements()
         self.loadLeaderboards()
       } else {
         setCurrentPlayer("anon", playerName: "Anonymous", alternatePlayerID: nil)
@@ -109,6 +107,12 @@ class GameCenterInterface {
         logging($0.identifier)
         return $0.identifier
       })
+    }
+  }
+
+  func loadPlayerAchievements() {
+    GKAchievement.loadAchievements { [weak self] playerAchievements, error in
+      self?.setPlayerAchievements(playerAchievements, error: error)
     }
   }
 
@@ -196,6 +200,18 @@ class GameCenterInterface {
           self.playerAchievements[identifier] = percent
         }
         self.playerAchievementsProgress.removeAll()
+      }
+    }
+  }
+
+  func resetAchievements() {
+    GKAchievement.resetAchievements { [weak self] error in
+      if let error = error {
+        logging("Error reseting achievements: \(error.localizedDescription)")
+      } else {
+        self?.playerAchievements.removeAll()
+        self?.playerAchievementsProgress.removeAll()
+        self?.loadPlayerAchievements()
       }
     }
   }

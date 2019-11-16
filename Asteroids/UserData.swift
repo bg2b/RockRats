@@ -34,6 +34,8 @@ struct GameCounter {
   /// Retrieving a GameCounter returns the maximum value of local and iCloud versions
   /// for the current player.  Setting it provides a new lower bound value (which will
   /// typically be the new max) and synchronizes local and iCloud storage.
+  ///
+  /// As a special case, setting the counter to a negative value resets it to zero.
   var value: Int {
     get {
       let playerID = userDefaults.currentPlayerID.value
@@ -53,7 +55,8 @@ struct GameCounter {
       for (iCloudKey, iCloudValue) in iCloudDict {
         mergedDict[iCloudKey] = max(mergedDict[iCloudKey] ?? 0, iCloudValue)
       }
-      let mergedValue = max(mergedDict[playerID] ?? 0, newValue)
+      // Negative => reset counter
+      let mergedValue = newValue < 0 ? 0 : max(mergedDict[playerID] ?? 0, newValue)
       mergedDict[playerID] = mergedValue
       for (key, value) in mergedDict {
         logging("Merged: player \(key), count \(value)")
@@ -137,6 +140,11 @@ struct HighScores {
     highScores = sortedAndTrimmed(highScores)
     writeBack(highScores)
     return highScores
+  }
+
+  /// Clear out all high scores
+  func reset() {
+    writeBack([])
   }
 }
 

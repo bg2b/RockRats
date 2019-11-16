@@ -66,13 +66,13 @@ class SettingsScene: BasicScene {
     nextButtonY -= buttonSpacing
     let resetScoresButton = Button(forText: "Reset Scores", confirmText: "Confirm Reset", fontSize: buttonFontSize, size: textButtonSize)
     resetScoresButton.name = "resetScoresButton"
-    resetScoresButton.action = { print("reset scores") }
+    resetScoresButton.action = { [unowned self] in self.resetScores() }
     resetScoresButton.position = CGPoint(x: 0, y: nextButtonY)
     nextButtonY -= resetScoresButton.calculateAccumulatedFrame().height + 0.5 * buttonSpacing
     vstack.addChild(resetScoresButton)
     let resetAchievementsButton = Button(forText: "Reset Achievements", confirmText: "Confirm Reset", fontSize: buttonFontSize, size: textButtonSize)
     resetAchievementsButton.name = "resetAchievementsButton"
-    resetAchievementsButton.action = { print("reset achievements") }
+    resetAchievementsButton.action = { [unowned self] in self.resetAchievements() }
     resetAchievementsButton.position = CGPoint(x: 0, y: nextButtonY)
     if !Globals.gcInterface.enabled {
       resetAchievementsButton.disable()
@@ -98,6 +98,24 @@ class SettingsScene: BasicScene {
     } else {
       audio.muted = false
       userDefaults.audioIsMuted.value = false
+    }
+  }
+
+  func resetScores() {
+    userDefaults.highScores.reset()
+    logging("Scores reset")
+  }
+
+  func resetAchievements() {
+    if let gc = Globals.gcInterface, gc.enabled {
+      gc.resetAchievements()
+      userDefaults.ufosDestroyed.value = 0
+      userDefaults.asteroidsDestroyed.value = 0
+      // Assigning a negative value means to force the iCloud-synchronized per-player
+      // values to zero.
+      userDefaults.ufosDestroyedCounter.value = -1
+      userDefaults.asteroidsDestroyedCounter.value = -1
+      logging("Achievements reset")
     }
   }
 
