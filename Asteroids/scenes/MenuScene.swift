@@ -11,12 +11,11 @@ import GameKit
 
 class MenuScene: BasicScene { //, GKGameCenterControllerDelegate {
   var shotsFired = [UFO: Int]()
-  var gameStarting = false
+  var getRidOfUFOs = false
   var menu: SKNode!
   var highScore: SKLabelNode!
   weak var gameCenterAuthVC: UIViewController? = nil
   var presentingGCAuth = false
-  var nextScene: SKScene? = nil
 
   func initMenu() {
     menu = SKNode()
@@ -49,18 +48,8 @@ class MenuScene: BasicScene { //, GKGameCenterControllerDelegate {
     menu.addChild(highScoresButton)
     let settingsButton = Button(imageNamed: "settingsbutton", imageColor: AppColors.blue, size: buttonSize)
     settingsButton.position = CGPoint(x: playButton.position.x - buttonSize.width - buttonSpacing, y: playButton.position.y)
-    settingsButton.action = { print("settings") }
+    settingsButton.action = { [unowned self] in self.showSettings() }
     menu.addChild(settingsButton)
-
-//    let buttonHeight = CGFloat(50)
-//    let playButton = Button(forText: "Play", size: CGSize(width: 400, height: buttonHeight), fontName: AppColors.font)
-//    playButton.position = CGPoint(x: fullFrame.midX, y: 0.625 * fullFrame.midY + 0.375 * fullFrame.minY)
-//    playButton.action = { [unowned self] in self.startGame() }
-//    menu.addChild(playButton)
-//    let highScoresButton = Button(forText: "High Scores", size: CGSize(width: 400, height: buttonHeight), fontName: AppColors.font)
-//    highScoresButton.position = CGPoint(x: fullFrame.midX, y: playButton.position.y - buttonHeight - 25)
-//    highScoresButton.action = { [unowned self] in self.showHighScores() }
-//    menu.addChild(highScoresButton)
   }
 
   func spawnAsteroids() {
@@ -71,7 +60,7 @@ class MenuScene: BasicScene { //, GKGameCenterControllerDelegate {
   }
 
   func spawnUFOs() {
-    if !gameStarting && asteroids.count >= 3 && ufos.count < Globals.gameConfig.value(for: \.maxUFOs) {
+    if !getRidOfUFOs && asteroids.count >= 3 && ufos.count < Globals.gameConfig.value(for: \.maxUFOs) {
       let ufo = UFO(brothersKilled: 0, audio: nil)
       spawnUFO(ufo: ufo)
       shotsFired[ufo] = 0
@@ -97,34 +86,24 @@ class MenuScene: BasicScene { //, GKGameCenterControllerDelegate {
     when(contact, isBetween: .ufo, and: .ufo) { ufosCollided(ufo1: $0, ufo2: $1) }
   }
 
-  func switchWhenQuiescent() {
-    if playfield.isQuiescent(transient: setOf([.ufo, .ufoShot, .fragment])), let nextScene = nextScene {
-      wait(for: 0.25) {
-        self.nextScene = nil
-        self.switchScene(to: nextScene)
-      }
-    } else {
-      wait(for: 0.25) { self.switchWhenQuiescent() }
-    }
+  func prepareForSwitch() {
+    getRidOfUFOs = true
+    _ = warpOutUFOs(averageDelay: 0.25)
   }
 
-  func switchToScene(_ sceneCreation: @escaping () -> SKScene) {
-    gameStarting = true
-    _ = warpOutUFOs(averageDelay: 0.25)
-    // The scene creation is a little time-consuming and would cause the menu
-    // animation to lag, so run it in the background while UFOs are warping out and
-    // we're waiting for the playfield to become quiescent.
-    run(SKAction.run({ self.nextScene = sceneCreation() },
-                     queue: DispatchQueue.global(qos: .utility)))
-    switchWhenQuiescent()
+  func showSettings() {
+    prepareForSwitch()
+    switchToScene { SettingsScene(size: self.fullFrame.size) }
   }
 
   func startGame() {
-    switchToScene { return GameScene(size: self.fullFrame.size) }
+    prepareForSwitch()
+    switchToScene { GameScene(size: self.fullFrame.size) }
   }
 
   func showHighScores() {
-    switchToScene { return HighScoreScene(size: self.fullFrame.size, score: nil) }
+    prepareForSwitch()
+    switchToScene { HighScoreScene(size: self.fullFrame.size, score: nil) }
   }
 
   /// Enforce pausing if the Game Center authentication controller is shown.
@@ -156,7 +135,7 @@ class MenuScene: BasicScene { //, GKGameCenterControllerDelegate {
     Globals.gameConfig.currentWaveNumber = 1
     highScore.text = "High Score: \(userDefaults.highScores.highest)"
     wait(for: 1) { self.spawnAsteroids() }
-    gameStarting = false
+    getRidOfUFOs = false
     wait(for: 10) { self.spawnUFOs() }
     logging("\(name!) finished didMove to view")
   }
@@ -165,7 +144,7 @@ class MenuScene: BasicScene { //, GKGameCenterControllerDelegate {
     super.update(currentTime)
     ufos.forEach { ufo in
       ufo.fly(player: nil, playfield: playfield) { (angle, position, speed) in
-        if !self.gameStarting {
+        if !self.getRidOfUFOs {
           self.fireUFOLaser(angle: angle, position: position, speed: speed)
           self.shotsFired[ufo] = self.shotsFired[ufo]! + 1
           if self.shotsFired[ufo]! > 3 && Int.random(in: 0 ..< 10) == 0 {
@@ -200,6 +179,10 @@ class MenuScene: BasicScene { //, GKGameCenterControllerDelegate {
       }
     }
   }
+
+  override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {}
+  override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {}
+  override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {}
 
   required init(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)

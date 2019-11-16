@@ -102,6 +102,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   var audio: SceneAudio!
   var asteroids = Set<SKSpriteNode>()
   var ufos = Set<UFO>()
+  var nextScene: SKScene? = nil
 
   /// Pauses the scene when set.  This is an override of SKScene's property of the
   /// same name because SpriteKit's automatic pausing/unpausing for stuff like the
@@ -614,6 +615,11 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     }
   }
 
+  /// Transition to a new scene.  Call this instead of presentScene directly to
+  /// ensure uniformity of transitions throughout the app.
+  /// - Parameters:
+  ///   - newScene: The scene to switch to
+  ///   - duration: Optional amount of time for the transition
   func switchScene(to newScene: SKScene, withDuration duration: Double = 1) {
     logging("\(name!) switchScene to \(newScene.name!)")
     let transition = SKTransition.fade(with: AppColors.transitionColor, duration: duration)
@@ -621,6 +627,44 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     logging("\(name!) about to call presentScene")
     view?.presentScene(newScene, transition: transition)
     logging("\(name!) finished presentScene")
+  }
+
+  /// Transition to a new scene when all transient stuff that might be happening in
+  /// the playfield (shots, explosions, effects) has finished.
+  /// - Parameter newScene: The scene to switch to
+  func showWhenQuiescent(_ newScene: SKScene) {
+    if playfield.isQuiescent(transient: setOf([.playerShot, .ufo, .ufoShot, .fragment])) {
+      wait(for: 0.25) {
+        self.switchScene(to: newScene)
+      }
+    } else {
+      wait(for: 0.25) { self.showWhenQuiescent(newScene) }
+    }
+  }
+
+  /// Wait for nextScene (being constructed asynchronously) to become valid, then
+  /// transition when quiescenet.  This is used by `switchToScene(sceneCreation:)`
+  /// and probably shouldn't be called directly.
+  func switchWhenReady() {
+    if let nextScene = nextScene {
+      wait(for: 0.25) {
+        self.nextScene = nil
+        self.showWhenQuiescent(nextScene)
+      }
+    } else {
+      wait(for: 0.25) { self.switchWhenReady() }
+    }
+  }
+
+  /// Create a new scene asynchronously (to avoid lag), then transition when it's
+  /// ready and when the playfield is quiescent.
+  /// - Parameter sceneCreation: A closure that builds the new scene
+  func switchToScene(_ sceneCreation: @escaping () -> SKScene) {
+    // The scene creation is a little time-consuming and would cause the menu
+    // animation to lag, so run it in the background.
+    run(SKAction.run({ self.nextScene = sceneCreation() },
+                     queue: DispatchQueue.global(qos: .utility)))
+    switchWhenReady()
   }
 
   // Subclasses should provide a didBegin method and set themselves as the

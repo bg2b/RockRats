@@ -11,7 +11,6 @@ import GameKit
 
 class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
   var scores: SKNode!
-  var gameStarting = false
   var showingGCVC = false
   var newGame: GameScene? = nil
 
@@ -130,33 +129,8 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     scores.addChild(highScores)
   }
 
-  func showWhenQuiescent(_ newScene: SKScene) {
-    if playfield.isQuiescent(transient: setOf([.ufo, .ufoShot, .fragment])) {
-      wait(for: 0.25) {
-        self.switchScene(to: newScene)
-      }
-    } else {
-      wait(for: 0.25) { self.showWhenQuiescent(newScene) }
-    }
-  }
-
-  func startWhenQuiescent() {
-    if let newGame = newGame {
-      self.newGame = nil
-      showWhenQuiescent(newGame)
-    } else {
-      wait(for: 0.25) { self.startWhenQuiescent() }
-    }
-  }
-
   func startGame() {
-    gameStarting = true
-    // The game creation is a little time-consuming and would cause the menu
-    // animation to lag, so run it in the background while UFOs are warping out and
-    // we're waiting for the playfield to become quiescent.
-    run(SKAction.run({ self.newGame = GameScene(size: self.fullFrame.size) },
-                     queue: DispatchQueue.global(qos: .utility)))
-    startWhenQuiescent()
+    switchToScene { return GameScene(size: self.fullFrame.size) }
   }
 
   func mainMenu() {
@@ -189,29 +163,11 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
 
   override func didMove(to view: SKView) {
     super.didMove(to: view)
-//    Globals.gameConfig = loadGameConfig(forMode: "menu")
-//    Globals.gameConfig.currentWaveNumber = 1
-//    highScore.text = "High Score: \(userDefaults.highScore.value)"
-//    wait(for: 1) { self.spawnAsteroids() }
-//    gameStarting = false
-//    wait(for: 10) { self.spawnUFOs() }
     logging("\(name!) finished didMove to view")
   }
 
   override func update(_ currentTime: TimeInterval) {
     super.update(currentTime)
-//    ufos.forEach { ufo in
-//      ufo.fly(player: nil, playfield: playfield) { (angle, position, speed) in
-//        if !self.gameStarting {
-//          self.fireUFOLaser(angle: angle, position: position, speed: speed)
-//          self.shotsFired[ufo] = self.shotsFired[ufo]! + 1
-//          if self.shotsFired[ufo]! > 3 && Int.random(in: 0 ..< 10) == 0 {
-//            self.warpOutUFO(ufo)
-//          }
-//        }
-//      }
-//    }
-//    playfield.wrapCoordinates()
   }
 
   override init(size: CGSize) {
