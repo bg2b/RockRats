@@ -74,7 +74,7 @@ class SettingsScene: BasicScene {
     resetAchievementsButton.name = "resetAchievementsButton"
     resetAchievementsButton.action = { print("reset achievements") }
     resetAchievementsButton.position = CGPoint(x: 0, y: nextButtonY)
-    if !Globals.gcInterface.enabled || true {
+    if !Globals.gcInterface.enabled {
       resetAchievementsButton.disable()
     }
     vstack.addChild(resetAchievementsButton)
