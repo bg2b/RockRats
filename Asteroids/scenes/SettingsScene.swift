@@ -45,6 +45,45 @@ class SettingsScene: BasicScene {
     creditsButton.position = CGPoint(x: nextButtonX, y: buttonY)
     nextButtonX += buttonSize.width + buttonSpacing
     settings.addChild(creditsButton)
+    let vstack = SKNode()
+    vstack.name = "vstack"
+    let buttonFontSize = CGFloat(50)
+    let textButtonSize = CGSize(width: 650, height: buttonFontSize)
+    var nextButtonY = CGFloat(0)
+    let introButton = Button(forText: "Introduction", fontSize: buttonFontSize, size: textButtonSize)
+    introButton.name = "introButton"
+    introButton.action = { print("intro") }
+    introButton.position = CGPoint(x: 0, y: nextButtonY)
+    nextButtonY -= introButton.calculateAccumulatedFrame().height + 0.5 * buttonSpacing
+    vstack.addChild(introButton)
+    let tutorialButton = Button(forText: "Tutorial", fontSize: buttonFontSize, size: textButtonSize)
+    tutorialButton.name = "tutorialButton"
+    tutorialButton.action = { print("tutorial") }
+    tutorialButton.position = CGPoint(x: 0, y: nextButtonY)
+    nextButtonY -= tutorialButton.calculateAccumulatedFrame().height + 0.5 * buttonSpacing
+    vstack.addChild(tutorialButton)
+    // Extra space before dangerous items
+    nextButtonY -= buttonSpacing
+    let resetScoresButton = Button(forText: "Reset Scores", confirmText: "Confirm Reset", fontSize: buttonFontSize, size: textButtonSize)
+    resetScoresButton.name = "resetScoresButton"
+    resetScoresButton.action = { print("reset scores") }
+    resetScoresButton.position = CGPoint(x: 0, y: nextButtonY)
+    nextButtonY -= resetScoresButton.calculateAccumulatedFrame().height + 0.5 * buttonSpacing
+    vstack.addChild(resetScoresButton)
+    let resetAchievementsButton = Button(forText: "Reset Achievements", confirmText: "Confirm Reset", fontSize: buttonFontSize, size: textButtonSize)
+    resetAchievementsButton.name = "resetAchievementsButton"
+    resetAchievementsButton.action = { print("reset achievements") }
+    resetAchievementsButton.position = CGPoint(x: 0, y: nextButtonY)
+    if !Globals.gcInterface.enabled || true {
+      resetAchievementsButton.disable()
+    }
+    vstack.addChild(resetAchievementsButton)
+    let wantedMidY = 0.5 * (title.frame.minY + menuButton.calculateAccumulatedFrame().maxY)
+    // Center verticalStack vertically at wantedMidY
+    vstack.position = .zero
+    let vstackY = round(wantedMidY - vstack.calculateAccumulatedFrame().midY)
+    vstack.position = CGPoint(x: fullFrame.midX, y: vstackY)
+    settings.addChild(vstack)
   }
 
   func mainMenu() {

@@ -176,7 +176,7 @@ class Button: SKNode {
     // no confirmation.
     decorations[currentDecoration].isHidden = true
     confirmDecoration.isHidden = false
-    wait(for: 5) {
+    wait(for: 3) {
       self.cancelConfirmation()
     }
   }
