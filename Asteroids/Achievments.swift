@@ -51,7 +51,7 @@ enum Achievement: String {
 
 let achievementLevels = [
   Achievement.ufoHunter: [30, 100, 300, 1000],
-  .rockRat: [3000, 10000, 30000, 100000]
+  .rockRat: [1500, 5000, 15000, 50000]
 ]
 
 func reportAchievement(achievement: Achievement) {
