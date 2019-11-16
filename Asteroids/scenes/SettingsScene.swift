@@ -9,6 +9,8 @@
 import SpriteKit
 
 class SettingsScene: BasicScene {
+  var muteButton: Button!
+
   func initSettings() {
     let settings = SKNode()
     settings.name = "settings"
@@ -32,12 +34,13 @@ class SettingsScene: BasicScene {
     menuButton.position = CGPoint(x: nextButtonX, y: buttonY)
     nextButtonX += buttonSize.width + buttonSpacing
     settings.addChild(menuButton)
-    let soundButton = Button(imageNamed: "playbutton", imageColor: AppColors.blue, size: buttonSize)
-    soundButton.action = { print("sound") }
-    soundButton.position = CGPoint(x: nextButtonX, y: buttonY)
+    muteButton = Button(imagesNamed: ["soundon", "soundoff"], imageColor: AppColors.blue, size: buttonSize)
+    muteButton.selectedValue = (userDefaults.audioIsMuted.value ? 1 : 0)
+    muteButton.action = { [unowned self] in self.toggleSound() }
+    muteButton.position = CGPoint(x: nextButtonX, y: buttonY)
     nextButtonX += buttonSize.width + buttonSpacing
-    settings.addChild(soundButton)
-    let creditsButton = Button(imageNamed: "playbutton", imageColor: AppColors.blue, size: buttonSize)
+    settings.addChild(muteButton)
+    let creditsButton = Button(imageNamed: "infobutton", imageColor: AppColors.blue, size: buttonSize)
     creditsButton.action = { print("credits") }
     creditsButton.position = CGPoint(x: nextButtonX, y: buttonY)
     nextButtonX += buttonSize.width + buttonSpacing
@@ -46,6 +49,17 @@ class SettingsScene: BasicScene {
 
   func mainMenu() {
     showWhenQuiescent(Globals.menuScene)
+  }
+
+  func toggleSound() {
+    if muteButton.selectedValue == 1 {
+      // Muted
+      audio.muted = true
+      userDefaults.audioIsMuted.value = true
+    } else {
+      audio.muted = false
+      userDefaults.audioIsMuted.value = false
+    }
   }
 
   override func didMove(to view: SKView) {

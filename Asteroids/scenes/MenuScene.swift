@@ -131,6 +131,7 @@ class MenuScene: BasicScene { //, GKGameCenterControllerDelegate {
 
   override func didMove(to view: SKView) {
     super.didMove(to: view)
+    audio.muted = userDefaults.audioIsMuted.value
     Globals.gameConfig = loadGameConfig(forMode: "menu")
     Globals.gameConfig.currentWaveNumber = 1
     highScore.text = "High Score: \(userDefaults.highScores.highest)"

@@ -145,6 +145,8 @@ struct HighScores {
 class SavedUserData {
   /// True when the intro scene has been played on this device
   var hasDoneIntro = DefaultsValue<Bool>(name: "hasDoneIntro", defaultValue: false)
+  /// Audio off/on preference
+  var audioIsMuted = DefaultsValue<Bool>(name: "audioIsMuted", defaultValue: false)
   /// Local player high scores (not global scores from Game Center)
   var highScores = HighScores()
   /// Whoever logged into Game Center last.  If Game Center isn't available for some

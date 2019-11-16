@@ -130,13 +130,19 @@ class SceneAudio {
         audioEngine.connect(playerNode, to: audioEngine.mainMixerNode, format: buffer.format)
         playerNode.play()
       }
+      muted = userDefaults.audioIsMuted.value
     } catch {
       logging("Cannot start audio engine, \(error.localizedDescription)")
     }
   }
 
+  var muted: Bool {
+    get { audioEngine.mainMixerNode.outputVolume == 0 }
+    set { audioEngine.mainMixerNode.outputVolume = (newValue ? 0 : 1) }
+  }
+
   func soundEffect(_ sound: SoundEffect, at position: CGPoint = .zero) {
-    guard audioEngine.isRunning else { return }
+    guard audioEngine.isRunning, !muted else { return }
     let buffer = Globals.sounds.cachedAudioBuffer(sound)
     let playerNode = playerNodes[nextPlayerNode]
     nextPlayerNode = (nextPlayerNode + 1) % playerNodes.count
