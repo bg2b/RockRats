@@ -52,13 +52,13 @@ class SettingsScene: BasicScene {
     var nextButtonY = CGFloat(0)
     let introButton = Button(forText: "Introduction", fontSize: buttonFontSize, size: textButtonSize)
     introButton.name = "introButton"
-    introButton.action = { print("intro") }
+    introButton.action = { [unowned self] in self.replayIntro() }
     introButton.position = CGPoint(x: 0, y: nextButtonY)
     nextButtonY -= introButton.calculateAccumulatedFrame().height + 0.5 * buttonSpacing
     vstack.addChild(introButton)
     let tutorialButton = Button(forText: "Tutorial", fontSize: buttonFontSize, size: textButtonSize)
     tutorialButton.name = "tutorialButton"
-    tutorialButton.action = { print("tutorial") }
+    tutorialButton.action = { [unowned self] in self.replayTutorial() }
     tutorialButton.position = CGPoint(x: 0, y: nextButtonY)
     nextButtonY -= tutorialButton.calculateAccumulatedFrame().height + 0.5 * buttonSpacing
     vstack.addChild(tutorialButton)
@@ -84,6 +84,14 @@ class SettingsScene: BasicScene {
     let vstackY = round(wantedMidY - vstack.calculateAccumulatedFrame().midY)
     vstack.position = CGPoint(x: fullFrame.midX, y: vstackY)
     settings.addChild(vstack)
+  }
+
+  func replayIntro() {
+    switchToScene { IntroScene(size: self.fullFrame.size) }
+  }
+
+  func replayTutorial() {
+    switchToScene { TutorialScene(size: self.fullFrame.size) }
   }
 
   func mainMenu() {

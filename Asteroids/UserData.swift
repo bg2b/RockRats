@@ -106,6 +106,12 @@ struct HighScores {
       let local = UserDefaults.standard.object(forKey: "highScores") as? [[String: Any]] ?? [[String: Any]]()
       let localScores = local.compactMap { GameScore(fromDict: $0) }
       let localDate = UserDefaults.standard.double(forKey: "highScoresDate")
+      // If the local scores are being loaded for the first time then the local
+      // highScoresDate will be zero.  We _don't_ set it to now in this case; the
+      // globalDate below will be set to now instead, which will ensure the iCloud
+      // scores take precedence.  If we initialized localDate to now but some other
+      // device had scores from earlier stored in iCloud, then those would have an
+      // older date, and the empty local high scores would overwrite them.
       let global = NSUbiquitousKeyValueStore.default.object(forKey: "highScores") as? [[String: Any]] ?? [[String: Any]]()
       let globalScores = global.compactMap { GameScore(fromDict: $0) }
       let globalDate = NSUbiquitousKeyValueStore.default.double(forKey: "highScoresDate")
