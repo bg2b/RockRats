@@ -26,6 +26,7 @@ enum Achievement: String {
   case bigBrother = "bigBrother"
   case whatAreTheOdds = "whatAreTheOdds"
   case keepOnTrekking = "keepOnTrekking"
+  case promoted = "promoted"
   // Normal
   case spaceCadet = "spaceCadet"
   case spaceScout = "spaceScout"
@@ -99,4 +100,16 @@ func reportAchievement(achievement: Achievement, soFar: Int) -> Int? {
     logging("Achievement \(achievement.rawValue) but Game Center is disabled")
   }
   return result
+}
+
+func achievementIsCompleted(achievement: Achievement) -> Bool {
+  guard let gc = Globals.gcInterface, gc.enabled else { return false }
+  guard let status = gc.statusOfAchievement(achievement.gameCenterID) else { return false }
+  return status == 100
+}
+
+func levelIsReached(achievement: Achievement, level: Int) -> Bool {
+  guard let gc = Globals.gcInterface, gc.enabled else { return false }
+  guard let status = gc.statusOfAchievement(achievement.gameCenterLevelID(level)) else { return false }
+  return status == 100
 }

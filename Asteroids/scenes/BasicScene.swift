@@ -643,8 +643,11 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   }
 
   /// Wait for nextScene (being constructed asynchronously) to become valid, then
-  /// transition when quiescenet.  This is used by `switchToScene(sceneCreation:)`
-  /// and probably shouldn't be called directly.
+  /// transition when quiescenet.
+  ///
+  /// This is used by `switchToScene(sceneCreation:)` and typically not called
+  /// directly, but you can use `makeSceneInBackground(sceneCreation:)` if you want
+  /// to kick off the scene creation separatedly from the wait-and-transition.
   func switchWhenReady() {
     if let nextScene = nextScene {
       wait(for: 0.25) {
@@ -656,14 +659,21 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     }
   }
 
+  /// Create a new scene asynchronously (to avoid lag) and store the result in
+  /// `nextScene`.
+  /// - Parameter sceneCreation: A closure that builds the new scene
+  func makeSceneInBackground(_ sceneCreation: @escaping () -> SKScene) {
+    // Some scene creation can be a little time-consuming and might cause the update
+    // loop to lag, so run it in the background.
+    run(SKAction.run({ self.nextScene = sceneCreation() },
+                     queue: DispatchQueue.global(qos: .utility)))
+  }
+
   /// Create a new scene asynchronously (to avoid lag), then transition when it's
   /// ready and when the playfield is quiescent.
   /// - Parameter sceneCreation: A closure that builds the new scene
   func switchToScene(_ sceneCreation: @escaping () -> SKScene) {
-    // The scene creation is a little time-consuming and would cause the menu
-    // animation to lag, so run it in the background.
-    run(SKAction.run({ self.nextScene = sceneCreation() },
-                     queue: DispatchQueue.global(qos: .utility)))
+    makeSceneInBackground(sceneCreation)
     switchWhenReady()
   }
 

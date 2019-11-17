@@ -62,6 +62,14 @@ class SettingsScene: BasicScene {
     tutorialButton.position = CGPoint(x: 0, y: nextButtonY)
     nextButtonY -= tutorialButton.calculateAccumulatedFrame().height + 0.5 * buttonSpacing
     vstack.addChild(tutorialButton)
+    if achievementIsCompleted(achievement: .promoted) {
+      let conclusionButton = Button(forText: "Conclusion", fontSize: buttonFontSize, size: textButtonSize)
+      conclusionButton.name = "introButton"
+      conclusionButton.action = { [unowned self] in self.replayConclusion() }
+      conclusionButton.position = CGPoint(x: 0, y: nextButtonY)
+      nextButtonY -= conclusionButton.calculateAccumulatedFrame().height + 0.5 * buttonSpacing
+      vstack.addChild(conclusionButton)
+    }
     // Extra space before dangerous items
     nextButtonY -= buttonSpacing
     let resetScoresButton = Button(forText: "Reset Scores", confirmText: "Confirm Reset", fontSize: buttonFontSize, size: textButtonSize)
@@ -87,7 +95,22 @@ class SettingsScene: BasicScene {
   }
 
   func replayIntro() {
-    switchToScene { IntroScene(size: self.fullFrame.size) }
+    var showConclusion = false
+    // If they've reached the top level but have not seen the conclusion screen, then
+    // clicking the replay intro button triggers the promoted achievement and shows
+    // the conclusion instead.  Once the promoted achievement has been done, then
+    // there will be a separate replay conclusion button.
+    if let gc = Globals.gcInterface, gc.enabled, levelIsReached(achievement: .rockRat, level: 3) {
+      if !achievementIsCompleted(achievement: .promoted) {
+        reportAchievement(achievement: .promoted)
+        showConclusion = true
+      }
+    }
+    switchToScene { IntroScene(size: self.fullFrame.size, conclusion: showConclusion) }
+  }
+
+  func replayConclusion() {
+    switchToScene { IntroScene(size: self.fullFrame.size, conclusion: true) }
   }
 
   func replayTutorial() {

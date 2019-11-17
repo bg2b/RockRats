@@ -10,29 +10,17 @@ import SpriteKit
 import AVFoundation
 
 class IntroScene: BasicScene {
+  let conclusion: Bool
   let attributes = AttrStyles(fontName: AppColors.font, fontSize: 40)
   let standBy = """
   Incoming transmission...
   Please stand by.
   """
-  let messageHeader = """
-  From: @Lt Cmdr Ivanova@
-    Sector Head
-  To: All @new recruits@
-  CC: Central Command
-  Subject: @Intro Briefing@
-  """
-  let introduction = """
-  It's tough working in the belt. Whether you're from Luna City, Mars Colony, \
-  or good old Terra, out here you're a @long way@ from home. Cleaning the fields \
-  from mining debris is a @dangerous@ job; the pay's good for a reason... \
-  You're here because you're a @hotshot@ pilot, and Central suspects \
-  you @MIGHT@ survive. At least if the pesky @UFOs@ don't get you... Do you \
-  have what it takes to become one of us, the @Rock Rats@?
-  """
+  let messageHeader: String
+  let introduction: String
   var incomingLabel: SKLabelNode!
   var introLabel: SKLabelNode!
-  var goButton: Button!
+  var doneButton: Button!
   var transmissionSounds: ContinuousPositionalAudio!
 
   func initIntro() {
@@ -61,23 +49,23 @@ class IntroScene: BasicScene {
     introLabel.position = CGPoint(x: gameFrame.midX, y: 0)
     intro.addChild(introLabel)
     introLabel.isHidden = true
-    goButton = Button(forText: "Find Out", fontSize: 50, size: CGSize(width: 350, height: 50))
-    goButton.position = CGPoint(x: fullFrame.midX, y: 0)
-    goButton.action = { [unowned self] in self.toMenu() }
-    intro.addChild(goButton)
-    goButton.alpha = 0
-    goButton.isHidden = true
+    doneButton = Button(forText: (!conclusion ? "Find Out" : "Acknowledge"), fontSize: 50, size: CGSize(width: 350, height: 50))
+    doneButton.position = CGPoint(x: fullFrame.midX, y: 0)
+    doneButton.action = { [unowned self] in self.done() }
+    intro.addChild(doneButton)
+    doneButton.alpha = 0
+    doneButton.isHidden = true
     // Calculate vertical positions for layout
     let introFrame = introLabel.frame
     let spacerHeight = 1.25 * introLabel.fontSize
-    let goFrame = goButton.calculateAccumulatedFrame()
+    let goFrame = doneButton.calculateAccumulatedFrame()
     let totalHeight = introFrame.height + spacerHeight + goFrame.height
     let desiredTopY = gameFrame.maxY - 0.5 * (gameFrame.height - totalHeight)
     let desiredBottomY = gameFrame.minY + 0.5 * (gameFrame.height - totalHeight)
     // Put the top of the intro at desiredTopY
     introLabel.position = introLabel.position + CGVector(dx: 0, dy: desiredTopY - introFrame.maxY)
     // Put the bottom of the button at desiredBottomY
-    goButton.position = goButton.position + CGVector(dx: 0, dy: desiredBottomY - goFrame.minY)
+    doneButton.position = doneButton.position + CGVector(dx: 0, dy: desiredBottomY - goFrame.minY)
     transmissionSounds = audio.continuousAudio(.transmission, at: self)
     transmissionSounds.playerNode.volume = 0
     transmissionSounds.playerNode.play()
@@ -101,17 +89,18 @@ class IntroScene: BasicScene {
   func intro() {
     introLabel.isHidden = false
     introLabel.typeIn(text: introduction, attributes: attributes, sounds: transmissionSounds) {
-      self.goButton.run(SKAction.sequence([SKAction.unhide(), SKAction.fadeIn(withDuration: 0.5)]))
+      self.doneButton.run(SKAction.sequence([SKAction.unhide(), SKAction.fadeIn(withDuration: 0.5)]))
     }
   }
 
-  func toMenu() {
-    wait(for: 0.25) {
-      userDefaults.hasDoneIntro.value = true
-      self.switchScene(to: Globals.menuScene, withDuration: 3)
+  func done() {
+    if userDefaults.hasDoneIntro.value {
+      nextScene = Globals.menuScene
+    } else {
+      makeSceneInBackground { TutorialScene(size: self.fullFrame.size) }
     }
-    // let tutorialScene = TutorialScene(size: fullFrame.size)
-    // wait(for: 0.25) { self.switchScene(to: tutorialScene, withDuration: 3) }
+    userDefaults.hasDoneIntro.value = true
+    switchWhenReady()
   }
 
   override func didMove(to view: SKView) {
@@ -126,7 +115,44 @@ class IntroScene: BasicScene {
     super.update(currentTime)
   }
 
-  override init(size: CGSize) {
+  init(size: CGSize, conclusion: Bool) {
+    self.conclusion = conclusion
+    if !conclusion {
+      messageHeader = """
+      From: @Lt Cmdr Ivanova@
+        Sector Head
+      To: All @new recruits@
+      CC: Central Command
+      Subject: @Intro Briefing@
+      """
+      introduction = """
+      It's tough working in the belt. Whether you're from Luna City, Mars Colony, \
+      or good old Terra, out here you're a @long way@ from home. Cleaning the fields \
+      from mining debris is a @dangerous@ job; the pay's good for a reason... \
+      You're here because you're a @hotshot@ pilot, and Central suspects \
+      you @MIGHT@ survive. At least if the pesky @UFOs@ don't get you... Do you \
+      have what it takes to become one of us, the @Rock Rats@?
+      """
+    } else {
+      let playerID = userDefaults.currentPlayerID.value
+      let playerName = userDefaults.playerNames.value[playerID] ?? "Anonymous"
+      messageHeader = """
+      From: @Cmdr Ivanova@
+        Outgoing Sector Head
+      To: @Lt Cmdr \(playerName)@
+        Incoming Sector Head
+      Subject: @Promotion!@
+      """
+      introduction = """
+      @Congratulations on your promotion@ to Lt Cmdr! I remember the day you \
+      joined as a new recruit, still wet behind the ears, but confident that you \
+      could make it as a @Rock Rat@. That confidence was justified, and then some. \
+      Now you face a @new challenge@, training the next generation of superstar \
+      pilots. You're probably nervous (I was when I got the job), but I'm sure \
+      you'll make it look easy. Best wishes commander, and keep the @Rock Rat@ \
+      spirit strong!
+      """
+    }
     super.init(size: size)
     name = "introScene"
     initGameArea(avoidSafeArea: false)
@@ -134,6 +160,9 @@ class IntroScene: BasicScene {
   }
 
   required init(coder aDecoder: NSCoder) {
+    conclusion = false
+    messageHeader = ""
+    introduction = ""
     super.init(coder: aDecoder)
   }
 }

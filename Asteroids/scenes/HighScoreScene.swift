@@ -9,6 +9,16 @@
 import SpriteKit
 import GameKit
 
+func abbreviatedName(_ playerName: String) -> String {
+  let maxLength = 20
+  if playerName.count > maxLength {
+    // Cut off names that are too long
+    return playerName.prefix(maxLength - 3) + "..."
+  } else {
+    return playerName
+  }
+}
+
 class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
   var scores: SKNode!
   var showingGCVC = false
@@ -20,12 +30,7 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     var playerScoreText = "\(highScore.points)"
     let playerName = SKLabelNode()
     playerName.name = "playerName"
-    var playerNameText = (highScore.playerName ?? "Space Ghost").uppercased()
-    let maxLength = 20
-    if playerNameText.count > maxLength {
-      // Cut off names that are too long
-      playerNameText = playerNameText.prefix(maxLength - 3) + "..."
-    }
+    var playerNameText = abbreviatedName((highScore.playerName ?? "Space Ghost").uppercased())
     if highScore.playerID == highlighted.playerID {
       // Boldface name of the current player
       playerNameText = "@" + playerNameText + "@"
