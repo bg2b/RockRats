@@ -102,15 +102,36 @@ struct HighScores {
   /// iCloud-backed and local storage.
   var value: [GameScore] {
     get {
+      let now = Date().timeIntervalSinceReferenceDate
       let local = UserDefaults.standard.object(forKey: "highScores") as? [[String: Any]] ?? [[String: Any]]()
       let localScores = local.compactMap { GameScore(fromDict: $0) }
+      let localDate = UserDefaults.standard.double(forKey: "highScoresDate")
       let global = NSUbiquitousKeyValueStore.default.object(forKey: "highScores") as? [[String: Any]] ?? [[String: Any]]()
       let globalScores = global.compactMap { GameScore(fromDict: $0) }
-      var highScores = localScores
-      for score in globalScores {
-        if (highScores.firstIndex { sameScore(score, $0) }) == nil {
-          highScores.append(score)
+      let globalDate = NSUbiquitousKeyValueStore.default.double(forKey: "highScoresDate")
+      if globalDate == 0 {
+        NSUbiquitousKeyValueStore.default.set(now, forKey: "highScoresDate")
+      }
+      var highScores: [GameScore]
+      if localDate == globalDate {
+        // iCloud and the local scores come from the same generation, so merge.
+        highScores = localScores
+        for score in globalScores {
+          if (highScores.firstIndex { sameScore(score, $0) }) == nil {
+            highScores.append(score)
+          }
         }
+      } else if localDate < globalDate {
+        // iCloud has the relevant data.  This happens if the scores get reset on a
+        // different device, or if this is the first time getting scores for this
+        // device but they've played on some other device before.
+        highScores = globalScores
+        UserDefaults.standard.set(globalDate, forKey: "highScoresDate")
+      } else {
+        // Local has the relevant data, but I'm not sure how this could happen.
+        // Maybe if iCloud isn't available in some way?
+        highScores = localScores
+        NSUbiquitousKeyValueStore.default.set(localDate, forKey: "highScoresDate")
       }
       highScores = sortedAndTrimmed(highScores)
       highScores = updateNames(highScores)
@@ -144,6 +165,11 @@ struct HighScores {
 
   /// Clear out all high scores
   func reset() {
+    // Start a new generation so when scores get synced to other devices, these will
+    // take precedence.
+    let now = Date().timeIntervalSinceReferenceDate
+    UserDefaults.standard.set(now, forKey: "highScoresDate")
+    NSUbiquitousKeyValueStore.default.set(now, forKey: "highScoresDate")
     writeBack([])
   }
 }
