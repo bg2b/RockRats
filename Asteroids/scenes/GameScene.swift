@@ -37,6 +37,7 @@ class GameScene: GameTutorialScene {
   var ufosToAvenge = 0
   var ufosKilledWithoutDying = 0
   var consecutiveUFOsKilled = 0
+  var killedByUFO = false
   var ufoSpawningRate = 0.0
   var timesUFOsShot = 0
   var centralDisplay: SKLabelNode!
@@ -297,6 +298,7 @@ class GameScene: GameTutorialScene {
       wait(for: 0.5) { self.spawnPlayer(safeTime: max(safeTime - 0.25, 0)) }
     } else {
       ufosToAvenge /= 2
+      killedByUFO = false
       energyBar.fill()
       player.reset()
       player.warpIn(to: spawnPosition, atAngle: player.zRotation, addTo: playfield)
@@ -364,12 +366,17 @@ class GameScene: GameTutorialScene {
   }
 
   func laserHit(laser: SKNode, ufo: SKNode) {
-    ufosToAvenge += 1
     consecutiveHit()
-    consecutiveUFOsKilled += 1
-    ufosKilledWithoutDying += 1
-    if ufosKilledWithoutDying == 12 {
-      reportAchievement(achievement: .armedAndDangerous)
+    if killedByUFO {
+      // The player died by getting shot by a UFO and hasn't respawned yet.
+      reportAchievement(achievement: .bestServedCold)
+    } else {
+      consecutiveUFOsKilled += 1
+      ufosKilledWithoutDying += 1
+      ufosToAvenge += 1
+      if ufosKilledWithoutDying == 12 {
+        reportAchievement(achievement: .armedAndDangerous)
+      }
     }
     if !ufo.requiredPhysicsBody().isOnScreen {
       reportAchievement(achievement: .hanShotFirst)
@@ -479,6 +486,9 @@ class GameScene: GameTutorialScene {
     }
     removeUFOLaser(laser as! SKSpriteNode)
     destroyPlayer()
+    // This gets reset upon respawning, but if they happen to shoot a UFO in the
+    // meantime, we give them the revenge achievement.
+    killedByUFO = true
   }
 
   func playerCollided(asteroid: SKNode) {

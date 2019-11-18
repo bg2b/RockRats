@@ -26,6 +26,7 @@ enum Achievement: String {
   case bigBrother = "bigBrother"
   case whatAreTheOdds = "whatAreTheOdds"
   case keepOnTrekking = "keepOnTrekking"
+  case bestServedCold = "bestServedCold"
   case promoted = "promoted"
   // Normal
   case spaceCadet = "spaceCadet"
