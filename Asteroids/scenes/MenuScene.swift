@@ -16,6 +16,7 @@ class MenuScene: BasicScene { //, GKGameCenterControllerDelegate {
   var highScore: SKLabelNode!
   weak var gameCenterAuthVC: UIViewController? = nil
   var presentingGCAuth = false
+  var buttons = [Button]()
 
   func initMenu() {
     menu = SKNode()
@@ -41,14 +42,17 @@ class MenuScene: BasicScene { //, GKGameCenterControllerDelegate {
     let playButton = Button(imageNamed: "playbutton", imageColor: AppColors.green, size: buttonSize)
     playButton.position = CGPoint(x: fullFrame.midX, y: buttonY)
     playButton.action = { [unowned self] in self.startGame() }
+    buttons.append(playButton)
     menu.addChild(playButton)
     let highScoresButton = Button(imageNamed: "highscoresbutton", imageColor: AppColors.blue, size: buttonSize)
     highScoresButton.position = CGPoint(x: playButton.position.x + buttonSize.width + buttonSpacing, y: playButton.position.y)
     highScoresButton.action = { [unowned self] in self.showHighScores() }
+    buttons.append(highScoresButton)
     menu.addChild(highScoresButton)
     let settingsButton = Button(imageNamed: "settingsbutton", imageColor: AppColors.blue, size: buttonSize)
     settingsButton.position = CGPoint(x: playButton.position.x - buttonSize.width - buttonSpacing, y: playButton.position.y)
     settingsButton.action = { [unowned self] in self.showSettings() }
+    buttons.append(settingsButton)
     menu.addChild(settingsButton)
   }
 
@@ -131,6 +135,11 @@ class MenuScene: BasicScene { //, GKGameCenterControllerDelegate {
 
   override func didMove(to view: SKView) {
     super.didMove(to: view)
+    // If a touch was in progress for some button and the user pressed another button
+    // that caused a scene transition, then the first button will be stuck in a
+    // half-touched state when we come back to the menu.  So be sure to clear the
+    // state of all the buttons.
+    buttons.forEach { $0.resetTouch() }
     audio.muted = userDefaults.audioIsMuted.value
     Globals.gameConfig = loadGameConfig(forMode: "menu")
     Globals.gameConfig.currentWaveNumber = 1
