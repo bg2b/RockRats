@@ -95,7 +95,11 @@ class IntroScene: BasicScene {
 
   func done() {
     if userDefaults.hasDoneIntro.value {
-      nextScene = Globals.menuScene
+      if conclusion {
+        makeSceneInBackground { CreditsScene(size: self.fullFrame.size) }
+      } else {
+        nextScene = Globals.menuScene
+      }
     } else {
       makeSceneInBackground { TutorialScene(size: self.fullFrame.size) }
     }

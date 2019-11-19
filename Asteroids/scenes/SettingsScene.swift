@@ -41,7 +41,7 @@ class SettingsScene: BasicScene {
     nextButtonX += buttonSize.width + buttonSpacing
     settings.addChild(muteButton)
     let creditsButton = Button(imageNamed: "infobutton", imageColor: AppColors.blue, size: buttonSize)
-    creditsButton.action = { print("credits") }
+    creditsButton.action = { [unowned self] in self.showCredits() }
     creditsButton.position = CGPoint(x: nextButtonX, y: buttonY)
     nextButtonX += buttonSize.width + buttonSpacing
     settings.addChild(creditsButton)
@@ -130,6 +130,10 @@ class SettingsScene: BasicScene {
       audio.muted = false
       userDefaults.audioIsMuted.value = false
     }
+  }
+
+  func showCredits() {
+    switchToScene { CreditsScene(size: self.fullFrame.size) }
   }
 
   func resetScores() {
