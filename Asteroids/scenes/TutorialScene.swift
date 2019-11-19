@@ -136,8 +136,6 @@ class TutorialScene: GameTutorialScene {
     if asteroids.isEmpty {
       if deathCount != messages.count {
         message += " At least you cleared the debris."
-      } else {
-        reportAchievement(achievement: .hanYolo)
       }
     }
     wait(for: 2) {

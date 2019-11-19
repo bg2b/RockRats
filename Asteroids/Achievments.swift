@@ -9,7 +9,7 @@
 import SpriteKit
 import GameKit
 
-enum Achievement: String {
+enum Achievement: String, CaseIterable {
   // Hidden
   case leeroyJenkins = "leeroyJenkins"
   case redShirt = "redShirt"
@@ -18,7 +18,6 @@ enum Achievement: String {
   case hanShotFirst = "hanShotFirst"
   case rightPlaceWrongTime = "rightPlaceWrongTime"
   case itsATrap = "itsATrap"
-  case hanYolo = "hanYolo"
   case score404 = "notFound"
   case littlePrince = "littlePrince"
   case spaceOddity = "spaceOddity"
@@ -29,6 +28,10 @@ enum Achievement: String {
   case bestServedCold = "bestServedCold"
   case promoted = "promoted"
   // Normal
+  // The first of these should be useTheSource, since finding the set of hidden
+  // achievements is done by iterating through the enum until useTheSource is
+  // reached.
+  case useTheSource = "useTheSource"
   case spaceCadet = "spaceCadet"
   case spaceScout = "spaceScout"
   case spaceRanger = "spaceRanger"
@@ -49,6 +52,20 @@ enum Achievement: String {
   var gameCenterID: String { "org.davidlong.Asteroids." + rawValue }
 
   func gameCenterLevelID(_ level: Int) -> String { return gameCenterID + String(level + 1) }
+
+  static let hiddenAchievements: Set<Achievement> = {
+    var result = Set<Achievement>()
+    for achievement in Achievement.allCases {
+      if achievement == .useTheSource {
+        break
+      } else {
+        result.insert(achievement)
+      }
+    }
+    return result
+  }()
+
+  var isHidden: Bool { Achievement.hiddenAchievements.contains(self) }
 }
 
 let achievementLevels = [
@@ -63,6 +80,9 @@ func reportAchievement(achievement: Achievement) {
         logging("Achievement \(achievement.rawValue) already completed")
       } else {
         gc.reportCompletion(achievement.gameCenterID)
+        if achievement.isHidden {
+          reportHiddenProgress()
+        }
       }
     } else {
       // We don't know the status for some reason
@@ -113,4 +133,17 @@ func levelIsReached(achievement: Achievement, level: Int) -> Bool {
   guard let gc = Globals.gcInterface, gc.enabled else { return false }
   guard let status = gc.statusOfAchievement(achievement.gameCenterLevelID(level)) else { return false }
   return status == 100
+}
+
+func reportHiddenProgress() {
+  guard let gc = Globals.gcInterface, gc.enabled else { return }
+  var numFound = 0
+  for achievement in Achievement.hiddenAchievements {
+    if achievementIsCompleted(achievement: achievement) {
+      numFound += 1
+    }
+  }
+  logging("Found \(numFound) out of \(Achievement.hiddenAchievements.count) hidden achievements")
+  _ = gc.reportProgress(Achievement.useTheSource.gameCenterID,
+                        knownProgress: floor(Double(numFound) / Double(Achievement.hiddenAchievements.count) * 100))
 }

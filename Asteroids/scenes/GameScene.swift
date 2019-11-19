@@ -85,6 +85,7 @@ class GameScene: GameTutorialScene {
   func endGameSaveProgress() {
     updateGameCounters()
     if Globals.gcInterface.enabled {
+      reportHiddenProgress()
       Globals.gcInterface.flushProgress()
     }
   }
