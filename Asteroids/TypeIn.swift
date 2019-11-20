@@ -72,7 +72,7 @@ extension SKLabelNode {
         if previousChar == "." || previousChar == ";" || previousChar == "!" || previousChar == "?" {
           duration *= 50
           muteAudio = true
-        } else if previousChar == "," {
+        } else if previousChar == "," || previousChar == "-" {
           duration *= 10
           muteAudio = true
         }

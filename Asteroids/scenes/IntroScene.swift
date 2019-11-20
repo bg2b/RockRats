@@ -148,11 +148,11 @@ class IntroScene: BasicScene {
       Subject: @Promotion!@
       """
       introduction = """
-      @Congratulations on your promotion@ to Lt Cmdr! I remember the day you \
+      @Congratulations on your promotion@ to Lt Commander! I remember the day you \
       joined as a new recruit, still wet behind the ears, but confident that you \
       could make it as a @Rock Rat@. That confidence was justified, and then some. \
       Now you face a @new challenge@, training the next generation of superstar \
-      pilots. You're probably nervous (I was when I got the job), but I'm sure \
+      pilots. You're probably nervous - I was when I got the job - but I'm sure \
       you'll make it look easy. Best wishes commander, and keep the @Rock Rat@ \
       spirit strong!
       """
