@@ -191,12 +191,16 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     var highScores = userDefaults.highScores.value
     if let gc = Globals.gcInterface, gc.enabled, !gc.leaderboardScores.isEmpty {
       var ranks = Array(1 ... gc.leaderboardScores.count)
-      if gc.leaderboardScores.count >= 5 {
-        ranks = [1, 3, 5]
-        if gc.leaderboardScores.count >= 10 {
-          ranks = [1, 3, 10]
+      if gc.leaderboardScores.count >= 4 {
+        ranks = [1, 2, 4]
+        if gc.leaderboardScores.count >= 5 {
+          ranks = [1, 3, 5]
+          if gc.leaderboardScores.count >= 10 {
+            ranks = [1, 3, 10]
+          }
         }
       }
+      var globalScores = [GameScore]()
       for rank in ranks {
         // This style keeps the Game Center names.
         // let globalScore = GameScore(score: gc.leaderboardScores[rank - 1])
@@ -210,6 +214,7 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
         // device high scores and come look at the high score screen, they won't see
         // their name, but it serves them right...)
         let globalScore = GameScore(score: gc.leaderboardScores[rank - 1], displayName: "Weekly #\(rank)")
+        globalScores.append(globalScore)
         if (highScores.firstIndex { sameScore($0, globalScore) }) == nil {
           highScores.append(globalScore)
         }
@@ -218,6 +223,21 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
       for score in highScores {
         let date = Date(timeIntervalSinceReferenceDate: score.date)
         print("\(score.playerName ?? "unknown") \(score.points) \(score.date) \(date)")
+      }
+      var playerScore = score?.points ?? 0
+      if let previousWeeklyPlayerScore = gc.localPlayerScore {
+        playerScore = max(playerScore, GameScore(score: previousWeeklyPlayerScore).points)
+      }
+      let globalRank = (globalScores.firstIndex { playerScore >= $0.points } ?? 100) + 1
+      if globalRank == 1 {
+        reportAchievement(achievement: .top10)
+        reportAchievement(achievement: .top3)
+        reportAchievement(achievement: .top1)
+      } else if globalRank <= 3 {
+        reportAchievement(achievement: .top10)
+        reportAchievement(achievement: .top3)
+      } else if globalRank <= 10 {
+        reportAchievement(achievement: .top10)
       }
     }
     initScores(score: score, highScores: Array(highScores.prefix(10)))

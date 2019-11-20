@@ -227,15 +227,12 @@ class GameScene: GameTutorialScene {
     scoreDisplay.text = "\(score)"
     if initialScore < 3000 && score >= 3000 {
       reportAchievement(achievement: .spaceCadet)
-    }
-    else if initialScore < 4000 && score >= 4000 {
+    } else if initialScore < 4000 && score >= 4000 {
       reportAchievement(achievement: .spaceScout)
-    }
-    else if initialScore < 5000 && score >= 5000 {
+    } else if initialScore < 5000 && score >= 5000 {
       reportAchievement(achievement: .spaceRanger)
-    }
-    else if initialScore < 6000 && score >= 6000 {
-      reportAchievement(achievement: .spaceAce)
+    } else if initialScore < 6000 && score >= 6000 {
+      reportRepeatableAchievement(achievement: .spaceAce)
     }
     for special in specialScores {
       if score == special.score {

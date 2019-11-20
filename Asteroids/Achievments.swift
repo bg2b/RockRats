@@ -45,6 +45,9 @@ enum Achievement: String, CaseIterable {
   case sharpshooter = "sharpshooter"
   case hawkeye = "hawkeye"
   case armedAndDangerous = "armedAndDangerous"
+  case top10 = "top10"
+  case top3 = "top3"
+  case top1 = "top1"
   // Multi-level
   case ufoHunter = "ufoHunter"
   case rockRat = "rockRat"
@@ -90,6 +93,12 @@ func reportAchievement(achievement: Achievement) {
     }
   } else {
     logging("Achievement \(achievement.rawValue) but Game Center is disabled")
+  }
+}
+
+func reportRepeatableAchievement(achievement: Achievement) {
+  if let gc = Globals.gcInterface, gc.enabled {
+    gc.reportCompletion(achievement.gameCenterID)
   }
 }
 
