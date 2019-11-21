@@ -187,6 +187,9 @@ class SavedUserData {
   var hasDoneIntro = DefaultsValue<Bool>(name: "hasDoneIntro", defaultValue: false)
   /// Audio off/on preference
   var audioIsMuted = DefaultsValue<Bool>(name: "audioIsMuted", defaultValue: false)
+  /// Retro mode preference (ignored if Game Center is disabled or the player does
+  /// not have the blastFromThePast achievement)
+  var retroMode = DefaultsValue<Bool>(name: "retroMode", defaultValue: false)
   /// Local player high scores (not global scores from Game Center)
   var highScores = HighScores()
   /// Whoever logged into Game Center last.  If Game Center isn't available for some

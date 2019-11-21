@@ -10,6 +10,7 @@ import SpriteKit
 
 class SettingsScene: BasicScene {
   var muteButton: Button!
+  var retroButton: Button!
 
   func initSettings() {
     let settings = SKNode()
@@ -23,28 +24,40 @@ class SettingsScene: BasicScene {
     title.verticalAlignmentMode = .center
     title.position = CGPoint(x: fullFrame.midX, y: fullFrame.maxY - title.fontSize)
     settings.addChild(title)
+    let bottomButtons = SKNode()
+    bottomButtons.name = "bottomButtons"
     let buttonSize = CGSize(width: 150, height: 100)
     let buttonSpacing = CGFloat(20)
-    let buttonY = fullFrame.minY + buttonSize.height + buttonSpacing
-    let numButtons = 3
-    let widthForAllButtons = CGFloat(numButtons) * buttonSize.width + CGFloat(numButtons - 1) * buttonSpacing
-    var nextButtonX = fullFrame.midX - 0.5 * widthForAllButtons + 0.5 * buttonSize.width
+    var nextButtonX = CGFloat(0)
     let menuButton = Button(imageNamed: "homebutton", imageColor: AppColors.blue, size: buttonSize)
     menuButton.action = { [unowned self] in self.mainMenu() }
-    menuButton.position = CGPoint(x: nextButtonX, y: buttonY)
+    menuButton.position = CGPoint(x: nextButtonX, y: 0)
     nextButtonX += buttonSize.width + buttonSpacing
-    settings.addChild(menuButton)
+    bottomButtons.addChild(menuButton)
     muteButton = Button(imagesNamed: ["soundon", "soundoff"], imageColor: AppColors.blue, size: buttonSize)
     muteButton.selectedValue = (userDefaults.audioIsMuted.value ? 1 : 0)
     muteButton.action = { [unowned self] in self.toggleSound() }
-    muteButton.position = CGPoint(x: nextButtonX, y: buttonY)
+    muteButton.position = CGPoint(x: nextButtonX, y: 0)
     nextButtonX += buttonSize.width + buttonSpacing
-    settings.addChild(muteButton)
+    bottomButtons.addChild(muteButton)
+    if achievementIsCompleted(achievement: .blastFromThePast) {
+      retroButton = Button(imagesNamed: ["shipmodern", "shipretro"], imageColor: .white, size: buttonSize)
+      retroButton.selectedValue = (userDefaults.retroMode.value ? 1 : 0)
+      retroButton.action = { [unowned self] in self.toggleRetro() }
+      retroButton.position = CGPoint(x: nextButtonX, y: 0)
+      nextButtonX += buttonSize.width + buttonSpacing
+      bottomButtons.addChild(retroButton)
+    }
     let creditsButton = Button(imageNamed: "infobutton", imageColor: AppColors.blue, size: buttonSize)
     creditsButton.action = { [unowned self] in self.showCredits() }
-    creditsButton.position = CGPoint(x: nextButtonX, y: buttonY)
-    nextButtonX += buttonSize.width + buttonSpacing
-    settings.addChild(creditsButton)
+    creditsButton.position = CGPoint(x: nextButtonX, y: 0)
+    bottomButtons.addChild(creditsButton)
+    bottomButtons.position = .zero
+    let bottomFrame = bottomButtons.calculateAccumulatedFrame()
+    let buttonY = fullFrame.minY + buttonSize.height + buttonSpacing
+    // Want to center the bottom row of buttons on fullFrame.x, buttonY
+    bottomButtons.position = CGPoint(x: fullFrame.midX - bottomFrame.midX, y: buttonY - bottomFrame.midY)
+    settings.addChild(bottomButtons)
     let vstack = SKNode()
     vstack.name = "vstack"
     let buttonFontSize = CGFloat(50)
@@ -86,7 +99,7 @@ class SettingsScene: BasicScene {
       resetAchievementsButton.disable()
     }
     vstack.addChild(resetAchievementsButton)
-    let wantedMidY = 0.5 * (title.frame.minY + menuButton.calculateAccumulatedFrame().maxY)
+    let wantedMidY = 0.5 * (title.frame.minY + bottomButtons.calculateAccumulatedFrame().maxY)
     // Center verticalStack vertically at wantedMidY
     vstack.position = .zero
     let vstackY = round(wantedMidY - vstack.calculateAccumulatedFrame().midY)
@@ -130,6 +143,10 @@ class SettingsScene: BasicScene {
       audio.muted = false
       userDefaults.audioIsMuted.value = false
     }
+  }
+
+  func toggleRetro() {
+    userDefaults.retroMode.value = (retroButton.selectedValue == 1)
   }
 
   func showCredits() {

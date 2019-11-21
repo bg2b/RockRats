@@ -561,7 +561,7 @@ class GameScene: GameTutorialScene {
     name = "gameScene"
     initFutureShader()
     player = Ship(color: "blue", getJoystickDirection: { [unowned self] in return self.joystickDirection }, audio: audio)
-    setRetroMode(enabled: false)
+    setRetroMode(enabled: achievementIsCompleted(achievement: .blastFromThePast) && userDefaults.retroMode.value)
     physicsWorld.contactDelegate = self
   }
 
