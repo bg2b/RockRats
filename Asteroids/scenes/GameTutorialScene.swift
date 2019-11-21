@@ -305,7 +305,29 @@ class GameTutorialScene: BasicScene {
   /// Turn on the scene's special effects.  This is used in the game when retro mode
   /// is active.
   func setEffectsFilter(enabled: Bool) {
+    if enabled {
+      if let filter = CIFilter(name: "CICrystallize") {
+        filter.setValue(10, forKey: kCIInputRadiusKey)
+        gameArea.filter = filter
+        gameArea.shouldCenterFilter = true
+      } else {
+        gameArea.filter = nil
+      }
+    } else {
+      if let filter = CIFilter(name: "CIGaussianBlur") {
+        filter.setValue(10, forKey: kCIInputRadiusKey)
+        gameArea.filter = filter
+        gameArea.shouldCenterFilter = true
+      } else {
+        gameArea.filter = nil
+      }
+    }
     shouldEnableEffects = enabled
+  }
+
+  func setRetroMode(enabled: Bool) {
+    self.setEffectsFilter(enabled: enabled)
+    self.player.setAppearance(to: enabled ? .retro : .modern)
   }
 
   /// Handle the player's jump request.  They still need sufficient energy or they're
@@ -329,14 +351,12 @@ class GameTutorialScene: BasicScene {
       if blastFromThePast && !self.shouldEnableEffects {
         // Warping at a score ending in 79 (to honor Asteroid's 1979 release) turns
         // on retro mode.
-        self.setEffectsFilter(enabled: true)
-        self.player.setAppearance(to: .retro)
+        self.setRetroMode(enabled: true)
         reportAchievement(achievement: .blastFromThePast)
       } else if backToTheFuture && self.shouldEnableEffects {
         // Warping at a score ending in 88 (MPH) when in retro mode deactivates retro
         // and goes Back to the Future.
-        self.player.setAppearance(to: .modern)
-        self.setEffectsFilter(enabled: false)
+        self.setRetroMode(enabled: false)
         reportAchievement(achievement: .backToTheFuture)
       }
       self.audio.soundEffect(.warpIn, at: jumpPosition)

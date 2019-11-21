@@ -256,11 +256,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     }
     addChild(gameAreaCrop)
     gameArea.name = "gameArea"
-    if let filter = CIFilter(name: "CICrystallize") {
-      filter.setValue(10, forKey: kCIInputRadiusKey)
-      gameArea.filter = filter
-      gameArea.shouldCenterFilter = true
-    }
+    gameArea.filter = nil
     gameArea.shouldEnableEffects = false
     gameAreaCrop.addChild(gameArea)
     initBackground()
