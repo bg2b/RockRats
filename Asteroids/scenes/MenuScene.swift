@@ -12,6 +12,7 @@ import GameKit
 class MenuScene: BasicScene { //, GKGameCenterControllerDelegate {
   var shotsFired = [UFO: Int]()
   var getRidOfUFOs = false
+  var bubblesPopped = 0
   var menu: SKNode!
   var highScore: SKLabelNode!
   weak var gameCenterAuthVC: UIViewController? = nil
@@ -77,9 +78,22 @@ class MenuScene: BasicScene { //, GKGameCenterControllerDelegate {
     super.warpOutUFO(ufo)
   }
 
+  func poppedSomething() {
+    bubblesPopped += 1
+    if let gc = Globals.gcInterface, gc.enabled, bubblesPopped == 100 {
+      reportAchievement(achievement: .tooMuchTime)
+    }
+  }
+
+  func destroyAsteroid(_ asteroid: SKSpriteNode) {
+    splitAsteroid(asteroid)
+    poppedSomething()
+  }
+
   override func destroyUFO(_ ufo: UFO) {
     shotsFired.removeValue(forKey: ufo)
     super.destroyUFO(ufo)
+    poppedSomething()
   }
 
   func didBegin(_ contact: SKPhysicsContact) {
@@ -143,6 +157,7 @@ class MenuScene: BasicScene { //, GKGameCenterControllerDelegate {
     audio.muted = userDefaults.audioIsMuted.value
     Globals.gameConfig = loadGameConfig(forMode: "menu")
     Globals.gameConfig.currentWaveNumber = 1
+    bubblesPopped = 0
     highScore.text = "High Score: \(userDefaults.highScores.highest)"
     wait(for: 1) { self.spawnAsteroids() }
     getRidOfUFOs = false
@@ -175,15 +190,14 @@ class MenuScene: BasicScene { //, GKGameCenterControllerDelegate {
     physicsWorld.contactDelegate = self
     isUserInteractionEnabled = true
   }
-  
+
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     guard let touch = touches.first else { return }
     let location = touch.location(in: self)
     for touched in nodes(at: location) {
       guard let body = touched.physicsBody else { continue }
       if body.isA(.asteroid) {
-        splitAsteroid(touched as! SKSpriteNode)
-        return
+        destroyAsteroid(touched as! SKSpriteNode)
       } else if body.isA(.ufo) {
         destroyUFO(touched as! UFO)
       }

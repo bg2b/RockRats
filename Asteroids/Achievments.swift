@@ -26,6 +26,7 @@ enum Achievement: String, CaseIterable {
   case whatAreTheOdds = "whatAreTheOdds"
   case keepOnTrekking = "keepOnTrekking"
   case bestServedCold = "bestServedCold"
+  case tooMuchTime = "tooMuchTime"
   case promoted = "promoted"
   // Normal
   // The first of these should be useTheSource, since finding the set of hidden
