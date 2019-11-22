@@ -21,6 +21,7 @@ func abbreviatedName(_ playerName: String) -> String {
 
 class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
   var scores: SKNode!
+  var gcButton: Button!
   var showingGCVC = false
   var newGame: GameScene? = nil
 
@@ -118,12 +119,13 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     menuButton.position = CGPoint(x: playButton.position.x - buttonSize.width - buttonSpacing, y: playButton.position.y)
     menuButton.action = { [unowned self] in self.mainMenu() }
     scores.addChild(menuButton)
-    let gcButton = Button(imageNamed: "gamecenterbutton", imageColor: .white, size: buttonSize)
+    gcButton = Button(imageNamed: "gamecenterbutton", imageColor: .white, size: buttonSize)
     gcButton.position = CGPoint(x: playButton.position.x + buttonSize.width + buttonSpacing, y: playButton.position.y)
     gcButton.action = { [unowned self] in self.showGameCenter() }
     if !Globals.gcInterface.enabled {
       gcButton.disable()
     }
+    NotificationCenter.default.addObserver(self, selector: #selector(gcStateChanged), name: .authenticationChanged, object: nil)
     scores.addChild(gcButton)
     let highScores = highScoreLines(highScores, highlighted: highlighted)
     let wantedMidY = 0.5 * (title.frame.minY + playButton.calculateAccumulatedFrame().maxY)
@@ -140,6 +142,15 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
 
   func mainMenu() {
     showWhenQuiescent(Globals.menuScene)
+  }
+
+  @objc func gcStateChanged(_ notification: Notification) {
+    logging("High score scene got notification of Game Center state change")
+    if notification.object as? Bool ?? false {
+      gcButton.enable()
+    } else {
+      gcButton.disable()
+    }
   }
 
   /// Enforce pausing when showing the Game Center view controller.

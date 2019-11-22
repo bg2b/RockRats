@@ -49,13 +49,24 @@ class GameCenterInterface {
   var lastPlayerID: String? = nil
   /// A set of all the valid achievement identifiers, retrieved from Game Center.
   var achievementIdentifiers: Set<String>? = nil
+  /// The identifiers of all the local player's achievements and their completion
+  /// percentages as retrieved from Game Center.  If the player has zero percent on
+  /// some achievement, it's not in the dictionary.
   var playerAchievements = [String: Double]()
+  /// Used to record the percent progress of the player towards levelled achievements
+  /// when playing.  Flushed to Game Center if their progress reaches 100%, and also
+  /// flushed at the end of a game.
   var playerAchievementsProgress = [String: Double]()
+  /// The local player's score and rank from a leaderboard fetch
   var localPlayerScore: GKScore? = nil
+  /// Scores retrieved from Game Center from a leaderboard fetch
   var leaderboardScores = [GKScore]()
 
+  /// Is Game Center enabled (i.e., there's an authenticated local player)?
   var enabled: Bool { GKLocalPlayer.local.isAuthenticated }
+  /// The primary ID of the authenticated player (valid when `enabled`)
   var primaryPlayerID: String { GKLocalPlayer.local.primaryPlayerID }
+  /// The alternate ID (if any) of the authenticated player (if any).
   var alternatePlayerID: String? { GKLocalPlayer.local.alternatePlayerID }
 
   init(leaderboardID: String, presenter: @escaping (UIViewController?) -> Void) {
@@ -90,6 +101,7 @@ class GameCenterInterface {
         self.localPlayerScore = nil
         self.leaderboardScores.removeAll()
       }
+      NotificationCenter.default.post(name: .authenticationChanged, object: self.enabled)
     }
     logging("GameCenterInterface init finishes")
   }
@@ -282,4 +294,12 @@ class GameCenterInterface {
       }
     }
   }
+}
+
+extension Notification.Name {
+  /// A notification that gets posted whenever the Game Center authentication state
+  /// changes.  If a scene includes stuff like buttons that should be enabled only
+  /// when Game Center is enabled, then the scene should register for this
+  /// notification.
+  static let authenticationChanged = Notification.Name("gcInterfaceAuthenticationChanged")
 }

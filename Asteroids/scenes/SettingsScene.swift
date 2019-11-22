@@ -11,6 +11,7 @@ import SpriteKit
 class SettingsScene: BasicScene {
   var muteButton: Button!
   var retroButton: Button!
+  var resetAchievementsButton: Button!
 
   func initSettings() {
     let settings = SKNode()
@@ -91,13 +92,14 @@ class SettingsScene: BasicScene {
     resetScoresButton.position = CGPoint(x: 0, y: nextButtonY)
     nextButtonY -= resetScoresButton.calculateAccumulatedFrame().height + 0.5 * buttonSpacing
     vstack.addChild(resetScoresButton)
-    let resetAchievementsButton = Button(forText: "Reset Achievements", confirmText: "Confirm Reset", fontSize: buttonFontSize, size: textButtonSize)
+    resetAchievementsButton = Button(forText: "Reset Achievements", confirmText: "Confirm Reset", fontSize: buttonFontSize, size: textButtonSize)
     resetAchievementsButton.name = "resetAchievementsButton"
     resetAchievementsButton.action = { [unowned self] in self.resetAchievements() }
     resetAchievementsButton.position = CGPoint(x: 0, y: nextButtonY)
     if !Globals.gcInterface.enabled {
       resetAchievementsButton.disable()
     }
+    NotificationCenter.default.addObserver(self, selector: #selector(gcStateChanged), name: .authenticationChanged, object: nil)
     vstack.addChild(resetAchievementsButton)
     let wantedMidY = 0.5 * (title.frame.minY + bottomButtons.calculateAccumulatedFrame().maxY)
     // Center verticalStack vertically at wantedMidY
@@ -168,6 +170,15 @@ class SettingsScene: BasicScene {
       userDefaults.ufosDestroyedCounter.value = -1
       userDefaults.asteroidsDestroyedCounter.value = -1
       logging("Achievements reset")
+    }
+  }
+
+  @objc func gcStateChanged(_ notification: Notification) {
+    logging("Settings scene got notification of Game Center state change")
+    if notification.object as? Bool ?? false {
+      resetAchievementsButton.enable()
+    } else {
+      resetAchievementsButton.disable()
     }
   }
 
