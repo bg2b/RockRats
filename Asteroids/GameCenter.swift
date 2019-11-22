@@ -87,13 +87,13 @@ class GameCenterInterface {
           }
         }
         if self.primaryPlayerID != self.lastPlayerID {
-          setCurrentPlayer(self.primaryPlayerID, playerName: GKLocalPlayer.local.displayName, alternatePlayerID: self.alternatePlayerID)
           self.playerAchievements.removeAll()
           self.playerAchievementsProgress.removeAll()
           self.lastPlayerID = self.primaryPlayerID
           self.localPlayerScore = nil
           self.leaderboardScores.removeAll()
         }
+        setCurrentPlayer(self.primaryPlayerID, playerName: GKLocalPlayer.local.displayName, alternatePlayerID: self.alternatePlayerID)
         self.loadPlayerAchievements()
         self.loadLeaderboards()
       } else {
