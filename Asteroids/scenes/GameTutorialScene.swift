@@ -22,9 +22,8 @@ class GameTutorialScene: BasicScene {
   var quitButton: Button!
   /// The player's spaceship
   var player: Ship!
-  /// Points earned
-  /// - This is in GameTutorialScene only because hyperspaceJump() refer to it.  See
-  /// - the comments there.
+  /// Points earned; this is in GameTutorialScene only because `hyperspaceJump()`
+  /// refers to it.  See the comments there.
   var score = 0
   /// The display of the number of reserve ships
   var livesDisplay: LivesDisplay!
