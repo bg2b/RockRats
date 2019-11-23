@@ -45,6 +45,10 @@ class GameTutorialScene: BasicScene {
     isUserInteractionEnabled = true
   }
 
+  /// Handle the start of touches to control the ship
+  /// - Parameters:
+  ///   - touches: The new touches
+  ///   - event: The event the touches belong to
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     // Ignore new touches when the game is paused.
     guard !gamePaused else { return }
@@ -72,6 +76,10 @@ class GameTutorialScene: BasicScene {
     return (touch.location(in: self) - startLocation).norm2() > Globals.ptsToGameUnits * 100
   }
 
+  /// Handle moving touches for the ship controls
+  /// - Parameters:
+  ///   - touches: The touches that moved
+  ///   - event: The event the touches belong to
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
     // Ignore any touch movements when the game is paused.
     guard !gamePaused else { return }
@@ -95,6 +103,10 @@ class GameTutorialScene: BasicScene {
     }
   }
 
+  /// Handle the end of touches for the ship controls
+  /// - Parameters:
+  ///   - touches: The touches that finished
+  ///   - event: The event the touches belong to
   override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
     // Don't guard at the beginning with gamePaused.  A touch that started while the
     // game was active should still be removed from what I'm tracking if the player
@@ -118,6 +130,10 @@ class GameTutorialScene: BasicScene {
     }
   }
 
+  /// Handle touches interrupted by something like a phone call
+  /// - Parameters:
+  ///   - touches: The touches to be cancelled
+  ///   - event: The event the touches belong to
   override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
     touchesEnded(touches, with: event)
   }
@@ -237,8 +253,8 @@ class GameTutorialScene: BasicScene {
   /// - Parameters:
   ///   - point: Candidate spawn
   ///   - time: Desired amount of safe time
-  /// - Returns: true if they won't get creamed by an asteroid within that amount of
-  ///   time
+  /// - Returns: `true` if the player won't get creamed by an asteroid within that
+  ///   amount of time
   func isSafe(point: CGPoint, forDuration time: CGFloat) -> Bool {
     // time == 0 means I've tried and tried to find a safe spot, but there are just
     // way too many asteroids.  In that case, say that the point is safe and let them
@@ -301,9 +317,14 @@ class GameTutorialScene: BasicScene {
     removeLaser(laser)
   }
 
-  /// Turn on the scene's special effects.  This is used in the game when retro mode
-  /// is active.
-  func setEffectsFilter(enabled: Bool) {
+  /// Turn on/off the scene's special retro effects shader
+  ///
+  /// Turning on retro also changes the filter used in the game area when the scene
+  /// is paused, since the standard Gaussian blur doesn't work well with retro mode's
+  /// edge-detect shader.
+  ///
+  /// - Parameter enabled: `true` to enable retro mode
+  func setRetroFilter(enabled: Bool) {
     if enabled {
       if let filter = CIFilter(name: "CICrystallize") {
         filter.setValue(10, forKey: kCIInputRadiusKey)
@@ -324,8 +345,18 @@ class GameTutorialScene: BasicScene {
     shouldEnableEffects = enabled
   }
 
+  /// Turn on/off retro mode
+  ///
+  /// Retro mode happens when the player jumps to hyperspace while on a score that
+  /// ends in 79 (in honor of the 1979 release of the original Asteroids game).
+  /// Retro mode involves two changes:
+  /// 1. The ship is changed to look something like the original Asteroids game.
+  /// 2. The scene's shader is turned on, which switches to a black-and-white edge
+  /// detect filter that tries to mimic the look of the original game.
+  ///
+  /// - Parameter enabled: `true` to enable retro mode
   func setRetroMode(enabled: Bool) {
-    self.setEffectsFilter(enabled: enabled)
+    self.setRetroFilter(enabled: enabled)
     self.player.setAppearance(to: enabled ? .retro : .modern)
   }
 
@@ -371,6 +402,8 @@ class GameTutorialScene: BasicScene {
     wait(for: 0.5) { self.replenishEnergy() }
   }
 
+  /// Make a game or tutorial scene of a given size
+  /// - Parameter size: The size of the scene
   override init(size: CGSize) {
     super.init(size: size)
     name = "gameTutorialScene"
@@ -384,12 +417,16 @@ class GameTutorialScene: BasicScene {
     super.init(coder: aDecoder)
   }
 
+  /// Clean up a game or tutorial scene
+  ///
+  /// The scene is leaving its view and will be destroyed in a moment.  If this is
+  /// happening because of doQuit, then the scene may be in a complicated state that
+  /// I can't easily characterize.  So I force things into a state where the scene
+  /// can get garbage collected cleanly.
+  ///
+  /// - Parameter view: The view that the scene is leaving
   override func willMove(from view: SKView) {
     super.willMove(from: view)
-    // The scene is leaving its view and will be destroyed in a moment.  If this is
-    // happening because of doQuit, then the scene may be in a complicated state that
-    // I can't easily characterize.  So I force things into a state where the scene
-    // can get garbage collected cleanly.
     cleanup()
     logging("\(name!) finished willMove from view")
   }
