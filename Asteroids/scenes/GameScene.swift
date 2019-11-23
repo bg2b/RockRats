@@ -8,6 +8,7 @@
 
 import SpriteKit
 
+/// A score associated with a hidden achievement
 struct SpecialScore {
   let score: Int
   let display: String
