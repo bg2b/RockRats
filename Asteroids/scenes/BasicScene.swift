@@ -859,7 +859,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   ///
   /// This is used by `switchToScene(sceneCreation:)` and typically not called
   /// directly, but you can use `makeSceneInBackground(sceneCreation:)` if you want
-  /// to kick off the scene creation separatedly from the wait-and-transition.
+  /// to kick off the scene creation separately from the wait-and-transition.
   func switchWhenReady() {
     if let nextScene = nextScene {
       wait(for: 0.25) {
