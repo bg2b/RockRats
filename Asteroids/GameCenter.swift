@@ -76,7 +76,8 @@ class GameCenterInterface {
   /// - Parameters:
   ///   - leaderboardID: The app's one-and-only leaderboard identifier
   ///   - presenter: A closure that should receive Game Center's authentication view controller
-  init(leaderboardID: String, presenter: @escaping (UIViewController?) -> Void) {
+  ///   - gcvc: Show this view controller to authenticate to Game Center, `nil` means don't show anything
+  init(leaderboardID: String, presenter: @escaping (_ gcvc: UIViewController?) -> Void) {
     self.leaderboardID = leaderboardID
     self.presenter = presenter
     logging("GameCenterInterface init starts")

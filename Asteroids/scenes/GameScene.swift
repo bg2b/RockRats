@@ -519,7 +519,6 @@ class GameScene: GameTutorialScene {
     super.didMove(to: view)
     joystickTouch = nil
     fireOrWarpTouches.removeAll()
-    clearPlayfield()
     Globals.gameConfig = loadGameConfig(forMode: "normal")
     Globals.gameConfig.currentWaveNumber = 0
     score = 0

@@ -548,7 +548,6 @@ class TutorialScene: GameTutorialScene {
     super.didMove(to: view)
     joystickTouch = nil
     fireOrWarpTouches.removeAll()
-    clearPlayfield()
     energyBar.isHidden = true
     livesDisplay.isHidden = true
     Globals.gameConfig = loadGameConfig(forMode: "normal")
