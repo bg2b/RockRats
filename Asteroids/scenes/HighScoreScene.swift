@@ -272,6 +272,9 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     // Merge in scores from Game Center, if those are available
     if let gc = Globals.gcInterface, gc.enabled, !gc.leaderboardScores.isEmpty {
       var ranks = Array(1 ... gc.leaderboardScores.count)
+      // The scores from the weekly leaderboard at positions indicated by ranks will
+      // be included in the display.  I'll show up to three scores from the
+      // leaderboard.
       if gc.leaderboardScores.count >= 4 {
         ranks = [1, 2, 4]
         if gc.leaderboardScores.count >= 5 {
