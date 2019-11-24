@@ -219,9 +219,13 @@ var userDefaults = SavedUserData()
 
 /// Save a name to be displayed for the given player ID.  These are used by
 /// HighScores when it returns a list of the high scores for local players.
+///
+/// I originally was using `displayName` instead of `alias`, and an argument could be
+/// made for that, but under iOS 12, the "Me" for display name is kind of ugly.
+///
 /// - Parameters:
 ///   - playerID: The player ID from Game Center
-///   - playerName: The name to be shown (i.e. displayName in the GKPlayer structure)
+///   - playerName: The name to be shown (the `alias` in the `GKPlayer` structure)
 func savePlayerName(_ playerID: String, playerName: String) {
   userDefaults.playerNames.value[playerID] = playerName
 }
@@ -229,7 +233,7 @@ func savePlayerName(_ playerID: String, playerName: String) {
 /// Called by the Game Center interface when a new player authenticates.
 /// - Parameters:
 ///   - playerID: ID for the player that just logged in
-///   - playerName: The name that should be used for the player (their displayName)
+///   - playerName: The name that should be used for the player (their alias)
 ///   - alternatePlayerID: An optional alternate ID that should be saved for
 ///     transitioning persistent state when the deprecated GKPlayer playerID is no
 ///     longer available

@@ -29,10 +29,18 @@ struct GameScore: Equatable {
     date = Date().timeIntervalSinceReferenceDate
   }
 
+  /// - Todo:
+  ///   Check what happens if displayName is nil and the alias in the score has
+  ///   characters that aren't in our font.
   init(score: GKScore, displayName: String? = nil) {
     playerID = score.player.primaryPlayerID
-    // Old Game Center likes to put quotes around names, and in general just nuke anything that's non-ASCII
-    playerName = displayName ?? String(score.player.displayName.filter { $0.isASCII })
+    // I'm deliberately using alias instead of displayName because I don't like iOS
+    // 12's "Me".
+    // Originalyy I was using the displayName and filtering it like this
+    //   String(score.player.displayName.filter { $0.isASCII })
+    // with the filtering necessary to get rid of iOS 12's quote marks.  Should
+    // filtering still be used?
+    playerName = displayName ?? score.player.alias
     points = Int(score.value)
     date = score.date.timeIntervalSinceReferenceDate
   }

@@ -9,39 +9,53 @@
 import SpriteKit
 import AVFoundation
 
+/// The scene for displaying the app's introduction
+///
+/// This is the first screen shown.  It consists of an "incoming transmission...", a
+/// message header, and a message body.  The same scene is used (with different text)
+/// for the concluding screen when they're promoted to Lt Commander.
 class IntroScene: BasicScene {
+  /// `true` if this is the conclusion scene instead of the intro scene
   let conclusion: Bool
+  /// Attributes for the text being displayed
   let attributes = AttrStyles(fontName: AppColors.font, fontSize: 40)
+  /// The initial "standby" part of the message
   let standBy = """
-  Incoming transmission...
-  Please stand by.
-  """
+    Incoming transmission...
+    Please stand by.
+    """
+  /// The header of the message
   let messageHeader: String
+  /// The body of the message
   let introduction: String
+  /// The label that displays the initial "incoming..." and the header
   var incomingLabel: SKLabelNode!
+  /// The label that displays the main text (initially hidden)
   var introLabel: SKLabelNode!
+  /// The button used to move on to the next scene
   var doneButton: Button!
+  /// Some background sounds that are supposed to indicate data transmission
   var transmissionSounds: ContinuousPositionalAudio!
 
+  /// Create the stuff in the introduction scene
   func initIntro() {
     let intro = SKNode()
     intro.name = "intro"
     intro.setZ(.info)
     addChild(intro)
-    // It seems that numberOfLines needs to be set to something just to do the word
-    // breaking on SKLabelNodes.  The value doesn't really matter though, and we'll
-    // adjust the position of the node after computing sizes.
+    // Incoming transmission... and message header are narrow
     incomingLabel = SKLabelNode(attributedText: makeAttributed(text: standBy, until: standBy.startIndex, attributes: attributes))
-    incomingLabel.numberOfLines = 5
+    // 0 means multi-line
+    incomingLabel.numberOfLines = 0
     incomingLabel.lineBreakMode = .byWordWrapping
     incomingLabel.preferredMaxLayoutWidth = 600
     incomingLabel.horizontalAlignmentMode = .center
     incomingLabel.verticalAlignmentMode = .center
     incomingLabel.position = CGPoint(x: gameFrame.midX, y: 0)
     intro.addChild(incomingLabel)
-    //incomingLabel.isHidden = true
+    // The main label that shows everything else is wider
     introLabel = SKLabelNode(attributedText: makeAttributed(text: introduction, until: introduction.startIndex, attributes: attributes))
-    introLabel.numberOfLines = 2
+    introLabel.numberOfLines = 0
     introLabel.lineBreakMode = .byWordWrapping
     introLabel.preferredMaxLayoutWidth = 900
     introLabel.horizontalAlignmentMode = .center
@@ -49,6 +63,7 @@ class IntroScene: BasicScene {
     introLabel.position = CGPoint(x: gameFrame.midX, y: 0)
     intro.addChild(introLabel)
     introLabel.isHidden = true
+    // The button that ends the scene
     doneButton = Button(forText: (!conclusion ? "Find Out" : "Acknowledge"), fontSize: 50, size: CGSize(width: 350, height: 50))
     doneButton.position = CGPoint(x: fullFrame.midX, y: 0)
     doneButton.action = { [unowned self] in self.done() }
@@ -66,17 +81,20 @@ class IntroScene: BasicScene {
     introLabel.position = introLabel.position + CGVector(dx: 0, dy: desiredTopY - introFrame.maxY)
     // Put the bottom of the button at desiredBottomY
     doneButton.position = doneButton.position + CGVector(dx: 0, dy: desiredBottomY - goFrame.minY)
+    // Sounds that get modulated by the type-in effect of the labels
     transmissionSounds = audio.continuousAudio(.transmission, at: self)
     transmissionSounds.playerNode.volume = 0
     transmissionSounds.playerNode.play()
   }
 
+  /// Displays "Incoming transmission..."
   func incoming() {
     incomingLabel.typeIn(text: standBy, attributes: attributes, sounds: transmissionSounds) {
       self.wait(for: 3) { self.header() }
     }
   }
 
+  /// Displays the message header
   func header() {
     incomingLabel.typeIn(text: messageHeader, attributes: attributes, sounds: transmissionSounds) {
       self.wait(for: 5) {
@@ -86,6 +104,7 @@ class IntroScene: BasicScene {
     }
   }
 
+  /// Displays the main part of the message
   func intro() {
     introLabel.isHidden = false
     introLabel.typeIn(text: introduction, attributes: attributes, sounds: transmissionSounds) {
@@ -93,20 +112,25 @@ class IntroScene: BasicScene {
     }
   }
 
+  /// Handles clicks of the done button
   func done() {
     if userDefaults.hasDoneIntro.value {
+      // They're just replaying the intro (or conclusion) from the settings
       if conclusion {
         makeSceneInBackground { CreditsScene(size: self.fullFrame.size) }
       } else {
         nextScene = Globals.menuScene
       }
     } else {
+      // First time the game has launched, take them through the tutorial
       makeSceneInBackground { TutorialScene(size: self.fullFrame.size) }
     }
     userDefaults.hasDoneIntro.value = true
     switchWhenReady()
   }
 
+  /// Kick off the introduction
+  /// - Parameter view: The view that will display the scene
   override func didMove(to view: SKView) {
     super.didMove(to: view)
     wait(for: 1) {
@@ -115,13 +139,20 @@ class IntroScene: BasicScene {
     logging("\(name!) finished didMove to view")
   }
 
+  /// Nothing to see here
+  /// - Parameter currentTime: The current game time
   override func update(_ currentTime: TimeInterval) {
     super.update(currentTime)
   }
 
+  /// Create an intro or conclusion scene
+  /// - Parameters:
+  ///   - size: The size of the scene
+  ///   - conclusion: `true` for the conclusion, `false` for the introduction
   init(size: CGSize, conclusion: Bool) {
     self.conclusion = conclusion
     if !conclusion {
+      // They're a new recruit...
       messageHeader = """
       From: @Lt Cmdr Ivanova@
         Sector Head
@@ -138,8 +169,8 @@ class IntroScene: BasicScene {
       have what it takes to become one of us, the @Rock Rats@?
       """
     } else {
-      let playerID = userDefaults.currentPlayerID.value
-      let playerName = userDefaults.playerNames.value[playerID] ?? "Anonymous"
+      // They got promoted...
+      let playerName = Globals.gcInterface.playerName
       messageHeader = """
       From: @Cmdr Ivanova@
         Outgoing Sector Head
@@ -153,7 +184,7 @@ class IntroScene: BasicScene {
       could make it as a @Rock Rat@. That confidence was justified, and then some. \
       Now you face a @new challenge@, training the next generation of superstar \
       pilots. You're probably nervous - I was when I got the job - but I'm sure \
-      you'll make it look easy. Best wishes commander, and keep the @Rock Rat@ \
+      you'll make it look easy. Best wishes Lt Commander, and keep the @Rock Rat@ \
       spirit strong!
       """
     }

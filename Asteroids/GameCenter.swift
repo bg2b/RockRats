@@ -70,7 +70,8 @@ class GameCenterInterface {
   var primaryPlayerID: String { GKLocalPlayer.local.primaryPlayerID }
   /// The alternate ID (if any) of the authenticated player (if any).
   var alternatePlayerID: String? { GKLocalPlayer.local.alternatePlayerID }
-
+  /// This is the name to address the player by
+  var playerName: String { enabled ? GKLocalPlayer.local.alias : "Anonymous" }
 
   /// Initialize the Game Center interface.  This should be a singleton
   /// - Parameters:
@@ -101,7 +102,9 @@ class GameCenterInterface {
           self.localPlayerScore = nil
           self.leaderboardScores.removeAll()
         }
-        setCurrentPlayer(self.primaryPlayerID, playerName: GKLocalPlayer.local.displayName, alternatePlayerID: self.alternatePlayerID)
+        // I use alias instead of displayName deliberately, since I don't like the
+        // display name of "Me" from iOS 12.
+        setCurrentPlayer(self.primaryPlayerID, playerName: GKLocalPlayer.local.alias, alternatePlayerID: self.alternatePlayerID)
         self.loadPlayerAchievements()
         self.loadLeaderboards()
       } else {
@@ -332,7 +335,7 @@ class GameCenterInterface {
     if let score = score {
       let player = score.player
       let valid = scoreIsValid(score) ? "valid" : "invalid"
-      logging("player \(player.displayName), score \(score.value), date \(score.date), rank \(score.rank), \(valid)")
+      logging("player \(player.alias), score \(score.value), date \(score.date), rank \(score.rank), \(valid)")
     } else {
       logging("none")
     }
