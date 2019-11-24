@@ -10,12 +10,14 @@ import SpriteKit
 
 /// Game credits and acknowledgements
 class CreditsScene: BasicScene {
+  /// Build the stuff in the scene
   func initCredits() {
     let attributes = AttrStyles(fontName: AppColors.font, fontSize: 40)
     let credits = SKNode()
     credits.name = "credits"
     credits.setZ(.info)
     addChild(credits)
+    // Title
     let title = SKLabelNode(fontNamed: AppColors.font)
     title.fontSize = 100
     title.fontColor = AppColors.highlightTextColor
@@ -23,6 +25,7 @@ class CreditsScene: BasicScene {
     title.verticalAlignmentMode = .center
     title.position = CGPoint(x: fullFrame.midX, y: fullFrame.maxY - title.fontSize)
     credits.addChild(title)
+    // Buttons at the bottom
     let buttonSize = CGSize(width: 150, height: 100)
     let buttonSpacing = CGFloat(20)
     let buttonY = fullFrame.minY + buttonSize.height + buttonSpacing
@@ -38,8 +41,12 @@ class CreditsScene: BasicScene {
     settingsButton.position = CGPoint(x: playButton.position.x + buttonSize.width + buttonSpacing, y: playButton.position.y)
     settingsButton.action = { [unowned self] in self.showSettings() }
     credits.addChild(settingsButton)
+    // The actual credits in the center
     let creditsLabels = SKNode()
     creditsLabels.name = "creditsLabels"
+    // There are several sections, and I want more control over the spacing between
+    // sections than is obtained by making one big label with some line breaks, so
+    // I'll make one label per section instead.
     let creditsText = [
     """
     Designed & Programmed by
@@ -77,27 +84,36 @@ class CreditsScene: BasicScene {
     credits.addChild(creditsLabels)
   }
 
+  /// Start a new game
   func startGame() {
     switchToScene { return GameScene(size: self.fullFrame.size) }
   }
 
+  /// Switch back to the main menu
   func mainMenu() {
     showWhenQuiescent(Globals.menuScene)
   }
 
+  /// Show the game settings
   func showSettings() {
     switchToScene { SettingsScene(size: self.fullFrame.size) }
   }
 
+  /// Nothing much to see here
+  /// - Parameter view: The view that the scene is moving to
   override func didMove(to view: SKView) {
     super.didMove(to: view)
     logging("\(name!) finished didMove to view")
   }
 
+  /// Just the stars twinkling in the background
+  /// - Parameter currentTime: The current game time
   override func update(_ currentTime: TimeInterval) {
     super.update(currentTime)
   }
 
+  /// Make a new scene to display the credits
+  /// - Parameter size: The size of the scene
   override init(size: CGSize) {
     super.init(size: size)
     name = "creditsScene"

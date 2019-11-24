@@ -8,9 +8,12 @@
 
 import SpriteKit
 
-/// Things common to game and tutorial (but not in the BasicScene superclass), like
-/// the player's ship and controls, the remaining ships display, and the energy
-/// reserve display.  Also handles game pausing and resuming/quitting.
+/// Things common to game and tutorial (but not in the BasicScene superclass)
+///
+/// This scene includes the player's ship and controls, the remaining ships display,
+/// and the energy reserve display.  Also handles game pausing and resuming/quitting,
+/// and the special retro mode (though retro mode never gets enabled in the
+/// tutorial).
 class GameTutorialScene: BasicScene {
   /// Set to true when the pause button is pressed
   var gamePaused = false
