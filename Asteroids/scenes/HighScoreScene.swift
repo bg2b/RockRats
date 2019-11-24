@@ -245,28 +245,16 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     super.update(currentTime)
   }
 
-  /// Construct a high score display scene; don't call this, but use the convenience
-  /// init below.
-  /// - Parameter size: The size of the scene
-  override init(size: CGSize) {
-    super.init(size: size)
-    name = "highScoreScene"
-    initGameArea(avoidSafeArea: false)
-    physicsWorld.contactDelegate = self
-  }
-
-  required init(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented by HighScoreScene")
-  }
-
   /// Construct a new high score scene
   /// - Parameters:
   ///   - size: The size of the scene
   ///   - score: The score of the just-played game (or `nil` if the previous scene
   ///     was the main menu)
-  convenience init(size: CGSize, score: GameScore?) {
-    // Construct the scene's skeleton
-    self.init(size: size)
+  init(size: CGSize, score: GameScore?) {
+    super.init(size: size)
+    name = "highScoreScene"
+    initGameArea(avoidSafeArea: false)
+    physicsWorld.contactDelegate = self
     // Start with the local high scores
     var highScores = userDefaults.highScores.value
     // Merge in scores from Game Center, if those are available
@@ -331,5 +319,9 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     }
     // Display the top ten combined scores
     initScores(score: score, highScores: Array(highScores.prefix(10)))
+  }
+
+  required init(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented by HighScoreScene")
   }
 }
