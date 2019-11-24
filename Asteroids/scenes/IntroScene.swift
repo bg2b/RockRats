@@ -139,8 +139,6 @@ class IntroScene: BasicScene {
     logging("\(name!) finished didMove to view")
   }
 
-  /// Nothing to see here
-  /// - Parameter currentTime: The current game time
   override func update(_ currentTime: TimeInterval) {
     super.update(currentTime)
   }

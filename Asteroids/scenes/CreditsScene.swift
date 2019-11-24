@@ -29,14 +29,17 @@ class CreditsScene: BasicScene {
     let buttonSize = CGSize(width: 150, height: 100)
     let buttonSpacing = CGFloat(20)
     let buttonY = fullFrame.minY + buttonSize.height + buttonSpacing
+    // New game
     let playButton = Button(imageNamed: "playbutton", imageColor: AppColors.green, size: buttonSize)
     playButton.position = CGPoint(x: fullFrame.midX, y: buttonY)
     playButton.action = { [unowned self] in self.startGame() }
     credits.addChild(playButton)
+    // Main menu
     let menuButton = Button(imageNamed: "homebutton", imageColor: AppColors.blue, size: buttonSize)
     menuButton.position = CGPoint(x: playButton.position.x - buttonSize.width - buttonSpacing, y: playButton.position.y)
     menuButton.action = { [unowned self] in self.mainMenu() }
     credits.addChild(menuButton)
+    // Settings screen
     let settingsButton = Button(imageNamed: "settingsbutton", imageColor: AppColors.blue, size: buttonSize)
     settingsButton.position = CGPoint(x: playButton.position.x + buttonSize.width + buttonSpacing, y: playButton.position.y)
     settingsButton.action = { [unowned self] in self.showSettings() }
@@ -99,15 +102,11 @@ class CreditsScene: BasicScene {
     switchToScene { SettingsScene(size: self.fullFrame.size) }
   }
 
-  /// Nothing much to see here
-  /// - Parameter view: The view that the scene is moving to
   override func didMove(to view: SKView) {
     super.didMove(to: view)
     logging("\(name!) finished didMove to view")
   }
 
-  /// Just the stars twinkling in the background
-  /// - Parameter currentTime: The current game time
   override func update(_ currentTime: TimeInterval) {
     super.update(currentTime)
   }

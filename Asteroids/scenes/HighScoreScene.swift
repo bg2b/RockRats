@@ -149,14 +149,17 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     let buttonSize = CGSize(width: 150, height: 100)
     let buttonSpacing = CGFloat(20)
     let buttonY = fullFrame.minY + buttonSize.height + buttonSpacing
+    // New game
     let playButton = Button(imageNamed: "playbutton", imageColor: AppColors.green, size: buttonSize)
     playButton.position = CGPoint(x: fullFrame.midX, y: buttonY)
     playButton.action = { [unowned self] in self.startGame() }
     scores.addChild(playButton)
+    // Main menu
     let menuButton = Button(imageNamed: "homebutton", imageColor: AppColors.blue, size: buttonSize)
     menuButton.position = CGPoint(x: playButton.position.x - buttonSize.width - buttonSpacing, y: playButton.position.y)
     menuButton.action = { [unowned self] in self.mainMenu() }
     scores.addChild(menuButton)
+    // Go the the Game Center interface
     gcButton = Button(imageNamed: "gamecenterbutton", imageColor: .white, size: buttonSize)
     gcButton.position = CGPoint(x: playButton.position.x + buttonSize.width + buttonSpacing, y: playButton.position.y)
     gcButton.action = { [unowned self] in self.showGameCenter() }

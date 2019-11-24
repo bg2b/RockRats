@@ -73,16 +73,19 @@ class MenuScene: BasicScene {
     let buttonSize = CGSize(width: 150, height: 100)
     let buttonSpacing = CGFloat(20)
     let buttonY = fullFrame.minY + buttonSize.height + buttonSpacing
+    // New gamee
     let playButton = Button(imageNamed: "playbutton", imageColor: AppColors.green, size: buttonSize)
     playButton.position = CGPoint(x: fullFrame.midX, y: buttonY)
     playButton.action = { [unowned self] in self.startGame() }
     buttons.append(playButton)
     menu.addChild(playButton)
+    // High scores
     let highScoresButton = Button(imageNamed: "highscoresbutton", imageColor: AppColors.blue, size: buttonSize)
     highScoresButton.position = CGPoint(x: playButton.position.x + buttonSize.width + buttonSpacing, y: playButton.position.y)
     highScoresButton.action = { [unowned self] in self.showHighScores() }
     buttons.append(highScoresButton)
     menu.addChild(highScoresButton)
+    // Settings
     let settingsButton = Button(imageNamed: "settingsbutton", imageColor: AppColors.blue, size: buttonSize)
     settingsButton.position = CGPoint(x: playButton.position.x - buttonSize.width - buttonSpacing, y: playButton.position.y)
     settingsButton.action = { [unowned self] in self.showSettings() }
@@ -198,7 +201,8 @@ class MenuScene: BasicScene {
   /// This method just stores the view controller.  When the menu scene is shown and
   /// the stored view controller isn't `nil`, then it will be presented.
   ///
-  /// - Parameter viewController: A view controller to show for authentication, `nil` if nothing to show
+  /// - Parameter viewController: A view controller to show for authentication, `nil`
+  ///   if nothing to show
   func setGameCenterAuth(viewController: UIViewController?) {
     gameCenterAuthVC = viewController
     if gameCenterAuthVC == nil {
