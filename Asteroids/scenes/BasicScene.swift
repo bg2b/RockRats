@@ -834,7 +834,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   ///   - duration: Optional amount of time for the transition
   func switchScene(to newScene: SKScene, withDuration duration: Double = 1) {
     logging("\(name!) switchScene to \(newScene.name!)")
-    let transition = SKTransition.fade(with: AppColors.transitionColor, duration: duration)
+    let transition = SKTransition.fade(with: AppAppearance.transitionColor, duration: duration)
     newScene.removeAllActions()
     logging("\(name!) about to call presentScene")
     view?.presentScene(newScene, transition: transition)

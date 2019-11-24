@@ -90,7 +90,7 @@
 		FDC6A7FC2334E054001A4774 /* EnergyBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDC6A7FB2334E054001A4774 /* EnergyBar.swift */; };
 		FDCF8CA322DA175F008EDFD1 /* CGHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDCF8CA222DA175F008EDFD1 /* CGHelpers.swift */; };
 		FDCF8CA522DA7296008EDFD1 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDCF8CA422DA7296008EDFD1 /* Globals.swift */; };
-		FDD44F932336113F00C13609 /* AppColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD44F922336113F00C13609 /* AppColors.swift */; };
+		FDD44F932336113F00C13609 /* AppAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD44F922336113F00C13609 /* AppAppearance.swift */; };
 		FDD44F95233787ED00C13609 /* IntroScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD44F94233787ED00C13609 /* IntroScene.swift */; };
 		FDD44F972338C60700C13609 /* transmission.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDD44F962338C60700C13609 /* transmission.wav */; };
 		FDD831F222EDB50200CA4EC6 /* Explosions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD831F122EDB50200CA4EC6 /* Explosions.swift */; };
@@ -207,7 +207,7 @@
 		FDC6A7FB2334E054001A4774 /* EnergyBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnergyBar.swift; sourceTree = "<group>"; };
 		FDCF8CA222DA175F008EDFD1 /* CGHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGHelpers.swift; sourceTree = "<group>"; };
 		FDCF8CA422DA7296008EDFD1 /* Globals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
-		FDD44F922336113F00C13609 /* AppColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColors.swift; sourceTree = "<group>"; };
+		FDD44F922336113F00C13609 /* AppAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAppearance.swift; sourceTree = "<group>"; };
 		FDD44F94233787ED00C13609 /* IntroScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroScene.swift; sourceTree = "<group>"; };
 		FDD44F962338C60700C13609 /* transmission.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = transmission.wav; sourceTree = "<group>"; };
 		FDD831F122EDB50200CA4EC6 /* Explosions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Explosions.swift; sourceTree = "<group>"; };
@@ -319,7 +319,7 @@
 				FD7AE4AE237EB82200CAF082 /* scenes */,
 				FDDCB1442364834A00FF9F1C /* Asteroids.entitlements */,
 				6565DA10232E6818008EA85B /* Achievments.swift */,
-				FDD44F922336113F00C13609 /* AppColors.swift */,
+				FDD44F922336113F00C13609 /* AppAppearance.swift */,
 				FD79323522D20FE600E7D336 /* AppDelegate.swift */,
 				6513D66B22DC0B4E00B4BD57 /* Button.swift */,
 				FDCF8CA222DA175F008EDFD1 /* CGHelpers.swift */,
@@ -598,7 +598,7 @@
 				FDC6A7FC2334E054001A4774 /* EnergyBar.swift in Sources */,
 				FD96AE22233A52BD00D4CAFA /* TutorialScene.swift in Sources */,
 				FD7AE4B2238401C100CAF082 /* CreditsScene.swift in Sources */,
-				FDD44F932336113F00C13609 /* AppColors.swift in Sources */,
+				FDD44F932336113F00C13609 /* AppAppearance.swift in Sources */,
 				FD46BD72231415B7008C1F99 /* Playfield.swift in Sources */,
 				6513D66C22DC0B4E00B4BD57 /* Button.swift in Sources */,
 			);

@@ -177,12 +177,12 @@ class GameTutorialScene: BasicScene {
     // Two nice big buttons in the center of the screen for continue and quit.
     // They're only unhidden when the game pauses.
     let buttonSize = CGSize(width: 250, height: 200)
-    continueButton = Button(imageNamed: "bigplaybutton", imageColor: AppColors.green, size: buttonSize)
+    continueButton = Button(imageNamed: "bigplaybutton", imageColor: AppAppearance.playButtonColor, size: buttonSize)
     continueButton.action = { [unowned self] in self.doContinue() }
     continueButton.position = CGPoint(x: gameFrame.midX - 0.5 * buttonSize.width - 50, y: gameFrame.midY)
     continueButton.isHidden = true
     pauseControls.addChild(continueButton)
-    quitButton = Button(imageNamed: "bigcancelbutton", imageColor: AppColors.red, size: buttonSize)
+    quitButton = Button(imageNamed: "bigcancelbutton", imageColor: AppAppearance.dangerButtonColor, size: buttonSize)
     quitButton.action = { [unowned self] in self.doQuit() }
     quitButton.position = CGPoint(x: 2 * gameFrame.midX - continueButton.position.x, y: continueButton.position.y)
     quitButton.isHidden = true

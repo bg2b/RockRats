@@ -17,9 +17,9 @@ struct AttrStyles {
   init(fontName: String, fontSize: CGFloat) {
     var attributes = [NSAttributedString.Key: Any]()
     attributes[.font] = UIFont(name: fontName, size: fontSize)
-    attributes[.foregroundColor] = AppColors.textColor
+    attributes[.foregroundColor] = AppAppearance.textColor
     self.textAttributes = attributes
-    attributes[.foregroundColor] = AppColors.highlightTextColor
+    attributes[.foregroundColor] = AppAppearance.highlightTextColor
     self.highlightTextAttributes = attributes
     attributes[.foregroundColor] = UIColor.clear
     self.hiddenAttributes = attributes

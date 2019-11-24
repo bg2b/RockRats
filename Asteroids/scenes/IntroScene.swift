@@ -18,7 +18,7 @@ class IntroScene: BasicScene {
   /// `true` if this is the conclusion scene instead of the intro scene
   let conclusion: Bool
   /// Attributes for the text being displayed
-  let attributes = AttrStyles(fontName: AppColors.font, fontSize: 40)
+  let attributes = AttrStyles(fontName: AppAppearance.font, fontSize: 40)
   /// The initial "standby" part of the message
   let standBy = """
     Incoming transmission...

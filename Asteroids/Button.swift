@@ -32,7 +32,7 @@ class Button: SKNode {
   ///   - node: A node whose frame should be enclosed by the button
   ///   - minSize: The minimum size of the button
   ///   - borderColor: Color of the button's outline (optional, default green)
-  init(around node: SKNode, minSize: CGSize, borderColor: UIColor = AppColors.green) {
+  init(around node: SKNode, minSize: CGSize, borderColor: UIColor = AppAppearance.borderColor) {
     let nodeSize = node.frame.size
     // Padding is total amount for both sides, so 20 = 10 points on each
     let padding = CGFloat(20)
@@ -89,9 +89,9 @@ class Button: SKNode {
   convenience init(forText text: String, fontSize: CGFloat, size: CGSize) {
     let label = SKLabelNode(text: text)
     label.name = "buttonText"
-    label.fontName = AppColors.font
+    label.fontName = AppAppearance.font
     label.fontSize = fontSize
-    label.fontColor = AppColors.textColor
+    label.fontColor = AppAppearance.textColor
     label.horizontalAlignmentMode = .center
     label.verticalAlignmentMode = .center
     self.init(around: label, minSize: size)
@@ -107,12 +107,12 @@ class Button: SKNode {
   ///   - size: The desired (minimum) size of the button
   convenience init(forText text: String, confirmText: String, fontSize: CGFloat, size: CGSize) {
     self.init(forText: text, fontSize: fontSize, size: size)
-    border.strokeColor = AppColors.red
+    border.strokeColor = AppAppearance.dangerBorderColor
     let confirmLabel = SKLabelNode(text: confirmText)
     confirmLabel.name = "buttonConfirmText"
-    confirmLabel.fontName = AppColors.font
+    confirmLabel.fontName = AppAppearance.font
     confirmLabel.fontSize = fontSize
-    confirmLabel.fontColor = AppColors.red
+    confirmLabel.fontColor = AppAppearance.dangerButtonColor
     confirmLabel.horizontalAlignmentMode = .center
     confirmLabel.verticalAlignmentMode = .center
     addChild(confirmLabel)

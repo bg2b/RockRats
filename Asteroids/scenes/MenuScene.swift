@@ -55,17 +55,17 @@ class MenuScene: BasicScene {
     menu.setZ(.info)
     addChild(menu)
     // Title mostly centered
-    let title = SKLabelNode(fontNamed: AppColors.font)
+    let title = SKLabelNode(fontNamed: AppAppearance.font)
     title.fontSize = 125
-    title.fontColor = AppColors.highlightTextColor
+    title.fontColor = AppAppearance.highlightTextColor
     title.text = "ROCK RATS"
     title.verticalAlignmentMode = .center
     title.position = CGPoint(x: fullFrame.midX, y: 0.875 * fullFrame.midY + 0.125 * fullFrame.maxY)
     menu.addChild(title)
     // High score below the title
-    highScore = SKLabelNode(fontNamed: AppColors.font)
+    highScore = SKLabelNode(fontNamed: AppAppearance.font)
     highScore.fontSize = 50
-    highScore.fontColor = AppColors.highlightTextColor
+    highScore.fontColor = AppAppearance.highlightTextColor
     highScore.verticalAlignmentMode = .center
     highScore.position = CGPoint(x: fullFrame.midX, y: 0.75 * fullFrame.midY + 0.125 * fullFrame.minY)
     menu.addChild(highScore)
@@ -74,19 +74,19 @@ class MenuScene: BasicScene {
     let buttonSpacing = CGFloat(20)
     let buttonY = fullFrame.minY + buttonSize.height + buttonSpacing
     // New gamee
-    let playButton = Button(imageNamed: "playbutton", imageColor: AppColors.green, size: buttonSize)
+    let playButton = Button(imageNamed: "playbutton", imageColor: AppAppearance.playButtonColor, size: buttonSize)
     playButton.position = CGPoint(x: fullFrame.midX, y: buttonY)
     playButton.action = { [unowned self] in self.startGame() }
     buttons.append(playButton)
     menu.addChild(playButton)
     // High scores
-    let highScoresButton = Button(imageNamed: "highscoresbutton", imageColor: AppColors.blue, size: buttonSize)
+    let highScoresButton = Button(imageNamed: "highscoresbutton", imageColor: AppAppearance.buttonColor, size: buttonSize)
     highScoresButton.position = CGPoint(x: playButton.position.x + buttonSize.width + buttonSpacing, y: playButton.position.y)
     highScoresButton.action = { [unowned self] in self.showHighScores() }
     buttons.append(highScoresButton)
     menu.addChild(highScoresButton)
     // Settings
-    let settingsButton = Button(imageNamed: "settingsbutton", imageColor: AppColors.blue, size: buttonSize)
+    let settingsButton = Button(imageNamed: "settingsbutton", imageColor: AppAppearance.buttonColor, size: buttonSize)
     settingsButton.position = CGPoint(x: playButton.position.x - buttonSize.width - buttonSpacing, y: playButton.position.y)
     settingsButton.action = { [unowned self] in self.showSettings() }
     buttons.append(settingsButton)

@@ -88,16 +88,16 @@ class GameScene: GameTutorialScene {
     moreInfo.name = "moreInfo"
     moreInfo.setZ(.info)
     gameArea.addChild(moreInfo)
-    scoreDisplay = SKLabelNode(fontNamed: AppColors.font)
+    scoreDisplay = SKLabelNode(fontNamed: AppAppearance.font)
     scoreDisplay.fontSize = 50
-    scoreDisplay.fontColor = AppColors.textColor
+    scoreDisplay.fontColor = AppAppearance.textColor
     scoreDisplay.text = "0"
     scoreDisplay.name = "score"
     scoreDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.maxY - 50)
     moreInfo.addChild(scoreDisplay)
-    centralDisplay = SKLabelNode(fontNamed: AppColors.font)
+    centralDisplay = SKLabelNode(fontNamed: AppAppearance.font)
     centralDisplay.fontSize = 100
-    centralDisplay.fontColor = AppColors.highlightTextColor
+    centralDisplay.fontColor = AppAppearance.highlightTextColor
     centralDisplay.text = ""
     centralDisplay.name = "centralDisplay"
     centralDisplay.isHidden = true

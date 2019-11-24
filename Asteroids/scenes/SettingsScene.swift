@@ -31,9 +31,9 @@ class SettingsScene: BasicScene {
     settings.setZ(.info)
     addChild(settings)
     // Title
-    let title = SKLabelNode(fontNamed: AppColors.font)
+    let title = SKLabelNode(fontNamed: AppAppearance.font)
     title.fontSize = 100
-    title.fontColor = AppColors.highlightTextColor
+    title.fontColor = AppAppearance.highlightTextColor
     title.text = "Settings"
     title.verticalAlignmentMode = .center
     title.position = CGPoint(x: fullFrame.midX, y: fullFrame.maxY - title.fontSize)
@@ -45,13 +45,13 @@ class SettingsScene: BasicScene {
     let buttonSpacing = CGFloat(20)
     var nextButtonX = CGFloat(0)
     // Main menu button
-    let menuButton = Button(imageNamed: "homebutton", imageColor: AppColors.blue, size: buttonSize)
+    let menuButton = Button(imageNamed: "homebutton", imageColor: AppAppearance.buttonColor, size: buttonSize)
     menuButton.action = { [unowned self] in self.mainMenu() }
     menuButton.position = CGPoint(x: nextButtonX, y: 0)
     nextButtonX += buttonSize.width + buttonSpacing
     bottomButtons.addChild(menuButton)
     // Sound on/off
-    muteButton = Button(imagesNamed: ["soundon", "soundoff"], imageColor: AppColors.blue, size: buttonSize)
+    muteButton = Button(imagesNamed: ["soundon", "soundoff"], imageColor: AppAppearance.buttonColor, size: buttonSize)
     muteButton.selectedValue = (userDefaults.audioIsMuted.value ? 1 : 0)
     muteButton.action = { [unowned self] in self.toggleSound() }
     muteButton.position = CGPoint(x: nextButtonX, y: 0)
@@ -68,7 +68,7 @@ class SettingsScene: BasicScene {
       bottomButtons.addChild(retroButton)
     }
     // Game credits
-    let creditsButton = Button(imageNamed: "infobutton", imageColor: AppColors.blue, size: buttonSize)
+    let creditsButton = Button(imageNamed: "infobutton", imageColor: AppAppearance.buttonColor, size: buttonSize)
     creditsButton.action = { [unowned self] in self.showCredits() }
     creditsButton.position = CGPoint(x: nextButtonX, y: 0)
     bottomButtons.addChild(creditsButton)

@@ -12,7 +12,7 @@ class TutorialScene: GameTutorialScene {
   var instructionsLabel: SKLabelNode!
   var transmissionSounds: ContinuousPositionalAudio!
   var moveOnButton: Button? = nil
-  let attributes = AttrStyles(fontName: AppColors.font, fontSize: 40)
+  let attributes = AttrStyles(fontName: AppAppearance.font, fontSize: 40)
   var maxThrust = CGFloat(0)
   var minThrust = CGFloat(0)
   var maxRotate = CGFloat(0)

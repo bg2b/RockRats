@@ -59,7 +59,7 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
         playerScoreText = "@" + playerScoreText + "@"
       }
     }
-    let attributes = AttrStyles(fontName: AppColors.font, fontSize: 35)
+    let attributes = AttrStyles(fontName: AppAppearance.font, fontSize: 35)
     playerName.attributedText = makeAttributed(text: playerNameText, until: playerNameText.endIndex, attributes: attributes)
     playerName.horizontalAlignmentMode = .left
     playerName.verticalAlignmentMode = .center
@@ -138,9 +138,9 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     scores.setZ(.info)
     addChild(scores)
     // Title
-    let title = SKLabelNode(fontNamed: AppColors.font)
+    let title = SKLabelNode(fontNamed: AppAppearance.font)
     title.fontSize = 100
-    title.fontColor = AppColors.highlightTextColor
+    title.fontColor = AppAppearance.highlightTextColor
     title.text = "High Scores"
     title.verticalAlignmentMode = .center
     title.position = CGPoint(x: fullFrame.midX, y: fullFrame.maxY - title.fontSize)
@@ -150,12 +150,12 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     let buttonSpacing = CGFloat(20)
     let buttonY = fullFrame.minY + buttonSize.height + buttonSpacing
     // New game
-    let playButton = Button(imageNamed: "playbutton", imageColor: AppColors.green, size: buttonSize)
+    let playButton = Button(imageNamed: "playbutton", imageColor: AppAppearance.playButtonColor, size: buttonSize)
     playButton.position = CGPoint(x: fullFrame.midX, y: buttonY)
     playButton.action = { [unowned self] in self.startGame() }
     scores.addChild(playButton)
     // Main menu
-    let menuButton = Button(imageNamed: "homebutton", imageColor: AppColors.blue, size: buttonSize)
+    let menuButton = Button(imageNamed: "homebutton", imageColor: AppAppearance.buttonColor, size: buttonSize)
     menuButton.position = CGPoint(x: playButton.position.x - buttonSize.width - buttonSpacing, y: playButton.position.y)
     menuButton.action = { [unowned self] in self.mainMenu() }
     scores.addChild(menuButton)

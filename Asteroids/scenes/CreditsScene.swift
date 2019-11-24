@@ -12,15 +12,15 @@ import SpriteKit
 class CreditsScene: BasicScene {
   /// Build the stuff in the scene
   func initCredits() {
-    let attributes = AttrStyles(fontName: AppColors.font, fontSize: 40)
+    let attributes = AttrStyles(fontName: AppAppearance.font, fontSize: 40)
     let credits = SKNode()
     credits.name = "credits"
     credits.setZ(.info)
     addChild(credits)
     // Title
-    let title = SKLabelNode(fontNamed: AppColors.font)
+    let title = SKLabelNode(fontNamed: AppAppearance.font)
     title.fontSize = 100
-    title.fontColor = AppColors.highlightTextColor
+    title.fontColor = AppAppearance.highlightTextColor
     title.text = "Credits"
     title.verticalAlignmentMode = .center
     title.position = CGPoint(x: fullFrame.midX, y: fullFrame.maxY - title.fontSize)
@@ -30,17 +30,17 @@ class CreditsScene: BasicScene {
     let buttonSpacing = CGFloat(20)
     let buttonY = fullFrame.minY + buttonSize.height + buttonSpacing
     // New game
-    let playButton = Button(imageNamed: "playbutton", imageColor: AppColors.green, size: buttonSize)
+    let playButton = Button(imageNamed: "playbutton", imageColor: AppAppearance.playButtonColor, size: buttonSize)
     playButton.position = CGPoint(x: fullFrame.midX, y: buttonY)
     playButton.action = { [unowned self] in self.startGame() }
     credits.addChild(playButton)
     // Main menu
-    let menuButton = Button(imageNamed: "homebutton", imageColor: AppColors.blue, size: buttonSize)
+    let menuButton = Button(imageNamed: "homebutton", imageColor: AppAppearance.buttonColor, size: buttonSize)
     menuButton.position = CGPoint(x: playButton.position.x - buttonSize.width - buttonSpacing, y: playButton.position.y)
     menuButton.action = { [unowned self] in self.mainMenu() }
     credits.addChild(menuButton)
     // Settings screen
-    let settingsButton = Button(imageNamed: "settingsbutton", imageColor: AppColors.blue, size: buttonSize)
+    let settingsButton = Button(imageNamed: "settingsbutton", imageColor: AppAppearance.buttonColor, size: buttonSize)
     settingsButton.position = CGPoint(x: playButton.position.x + buttonSize.width + buttonSpacing, y: playButton.position.y)
     settingsButton.action = { [unowned self] in self.showSettings() }
     credits.addChild(settingsButton)
