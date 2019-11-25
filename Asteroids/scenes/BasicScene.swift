@@ -298,7 +298,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
         star.position = CGPoint(x: .random(in: gameFrame.minX...gameFrame.maxX),
                                 y: .random(in: gameFrame.minY...gameFrame.maxY))
         for otherStar in stars.children {
-          minSep = min(minSep, (otherStar.position - star.position).norm2())
+          minSep = min(minSep, (otherStar.position - star.position).length())
         }
       }
       star.wait(for: .random(in: 0.0...period), then: twinkle)
@@ -450,7 +450,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     let minSpeed = Globals.gameConfig.asteroidMinSpeed
     let maxSpeed = Globals.gameConfig.asteroidMaxSpeed
     var finalVelocity = velocity
-    let speed = velocity.norm2()
+    let speed = velocity.length()
     if speed == 0 {
       finalVelocity = CGVector(angle: .random(in: 0 ... 2 * .pi)).scale(by: .random(in: minSpeed...maxSpeed))
     } else if speed < minSpeed {
@@ -730,9 +730,9 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
       var thisClearance = CGFloat.infinity
       for asteroid in asteroids {
         let bothRadii = ufoRadius + 0.5 * asteroid.size.diagonal()
-        thisClearance = min(thisClearance, (asteroid.position - pos).norm2() - bothRadii)
+        thisClearance = min(thisClearance, (asteroid.position - pos).length() - bothRadii)
         // Check the wrapped position too
-        thisClearance = min(thisClearance, (asteroid.position - CGPoint(x: -pos.x, y: pos.y)).norm2() - bothRadii)
+        thisClearance = min(thisClearance, (asteroid.position - CGPoint(x: -pos.x, y: pos.y)).length() - bothRadii)
       }
       if bestPosition == nil || thisClearance > bestClearance {
         bestPosition = pos

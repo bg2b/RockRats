@@ -25,7 +25,7 @@ func aim(at p: CGVector, targetVelocity v: CGFloat, shotSpeed s: CGFloat) -> CGF
 
 func aim(at p: CGVector, targetVelocity v: CGVector, shotSpeed s: CGFloat) -> CGFloat? {
   let theta = v.angle()
-  return aim(at: p.rotate(by: -theta), targetVelocity: v.norm2(), shotSpeed: s)
+  return aim(at: p.rotate(by: -theta), targetVelocity: v.length(), shotSpeed: s)
 }
 
 func wrappedDisplacement(direct: CGVector, bounds: CGRect) -> CGVector {
@@ -146,10 +146,10 @@ class UFO: SKNode {
         if body.isA(.playerShot) {
           // Shots travel fast, so emphasize dodging to the side.  We do this by projecting out
           // some of the displacement along the direction of the shot.
-          let vhat = body.velocity.scale(by: 1 / body.velocity.norm2())
+          let vhat = body.velocity.scale(by: 1 / body.velocity.length())
           r = r - r.project(unitVector: vhat).scale(by: shotAnticipation)
         }
-        var d = r.norm2()
+        var d = r.length()
         if isKamikaze && body.isA(.player) {
           // Kamikazes are alway attracted to the player no matter where they are, but we'll
           // give an initial delay using the same first-shot mechanism before this kicks in.
@@ -183,15 +183,15 @@ class UFO: SKNode {
     body.applyForce(totalForce)
     // Regular UFOs have a desired cruising speed
     if !isKamikaze {
-      if body.velocity.norm2() > currentSpeed {
+      if body.velocity.length() > currentSpeed {
         body.velocity = body.velocity.scale(by: 0.95)
       }
-      else if body.velocity.norm2() < currentSpeed {
+      else if body.velocity.length() < currentSpeed {
         body.velocity = body.velocity.scale(by: 1.05)
       }
     }
-    if body.velocity.norm2() > maxSpeed {
-      body.velocity = body.velocity.scale(by: maxSpeed / body.velocity.norm2())
+    if body.velocity.length() > maxSpeed {
+      body.velocity = body.velocity.scale(by: maxSpeed / body.velocity.length())
     }
     guard !isKamikaze else { return }
     if playerDistance < 1.5 * targetDistance || (player?.parent != nil && Int.random(in: 0..<100) >= 25) {

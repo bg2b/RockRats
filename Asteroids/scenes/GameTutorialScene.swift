@@ -76,7 +76,7 @@ class GameTutorialScene: BasicScene {
     // Normal coordinates are scaled to give 768 units vertically on the screen, but
     // for this I want to require a move of a certain physical distance on the
     // screen, so I need to convert to points.
-    return (touch.location(in: self) - startLocation).norm2() > Globals.ptsToGameUnits * 100
+    return (touch.location(in: self) - startLocation).length() > Globals.ptsToGameUnits * 100
   }
 
   /// Handle moving touches for the ship controls
@@ -91,7 +91,7 @@ class GameTutorialScene: BasicScene {
         // This is a movement of the joystick.
         let location = touch.location(in: self)
         let delta = (location - joystickLocation).rotate(by: -.pi / 2)
-        let offset = delta.norm2()
+        let offset = delta.length()
         // Measure the movement in terms of a certain physical distance, so convert to points.
         joystickDirection = delta.scale(by: min(offset / (Globals.ptsToGameUnits * 0.5 * 100), 1.0) / offset)
       } else {

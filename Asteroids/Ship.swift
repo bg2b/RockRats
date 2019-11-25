@@ -171,7 +171,7 @@ class Ship: SKNode {
     }
     thrustForce *= maxThrust
     let maxSpeed = Globals.gameConfig.playerMaxSpeed
-    var currentSpeed = body.velocity.norm2()
+    var currentSpeed = body.velocity.length()
     if currentSpeed > maxSpeed {
       body.velocity = body.velocity.scale(by: maxSpeed / currentSpeed)
       currentSpeed = maxSpeed

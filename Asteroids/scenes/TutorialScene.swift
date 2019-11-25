@@ -285,7 +285,7 @@ class TutorialScene: GameTutorialScene {
 
   func observeThrust() {
     wait(for: 1) {
-      if self.observedMaxThrust > 0.75 && self.player.requiredPhysicsBody().velocity.norm2() > 200 {
+      if self.observedMaxThrust > 0.75 && self.player.requiredPhysicsBody().velocity.length() > 200 {
         (self.moveOnThen { self.tutorial7() })()
       } else {
         self.observeThrust()
@@ -306,7 +306,7 @@ class TutorialScene: GameTutorialScene {
 
   func observeStop() {
     wait(for: 1) {
-      if self.player.requiredPhysicsBody().velocity.norm2() < 50 {
+      if self.player.requiredPhysicsBody().velocity.length() < 50 {
         (self.moveOnThen { self.tutorial8() })()
       } else {
         self.observeStop()
