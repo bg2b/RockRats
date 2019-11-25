@@ -238,7 +238,7 @@ class MenuScene: BasicScene {
     // that caused a scene transition, then the first button will be stuck in a
     // half-touched state when we come back to the menu.  So be sure to clear the
     // state of all the buttons.
-    buttons.forEach { $0.resetTouch() }
+    buttons.forEach { $0.resetAndCancelConfirmation() }
     // The player may have turned audio on or off in the settings.
     audio.muted = userDefaults.audioIsMuted.value
     // Reset the number of things the player has tapped; they have to do the full

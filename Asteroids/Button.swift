@@ -20,11 +20,19 @@ import SpriteKit
 /// The class also supports requiring a second confirmation touch within a few
 /// seconds (when confirmDecoration is non-nil).
 class Button: SKNode {
+  /// The border of the button, highlighted during touch processing
   let border: SKShapeNode
+  /// The labels or pictures sit inside the button; the button cycles through these
+  /// upon activation
   var decorations = [SKNode]()
+  /// The index of the current button decoration
   var currentDecoration = 0
+  /// If this is non-`nil`, the button requires a second confirmation press;
+  /// `confirmDecoration` is shown during that process.
   var confirmDecoration: SKNode? = nil
+  /// The touch that the button is currently processing
   var clickTouch: UITouch? = nil
+  /// A closure that will be called when the button activates
   var action: (() -> Void)? = nil
 
   /// Make a button whose decorations are managed separately.
@@ -124,6 +132,7 @@ class Button: SKNode {
     fatalError("init(coder:) has not been implemented by Button")
   }
 
+  /// Used to read a cyclic button's state (the decoration index), or to set it.
   var selectedValue: Int {
     get { currentDecoration }
     set {
@@ -132,30 +141,50 @@ class Button: SKNode {
     }
   }
 
+  /// `true` if the button is enabled
   var enabled: Bool { isUserInteractionEnabled }
 
+  /// Enable the button
   func enable() {
     isUserInteractionEnabled = true
     alpha = 1
   }
 
+  // Disable the button
   func disable() {
     isUserInteractionEnabled = false
     alpha = 0.5
   }
 
+  /// Reset the button's touch processing
   func resetTouch() {
     clickTouch = nil
     border.glowWidth = 1
   }
 
-  func cancelConfirmation() {
+  /// Switch a confirmation-required button from "Are you sure (Y/N)?" back to normal
+  ///
+  /// This is also used when coming back to a scene that existed already (as opposed
+  /// to a newly-constructed scene).  If the scene has two buttons and both were
+  /// touched (had `clickTouch` non-`nil`) and then one was released+activated, the
+  /// other would still have `clickTouch` set on scene transition.  But because that
+  /// button would no longer be receiving touch notifications `clickTouch` would
+  /// never clear.  When coming back to the scene again later, that "active" button
+  /// would be stuck.  And if the affected button is one that requires confirmation,
+  /// it's also necessary to ensure that the button is in the normal
+  /// not-prompting-for-confirmation state.
+  func resetAndCancelConfirmation() {
     decorations[currentDecoration].isHidden = false
     confirmDecoration?.isHidden = true
     removeAllActions()
     resetTouch()
   }
 
+  /// Did the click on a button represent a confirmation to invoke the action?
+  ///
+  /// For normal buttons, this always says `true`
+  ///
+  /// - Returns: `true` if the action is confirmed, `false` means abort the action
   func wasConfirmed() -> Bool {
     // No confirmDecoration => simple button, immediately confirmed
     guard let confirmDecoration = confirmDecoration else { return true }
@@ -164,11 +193,18 @@ class Button: SKNode {
       return false
     } else {
       // The action was confirmed, switch back to the regular state
-      cancelConfirmation()
+      resetAndCancelConfirmation()
       return true
     }
   }
 
+  /// Prompt for confirmation for an action
+  ///
+  /// For normal buttons, this just returns immediately (and `wasConfirmed` will say
+  /// `true`).  Confirmation-required buttons are switched to the confirmation
+  /// decoration by this routine.  They'll automatically go back to normal if left
+  /// alone for a few seconds.  Or if touched again, `wasConfirmed` will return
+  /// `true` on the second touch.
   func requireConfirmation() {
     // No confirmDecoration => no need for confirmation
     guard let confirmDecoration = confirmDecoration else { return }
@@ -177,7 +213,7 @@ class Button: SKNode {
     decorations[currentDecoration].isHidden = true
     confirmDecoration.isHidden = false
     wait(for: 3) {
-      self.cancelConfirmation()
+      self.resetAndCancelConfirmation()
     }
   }
 
@@ -191,6 +227,15 @@ class Button: SKNode {
     decorations[currentDecoration].isHidden = false
   }
 
+  /// Start touch processing for a button
+  ///
+  /// If the button is enabled and not yet active, then the first touch gets
+  /// remembered as `clickTouch`.  The button then watches only for touch
+  /// move/ended/cancelled on that one touch.
+  ///
+  /// - Parameters:
+  ///   - touches: Some touches
+  ///   - event: The event the touches belong to
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     guard enabled else { return }
     for touch in touches {
@@ -201,6 +246,14 @@ class Button: SKNode {
     }
   }
 
+  /// Continue button touch processing
+  ///
+  /// Everything except `clickTouch` is ignored.  As that touch moves in and out of
+  /// the button, the frame highlighting is adjusted.
+  ///
+  /// - Parameters:
+  ///   - touches: Some touches
+  ///   - event: The event that the touches belong to
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
     for touch in touches {
       guard touch == clickTouch else { continue }
@@ -212,6 +265,14 @@ class Button: SKNode {
     }
   }
 
+  /// Some touches on the button ended
+  ///
+  /// Ignore everything but `clickTouch`.  When that touch is finally release, see if
+  /// the button needs another confirmation touch, and if not, invoke the action.
+  ///
+  /// - Parameters:
+  ///   - touches: Some touches
+  ///   - event: The event that the touches belong to
   override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
     for touch in touches {
       guard touch == clickTouch else { continue }
@@ -229,10 +290,18 @@ class Button: SKNode {
     }
   }
 
+  /// Some touches on the button were cancelled
+  ///
+  /// Ignore everything except `clickTouch`.  If that gets cancelled, then reset the
+  /// button state without invoking the action.
+  ///
+  /// - Parameters:
+  ///   - touches: Some touches
+  ///   - event: The event that the touches belong to
   override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
     for touch in touches {
       guard touch == clickTouch else { continue }
-      resetTouch()
+      resetAndCancelConfirmation()
     }
   }
 }
