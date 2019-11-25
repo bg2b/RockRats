@@ -8,32 +8,6 @@
 
 import SpriteKit
 
-struct TextureBitmap<T> {
-  let textureSize: CGSize
-  let width: Int
-  let height: Int
-  let pixels: [T]
-
-  init(texture: SKTexture, getPixelInfo: (UInt32) -> T) {
-    textureSize = texture.size()
-    let image = texture.cgImage()
-    width = image.width
-    height = image.height
-    let cgContext = CGContext(data: nil,
-                              width: width, height: height,
-                              bitsPerComponent: 8, bytesPerRow: 4 * width,
-                              space: CGColorSpaceCreateDeviceRGB(),
-                              bitmapInfo: CGBitmapInfo.byteOrder32Little.rawValue |
-                                CGImageAlphaInfo.premultipliedLast.rawValue)
-    guard let context = cgContext else { fatalError("Could not create graphics context") }
-    context.draw(image, in: CGRect(origin: .zero, size: CGSize(width: width, height: height)))
-    guard let data = context.data else { fatalError("Graphics context has no data") }
-    pixels = (0 ..< width * height).map {
-      return getPixelInfo((data + 4 * $0).load(as: UInt32.self))
-    }
-  }
-}
-
 // Notes about u_time...
 //
 // It seems that u_time is zero when it first gets used in some shader.  All well and
