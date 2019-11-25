@@ -14,7 +14,7 @@ struct DefaultsValue<T> {
   let name: String
   let defaultValue: T
 
-  /// Retrieves the stored value or (returns the default) on get, stores a new value
+  /// Retrieves the stored value (or returns the default) on get, stores a new value
   /// on set.
   var value: T {
     get {
@@ -192,9 +192,8 @@ class SavedUserData {
   var retroMode = DefaultsValue<Bool>(name: "retroMode", defaultValue: false)
   /// Local player high scores (not global scores from Game Center)
   var highScores = HighScores()
-  /// Whoever logged into Game Center last.  If Game Center isn't available for some
-  /// reason, then we assume that the person playing is this player.
-  var currentPlayerID = DefaultsValue<String>(name: "currentPlayerID", defaultValue: "")
+  /// Whoever is logged into Game Center, or "anon" if no one
+  var currentPlayerID = DefaultsValue<String>(name: "currentPlayerID", defaultValue: "anon")
   /// Mapping between current player IDs and new player IDs for whenever Game Center
   /// switches over
   var newPlayerIDs = DefaultsValue<[String: String]>(name: "newPlayerIDs", defaultValue: [String: String]())
