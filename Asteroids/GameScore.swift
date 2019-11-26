@@ -9,12 +9,19 @@
 import Foundation
 import GameKit
 
+/// An end-of-game score, plus info about when it happened and the player that earned it
 struct GameScore: Equatable {
+  /// The Game Center ID of the player
   let playerID: String
+  /// An optional name to diplay for this score
   let playerName: String?
+  /// The score earned
   let points: Int
-  let date: TimeInterval  // Since reference date
+  /// The interval since the reference date that the score was earned
+  let date: TimeInterval
 
+  /// Make a null score; this is used internally by the high scores scene when there
+  /// are no other scores to show
   init() {
     playerID = ""
     playerName = nil
@@ -22,6 +29,13 @@ struct GameScore: Equatable {
     date = Date().timeIntervalSinceReferenceDate
   }
 
+  /// Make a score for the current player
+  ///
+  /// To show the high score screen and just highlight the current player's entries,
+  /// pass the scene constructor a score made by this initializer with 0 for the
+  /// points.
+  ///
+  /// - Parameter points: The points earned
   init(points: Int) {
     playerID = UserData.currentPlayerID.value
     playerName = UserData.playerNames.value[playerID]
@@ -29,6 +43,11 @@ struct GameScore: Equatable {
     date = Date().timeIntervalSinceReferenceDate
   }
 
+  /// Make a score from a Game Center `GKScore`
+  ///
+  /// The display name can be specified explicitly if showing the Game Center alias
+  /// of the player isn't desired.
+  ///
   /// - Todo:
   ///   Check what happens if displayName is nil and the alias in the score has
   ///   characters that aren't in our font.
@@ -45,6 +64,11 @@ struct GameScore: Equatable {
     date = score.date.timeIntervalSinceReferenceDate
   }
 
+  /// Make a score from a dictionary
+  ///
+  /// Used when reconstructing scores as saved in `UserData`
+  ///
+  /// - Parameter dict: The dictionary representation (see the `encode` method)
   init?(fromDict dict: [String: Any]) {
     guard let playerID = dict["playerID"] as? String else { return nil }
     let playerName = dict["playerName"] as? String ?? nil
@@ -56,6 +80,16 @@ struct GameScore: Equatable {
     self.date = date
   }
 
+  /// Make a copy of the score, but change the displayed name
+  ///
+  /// I use this when getting the local high scores from `UserData` to make the high
+  /// score scene.  It's possible that the player has changed their Game Center alias
+  /// since the score was made/saved, and this is used to replace the name in the
+  /// saved score with whatever name I currently have for the player.
+  ///
+  /// - Parameters:
+  ///   - score: The original score
+  ///   - newName: The desired player name
   init(score: GameScore, newName: String) {
     playerID = score.playerID
     playerName = newName
@@ -63,6 +97,8 @@ struct GameScore: Equatable {
     date = score.date
   }
 
+  /// Encode a score as a dictionary for saving in `UserData`
+  /// - Returns: The encoded score
   func encode() -> [String: Any] {
     var result = [String: Any]()
     result["playerID"] = playerID
@@ -75,6 +111,11 @@ struct GameScore: Equatable {
   }
 }
 
+/// See if two `GameScore`s represent the same score
+/// - Parameters:
+///   - score1: The first score
+///   - score2: The second score
+/// - Returns: `true` means same player ID, same points, very close date
 func sameScore(_ score1: GameScore, _ score2: GameScore) -> Bool {
   // The date on different returns from Game Center seems to get munged a little,
   // so allow some slack when comparing.
