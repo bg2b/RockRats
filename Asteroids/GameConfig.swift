@@ -155,5 +155,6 @@ func loadGameConfig(forMode: String) -> GameConfig {
 }
 
 extension Globals {
+  /// The game configuration values for the current scene
   static var gameConfig = loadGameConfig(forMode: "normal")
 }

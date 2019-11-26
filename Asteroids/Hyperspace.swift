@@ -8,7 +8,7 @@
 
 import SpriteKit
 
-// Notes about u_time...
+// Notes about u_time and shaders...
 //
 // It seems that u_time is zero when it first gets used in some shader.  All well and
 // good.  When I write an effect like the hyperspace shaders, they'll do some sort of
@@ -24,9 +24,9 @@ import SpriteKit
 //
 // What I can do is learn the offset between u_time and the time passed to update(_:
 // TimeInterval).  The first time that a shader gets used (when u_time is guaranteed
-// to be 0), we can save the offset.  After that, when we need to invoke a shader
-// that would want u_time = 0, we instead refer to u_time - offset.  The offset can
-// be passed in by a shader attribute.  That's the whole a_start_time business.
+// to be 0), I can save the offset.  After that, when I need to invoke a shader that
+// would want u_time = 0, I instead refer to u_time - offset.  The offset can be
+// passed in by a shader attribute.  That's the whole a_start_time business.
 //
 // The one wrinkle is that it seems that it's somehow possible for there to be a
 // drift between u_time and the time passed to update().  How I don't know, but I had
@@ -39,19 +39,21 @@ import SpriteKit
 // utimeShader is a shader that encodes u_time in the three components of a pixel
 // color.  I need fractions of a second, so I multiply u_time by 128 (iPad Pro
 // refresh is 120 Hz) and then peel off 24 bits of precision to store in R, G, and B.
-// To get that color out, I use SKView's texture(from: SKnode) method.  I make a tiny
+// To get that color out, I use SKView's texture(from: SKnode) method.  I take a tiny
 // sprite (a 2x2 square, but 1x1 might be OK too) and then render that into a
 // texture.  The texture is converted into a pixel array with the TextureBitmap
 // struct.  Then readUtime takes the first pixel and reverses the encoding process to
-// get the u_time that the utimeShader saw.  We reset the saved utimeOffset each time
-// we do a scene transition or when the app becomes active.  The update(_:
+// get the u_time that the utimeShader saw.  I reset the saved utimeOffset each time
+// I do a scene transition or when the app becomes active.  The update(_:
 // TimeInterval) in BasicScene calls getUtimeOffset each time through; that will do
 // readUtime once and then cache the value of the offset.
 
+/// The shader used for reading `u_time`
 var utimeShader = SKShader(source:
   """
   void main() {
     uint32_t time = round(u_time * 128 + 0.5);
+    // Encode u_time in RGB values
     float red = (time & 0xff) / 255.0;
     time >>= 8;
     float green = (time & 0xff) / 255.0;
@@ -62,7 +64,11 @@ var utimeShader = SKShader(source:
   """
 )
 
+/// Read the `u_time` value that a shader would see
+/// - Parameter view: A view used to render a test sprite
+/// - Returns: The `u_time` that a shader saw
 func readUtime(view: SKView) -> Double {
+  // Make a little sprite that runs utimeShader and render it into a texture.
   let dotTexture = Globals.textureCache.findTexture(imageNamed: "dot")
   let sprite = SKSpriteNode(texture: dotTexture, size: dotTexture.size())
   sprite.shader = utimeShader
@@ -70,7 +76,9 @@ func readUtime(view: SKView) -> Double {
     logging("readUtime failed to render shaded sprite")
     return 0
   }
+  // Convert the texture into a bitmap
   let bitmap = TextureBitmap<UInt32>(texture: rendered) { $0 }
+  // Decode the first pixel to reconstruct u_time
   var pixel = bitmap.pixels[0]
   var result = 0.0
   pixel >>= 8
@@ -86,10 +94,21 @@ func readUtime(view: SKView) -> Double {
   return result
 }
 
+/// The offset between `u_time` and the current game time
+///
+/// When about to run a shader that wants `u_time` to start from zero, add this to
+/// `Globals.lastUpdateTime` and pass the result to the shader as an attribute
+/// `a_start_time`.  In the shader, subtract `a_start_time` from `u_time` to get the
+/// effective time from shader invocation.
 var utimeOffset: Double?
 
+/// Compute `utimeOffset` if needed, then return that value
+/// - Parameter view: A view to render a sprite if `utimeOffset` needs to be calculated
+/// - Returns: `utimeOffset`
 func getUtimeOffset(view: SKView?) -> Double {
   if let utimeOffset = utimeOffset {
+    // The view can be nil when it's guaranteed that utimeOffset will have already
+    // been computed
     return utimeOffset
   }
   guard let view = view else {
@@ -102,10 +121,19 @@ func getUtimeOffset(view: SKView?) -> Double {
   return newOffset
 }
 
+/// Reset `utimeOffset` so that it'll be recomputed
+///
+/// Call this on scene switch or when the app transitions from background to
+/// foreground state.
 func resetUtimeOffset() {
   utimeOffset = nil
 }
 
+/// Set the `a_state_time` attribute for a sprite's shader
+/// - Parameters:
+///   - effect: The sprite that the shader is attached to
+///   - view: A view for computing `utimeOffset` (`nil` is OK if `utimeOffset` has
+///     already been computed)
 func setStartTimeAttrib(_ effect: SKSpriteNode, view: SKView?) {
   // The view parameter can only be nil if something else has already called
   // getUtimeOffset with a real view.
@@ -113,28 +141,28 @@ func setStartTimeAttrib(_ effect: SKSpriteNode, view: SKView?) {
   effect.setValue(SKAttributeValue(float: Float(startUtime)), forAttribute: "a_start_time")
 }
 
+/// A down-the-drain (or reverse of that) shader, used when the player jumps to
+/// hyperspace
+/// - Parameters:
+///   - texture: The texture to animate
+///   - inward: `true` for shrinking effect, `false` for the reverse
+///   - warpTime: The time duration of the effect
+/// - Returns: A shader for the effect
 func swirlShader(forTexture texture: SKTexture, inward: Bool, warpTime: Double) -> SKShader {
-  // This one is a sort of down-the-drain effect (or the reverse of it).
-  //
-  // The a_start_time ugliness is because u_time starts from 0 when a shader first
-  // references it, but after that it just keeps counting up.  We have to be able to
-  // shift it so that it effectively starts from 0 each time we use a shader.
-  //
-  // Also be careful not to assume that the texture has v_tex_coord ranging in (0, 0)
-  // to (1, 1)!  If the texture is part of a texture atlas, this is not true.  We
-  // could make another attribute or uniform to pass in the textureRect info, but
-  // since we only use this with a particular texture, we just pass in the texture
-  // and compile in the required v_tex_coord transformations for that texture.
+  // Be careful not to assume that the texture has v_tex_coord ranging in (0, 0) to
+  // (1, 1)!  If the texture is part of a texture atlas, this is not true.  I could
+  // make another attribute or uniform to pass in the textureRect info, but since I
+  // only use this with a particular texture, I just pass in the texture and compile
+  // in the required v_tex_coord transformations for that texture.
   //
   // I still have some residual confusion about coordinate spaces in these things.
   // If you look in the tiling shader used for the background star field, v_tex_coord
   // on input corresponded to a position in the frame that was normalized to
-  // (0,0)-(1,1).  In that case we shifted and scaled only on output when the
+  // (0,0)-(1,1).  In that case I shifted and scaled only on output when the
   // coordinate was being used to index into the tiled texture.  In this case, it's a
-  // texture for a sprite node that we're warping, and the input coordinate seems to
-  // be in terms of the textureRect coordinates too.  So we have to inverse transform
-  // to get to (0,0)-(1,1), do our stuff, and then transform back again to
-  // textureRect.
+  // texture for a sprite node that I'm warping, and the input coordinate seems to be
+  // in terms of the textureRect coordinates too.  So I have to inverse transform to
+  // get to (0,0)-(1,1), do my stuff, and then transform back again to textureRect.
   let rect = texture.textureRect()
   let shaderSource = """
   void main() {
@@ -167,9 +195,17 @@ func swirlShader(forTexture texture: SKTexture, inward: Bool, warpTime: Double) 
   return shader
 }
 
+/// A shrink effect with disappearing sections
+///
+/// I use this for UFOs because the `swirlShader` doesn't look like much for a
+/// circular shape.  This one doesn't have a reverse direction because UFOs don't
+/// warp in.
+///
+/// - Parameters:
+///   - texture: The texture to warp
+///   - warpTime: The time duration for the effect
+/// - Returns: A shader for the effect
 func fanFoldShader(forTexture texture: SKTexture, warpTime: Double) -> SKShader {
-  // This one is a shrink but also sections disappear.  We use it for UFOs because
-  // the swirl effect doesn't look like much when the shape is mostly circular.
   let rect = texture.textureRect()
   let shaderSource = """
   void main() {
@@ -206,6 +242,12 @@ func fanFoldShader(forTexture texture: SKTexture, warpTime: Double) -> SKShader 
   return shader
 }
 
+/// A twinkle sort of effect with a growing-then-shrinking-while-twirling star
+/// - Parameters:
+///   - position: The position where the effect should happen
+///   - angle: Amount to twirl in radians
+///   - duration: The duration of the effect
+/// - Returns: A sprite that animates the effect
 func starBlink(at position: CGPoint, throughAngle angle: CGFloat, duration: Double) -> SKSpriteNode {
   let star = SKSpriteNode(imageNamed: "star1")
   star.position = position
