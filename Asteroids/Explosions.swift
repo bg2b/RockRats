@@ -64,6 +64,13 @@ func makeExplosionGrid(rect: CGRect, wantedSize: CGFloat, pieces: inout [CGRect]
 /// waiting until all the pieces finish fading out and removing themselves from the
 /// playfield.  The extra node delays and then puts the whole explosion back in a
 /// cache for later reuse.
+///
+/// - Bug:
+/// I can lose an explosion if the player force-quits a game before the recycler
+/// node's action gets a chance to run.  It won't break things since the cache will
+/// make a new explosion when required, but it would be nice if the playfield cleanup
+/// could recognize the recycler object and trigger its final action immediately in
+/// some way, or if there was some other explosion-recycling mechanism.
 struct Explosion {
   /// A list of nodes to add to the playfield at the explosion point
   let pieces: [SKNode]
@@ -125,6 +132,9 @@ struct Explosion {
 }
 
 /// A cache of explosions
+///
+/// When something blows up, (an instance of) this class is responsible for either
+/// making a new `Explosion` or recycling one that was created earlier.
 class ExplosionCache {
   /// A dictionary mapping textures to explosions for that texture
   var explosions = [SKTexture: [Explosion]]()
@@ -186,15 +196,21 @@ func makeExplosion(texture: SKTexture, angle: CGFloat, velocity: CGVector, at po
     SKAction.fadeOut(withDuration: 0.25 * duration),
     SKAction.removeFromParent()])
   for (piece, delta) in zip(explosion.pieces, explosion.deltas) {
-    let rotDelta = delta.rotate(by: angle)
     // If this explosion is recycled, then the pieces will have alpha == 0 due to the
     // fadeOut in the action above, so I have to reset that.  Also, if it's due to a
     // player ship exploding then the slow-motion effect that I use may have altered
     // the action speed of fragments, so be sure to reset that too.
     piece.alpha = 1
     piece.speed = .random(in: 1 ... 2)
+    // Arrange the pieces so that they look like the sprite's texture, with the right
+    // position and orientation
+    let rotDelta = delta.rotate(by: angle)
     piece.position = position + rotDelta
     piece.zRotation = angle
+    // Give the pieces velocities that match the original sprite's velocity, and also
+    // add in a radial component to make them fly apart.  The random variations in
+    // the velocity vector are to make the pieces bump into each other a lot as they
+    // scatter.
     let body = piece.requiredPhysicsBody()
     body.velocity = velocity + CGVector(angle: rotDelta.angle() + .random(in: -1 ... 1)).scale(by: .random(in: 10 ... 100))
     body.angularVelocity = .random(in: -2 * .pi ... 2 * .pi)

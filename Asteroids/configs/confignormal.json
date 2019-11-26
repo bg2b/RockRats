@@ -9,7 +9,6 @@
   "playerShotSpeed": 700,
   "playerMaxShots": 4,
   "safeTime": 5,
-  "hyperspaceCooldown": 10,
   "asteroidMinSpeed": 25,
   "asteroidMaxSpeed": 250,
   "numAsteroidCoeffs": [4, 0.7],
