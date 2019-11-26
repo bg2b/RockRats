@@ -240,12 +240,12 @@ class MenuScene: BasicScene {
     // state of all the buttons.
     buttons.forEach { $0.resetAndCancelConfirmation() }
     // The player may have turned audio on or off in the settings.
-    audio.muted = userDefaults.audioIsMuted.value
+    audio.muted = UserData.audioIsMuted.value
     // Reset the number of things the player has tapped; they have to do the full
     // number in one go to get the `tooMuchTime` achievement.
     bubblesPopped = 0
     // The high score might have changed.
-    highScore.text = "High Score: \(userDefaults.highScores.highest)"
+    highScore.text = "High Score: \(UserData.highScores.highest)"
     // Allow UFOs
     getRidOfUFOs = false
     Globals.gameConfig = loadGameConfig(forMode: "menu")

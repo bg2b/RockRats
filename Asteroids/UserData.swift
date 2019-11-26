@@ -38,7 +38,7 @@ struct GameCounter {
   /// As a special case, setting the counter to a negative value resets it to zero.
   var value: Int {
     get {
-      let playerID = userDefaults.currentPlayerID.value
+      let playerID = UserData.currentPlayerID.value
       let localDict = UserDefaults.standard.object(forKey: name) as? [String: Int] ?? [String: Int]()
       let iCloudDict = NSUbiquitousKeyValueStore.default.object(forKey: name) as? [String: Int] ?? [String: Int]()
       let local = localDict[playerID] ?? 0
@@ -48,7 +48,7 @@ struct GameCounter {
       return result
     }
     set {
-      let playerID = userDefaults.currentPlayerID.value
+      let playerID = UserData.currentPlayerID.value
       logging("Set counter \(name) for \(playerID) to \(newValue)")
       var mergedDict = UserDefaults.standard.object(forKey: name) as? [String: Int] ?? [String: Int]()
       let iCloudDict = NSUbiquitousKeyValueStore.default.object(forKey: name) as? [String: Int] ?? [String: Int]()
@@ -90,7 +90,7 @@ struct HighScores {
 
   func updateNames(_ highScores: [GameScore]) -> [GameScore] {
     return highScores.map { score in
-      if let name = userDefaults.playerNames.value[score.playerID], score.playerName != name {
+      if let name = UserData.playerNames.value[score.playerID], score.playerName != name {
         return GameScore(score: score, newName: name)
       } else {
         return score
@@ -180,41 +180,40 @@ struct HighScores {
   }
 }
 
-/// Things that are saved to UserDefaults.standard for persistence.  Some of these
-/// things are also synchronized via iCloud across devices.  Should be a singleton.
-class SavedUserData {
-  /// True when the intro scene has been played on this device
-  var hasDoneIntro = DefaultsValue<Bool>(name: "hasDoneIntro", defaultValue: false)
+/// Things that are saved to UserDefaults.standard for persistence
+///
+/// Some of these are also synchronized via iCloud across devices
+class UserData {
+  /// `true` when the intro scene has been played on this device
+  static var hasDoneIntro = DefaultsValue<Bool>(name: "hasDoneIntro", defaultValue: false)
   /// Audio off/on preference
-  var audioIsMuted = DefaultsValue<Bool>(name: "audioIsMuted", defaultValue: false)
+  static var audioIsMuted = DefaultsValue<Bool>(name: "audioIsMuted", defaultValue: false)
   /// Retro mode preference (ignored if Game Center is disabled or the player does
   /// not have the blastFromThePast achievement)
-  var retroMode = DefaultsValue<Bool>(name: "retroMode", defaultValue: false)
+  static var retroMode = DefaultsValue<Bool>(name: "retroMode", defaultValue: false)
   /// Local player high scores (not global scores from Game Center)
-  var highScores = HighScores()
+  static var highScores = HighScores()
   /// Whoever is logged into Game Center, or "anon" if no one
-  var currentPlayerID = DefaultsValue<String>(name: "currentPlayerID", defaultValue: "anon")
+  static var currentPlayerID = DefaultsValue<String>(name: "currentPlayerID", defaultValue: "anon")
   /// Mapping between current player IDs and new player IDs for whenever Game Center
   /// switches over
-  var newPlayerIDs = DefaultsValue<[String: String]>(name: "newPlayerIDs", defaultValue: [String: String]())
-  /// Mapping between player IDs and display names for high score boards.  We use
-  /// this to just save names for the local players rather than relying on being able
-  /// to load stuff from Game Center.
-  var playerNames = DefaultsValue<[String: String]>(name: "playerNames", defaultValue: [String: String]())
+  static var newPlayerIDs = DefaultsValue<[String: String]>(name: "newPlayerIDs", defaultValue: [String: String]())
+  /// Mapping between player IDs and display names for high score boards.  I use this
+  /// to just save names for the local players rather than relying on being able to
+  /// load stuff from Game Center.
+  static var playerNames = DefaultsValue<[String: String]>(name: "playerNames", defaultValue: [String: String]())
   /// A local-only copy of ufosDestroyedCounter that is updated during a game
-  var ufosDestroyed = DefaultsValue<Int>(name: "ufosDestroyed", defaultValue: 0)
+  static var ufosDestroyed = DefaultsValue<Int>(name: "ufosDestroyed", defaultValue: 0)
   /// A local-only copy of asteroidsDestroyedCounter that is updated during a game
-  var asteroidsDestroyed = DefaultsValue<Int>(name: "asteroidsDestroyed", defaultValue: 0)
+  static var asteroidsDestroyed = DefaultsValue<Int>(name: "asteroidsDestroyed", defaultValue: 0)
   /// Mapping between player IDs and the total number of UFOs they've destroyed.
-  /// Used for different levels of UFO destruction achievements.
-  var ufosDestroyedCounter = GameCounter(name: "ufosDestroyedCounter")
+  /// Used for different levels of UFO destruction achievements (synced via iCloud)
+  static var ufosDestroyedCounter = GameCounter(name: "ufosDestroyedCounter")
   /// Mapping between player IDs and the total number of asteroids they've destroyed.
-  /// Used for different levels of asteroid destruction achievements.
-  var asteroidsDestroyedCounter = GameCounter(name: "asteroidsDestroyedCounter")
+  /// Used for different levels of asteroid destruction achievements (synced via
+  /// iCloud)
+  static var asteroidsDestroyedCounter = GameCounter(name: "asteroidsDestroyedCounter")
 }
-
-/// Singleton for saving persistent and synchronized information and settings
-var userDefaults = SavedUserData()
 
 /// Save a name to be displayed for the given player ID.  These are used by
 /// HighScores when it returns a list of the high scores for local players.
@@ -226,7 +225,7 @@ var userDefaults = SavedUserData()
 ///   - playerID: The player ID from Game Center
 ///   - playerName: The name to be shown (the `alias` in the `GKPlayer` structure)
 func savePlayerName(_ playerID: String, playerName: String) {
-  userDefaults.playerNames.value[playerID] = playerName
+  UserData.playerNames.value[playerID] = playerName
 }
 
 /// Called by the Game Center interface when a new player authenticates.
@@ -238,15 +237,15 @@ func savePlayerName(_ playerID: String, playerName: String) {
 ///     longer available
 func setCurrentPlayer(_ playerID: String, playerName: String, alternatePlayerID: String?) {
   // Someone logged in on Game Center; make sure we have the right counters for them.
-  userDefaults.currentPlayerID.value = playerID
+  UserData.currentPlayerID.value = playerID
   savePlayerName(playerID, playerName: playerName)
   if let alternatePlayerID = alternatePlayerID {
-    userDefaults.newPlayerIDs.value[playerID] = alternatePlayerID
+    UserData.newPlayerIDs.value[playerID] = alternatePlayerID
   }
   logging("Player is now \(playerID) (alternate \(alternatePlayerID ?? "<none>")), name \(playerName)")
-  userDefaults.ufosDestroyed.value = userDefaults.ufosDestroyedCounter.value
-  userDefaults.asteroidsDestroyed.value = userDefaults.asteroidsDestroyedCounter.value
-  logging("UFO counter \(userDefaults.ufosDestroyed.value), asteroid counter \(userDefaults.asteroidsDestroyed.value)")
+  UserData.ufosDestroyed.value = UserData.ufosDestroyedCounter.value
+  UserData.asteroidsDestroyed.value = UserData.asteroidsDestroyedCounter.value
+  logging("UFO counter \(UserData.ufosDestroyed.value), asteroid counter \(UserData.asteroidsDestroyed.value)")
   // Synchronize in case either local or iCloud was out-of-date.
   updateGameCounters()
 }
@@ -259,10 +258,10 @@ func updateGameCounters() {
   // The current counters have been updated by playing a game.  Sync them to
   // persistent storage and iCloud.
   logging("Updating game counters")
-  userDefaults.ufosDestroyedCounter.value = userDefaults.ufosDestroyed.value
-  userDefaults.asteroidsDestroyedCounter.value = userDefaults.asteroidsDestroyed.value
+  UserData.ufosDestroyedCounter.value = UserData.ufosDestroyed.value
+  UserData.asteroidsDestroyedCounter.value = UserData.asteroidsDestroyed.value
   // If by some chance the same person has been playing on another device, store the
   // new values back in the local counters.
-  userDefaults.ufosDestroyed.value = userDefaults.ufosDestroyedCounter.value
-  userDefaults.asteroidsDestroyed.value = userDefaults.asteroidsDestroyedCounter.value
+  UserData.ufosDestroyed.value = UserData.ufosDestroyedCounter.value
+  UserData.asteroidsDestroyed.value = UserData.asteroidsDestroyedCounter.value
 }

@@ -52,7 +52,7 @@ class SettingsScene: BasicScene {
     bottomButtons.addChild(menuButton)
     // Sound on/off
     muteButton = Button(imagesNamed: ["soundon", "soundoff"], imageColor: AppAppearance.buttonColor, size: buttonSize)
-    muteButton.selectedValue = (userDefaults.audioIsMuted.value ? 1 : 0)
+    muteButton.selectedValue = (UserData.audioIsMuted.value ? 1 : 0)
     muteButton.action = { [unowned self] in self.toggleSound() }
     muteButton.position = CGPoint(x: nextButtonX, y: 0)
     nextButtonX += buttonSize.width + buttonSpacing
@@ -61,7 +61,7 @@ class SettingsScene: BasicScene {
     // `blastFromThePast` achievement.
     if achievementIsCompleted(achievement: .blastFromThePast) {
       retroButton = Button(imagesNamed: ["shipmodern", "shipretro"], imageColor: .white, size: buttonSize)
-      retroButton.selectedValue = (userDefaults.retroMode.value ? 1 : 0)
+      retroButton.selectedValue = (UserData.retroMode.value ? 1 : 0)
       retroButton.action = { [unowned self] in self.toggleRetro() }
       retroButton.position = CGPoint(x: nextButtonX, y: 0)
       nextButtonX += buttonSize.width + buttonSpacing
@@ -181,16 +181,16 @@ class SettingsScene: BasicScene {
     if muteButton.selectedValue == 1 {
       // Muted
       audio.muted = true
-      userDefaults.audioIsMuted.value = true
+      UserData.audioIsMuted.value = true
     } else {
       audio.muted = false
-      userDefaults.audioIsMuted.value = false
+      UserData.audioIsMuted.value = false
     }
   }
 
   /// Toggle retro/modern appearance
   func toggleRetro() {
-    userDefaults.retroMode.value = (retroButton.selectedValue == 1)
+    UserData.retroMode.value = (retroButton.selectedValue == 1)
   }
 
   /// Display the credits scene
@@ -200,7 +200,7 @@ class SettingsScene: BasicScene {
 
   /// Reset all local high scores
   func resetScores() {
-    userDefaults.highScores.reset()
+    UserData.highScores.reset()
     logging("Scores reset")
   }
 
@@ -211,12 +211,12 @@ class SettingsScene: BasicScene {
   func resetAchievements() {
     if let gc = Globals.gcInterface, gc.enabled {
       gc.resetAchievements()
-      userDefaults.ufosDestroyed.value = 0
-      userDefaults.asteroidsDestroyed.value = 0
+      UserData.ufosDestroyed.value = 0
+      UserData.asteroidsDestroyed.value = 0
       // Assigning a negative value means to force the iCloud-synchronized per-player
       // values to zero.
-      userDefaults.ufosDestroyedCounter.value = -1
-      userDefaults.asteroidsDestroyedCounter.value = -1
+      UserData.ufosDestroyedCounter.value = -1
+      UserData.asteroidsDestroyedCounter.value = -1
       logging("Achievements reset")
     }
   }

@@ -130,7 +130,7 @@ class SceneAudio {
         audioEngine.connect(playerNode, to: audioEngine.mainMixerNode, format: buffer.format)
         playerNode.play()
       }
-      muted = userDefaults.audioIsMuted.value
+      muted = UserData.audioIsMuted.value
     } catch {
       logging("Cannot start audio engine, \(error.localizedDescription)")
     }

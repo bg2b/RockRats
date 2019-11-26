@@ -27,7 +27,7 @@ class GameViewController: UIViewController {
       Globals.menuScene = MenuScene(size: size)
       Globals.gcInterface = GameCenterInterface(leaderboardID: "org.davidlong.Asteroids.normalScores",
                                                 presenter: { vc in Globals.menuScene.setGameCenterAuth(viewController: vc) })
-      let toPresent = userDefaults.hasDoneIntro.value ? Globals.menuScene! : IntroScene(size: size, conclusion: false)
+      let toPresent = UserData.hasDoneIntro.value ? Globals.menuScene! : IntroScene(size: size, conclusion: false)
       logging("viewDidLoad will present \(toPresent.name!)")
       view.presentScene(toPresent)
       view.preferredFramesPerSecond = 120

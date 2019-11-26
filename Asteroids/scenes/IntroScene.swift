@@ -114,7 +114,7 @@ class IntroScene: BasicScene {
 
   /// Handles clicks of the done button
   func done() {
-    if userDefaults.hasDoneIntro.value {
+    if UserData.hasDoneIntro.value {
       // They're just replaying the intro (or conclusion) from the settings
       if conclusion {
         makeSceneInBackground { CreditsScene(size: self.fullFrame.size) }
@@ -125,7 +125,7 @@ class IntroScene: BasicScene {
       // First time the game has launched, take them through the tutorial
       makeSceneInBackground { TutorialScene(size: self.fullFrame.size) }
     }
-    userDefaults.hasDoneIntro.value = true
+    UserData.hasDoneIntro.value = true
     switchWhenReady()
   }
 

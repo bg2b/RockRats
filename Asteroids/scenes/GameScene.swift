@@ -149,7 +149,7 @@ class GameScene: GameTutorialScene {
     // somewhat out-of-date Game Center scores, but whatevs.
     let gc = Globals.gcInterface!
     let gameScore = gc.enabled ? gc.saveScore(score) : GameScore(points: score)
-    _ = userDefaults.highScores.addScore(gameScore)
+    _ = UserData.highScores.addScore(gameScore)
     if gc.enabled {
       wait(for: 2) {
         gc.loadLeaderboards()
@@ -466,11 +466,11 @@ class GameScene: GameTutorialScene {
     if !asteroid.requiredPhysicsBody().isOnScreen {
       reportAchievement(achievement: .quickFingers)
     }
-    userDefaults.asteroidsDestroyed.value += 1
-    if userDefaults.asteroidsDestroyed.value % 100 == 0 {
-      if let minDestroyed = reportAchievement(achievement: .rockRat, soFar: userDefaults.asteroidsDestroyed.value) {
-        logging("Bumping destroyed asteroids from \(userDefaults.asteroidsDestroyed.value) to \(minDestroyed) because of Game Center")
-        userDefaults.asteroidsDestroyed.value = minDestroyed
+    UserData.asteroidsDestroyed.value += 1
+    if UserData.asteroidsDestroyed.value % 100 == 0 {
+      if let minDestroyed = reportAchievement(achievement: .rockRat, soFar: UserData.asteroidsDestroyed.value) {
+        logging("Bumping destroyed asteroids from \(UserData.asteroidsDestroyed.value) to \(minDestroyed) because of Game Center")
+        UserData.asteroidsDestroyed.value = minDestroyed
       }
     }
     addToScore(asteroidPoints(asteroid))
@@ -506,11 +506,11 @@ class GameScene: GameTutorialScene {
     if laser.requiredPhysicsBody().hasWrapped {
       reportAchievement(achievement: .trickShot)
     }
-    userDefaults.ufosDestroyed.value += 1
-    if userDefaults.ufosDestroyed.value % 5 == 0 {
-      if let minDestroyed = reportAchievement(achievement: .ufoHunter, soFar: userDefaults.ufosDestroyed.value) {
-        logging("Bumping destroyed UFOs from \(userDefaults.ufosDestroyed.value) to \(minDestroyed) because of Game Center")
-        userDefaults.ufosDestroyed.value = minDestroyed
+    UserData.ufosDestroyed.value += 1
+    if UserData.ufosDestroyed.value % 5 == 0 {
+      if let minDestroyed = reportAchievement(achievement: .ufoHunter, soFar: UserData.ufosDestroyed.value) {
+        logging("Bumping destroyed UFOs from \(UserData.ufosDestroyed.value) to \(minDestroyed) because of Game Center")
+        UserData.ufosDestroyed.value = minDestroyed
       }
     }
     addToScore(ufoPoints(ufo))
@@ -735,7 +735,7 @@ class GameScene: GameTutorialScene {
     name = "gameScene"
     initFutureShader()
     player = Ship(color: "blue", getJoystickDirection: { [unowned self] in return self.joystickDirection }, audio: audio)
-    setRetroMode(enabled: achievementIsCompleted(achievement: .blastFromThePast) && userDefaults.retroMode.value)
+    setRetroMode(enabled: achievementIsCompleted(achievement: .blastFromThePast) && UserData.retroMode.value)
     physicsWorld.contactDelegate = self
   }
 

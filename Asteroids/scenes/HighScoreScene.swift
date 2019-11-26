@@ -259,7 +259,7 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     initGameArea(avoidSafeArea: false)
     physicsWorld.contactDelegate = self
     // Start with the local high scores
-    var highScores = userDefaults.highScores.value
+    var highScores = UserData.highScores.value
     // Merge in scores from Game Center, if those are available
     if let gc = Globals.gcInterface, gc.enabled, !gc.leaderboardScores.isEmpty {
       var ranks = Array(1 ... gc.leaderboardScores.count)

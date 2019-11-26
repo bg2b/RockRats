@@ -23,8 +23,8 @@ struct GameScore: Equatable {
   }
 
   init(points: Int) {
-    playerID = userDefaults.currentPlayerID.value
-    playerName = userDefaults.playerNames.value[playerID]
+    playerID = UserData.currentPlayerID.value
+    playerName = UserData.playerNames.value[playerID]
     self.points = points
     date = Date().timeIntervalSinceReferenceDate
   }
