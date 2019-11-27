@@ -42,6 +42,8 @@ class ShipAppearanceAlternative {
   }
 }
 
+// MARK: -
+
 /// The player!
 ///
 /// Handles the main sprite, thrust animation and engine sounds, keeping track of
@@ -59,9 +61,6 @@ class ShipAppearanceAlternative {
 ///   the energy, and have `canShoot` and `canJump` deduct from it as part of the
 ///   check for whether an action is possible.
 class Ship: SKNode {
-
-  // MARK: - Instance variables
-
   /// A closure that gives the joystick direction, normalized so max activation is a unit vector
   let getJoystickDirection: () -> CGVector
   /// Possible looks for the ship
