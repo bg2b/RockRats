@@ -284,7 +284,7 @@ class GameTutorialScene: BasicScene {
   /// Handle the player's request to shoot.  Doesn't actually shoot if they have
   /// insufficient energy or too many shots in-flight.
   func fireLaser() {
-    guard player.canShoot(), energyBar.useEnergy(3) else { return }
+    guard player.canShoot(energyBar) else { return }
     let laser = Globals.spriteCache.findSprite(imageNamed: "lasersmall_green") { sprite in
       let texture = sprite.requiredTexture()
       // The physics body is just a little circle at the front end of the laser,
@@ -366,7 +366,7 @@ class GameTutorialScene: BasicScene {
   /// Handle the player's jump request.  They still need sufficient energy or they're
   /// not going anywhere.
   func hyperspaceJump() {
-    guard player.canJump(), energyBar.useEnergy(40) else { return }
+    guard player.canJump(energyBar) else { return }
     // I have the achievement checking and retro effect enabling/disabling here just
     // because it's convenient.  The tutorial always has score == 0, so those parts
     // are not active in the tutorial.

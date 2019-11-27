@@ -573,7 +573,7 @@ class TutorialScene: GameTutorialScene {
     super.init(size: size)
     name = "tutorialScene"
     initInstructions()
-    player = Ship(color: "blue", getJoystickDirection: { [unowned self] in return self.clampedJoystick() }, audio: audio)
+    player = Ship(getJoystickDirection: { [unowned self] in return self.clampedJoystick() }, audio: audio)
     physicsWorld.contactDelegate = self
   }
 
