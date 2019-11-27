@@ -44,7 +44,8 @@ class ShipAppearanceAlternative {
 
 /// The player!
 ///
-/// Handles the main sprite, thrust animation and engine sounds, keeping track of available laser shots, and flying based on a joystick input.
+/// Handles the main sprite, thrust animation and engine sounds, keeping track of
+/// available laser shots, and flying based on a joystick input.
 ///
 /// The actual control of the ship (turning touches into desired actions) is mostly
 /// elsewhere, in `GameTutorialScene`.  This class provides methods to do the various
@@ -55,8 +56,8 @@ class ShipAppearanceAlternative {
 ///   energy bookkeeping were moved here, there would have to be an interface with a
 ///   separate `EnergyBar` to display it, since the display has to be elsewhere in
 ///   the node hierarchy.  I've instead decided to have the `EnergyBar` keep track of
-///   the energy, and for having `canShoot` and `canJump` deduct from it as part of
-///   the check for whether an action is possible.
+///   the energy, and have `canShoot` and `canJump` deduct from it as part of the
+///   check for whether an action is possible.
 class Ship: SKNode {
 
   // MARK: - Instance variables
