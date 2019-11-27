@@ -28,6 +28,7 @@ class EnergyBar: SKNode {
   required init(maxLength: Int) {
     self.maxLength = maxLength
     super.init()
+    name = "energyBar"
     addToLevel(maxLevel)
   }
 
