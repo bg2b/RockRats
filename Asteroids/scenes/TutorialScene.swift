@@ -555,7 +555,7 @@ class TutorialScene: GameTutorialScene {
     score = 0
     energyBar.fill()
     replenishEnergy()
-    livesDisplay.showLives(3)
+    livesDisplay.showReserves(3)
     deathCount = 0
     wait(for: 1) {
       self.tutorial1()

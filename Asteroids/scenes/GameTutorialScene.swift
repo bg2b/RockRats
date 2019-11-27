@@ -29,7 +29,7 @@ class GameTutorialScene: BasicScene {
   /// refers to it.  See the comments there.
   var score = 0
   /// The display of the number of reserve ships
-  var livesDisplay: LivesDisplay!
+  var livesDisplay: ReservesDisplay!
   /// The display of the player's energy reserves
   var energyBar: EnergyBar!
   /// The point of the (virtual) joystick's origin
@@ -152,7 +152,7 @@ class GameTutorialScene: BasicScene {
     // blurring effect is used when the game is paused.
     gameArea.addChild(info)
     // Remaining ships in upper left.
-    livesDisplay = LivesDisplay()
+    livesDisplay = ReservesDisplay()
     livesDisplay.position = CGPoint(x: gameFrame.minX + 20, y: gameFrame.maxY - 20)
     info.addChild(livesDisplay)
     // Energy reserves in upper right.

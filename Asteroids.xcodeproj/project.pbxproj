@@ -37,7 +37,7 @@
 		FD3E02082333B1C20057A766 /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD3E02072333B1C20057A766 /* Logging.swift */; };
 		FD40DE7E236C538B00544034 /* GameScore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD40DE7D236C538B00544034 /* GameScore.swift */; };
 		FD46BD72231415B7008C1F99 /* Playfield.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD46BD71231415B7008C1F99 /* Playfield.swift */; };
-		FD4D53C02306B47900718938 /* LivesDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4D53BF2306B47900718938 /* LivesDisplay.swift */; };
+		FD4D53C02306B47900718938 /* ReservesDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4D53BF2306B47900718938 /* ReservesDisplay.swift */; };
 		FD4D53C22306B60F00718938 /* life_blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53C12306B60F00718938 /* life_blue@2x.png */; };
 		FD4D53C523080D3600718938 /* player_explosion.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53C423080D3600718938 /* player_explosion.wav */; };
 		FD4D53C723080E7300718938 /* Sounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4D53C623080E7300718938 /* Sounds.swift */; };
@@ -153,7 +153,7 @@
 		FD3E02072333B1C20057A766 /* Logging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
 		FD40DE7D236C538B00544034 /* GameScore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScore.swift; sourceTree = "<group>"; };
 		FD46BD71231415B7008C1F99 /* Playfield.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Playfield.swift; sourceTree = "<group>"; };
-		FD4D53BF2306B47900718938 /* LivesDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivesDisplay.swift; sourceTree = "<group>"; };
+		FD4D53BF2306B47900718938 /* ReservesDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservesDisplay.swift; sourceTree = "<group>"; };
 		FD4D53C12306B60F00718938 /* life_blue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "life_blue@2x.png"; sourceTree = "<group>"; };
 		FD4D53C423080D3600718938 /* player_explosion.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = player_explosion.wav; sourceTree = "<group>"; };
 		FD4D53C623080E7300718938 /* Sounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sounds.swift; sourceTree = "<group>"; };
@@ -335,9 +335,9 @@
 				FD79323D22D20FE600E7D336 /* GameViewController.swift */,
 				FDCF8CA422DA7296008EDFD1 /* Globals.swift */,
 				FDF92B412322456900CC4DFE /* Hyperspace.swift */,
-				FD4D53BF2306B47900718938 /* LivesDisplay.swift */,
 				FD3E02072333B1C20057A766 /* Logging.swift */,
 				FD46BD71231415B7008C1F99 /* Playfield.swift */,
+				FD4D53BF2306B47900718938 /* ReservesDisplay.swift */,
 				FD53167422DB24EC00F09E57 /* Ship.swift */,
 				FD4D53C623080E7300718938 /* Sounds.swift */,
 				FDDF488622D2A700006FB86F /* SpriteCache.swift */,
@@ -586,7 +586,7 @@
 				FD96AE20233A4BE600D4CAFA /* GameTutorialScene.swift in Sources */,
 				FDD831F222EDB50200CA4EC6 /* Explosions.swift in Sources */,
 				FDCF8CA322DA175F008EDFD1 /* CGHelpers.swift in Sources */,
-				FD4D53C02306B47900718938 /* LivesDisplay.swift in Sources */,
+				FD4D53C02306B47900718938 /* ReservesDisplay.swift in Sources */,
 				FD96AE1C2339A93300D4CAFA /* TypeIn.swift in Sources */,
 				FD1B38A0234C904C00674161 /* CyclicCache.swift in Sources */,
 				FDCF8CA522DA7296008EDFD1 /* Globals.swift in Sources */,

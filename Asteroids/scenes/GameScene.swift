@@ -335,7 +335,7 @@ class GameScene: GameTutorialScene {
   /// - Parameter amount: The amount by which to change the number of reserves
   func updateLives(_ amount: Int) {
     livesRemaining += amount
-    livesDisplay.showLives(livesRemaining)
+    livesDisplay.showReserves(livesRemaining)
   }
 
   /// Display a message in the center of the screen for some time, then do something
