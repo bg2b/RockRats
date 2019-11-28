@@ -160,7 +160,7 @@ class TutorialScene: GameTutorialScene {
     instructionsLabel.attributedText = makeAttributed(text: text, until: text.startIndex, attributes: attributes)
     instructionsLabel.alpha = 1
     instructionsLabel.isHidden = false
-    instructionsLabel.typeIn(text: text, attributes: attributes, sounds: transmissionSounds, whenDone: whenDone)
+    instructionsLabel.typeIn(text: text, attributes: attributes, sound: transmissionSounds, whenDone: whenDone)
   }
 
   func showMoveOnButton(action: @escaping () -> Void) {

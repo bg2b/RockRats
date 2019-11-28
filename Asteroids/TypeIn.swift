@@ -9,56 +9,19 @@
 import SpriteKit
 import AVFoundation
 
-struct AttrStyles {
-  let textAttributes: [NSAttributedString.Key: Any]
-  let highlightTextAttributes: [NSAttributedString.Key: Any]
-  let hiddenAttributes: [NSAttributedString.Key: Any]
-
-  init(fontName: String, fontSize: CGFloat) {
-    var attributes = [NSAttributedString.Key: Any]()
-    attributes[.font] = UIFont(name: fontName, size: fontSize)
-    attributes[.foregroundColor] = AppAppearance.textColor
-    self.textAttributes = attributes
-    attributes[.foregroundColor] = AppAppearance.highlightTextColor
-    self.highlightTextAttributes = attributes
-    attributes[.foregroundColor] = UIColor.clear
-    self.hiddenAttributes = attributes
-  }
-}
-
-func makeAttributed(text: String, until invisibleIndex: String.Index, attributes: AttrStyles) -> NSAttributedString {
-  var highlighted = false
-  var hidden = false
-  let result = NSMutableAttributedString(string: "")
-  var index = text.startIndex
-  while index < text.endIndex {
-    if text[index] == "@" {
-      highlighted = !highlighted
-    } else if text[index] == "%" {
-      hidden = !hidden
-    } else {
-      if index < invisibleIndex && !hidden {
-        if highlighted {
-          result.append(NSAttributedString(string: String(text[index]), attributes: attributes.highlightTextAttributes))
-        } else {
-          result.append(NSAttributedString(string: String(text[index]), attributes: attributes.textAttributes))
-        }
-      } else {
-        result.append(NSAttributedString(string: String(text[index]), attributes: attributes.hiddenAttributes))
-      }
-    }
-    index = text.index(after: index)
-  }
-  return result
-}
-
 extension SKLabelNode {
-  // This method reveals the (formatted) text in a label node while playing some sound.
-  // It's supposed to give an incoming-transmission type of effect.
+  /// Reveal some (formatted) text in a label node while playing some sound
+  /// - Parameters:
+  ///   - text: The text to show
+  ///   - index: Start the effect from this position (pass `startIndex` initially)
+  ///   - attributes: Attributes for formatting the text
+  ///   - sound: The sound to play while the effect is running
+  ///   - delay: Time between characters
+  ///   - whenDone: A closure to run when the effect finishes
   func typeIn(text: String, at index: String.Index, attributes: AttrStyles,
-              sounds: ContinuousPositionalAudio, delay: Double, whenDone: (() -> Void)?) {
+              sound: ContinuousPositionalAudio, delay: Double, whenDone: (() -> Void)?) {
     if index == text.startIndex {
-      sounds.playerNode.volume = 1
+      sound.playerNode.volume = 1
     }
     if index < text.endIndex {
       // Probably it's not very efficient to regenerate the attributed text
@@ -81,24 +44,31 @@ extension SKLabelNode {
         muteAudio = true
       }
       if muteAudio {
-        sounds.playerNode.volume = 0
+        sound.playerNode.volume = 0
       }
       wait(for: duration) {
         if muteAudio {
-          sounds.playerNode.volume = 1
+          sound.playerNode.volume = 1
         }
         self.typeIn(text: text, at: text.index(after: index), attributes: attributes,
-                    sounds: sounds, delay: delay, whenDone: whenDone)
+                    sound: sound, delay: delay, whenDone: whenDone)
       }
     } else {
       attributedText = makeAttributed(text: text, until: index, attributes: attributes)
-      sounds.playerNode.volume = 0
+      sound.playerNode.volume = 0
       whenDone?()
     }
   }
 
-  func typeIn(text: String, attributes: AttrStyles, sounds: ContinuousPositionalAudio, whenDone: (() -> Void)?) {
+  /// Reveal some formatted text in a label node while playing a sound.  This is
+  /// intended to give an incoming-transmission type of effect.
+  /// - Parameters:
+  ///   - text: The text to show
+  ///   - attributes: Attributes for formatting the text
+  ///   - sound: A sound to play while the effect is running
+  ///   - whenDone: A closure to run when the effect finishes
+  func typeIn(text: String, attributes: AttrStyles, sound: ContinuousPositionalAudio, whenDone: (() -> Void)?) {
     let delay = 2.0 / 60
-    typeIn(text: text, at: text.startIndex, attributes: attributes, sounds: sounds, delay: delay, whenDone: whenDone)
+    typeIn(text: text, at: text.startIndex, attributes: attributes, sound: sound, delay: delay, whenDone: whenDone)
   }
 }

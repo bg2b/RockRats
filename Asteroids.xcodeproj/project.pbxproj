@@ -24,6 +24,7 @@
 		FD0C070E22D8925E00F19A55 /* ship_orange@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD0C070622D8925E00F19A55 /* ship_orange@2x.png */; };
 		FD0C070F22D8925E00F19A55 /* ship_red@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD0C070722D8925E00F19A55 /* ship_red@2x.png */; };
 		FD158A21238BF4CA00180EC9 /* TextureBitmap.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD158A20238BF4CA00180EC9 /* TextureBitmap.swift */; };
+		FD158A23238F6A6C00180EC9 /* AttributedText.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD158A22238F6A6C00180EC9 /* AttributedText.swift */; };
 		FD1B389E234ACC5E00674161 /* ufo3loop.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD1B389D234ACC5E00674161 /* ufo3loop.wav */; };
 		FD1B38A0234C904C00674161 /* CyclicCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD1B389F234C904C00674161 /* CyclicCache.swift */; };
 		FD28DB5422DFFA87009446A2 /* meteorhuge2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD28DB4D22DFFA87009446A2 /* meteorhuge2@2x.png */; };
@@ -129,6 +130,7 @@
 		FD0C070622D8925E00F19A55 /* ship_orange@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ship_orange@2x.png"; sourceTree = "<group>"; };
 		FD0C070722D8925E00F19A55 /* ship_red@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ship_red@2x.png"; sourceTree = "<group>"; };
 		FD158A20238BF4CA00180EC9 /* TextureBitmap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureBitmap.swift; sourceTree = "<group>"; };
+		FD158A22238F6A6C00180EC9 /* AttributedText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttributedText.swift; sourceTree = "<group>"; };
 		FD1B389D234ACC5E00674161 /* ufo3loop.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo3loop.wav; sourceTree = "<group>"; };
 		FD1B389F234C904C00674161 /* CyclicCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyclicCache.swift; sourceTree = "<group>"; };
 		FD28DB4D22DFFA87009446A2 /* meteorhuge2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "meteorhuge2@2x.png"; sourceTree = "<group>"; };
@@ -323,6 +325,7 @@
 				6565DA10232E6818008EA85B /* Achievments.swift */,
 				FDD44F922336113F00C13609 /* AppAppearance.swift */,
 				FD79323522D20FE600E7D336 /* AppDelegate.swift */,
+				FD158A22238F6A6C00180EC9 /* AttributedText.swift */,
 				6513D66B22DC0B4E00B4BD57 /* Button.swift */,
 				FDCF8CA222DA175F008EDFD1 /* CGHelpers.swift */,
 				FD6F23DD234357710083A913 /* ConformingCache.swift */,
@@ -572,6 +575,7 @@
 				FD158A21238BF4CA00180EC9 /* TextureBitmap.swift in Sources */,
 				FDD8FB93232CF4FC00A83EB5 /* MenuScene.swift in Sources */,
 				FDE04B2D22D753240011A529 /* TextureCache.swift in Sources */,
+				FD158A23238F6A6C00180EC9 /* AttributedText.swift in Sources */,
 				FD79323C22D20FE600E7D336 /* BasicScene.swift in Sources */,
 				FD6F23DE234357710083A913 /* ConformingCache.swift in Sources */,
 				FD3E02082333B1C20057A766 /* Logging.swift in Sources */,

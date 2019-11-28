@@ -89,14 +89,14 @@ class IntroScene: BasicScene {
 
   /// Displays "Incoming transmission..."
   func incoming() {
-    incomingLabel.typeIn(text: standBy, attributes: attributes, sounds: transmissionSounds) {
+    incomingLabel.typeIn(text: standBy, attributes: attributes, sound: transmissionSounds) {
       self.wait(for: 3) { self.header() }
     }
   }
 
   /// Displays the message header
   func header() {
-    incomingLabel.typeIn(text: messageHeader, attributes: attributes, sounds: transmissionSounds) {
+    incomingLabel.typeIn(text: messageHeader, attributes: attributes, sound: transmissionSounds) {
       self.wait(for: 5) {
         self.incomingLabel.isHidden = true
         self.intro()
@@ -107,7 +107,7 @@ class IntroScene: BasicScene {
   /// Displays the main part of the message
   func intro() {
     introLabel.isHidden = false
-    introLabel.typeIn(text: introduction, attributes: attributes, sounds: transmissionSounds) {
+    introLabel.typeIn(text: introduction, attributes: attributes, sound: transmissionSounds) {
       self.doneButton.run(SKAction.sequence([SKAction.unhide(), SKAction.fadeIn(withDuration: 0.5)]))
     }
   }
