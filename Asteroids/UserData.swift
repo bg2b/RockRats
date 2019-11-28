@@ -73,6 +73,8 @@ struct GameCounter {
 struct HighScores {
   static let maxScores = 10
 
+  /// Write scores in UserDefaults and iCloud
+  /// - Parameter highScores: The scores to encode and save
   func writeBack(_ highScores: [GameScore]) {
     logging("Saving \(highScores.count) high scores")
     let encoded = highScores.map { $0.encode() }
@@ -80,6 +82,9 @@ struct HighScores {
     NSUbiquitousKeyValueStore.default.set(encoded, forKey: "highScores")
   }
 
+  /// Keep only a limited number of high scores
+  /// - Parameter highScores: An array of scores
+  /// - Returns: The highest scores (sorted) and limited to `maxScores` in number
   func sortedAndTrimmed(_ highScores: [GameScore]) -> [GameScore] {
     var sorted = highScores.sorted { $0.points > $1.points }
     if sorted.count > HighScores.maxScores {
@@ -88,6 +93,9 @@ struct HighScores {
     return sorted
   }
 
+  /// Update player names in a list of scores
+  /// - Parameter highScores: The high scores
+  /// - Returns: The scores, but with player names replaced by whatever is currently known
   func updateNames(_ highScores: [GameScore]) -> [GameScore] {
     return highScores.map { score in
       if let name = UserData.playerNames.value[score.playerID], score.playerName != name {
@@ -101,51 +109,49 @@ struct HighScores {
   /// Gets the local high scores.  Also handles updating names and synchronizing
   /// iCloud-backed and local storage.
   var value: [GameScore] {
-    get {
-      let now = Date().timeIntervalSinceReferenceDate
-      let local = UserDefaults.standard.object(forKey: "highScores") as? [[String: Any]] ?? [[String: Any]]()
-      let localScores = local.compactMap { GameScore(fromDict: $0) }
-      let localDate = UserDefaults.standard.double(forKey: "highScoresDate")
-      // If the local scores are being loaded for the first time then the local
-      // highScoresDate will be zero.  We _don't_ set it to now in this case; the
-      // globalDate below will be set to now instead, which will ensure the iCloud
-      // scores take precedence.  If we initialized localDate to now but some other
-      // device had scores from earlier stored in iCloud, then those would have an
-      // older date, and the empty local high scores would overwrite them.
-      let global = NSUbiquitousKeyValueStore.default.object(forKey: "highScores") as? [[String: Any]] ?? [[String: Any]]()
-      let globalScores = global.compactMap { GameScore(fromDict: $0) }
-      let globalDate = NSUbiquitousKeyValueStore.default.double(forKey: "highScoresDate")
-      if globalDate == 0 {
-        NSUbiquitousKeyValueStore.default.set(now, forKey: "highScoresDate")
-      }
-      var highScores: [GameScore]
-      if localDate == globalDate {
-        // iCloud and the local scores come from the same generation, so merge.
-        highScores = localScores
-        for score in globalScores {
-          if (highScores.firstIndex { sameScore(score, $0) }) == nil {
-            highScores.append(score)
-          }
-        }
-      } else if localDate < globalDate {
-        // iCloud has the relevant data.  This happens if the scores get reset on a
-        // different device, or if this is the first time getting scores for this
-        // device but they've played on some other device before.
-        highScores = globalScores
-        UserDefaults.standard.set(globalDate, forKey: "highScoresDate")
-      } else {
-        // Local has the relevant data, but I'm not sure how this could happen.
-        // Maybe if iCloud isn't available in some way?
-        highScores = localScores
-        NSUbiquitousKeyValueStore.default.set(localDate, forKey: "highScoresDate")
-      }
-      highScores = sortedAndTrimmed(highScores)
-      highScores = updateNames(highScores)
-      if highScores != localScores || highScores != globalScores {
-        writeBack(highScores)
-      }
-      return highScores
+    let now = Date().timeIntervalSinceReferenceDate
+    let local = UserDefaults.standard.object(forKey: "highScores") as? [[String: Any]] ?? [[String: Any]]()
+    let localScores = local.compactMap { GameScore(fromDict: $0) }
+    let localDate = UserDefaults.standard.double(forKey: "highScoresDate")
+    // If the local scores are being loaded for the first time then the local
+    // highScoresDate will be zero.  We _don't_ set it to now in this case; the
+    // globalDate below will be set to now instead, which will ensure the iCloud
+    // scores take precedence.  If we initialized localDate to now but some other
+    // device had scores from earlier stored in iCloud, then those would have an
+    // older date, and the empty local high scores would overwrite them.
+    let global = NSUbiquitousKeyValueStore.default.object(forKey: "highScores") as? [[String: Any]] ?? [[String: Any]]()
+    let globalScores = global.compactMap { GameScore(fromDict: $0) }
+    let globalDate = NSUbiquitousKeyValueStore.default.double(forKey: "highScoresDate")
+    if globalDate == 0 {
+      NSUbiquitousKeyValueStore.default.set(now, forKey: "highScoresDate")
     }
+    var highScores: [GameScore]
+    if localDate == globalDate {
+      // iCloud and the local scores come from the same generation, so merge.
+      highScores = localScores
+      for score in globalScores {
+        if (highScores.firstIndex { sameScore(score, $0) }) == nil {
+          highScores.append(score)
+        }
+      }
+    } else if localDate < globalDate {
+      // iCloud has the relevant data.  This happens if the scores get reset on a
+      // different device, or if this is the first time getting scores for this
+      // device but they've played on some other device before.
+      highScores = globalScores
+      UserDefaults.standard.set(globalDate, forKey: "highScoresDate")
+    } else {
+      // Local has the relevant data, but I'm not sure how this could happen.
+      // Maybe if iCloud isn't available in some way?
+      highScores = localScores
+      NSUbiquitousKeyValueStore.default.set(localDate, forKey: "highScoresDate")
+    }
+    highScores = sortedAndTrimmed(highScores)
+    highScores = updateNames(highScores)
+    if highScores != localScores || highScores != globalScores {
+      writeBack(highScores)
+    }
+    return highScores
   }
 
   /// The highest all-time local score
@@ -156,7 +162,8 @@ struct HighScores {
 
   /// See if the score for a just-completed game is sufficien to make the high scores
   /// list.  If so, store it and sync back to iCloud.
-  /// - Parameter score: The score that the player achieved
+  /// - Parameter score: The new score that the player achieved
+  /// - Returns: The array of high scores, possibly including the new score
   func addScore(_ score: GameScore) -> [GameScore] {
     var highScores = value
     if (highScores.last?.points ?? 0) > score.points && highScores.count >= HighScores.maxScores {
@@ -233,8 +240,8 @@ func savePlayerName(_ playerID: String, playerName: String) {
 ///   - playerID: ID for the player that just logged in
 ///   - playerName: The name that should be used for the player (their alias)
 ///   - alternatePlayerID: An optional alternate ID that should be saved for
-///     transitioning persistent state when the deprecated GKPlayer playerID is no
-///     longer available
+///     transitioning persistent state when the deprecated `GKPlayer` `playerID` is
+///     no longer available
 func setCurrentPlayer(_ playerID: String, playerName: String, alternatePlayerID: String?) {
   // Someone logged in on Game Center; make sure we have the right counters for them.
   UserData.currentPlayerID.value = playerID
