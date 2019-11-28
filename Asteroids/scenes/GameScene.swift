@@ -718,9 +718,9 @@ class GameScene: GameTutorialScene {
       lastWarpInTime = currentTime
     }
     ufos.forEach {
-      $0.fly(player: player, playfield: playfield) {
-        (angle, position, speed) in self.fireUFOLaser(angle: angle, position: position, speed: speed)
-        timesUFOsShot += 1
+      $0.fly(player: player, playfield: playfield) { angle, position, speed in
+        self.fireUFOLaser(angle: angle, position: position, speed: speed)
+        self.timesUFOsShot += 1
       }
     }
     player.fly()

@@ -241,7 +241,8 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
 
   /// Not much to see here (yet)
   ///
-  /// - Todo: Add some animations to the high score scene
+  /// - Todo:
+  ///   Add some animations to the high score scene
   ///
   /// - Parameter currentTime: The current game time
   override func update(_ currentTime: TimeInterval) {

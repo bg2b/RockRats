@@ -264,7 +264,7 @@ class MenuScene: BasicScene {
   override func update(_ currentTime: TimeInterval) {
     super.update(currentTime)
     ufos.forEach { ufo in
-      ufo.fly(player: nil, playfield: playfield) { (angle, position, speed) in
+      ufo.fly(player: nil, playfield: playfield) { angle, position, speed in
         if !self.getRidOfUFOs {
           self.fireUFOLaser(angle: angle, position: position, speed: speed)
           self.shotsFired[ufo] = self.shotsFired[ufo]! + 1

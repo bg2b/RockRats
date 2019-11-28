@@ -10,7 +10,7 @@ import SpriteKit
 import AVFoundation
 
 extension SKLabelNode {
-  /// Reveal some (formatted) text in a label node while playing some sound
+  /// Helper routine for `typeIn(text:attributes:sound:whenDone:)`
   /// - Parameters:
   ///   - text: The text to show
   ///   - index: Start the effect from this position (pass `startIndex` initially)

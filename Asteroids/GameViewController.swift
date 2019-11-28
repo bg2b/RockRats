@@ -14,7 +14,7 @@ class GameViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     if let lang = Locale.preferredLanguages.first {
-      /// - ToDo: Ideally the game would be localized, at least for Spanish
+      /// - Todo: Ideally the game would be localized, at least for Spanish
       logging("Preferred language \(lang)")
     }
     if let view = self.view as! SKView? {

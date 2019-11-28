@@ -49,7 +49,7 @@ struct GameScore: Equatable {
   /// of the player isn't desired.
   ///
   /// - Todo:
-  ///   Check what happens if displayName is nil and the alias in the score has
+  ///   Check what happens if displayName is `nil` and the alias in the score has
   ///   characters that aren't in our font.
   init(score: GKScore, displayName: String? = nil) {
     playerID = score.player.primaryPlayerID
