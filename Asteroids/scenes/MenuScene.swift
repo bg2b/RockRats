@@ -24,7 +24,7 @@ import GameKit
 class MenuScene: BasicScene {
   /// A count of how many shots have been fired by a UFO; they don't warp out until
   /// they've fired a few shots.
-  var shotsFired = [UFO: Int]()
+  var shotsToFire = [UFO: Int]()
   /// Becomes `true` before a scene transition, stops UFO spawning and shooting
   var getRidOfUFOs = false
   /// How many UFOs or asteroids the player has tapped on
@@ -110,15 +110,15 @@ class MenuScene: BasicScene {
     if !getRidOfUFOs && asteroids.count >= 3 && ufos.count < Globals.gameConfig.value(for: \.maxUFOs) {
       let ufo = UFO(brothersKilled: 0, audio: nil)
       spawnUFO(ufo: ufo)
-      shotsFired[ufo] = 0
+      shotsToFire[ufo] = .random(in: 3 ... 10)
     }
     wait(for: 5) { self.spawnUFOs() }
   }
 
-  /// Make a UFO warp out; this is an override because I need to update `shotsFired`
+  /// Make a UFO warp out; this is an override because I need to update `shotsToFire`
   /// - Parameter ufo: The UFO that's leaving
   override func warpOutUFO(_ ufo: UFO) {
-    shotsFired.removeValue(forKey: ufo)
+    shotsToFire.removeValue(forKey: ufo)
     super.warpOutUFO(ufo)
   }
 
@@ -139,10 +139,10 @@ class MenuScene: BasicScene {
     poppedSomething()
   }
 
-  /// A UFO is being destroyed; this is an override because I need to update `shotsFired`
+  /// A UFO is being destroyed; this is an override because I need to update `shotsToFire`
   /// - Parameter ufo: The UFO that is being nuked
   override func destroyUFO(_ ufo: UFO) {
-    shotsFired.removeValue(forKey: ufo)
+    shotsToFire.removeValue(forKey: ufo)
     super.destroyUFO(ufo)
   }
 
@@ -267,9 +267,11 @@ class MenuScene: BasicScene {
       ufo.fly(player: nil, playfield: playfield) { angle, position, speed in
         if !self.getRidOfUFOs {
           self.fireUFOLaser(angle: angle, position: position, speed: speed)
-          self.shotsFired[ufo] = self.shotsFired[ufo]! + 1
-          if self.shotsFired[ufo]! > 3 && Int.random(in: 0 ..< 10) == 0 {
-            self.warpOutUFO(ufo)
+          self.shotsToFire[ufo] = self.shotsToFire[ufo]! - 1
+          if self.shotsToFire[ufo]! == 0 {
+            ufo.wait(for: .random(in: 1 ... 3)) {
+              self.warpOutUFO(ufo)
+            }
           }
         }
       }
