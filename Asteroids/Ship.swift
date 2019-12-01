@@ -239,7 +239,6 @@ class Ship: SKNode {
       setEngineLevel(0)
       return
     }
-    logging("stick on")
     // The player is actually trying to do something...
     var thrustAmount = CGFloat(0)
     var thrustForce = CGFloat(0)
