@@ -25,6 +25,7 @@
 		FD0C070F22D8925E00F19A55 /* ship_red@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD0C070722D8925E00F19A55 /* ship_red@2x.png */; };
 		FD158A21238BF4CA00180EC9 /* TextureBitmap.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD158A20238BF4CA00180EC9 /* TextureBitmap.swift */; };
 		FD158A23238F6A6C00180EC9 /* AttributedText.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD158A22238F6A6C00180EC9 /* AttributedText.swift */; };
+		FD158A25238FF9EA00180EC9 /* Touchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD158A24238FF9EA00180EC9 /* Touchable.swift */; };
 		FD1B389E234ACC5E00674161 /* ufo3loop.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD1B389D234ACC5E00674161 /* ufo3loop.wav */; };
 		FD1B38A0234C904C00674161 /* CyclicCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD1B389F234C904C00674161 /* CyclicCache.swift */; };
 		FD28DB5422DFFA87009446A2 /* meteorhuge2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD28DB4D22DFFA87009446A2 /* meteorhuge2@2x.png */; };
@@ -107,7 +108,6 @@
 		FDE04B2822D5FEA30011A529 /* star3@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FDE04B2522D5FEA30011A529 /* star3@2x.png */; };
 		FDE04B2922D5FEA30011A529 /* star2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FDE04B2622D5FEA30011A529 /* star2@2x.png */; };
 		FDE04B2D22D753240011A529 /* TextureCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE04B2C22D753240011A529 /* TextureCache.swift */; };
-		FDF32A6D23488F6D00785715 /* TouchableSprite.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDF32A6C23488F6D00785715 /* TouchableSprite.swift */; };
 		FDF92B422322456900CC4DFE /* Hyperspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDF92B412322456900CC4DFE /* Hyperspace.swift */; };
 		FDF92B442322666600CC4DFE /* ufo_warpout.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDF92B432322666600CC4DFE /* ufo_warpout.wav */; };
 /* End PBXBuildFile section */
@@ -131,6 +131,7 @@
 		FD0C070722D8925E00F19A55 /* ship_red@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ship_red@2x.png"; sourceTree = "<group>"; };
 		FD158A20238BF4CA00180EC9 /* TextureBitmap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureBitmap.swift; sourceTree = "<group>"; };
 		FD158A22238F6A6C00180EC9 /* AttributedText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttributedText.swift; sourceTree = "<group>"; };
+		FD158A24238FF9EA00180EC9 /* Touchable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Touchable.swift; sourceTree = "<group>"; };
 		FD1B389D234ACC5E00674161 /* ufo3loop.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo3loop.wav; sourceTree = "<group>"; };
 		FD1B389F234C904C00674161 /* CyclicCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyclicCache.swift; sourceTree = "<group>"; };
 		FD28DB4D22DFFA87009446A2 /* meteorhuge2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "meteorhuge2@2x.png"; sourceTree = "<group>"; };
@@ -227,7 +228,6 @@
 		FDE04B2522D5FEA30011A529 /* star3@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "star3@2x.png"; sourceTree = "<group>"; };
 		FDE04B2622D5FEA30011A529 /* star2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "star2@2x.png"; sourceTree = "<group>"; };
 		FDE04B2C22D753240011A529 /* TextureCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureCache.swift; sourceTree = "<group>"; };
-		FDF32A6C23488F6D00785715 /* TouchableSprite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchableSprite.swift; sourceTree = "<group>"; };
 		FDF92B412322456900CC4DFE /* Hyperspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hyperspace.swift; sourceTree = "<group>"; };
 		FDF92B432322666600CC4DFE /* ufo_warpout.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo_warpout.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -346,7 +346,7 @@
 				FDDF488622D2A700006FB86F /* SpriteCache.swift */,
 				FD158A20238BF4CA00180EC9 /* TextureBitmap.swift */,
 				FDE04B2C22D753240011A529 /* TextureCache.swift */,
-				FDF32A6C23488F6D00785715 /* TouchableSprite.swift */,
+				FD158A24238FF9EA00180EC9 /* Touchable.swift */,
 				FD96AE1B2339A93300D4CAFA /* TypeIn.swift */,
 				659CC039230EC9FE00AA087C /* UFO.swift */,
 				6506AD512340D3450006E8D6 /* UserData.swift */,
@@ -411,11 +411,11 @@
 			isa = PBXGroup;
 			children = (
 				FD79323B22D20FE600E7D336 /* BasicScene.swift */,
+				FD7AE4B1238401C100CAF082 /* CreditsScene.swift */,
 				FDD8FB90232B99BE00A83EB5 /* GameScene.swift */,
 				FD96AE1F233A4BE600D4CAFA /* GameTutorialScene.swift */,
 				FD3B8484236ADE3C008F642B /* HighScoreScene.swift */,
 				FDD44F94233787ED00C13609 /* IntroScene.swift */,
-				FD7AE4B1238401C100CAF082 /* CreditsScene.swift */,
 				FDD8FB92232CF4FC00A83EB5 /* MenuScene.swift */,
 				FD7AE4AF237F999F00CAF082 /* SettingsScene.swift */,
 				FD96AE21233A52BD00D4CAFA /* TutorialScene.swift */,
@@ -584,6 +584,7 @@
 				FDD831F622F187D200CA4EC6 /* GameConfig.swift in Sources */,
 				FD79323622D20FE600E7D336 /* AppDelegate.swift in Sources */,
 				FD7635B02354A410000543E7 /* GameCenter.swift in Sources */,
+				FD158A25238FF9EA00180EC9 /* Touchable.swift in Sources */,
 				FDDF488722D2A700006FB86F /* SpriteCache.swift in Sources */,
 				FD7AE4B0237F999F00CAF082 /* SettingsScene.swift in Sources */,
 				FDF92B422322456900CC4DFE /* Hyperspace.swift in Sources */,
@@ -597,7 +598,6 @@
 				FDD8FB91232B99BE00A83EB5 /* GameScene.swift in Sources */,
 				FD4D53C723080E7300718938 /* Sounds.swift in Sources */,
 				6565DA11232E6818008EA85B /* Achievments.swift in Sources */,
-				FDF32A6D23488F6D00785715 /* TouchableSprite.swift in Sources */,
 				FD40DE7E236C538B00544034 /* GameScore.swift in Sources */,
 				FD53167522DB24EC00F09E57 /* Ship.swift in Sources */,
 				659CC03A230EC9FE00AA087C /* UFO.swift in Sources */,

@@ -7,6 +7,7 @@
 //
 
 import SpriteKit
+import SafariServices
 
 /// Game credits and acknowledgements
 class CreditsScene: BasicScene {
@@ -51,21 +52,15 @@ class CreditsScene: BasicScene {
     // sections than is obtained by making one big label with some line breaks, so
     // I'll make one label per section instead.
     let creditsText = [
-    """
-    Designed & Programmed by
-    @Daniel Long@ and @David Long@
-    """,
-    """
-    Game art & sounds by @Kenney@
-    @www.kenney.nl@
-    """,
-    """
-    Thanks to @Paul Hudson@ for iOS development tutorials
-    @www.hackingwithswift.com@
-    """
+      ("Designed & Programmed by\n@Daniel Long@ and @David Long@",
+       "rockrats.davidlong.org"),
+      ("Game art & sounds by @Kenney@",
+       "www.kenney.nl"),
+      ("Thanks to @Paul Hudson@ for\niOS development tutorials",
+       "www.hackingwithswift.com")
     ]
     var nextLabelY = CGFloat(0)
-    for text in creditsText {
+    for (text, link) in creditsText {
       let creditsLabel = SKLabelNode(attributedText: makeAttributed(text: text, until: text.endIndex, attributes: attributes))
       creditsLabel.name = "creditsLabel"
       creditsLabel.numberOfLines = 0
@@ -74,8 +69,17 @@ class CreditsScene: BasicScene {
       creditsLabel.horizontalAlignmentMode = .left
       creditsLabel.verticalAlignmentMode = .top
       creditsLabel.position = CGPoint(x: 0, y: nextLabelY)
-      nextLabelY -= creditsLabel.frame.height + 30
       creditsLabels.addChild(creditsLabel)
+      nextLabelY -= creditsLabel.frame.height + 10
+      let linkLabel = SKLabelNode(text: link)
+      linkLabel.fontName = AppAppearance.font
+      linkLabel.fontSize = 40
+      linkLabel.fontColor = AppAppearance.borderColor
+      linkLabel.horizontalAlignmentMode = .left
+      linkLabel.verticalAlignmentMode = .top
+      linkLabel.position = CGPoint(x: 0, y: nextLabelY)
+      creditsLabels.addChild(Touchable(linkLabel) { [unowned self] in self.showLink(link) })
+      nextLabelY -= linkLabel.frame.height + 30
     }
     let wantedMidY = 0.5 * (title.frame.minY + playButton.calculateAccumulatedFrame().maxY)
     // Center credits vertically at wantedMidY
@@ -100,6 +104,17 @@ class CreditsScene: BasicScene {
   /// Show the game settings
   func showSettings() {
     switchToScene { SettingsScene(size: self.fullFrame.size) }
+  }
+
+  func showLink(_ link: String) {
+    guard let rootVC = view?.window?.rootViewController else {
+      logging("No view controller to show \(link)")
+      return
+    }
+    guard let url = URL(string: "https://" + link) else { fatalError("Invalid link \(link)") }
+    let config = SFSafariViewController.Configuration()
+    let vc = SFSafariViewController(url: url, configuration: config)
+    rootVC.present(vc, animated: true)
   }
 
   override func didMove(to view: SKView) {

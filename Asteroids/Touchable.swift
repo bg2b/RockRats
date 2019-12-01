@@ -1,30 +1,35 @@
 //
-//  TouchableSprite.swift
+//  Touchable.swift
 //  Asteroids
 //
-//  Created by David Long on 10/5/19.
+//  Created by David Long on 11/28/19.
 //  Copyright © 2019 David Long. All rights reserved.
 //
 
 import SpriteKit
 
-/// An `SKSpriteNode` that also responds to touches
-class TouchableSprite: SKSpriteNode {
-  /// The action to run upon touch
-  var action: (() -> Void)? = nil
+/// A wrapper around a node that makes it respond to touches
+class Touchable: SKNode {
+  let action: () -> Void
 
-  /// Make the sprite react to touches
+  init(_ child: SKNode, _ action: @escaping () -> Void) {
+    self.action = action
+    super.init()
+    name = "touchable" + (child.name ?? "")
+    addChild(child)
+  }
+
+  required init(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented by Touchable")
+  }
+
   override var isUserInteractionEnabled: Bool {
     get { return true }
     set {}
   }
 
-  /// Handle touches for the sprite
-  /// - Parameters:
-  ///   - touches: Some touches
-  ///   - event: An event that the touches belong to
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-    action?()
+    action()
   }
 
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {}

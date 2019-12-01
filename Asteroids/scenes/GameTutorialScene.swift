@@ -18,7 +18,7 @@ class GameTutorialScene: BasicScene {
   /// Set to true when the pause button is pressed
   var gamePaused = false
   /// The touch control to pause the game
-  var pauseButton: TouchableSprite!
+  var pauseButton: Touchable!
   /// The button to continue the game (usually hidden)
   var continueButton: Button!
   /// The button to quit the game (usually hidden)
@@ -166,13 +166,14 @@ class GameTutorialScene: BasicScene {
     pauseControls.name = "pauseControls"
     pauseControls.setZ(.info)
     let pauseTexture = Globals.textureCache.findTexture(imageNamed: "pause")
-    pauseButton = TouchableSprite(texture: pauseTexture, size: pauseTexture.size())
-    pauseButton.action = { [unowned self] in self.doPause() }
+    pauseButton = Touchable(SKSpriteNode(texture: pauseTexture, size: pauseTexture.size())) {
+      [unowned self] in self.doPause()
+    }
     // The pause icon sits just below the remaining ships and is mostly transparent.
     // When touched, it'll hide itself and show the continue/quit buttons.
     pauseButton.alpha = 0.1
-    pauseButton.position = CGPoint(x: gameFrame.minX + pauseButton.size.width / 2 + 10,
-                                   y: livesDisplay.position.y - pauseButton.size.height / 2 - 20)
+    pauseButton.position = CGPoint(x: gameFrame.minX + pauseTexture.size().width / 2 + 10,
+                                   y: livesDisplay.position.y - pauseTexture.size().height / 2 - 20)
     pauseControls.addChild(pauseButton)
     // Two nice big buttons in the center of the screen for continue and quit.
     // They're only unhidden when the game pauses.
