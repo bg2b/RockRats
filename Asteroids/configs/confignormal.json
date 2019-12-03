@@ -80,13 +80,16 @@
     },
     {
       "waveNumber": 11,
-      "maxUFOs": 3,
       "ufoDodging": 15,
       "ufoChances": [0, 0, 1],
       "ufoShotAnticipation": 0.4,
       "ufoAccuracy": [0.2, 0.1],
       "ufoMeanShotTime": [0.75, 0.5],
       "asteroidSpeedBoost": 1.3
+    },
+    {
+      "waveNumber": 13,
+      "maxUFOs": 3
     }
   ]
 }
