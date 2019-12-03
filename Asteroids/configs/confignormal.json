@@ -50,7 +50,6 @@
     },
     {
       "waveNumber": 7,
-      "maxUFOs": 2,
       "ufoDodging": 8,
       "ufoShotAnticipation": 0.1,
       "ufoChances": [0.25, 0.325, 0.325],
@@ -72,6 +71,7 @@
     },
     {
       "waveNumber": 10,
+      "maxUFOs": 2,
       "ufoDodging": 13,
       "ufoChances": [0, 0.25, 0.75],
       "ufoShotAnticipation": 0.3,
