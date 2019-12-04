@@ -78,10 +78,14 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
   /// - Parameters:
   ///   - highScores: The list of high scores
   ///   - highlighted: What to highlight (see `highScoreLineLabels`)
-  /// - Returns: A node hierarchy that corresponds to the high scores display
+  /// - Returns: A node that corresponds to the high scores display
   func highScoreLines(_ highScores: [GameScore], highlighted: GameScore) -> SKNode {
-    let scores = SKNode()
+    // This has so many label and shape nodes that it blows the draw count if the
+    // result is a regular SKNode.  But it's all static, so just make an SKEffectNode
+    // and have it cache the rendered content.
+    let scores = SKEffectNode()
     scores.name = "highScoreLines"
+    scores.shouldRasterize = true
     var labels = highScores.map { highScoreLineLabels($0, highlighted: highlighted) }
     let numHighScores = labels.count
     if highScores.firstIndex(of: highlighted) == nil && highlighted.points > 0 {
