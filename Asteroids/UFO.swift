@@ -48,7 +48,7 @@ func aim(at p: CGVector, targetSpeed v: CGFloat, shotSpeed s: CGFloat) -> CGFloa
   // The squared distance that the shot will have travelled is s^2*t^2
   // For a successful intercept, these two squared distances must be equal.
   // That gives a quadratic equation for t.
-  // After some algebra to rearrange to a*t^2 + b*t + c = 0, here's what we get:
+  // After some algebra to rearrange to a*t^2 + b*t + c = 0, here's what I get:
   let a = s * s - v * v
   let b = -2 * p.dx * v
   let c = -p.dx * p.dx - p.dy * p.dy
@@ -216,7 +216,7 @@ class UFO: SKNode {
     let typeIndex = type.rawValue
     if delayOfFirstShot >= 0 {
       // Just moved onto the screen, enable shooting after a delay.
-      // Kamikazes never shoot, but we use the same mechanism to turn off
+      // Kamikazes never shoot, but I use the same mechanism to turn off
       // their homing behavior initially.
       wait(for: delayOfFirstShot) { [unowned self] in self.attackEnabled = true }
       delayOfFirstShot = -1
@@ -250,14 +250,17 @@ class UFO: SKNode {
       if body.isOneOf(interesting) {
         var r = wrappedDisplacement(direct: node.position - position, bounds: bounds)
         if body.isA(.playerShot) {
-          // Shots travel fast, so emphasize dodging to the side.  We do this by projecting out
+          // Shots travel fast, so emphasize dodging to the side.  Do this by projecting out
           // some of the displacement along the direction of the shot.
           let vhat = body.velocity.scale(by: 1 / body.velocity.length())
-          r = r - r.project(unitVector: vhat).scale(by: shotAnticipation)
+          if r.dotProd(vhat) > 0 {
+            // Project only if the shot is moving towards the UFO
+            r = r - r.project(unitVector: vhat).scale(by: shotAnticipation)
+          }
         }
         var d = r.length()
         if type == .kamikaze && body.isA(.player) {
-          // Kamikazes are alway attracted to the player no matter where they are, but we'll
+          // Kamikazes are alway attracted to the player no matter where they are, but I'll
           // give an initial delay using the same first-shot mechanism before this kicks in.
           if attackEnabled {
             totalForce = totalForce + r.scale(by: kamikazeAcceleration * 1000 / d)
@@ -280,7 +283,7 @@ class UFO: SKNode {
           targetDistance = d
         }
         d -= ourRadius + objectRadius
-        // Limit the force so that we don't poke the UFO by an enormous amount
+        // Limit the force so as not to poke the UFO by an enormous amount
         let dmin = CGFloat(20)
         let dlim = 0.5 * (sqrt((d - dmin) * (d - dmin) + dmin) + d)
         totalForce = totalForce + r.scale(by: -forceScale / (dlim * dlim))
@@ -311,7 +314,7 @@ class UFO: SKNode {
     let useBounds = Globals.gameConfig.value(for: \.ufoShotWrapping)
     guard var angle = aimAt(target, shotSpeed: shotSpeed, bounds: useBounds ? bounds : nil) else { return }
     if target != player {
-      // If we're targetting an asteroid, be pretty accurate
+      // If targetting an asteroid, be pretty accurate
       angle += CGFloat.random(in: -0.1 * shotAccuracy * .pi ... 0.1 * shotAccuracy * .pi)
     } else {
       angle += CGFloat.random(in: -shotAccuracy * .pi ... shotAccuracy * .pi)

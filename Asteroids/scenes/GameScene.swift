@@ -420,6 +420,7 @@ class GameScene: GameTutorialScene {
 
   /// How many points is a destroyed asteroid worth?
   /// - Parameter asteroid: The asteroid that was hit
+  /// - Returns: The point value
   func asteroidPoints(_ asteroid: SKNode) -> Int {
     guard let name = asteroid.name else { fatalError("Asteroid should have a name") }
     // Small is not actually used...
@@ -432,9 +433,10 @@ class GameScene: GameTutorialScene {
 
   /// How many points is a destroyed UFO worth?
   /// - Parameter ufo: The UFO that was hit
+  /// - Returns: The point value
   func ufoPoints(_ ufo: SKNode) -> Int {
     guard let ufo = ufo as? UFO else { fatalError("The ufo doesn't have the UFO nature") }
-    return [20, 35, 50][ufo.type.rawValue]
+    return [20, 50, 100][ufo.type.rawValue]
   }
 
   /// Remove a player laser that missed
