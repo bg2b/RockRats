@@ -18,16 +18,15 @@
       "meanUFOTime": 20,
       "ufoChances": [0.5, 0, 0.5],
       "maxUFOs": 1,
-      "ufoDodging": 4,
-      "ufoShotAnticipation": 0,
-      "ufoAccuracy": [0.25, 0.125],
+      "ufoDodging": [4, 4, 4],
+      "ufoShotAnticipation": [0, 0, 0],
+      "ufoAccuracy": [0.25, 0, 0.125],
       "ufoShotWrapping": true,
       "asteroidSpeedBoost": 1.1,
-      "ufoShotSpeed": [300, 400],
-      "ufoMeanShotTime": [1, 1],
-      "ufoMaxSpeed": [200, 300],
+      "ufoShotSpeed": [300, 0, 400],
+      "ufoMeanShotTime": [1, 0, 1],
+      "ufoMaxSpeed": [200, 250, 300],
       "kamikazeAcceleration": 0.1
     }
   ]
 }
-

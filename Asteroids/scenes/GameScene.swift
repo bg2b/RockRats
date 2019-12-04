@@ -434,7 +434,7 @@ class GameScene: GameTutorialScene {
   /// - Parameter ufo: The UFO that was hit
   func ufoPoints(_ ufo: SKNode) -> Int {
     guard let ufo = ufo as? UFO else { fatalError("The ufo doesn't have the UFO nature") }
-    return ufo.isBig ? 20 : 100
+    return [20, 35, 50][ufo.type.rawValue]
   }
 
   /// Remove a player laser that missed
@@ -682,7 +682,7 @@ class GameScene: GameTutorialScene {
   ///
   /// - Parameter ufo: The UFO that they hit
   func playerHitUFO(ufo: SKNode) {
-    if !(ufo as! UFO).isKamikaze {
+    if (ufo as! UFO).type != .kamikaze {
       reportAchievement(achievement: .leeroyJenkins)
     }
     addToScore(ufoPoints(ufo))

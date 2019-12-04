@@ -94,10 +94,13 @@ func aim(at p: CGVector, targetVelocity v: CGVector, shotSpeed s: CGFloat) -> CG
 /// Decisions about when to spawn a UFO, when they're allowed to shoot, when they
 /// should warp out, etc., are left up to the scene.
 class UFO: SKNode {
-  /// Is this a big or Kamikaze UFO?
-  let isBig: Bool
-  /// Is this a Kamikaze UFO?
-  let isKamikaze: Bool
+  enum UFOType: Int {
+    case big = 0
+    case kamikaze
+    case small
+  }
+  /// Type of UFO
+  let type: UFOType
   /// The current (desired) cruising speed
   var currentSpeed: CGFloat
   /// Makes UFO noises if desired
@@ -120,7 +123,7 @@ class UFO: SKNode {
   /// A shader that makes the warp-out effect
   let warpOutShader: SKShader
   /// The UFOs physical size
-  var size: CGSize { return ufoTexture.size() }
+  var size: CGSize { ufoTexture.size() }
 
   // MARK: - Initialization
 
@@ -133,10 +136,16 @@ class UFO: SKNode {
     // Select the UFO type according to the current game configuration
     let typeChoice = Double.random(in: 0 ... 1)
     let chances = Globals.gameConfig.value(for: \.ufoChances)
-    isBig = typeChoice <= chances[0] + chances[1]
-    isKamikaze = isBig && typeChoice > chances[0]
+    if typeChoice <= chances[0] {
+      type = .big
+    } else if typeChoice <= chances[0] + chances[1] {
+      type = .kamikaze
+    } else {
+      type = .small
+    }
+    let typeIndex = type.rawValue
     // Choose an initial speed
-    let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[isBig ? 0 : 1]
+    let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[typeIndex]
     currentSpeed = .random(in: 0.5 * maxSpeed ... maxSpeed)
     // The player can destroy a few UFOs per wave without repurcussions, but after that...
     let revengeFactor = max(brothersKilled - 3, 0)
@@ -145,12 +154,13 @@ class UFO: SKNode {
     // enable attacking.  When revenge factor starts increasing, the UFOs start
     // shooting faster, getting much quicker on the draw initially, and being much
     // more accurate in their shooting.
-    meanShotTime = Globals.gameConfig.value(for: \.ufoMeanShotTime)[isBig ? 0 : 1] * pow(0.75, Double(revengeFactor))
+    meanShotTime = Globals.gameConfig.value(for: \.ufoMeanShotTime)[typeIndex] * pow(0.75, Double(revengeFactor))
     delayOfFirstShot = Double.random(in: 0 ... meanShotTime * pow(0.75, Double(revengeFactor)))
-    shotAccuracy = Globals.gameConfig.value(for: \.ufoAccuracy)[isBig ? 0 : 1] * pow(0.75, CGFloat(revengeFactor))
+    shotAccuracy = Globals.gameConfig.value(for: \.ufoAccuracy)[typeIndex] * pow(0.75, CGFloat(revengeFactor))
     kamikazeAcceleration = Globals.gameConfig.value(for: \.kamikazeAcceleration) * pow(1.25, CGFloat(revengeFactor))
     // Texture and warp shader
-    ufoTexture = Globals.textureCache.findTexture(imageNamed: isBig ? (isKamikaze ? "ufo_blue" : "ufo_green") : "ufo_red")
+    let textures = ["green", "blue", "red"]
+    ufoTexture = Globals.textureCache.findTexture(imageNamed: "ufo_\(textures[typeIndex])")
     warpOutShader = fanFoldShader(forTexture: ufoTexture, warpTime: warpTime)
     super.init()
     name = "ufo"
@@ -160,13 +170,13 @@ class UFO: SKNode {
     // Make noise only if the desires it.  UFOs in non-game scenes are currently
     // silent, since otherwise the constant whirring gets annoying
     if let audio = audio {
-      let engineSounds = audio.continuousAudio(isBig ? (isKamikaze ? .ufoEnginesMed : .ufoEnginesBig) : .ufoEnginesSmall, at: self)
+      let engineSounds = audio.continuousAudio([SoundEffect.ufoEnginesBig, .ufoEnginesMed, .ufoEnginesSmall][typeIndex], at: self)
       engineSounds.playerNode.volume = 0.5
       engineSounds.playerNode.play()
       self.engineSounds = engineSounds
     }
     let body = SKPhysicsBody(circleOfRadius: 0.5 * ufoTexture.size().width)
-    body.mass = isBig ? 1 : 0.75
+    body.mass = 1 - 0.125 * CGFloat(typeIndex)
     body.categoryBitMask = ObjectCategories.ufo.rawValue
     body.collisionBitMask = 0
     body.contactTestBitMask = setOf([.asteroid, .ufo, .player, .playerShot])
@@ -203,6 +213,7 @@ class UFO: SKNode {
     let bounds = playfield.bounds
     let body = requiredPhysicsBody()
     guard body.isOnScreen else { return }
+    let typeIndex = type.rawValue
     if delayOfFirstShot >= 0 {
       // Just moved onto the screen, enable shooting after a delay.
       // Kamikazes never shoot, but we use the same mechanism to turn off
@@ -210,16 +221,16 @@ class UFO: SKNode {
       wait(for: delayOfFirstShot) { [unowned self] in self.attackEnabled = true }
       delayOfFirstShot = -1
     }
-    let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[isBig ? 0 : 1]
+    let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[typeIndex]
     if Int.random(in: 0...100) == 0 {
-      if !isKamikaze {
+      if type != .kamikaze {
         currentSpeed = .random(in: 0.3 * maxSpeed ... maxSpeed)
       }
       body.angularVelocity = copysign(.pi * 2, -body.angularVelocity)
     }
     let ourRadius = 0.5 * size.diagonal()
-    let forceScale = Globals.gameConfig.value(for: \.ufoDodging) * 1000
-    let shotAnticipation = Globals.gameConfig.value(for: \.ufoShotAnticipation)
+    let forceScale = Globals.gameConfig.value(for: \.ufoDodging)[typeIndex] * 1000
+    let shotAnticipation = Globals.gameConfig.value(for: \.ufoShotAnticipation)[typeIndex]
     var totalForce = CGVector.zero
     let interesting = (shotAnticipation > 0 ?
       setOf([.asteroid, .ufo, .player, .playerShot]) :
@@ -245,7 +256,7 @@ class UFO: SKNode {
           r = r - r.project(unitVector: vhat).scale(by: shotAnticipation)
         }
         var d = r.length()
-        if isKamikaze && body.isA(.player) {
+        if type == .kamikaze && body.isA(.player) {
           // Kamikazes are alway attracted to the player no matter where they are, but we'll
           // give an initial delay using the same first-shot mechanism before this kicks in.
           if attackEnabled {
@@ -277,7 +288,7 @@ class UFO: SKNode {
     }
     body.applyForce(totalForce)
     // Regular UFOs have a desired cruising speed
-    if !isKamikaze {
+    if type != .kamikaze {
       if body.velocity.length() > currentSpeed {
         body.velocity = body.velocity.scale(by: 0.95)
       }
@@ -288,7 +299,7 @@ class UFO: SKNode {
     if body.velocity.length() > maxSpeed {
       body.velocity = body.velocity.scale(by: maxSpeed / body.velocity.length())
     }
-    guard !isKamikaze else { return }
+    guard type != .kamikaze else { return }
     if playerDistance < 1.5 * targetDistance || (player?.parent != nil && Int.random(in: 0 ..< 100) >= 25) {
       // Override closest-object targetting if the player is about at the same
       // distance.  Also bias towards randomly shooting at the player even if they're
@@ -296,7 +307,7 @@ class UFO: SKNode {
       potentialTarget = player
     }
     guard let target = potentialTarget, attackEnabled else { return }
-    let shotSpeed = Globals.gameConfig.value(for: \.ufoShotSpeed)[isBig ? 0 : 1]
+    let shotSpeed = Globals.gameConfig.value(for: \.ufoShotSpeed)[typeIndex]
     let useBounds = Globals.gameConfig.value(for: \.ufoShotWrapping)
     guard var angle = aimAt(target, shotSpeed: shotSpeed, bounds: useBounds ? bounds : nil) else { return }
     if target != player {

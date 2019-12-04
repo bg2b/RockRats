@@ -19,9 +19,9 @@ class WaveConfig: Decodable {
   /// Maximum number of simultaneous UFOs
   var maxUFOs: Int? = nil
   /// Multiplier for forces on UFOs (something like agility)
-  var ufoDodging: CGFloat? = nil
+  var ufoDodging: [CGFloat]? = nil
   /// Multiplier indicating how well UFOs can dodge shots
-  var ufoShotAnticipation: CGFloat? = nil
+  var ufoShotAnticipation: [CGFloat]? = nil
   /// How accurately UFOs shoot
   var ufoAccuracy: [CGFloat]? = nil
   /// `true` if UFOs consider playfield wrapping when shooting
@@ -150,8 +150,12 @@ func loadGameConfig(forMode: String) -> GameConfig {
   let decoder = JSONDecoder()
   guard let path = Bundle.main.url(forResource: configName, withExtension: "json") else { fatalError("Can't find \(configName) JSON") }
   guard let data = try? Data(contentsOf: path) else { fatalError("Can't load \(configName) JSON") }
-  guard let result = try? decoder.decode(GameConfig.self, from: data) else { fatalError("Can't decode \(configName) JSON") }
-  return result
+  do {
+    let result = try decoder.decode(GameConfig.self, from: data)
+    return result
+  } catch {
+    fatalError("Can't decode \(configName) JSON\n\(error.localizedDescription)")
+  }
 }
 
 extension Globals {
