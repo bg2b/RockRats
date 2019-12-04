@@ -271,7 +271,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
                  RGB(255, 204, 111)]
     let tint = tints.randomElement()!
     let texture = Globals.textureCache.findTexture(imageNamed: "star1")
-    let star = SKSpriteNode(texture: texture, size: texture.size().scale(by: .random(in: 0.5...1.0)))
+    let star = SKSpriteNode(texture: texture, size: texture.size().scale(by: .random(in: 0.5 ... 1.0)))
     star.name = "star"
     star.color = tint
     star.colorBlendFactor = 1.0
@@ -288,21 +288,21 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     let bright = CGFloat(0.3)
     let period = 8.0
     let twinkle = twinkleAction(period: period, from: dim, to: bright)
-    for _ in 0..<100 {
+    for _ in 0 ..< 100 {
       let star = makeStar()
       star.alpha = dim
       var minSep = CGFloat(0)
       let wantedSep = 3 * star.size.diagonal()
       while minSep < wantedSep {
         minSep = .infinity
-        star.position = CGPoint(x: .random(in: gameFrame.minX...gameFrame.maxX),
-                                y: .random(in: gameFrame.minY...gameFrame.maxY))
+        star.position = CGPoint(x: .random(in: gameFrame.minX ... gameFrame.maxX),
+                                y: .random(in: gameFrame.minY ... gameFrame.maxY))
         for otherStar in stars.children {
           minSep = min(minSep, (otherStar.position - star.position).length())
         }
       }
-      star.wait(for: .random(in: 0.0...period), then: twinkle)
-      star.speed = .random(in: 0.75...1.5)
+      star.wait(for: .random(in: 0.0 ... period), then: twinkle)
+      star.speed = .random(in: 0.75 ... 1.5)
       stars.addChild(star)
     }
   }
@@ -423,15 +423,28 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   func makeAsteroid(position pos: CGPoint, size: String, velocity: CGVector, onScreen: Bool) {
     let typesForSize = ["small": 2, "med": 2, "big": 4, "huge": 3]
     guard let numTypes = typesForSize[size] else { fatalError("Incorrect asteroid size") }
-    var type = Int.random(in: 1...numTypes)
-    if Int.random(in: 1...4) != 1 {
+    var type = Int.random(in: 1 ... numTypes)
+    if Int.random(in: 1 ... 4) != 1 {
       // Prefer the last type for each size (where we can use a circular physics
       // body), rest just for variety.
       type = numTypes
     }
-    let name = "meteor\(size)\(type)"
+    var name = "meteor\(size)\(type)"
+    // For amusement, if the player has gotten the Little Prince achievement, then on
+    // rare occasions spawn an asteroid with the Prince and his friends on it.
+    if size == "huge" && type == numTypes && Int.random(in: 0 ..< 100) == 0 && achievementIsCompleted(.littlePrince) {
+      name = "meteorhugeprince"
+    }
     let asteroid = Globals.spriteCache.findSprite(imageNamed: name) { sprite in
-      let texture = sprite.requiredTexture()
+      let texture: SKTexture
+      if name == "meteorhugeprince" {
+        // The Litte Prince asteroid texture is the same as the last huge asteroid
+        // texture but enlarged slightly and with some decoration.  Use the unadorned
+        // texture for the physics body though.
+        texture = Globals.textureCache.findTexture(imageNamed: "meteor\(size)\(type)")
+      } else {
+        texture = sprite.requiredTexture()
+      }
       // Huge and big asteroids of all types except the default have irregular shape,
       // so we use a pixel-perfect physics body for those.  Everything else gets a
       // circle.
@@ -452,7 +465,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     var finalVelocity = velocity
     let speed = velocity.length()
     if speed == 0 {
-      finalVelocity = CGVector(angle: .random(in: 0 ... 2 * .pi)).scale(by: .random(in: minSpeed...maxSpeed))
+      finalVelocity = CGVector(angle: .random(in: 0 ... 2 * .pi)).scale(by: .random(in: minSpeed ... maxSpeed))
     } else if speed < minSpeed {
       finalVelocity = velocity.scale(by: minSpeed / speed)
     } else if speed > maxSpeed {
@@ -486,13 +499,13 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     let speed = CGFloat.random(in: minSpeed ... max(min(4 * minSpeed, 0.33 * maxSpeed), 0.25 * maxSpeed))
     let velocity = dir.scale(by: -speed)
     // Offset from the center by some random amount
-    let offset = CGPoint(x: .random(in: 0.75 * gameFrame.minX...0.75 * gameFrame.maxX),
-                         y: .random(in: 0.75 * gameFrame.minY...0.75 * gameFrame.maxY))
+    let offset = CGPoint(x: .random(in: 0.75 * gameFrame.minX ... 0.75 * gameFrame.maxX),
+                         y: .random(in: 0.75 * gameFrame.minY ... 0.75 * gameFrame.maxY))
     // Find a random distance that places us beyond the screen by a reasonable amount
-    var dist = .random(in: 0.25...0.5) * gameFrame.height
+    var dist = .random(in: 0.25 ... 0.5) * gameFrame.height
     let minExclusion = max(1.25 * speed, 50)
     let maxExclusion = max(3.5 * speed, 200)
-    let exclusion = -CGFloat.random(in: minExclusion...maxExclusion)
+    let exclusion = -CGFloat.random(in: minExclusion ... maxExclusion)
     while gameFrame.insetBy(dx: exclusion, dy: exclusion).contains(offset + dir.scale(by: dist)) {
       dist *= 1.1
     }
@@ -556,7 +569,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   ///
   /// These get recycled repeatedly during a game as asteroids are destroyed.
   func preloadAsteroidSplitEffects() {
-    for size in 1...3 {
+    for size in 1 ... 3 {
       Globals.asteroidSplitEffectsCache.load(count: 10, forKey: size) { getAsteroidSplitEffect(size: size) }
     }
   }
@@ -595,7 +608,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     // but we include small just for completeness in case we change our minds later.
     if size >= 2 {
       // Choose a random direction for the first child and project to get that child's velocity
-      let velocity1Angle = CGVector(angle: velocity.angle() + .random(in: -0.4 * .pi...0.4 * .pi))
+      let velocity1Angle = CGVector(angle: velocity.angle() + .random(in: -0.4 * .pi ... 0.4 * .pi))
       // Throw in a random scaling just to keep it from being too uniform
       let velocity1 = velocity.project(unitVector: velocity1Angle).scale(by: .random(in: 0.75 ... 1.25))
       // The second child's velocity is chosen from momentum conservation
@@ -725,7 +738,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     // number of tries, just go ahead and spawn anyway.
     var bestPosition: CGPoint? = nil
     var bestClearance = CGFloat.infinity
-    for _ in 0..<10 {
+    for _ in 0 ..< 10 {
       let pos = CGPoint(x: ufo.position.x, y: .random(in: 0.9 * gameFrame.minY ... 0.9 * gameFrame.maxY))
       var thisClearance = CGFloat.infinity
       for asteroid in asteroids {

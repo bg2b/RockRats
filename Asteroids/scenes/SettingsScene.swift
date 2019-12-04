@@ -59,7 +59,7 @@ class SettingsScene: BasicScene {
     bottomButtons.addChild(muteButton)
     // This retro/modern selection is only available if the player has the
     // `blastFromThePast` achievement.
-    if achievementIsCompleted(achievement: .blastFromThePast) {
+    if achievementIsCompleted(.blastFromThePast) {
       retroButton = Button(imagesNamed: ["shipmodern", "shipretro"], imageColor: .white, size: buttonSize)
       retroButton.selectedValue = (UserData.retroMode.value ? 1 : 0)
       retroButton.action = { [unowned self] in self.toggleRetro() }
@@ -103,7 +103,7 @@ class SettingsScene: BasicScene {
     vstack.addChild(tutorialButton)
     // If they saw the conclusion once and got the promoted achievement, add a
     // separate button to replay the conclusion.
-    if achievementIsCompleted(achievement: .promoted) {
+    if achievementIsCompleted(.promoted) {
       let conclusionButton = Button(forText: "Conclusion", fontSize: buttonFontSize, size: textButtonSize)
       conclusionButton.name = "introButton"
       conclusionButton.action = { [unowned self] in self.replayConclusion() }
@@ -148,7 +148,7 @@ class SettingsScene: BasicScene {
   /// conclusion button.
   func replayIntro() {
     var showConclusion = false
-    if levelIsReached(achievement: .rockRat, level: 3) && !achievementIsCompleted(achievement: .promoted) {
+    if levelIsReached(achievement: .rockRat, level: 3) && !achievementIsCompleted(.promoted) {
       // Game Center has to be enabled to get here, since levelIsReached will have
       // returned false if it was not enabled.
       reportAchievement(achievement: .promoted)
