@@ -177,7 +177,7 @@ func reportAchievement(achievement: Achievement, soFar: Int) -> Int? {
 /// - Parameter achievement: The achievement to check
 /// - Returns: `true` if the achievement was completed, `false` if not or if Game
 ///   Center isn't available
-func achievementIsCompleted(achievement: Achievement) -> Bool {
+func achievementIsCompleted(_ achievement: Achievement) -> Bool {
   guard let gc = Globals.gcInterface, gc.enabled else { return false }
   guard let status = gc.statusOfAchievement(achievement.gameCenterID) else { return false }
   return status == 100
@@ -210,7 +210,7 @@ func reportHiddenProgress() {
   guard let gc = Globals.gcInterface, gc.enabled else { return }
   var numFound = 0
   for achievement in Achievement.hiddenAchievements {
-    if achievementIsCompleted(achievement: achievement) {
+    if achievementIsCompleted(achievement) {
       numFound += 1
     }
   }
