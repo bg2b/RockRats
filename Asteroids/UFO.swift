@@ -84,7 +84,7 @@ func aim(at p: CGVector, targetVelocity v: CGVector, shotSpeed s: CGFloat) -> CG
   return aim(at: p.rotate(by: -theta), targetSpeed: v.length(), shotSpeed: s)
 }
 
-// MARK: -
+// MARK: - UFO stuff
 
 /// UFOs shoot at the player, but maybe they're just misunderstood
 ///
@@ -118,11 +118,7 @@ class UFO: SKNode {
   var kamikazeAcceleration: CGFloat
   /// The texture for the UFO
   let ufoTexture: SKTexture
-  /// Amount of time the warp-out effect lasts
-  let warpTime = 0.5
-  /// A shader that makes the warp-out effect
-  let warpOutShader: SKShader
-  /// The UFOs physical size
+  /// The UFO's physical size
   var size: CGSize { ufoTexture.size() }
 
   // MARK: - Initialization
@@ -161,7 +157,7 @@ class UFO: SKNode {
     // Texture and warp shader
     let textures = ["green", "blue", "red"]
     ufoTexture = Globals.textureCache.findTexture(imageNamed: "ufo_\(textures[typeIndex])")
-    warpOutShader = fanFoldShader(forTexture: ufoTexture, warpTime: warpTime)
+//    warpOutShader = fanFoldShader(forTexture: ufoTexture, warpTime: warpTime)
     super.init()
     name = "ufo"
     let ufo = SKSpriteNode(texture: ufoTexture)
@@ -367,21 +363,14 @@ class UFO: SKNode {
   /// - Returns: An array of effect nodes that should be added to the playfield to
   ///   animate the warping
   func warpOut() -> [SKNode] {
-    let effect = SKSpriteNode(texture: ufoTexture)
-    effect.position = position
-    effect.zRotation = zRotation
-    effect.shader = warpOutShader
-    setStartTimeAttrib(effect, view: scene?.view)
-    effect.run(SKAction.sequence([SKAction.wait(forDuration: warpTime), SKAction.removeFromParent()]))
-    let star = starBlink(at: position, throughAngle: -.pi, duration: 2 * warpTime)
     cleanup()
-    return [effect, star]
+    return warpOutEffect(texture: ufoTexture, position: position, rotation: zRotation)
   }
 
   /// Make the UFO explode
   /// - Returns: An array of nodes to add to the playfield to animate the explosion
   func explode() -> [SKNode] {
-    let velocity = physicsBody!.velocity
+    let velocity = requiredPhysicsBody().velocity
     cleanup()
     return makeExplosion(texture: ufoTexture, angle: zRotation, velocity: velocity, at: position, duration: 2)
   }

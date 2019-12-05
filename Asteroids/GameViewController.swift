@@ -26,6 +26,8 @@ class GameViewController: UIViewController {
       logging("\(Globals.ptsToGameUnits) game units per pt")
       // Make physics bodies for irregular shapes
       Globals.conformingPhysicsCache.preload()
+      // Build custom shaders for special effects
+      precompileShaders()
       let size = CGSize(width: 768 * aspect, height: 768)
       // Create the main menu then trigger the Game Center authentication
       Globals.menuScene = MenuScene(size: size)

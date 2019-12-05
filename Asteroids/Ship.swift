@@ -9,10 +9,12 @@
 import SpriteKit
 import AVFoundation
 
+// MARK: Ship appearance info
+
 /// An identifier for the current look of the ship
 enum ShipAppearance: Int {
   case modern = 0
-  case retro = 1
+  case retro
 }
 
 /// A holder for things that change based on the ship's appearance
@@ -21,10 +23,6 @@ class ShipAppearanceAlternative {
   let texture: SKTexture
   /// The sprite used for the ship
   let sprite: SKSpriteNode
-  /// A shader that makes the jump-to-hyperspace effect
-  let warpOutShader: SKShader
-  /// A shader that makes the back-from-hyperspace effect
-  let warpInShader: SKShader
   /// A closely-conforming physics body
   let body: SKPhysicsBody
 
@@ -36,13 +34,11 @@ class ShipAppearanceAlternative {
     texture = Globals.textureCache.findTexture(imageNamed: imageName)
     sprite = SKSpriteNode(texture: texture)
     sprite.name = "shipImage"
-    warpOutShader = swirlShader(forTexture: texture, inward: true, warpTime: warpTime)
-    warpInShader = swirlShader(forTexture: texture, inward: false, warpTime: warpTime)
     body = Globals.conformingPhysicsCache.makeBody(texture: texture)
   }
 }
 
-// MARK: -
+// MARK: - The ship
 
 /// The player!
 ///
@@ -77,8 +73,6 @@ class Ship: SKNode {
   var reverseFlames = [[SKSpriteNode]]()
   /// The number of lasers available to shoot
   var lasersRemaining = Globals.gameConfig.playerMaxShots
-  /// How long warp-in and warp-out effects last
-  let warpTime = 0.5
 
   // MARK: - Initialization
 
@@ -350,35 +344,12 @@ class Ship: SKNode {
     return parent != nil && energyBar.useEnergy(40)
   }
 
-  /// Create an effect for the jump to or from hyperspace
-  ///
-  /// This shader has the `u_time` / `a_start_time` nature, and so must be used
-  /// immediately.  See the discussion in the file containing `setStartTimeAttrib`.
-  ///
-  /// - Parameter direction: A keypath indicating the shader to use
-  /// - Returns: A sprite with the appropriate shader set up
-  func warpEffect(direction: KeyPath<ShipAppearanceAlternative, SKShader>) -> SKNode {
-    let effect = SKSpriteNode(texture: shipTexture)
-    effect.name = "shipWarpEffect"
-    effect.position = position
-    effect.zRotation = zRotation
-    effect.shader = shipAppearance[keyPath: direction]
-    setStartTimeAttrib(effect, view: scene?.view)
-    return effect
-  }
-
   /// Make the jump to hyperspace
   /// - Returns: An array of effects that should be added to the playfield
   func warpOut() -> [SKNode] {
-    let effect = warpEffect(direction: \.warpOutShader)
-    effect.run(SKAction.sequence([SKAction.wait(forDuration: warpTime), SKAction.removeFromParent()]))
-    let star = starBlink(at: position, throughAngle: .pi, duration: 2 * warpTime)
     setEngineLevel(0)
-    // As soon as the player hits the jump, the ship gets removed, though the effect
-    // will still make it look like the ship is still there and disappearing.
-    // They're invulnerable during the warp out and warp in however.
     removeFromParent()
-    return [effect, star]
+    return warpOutEffect(texture: shipTexture, position: position, rotation: zRotation)
   }
 
   /// Jump back from hyperspace
@@ -392,12 +363,9 @@ class Ship: SKNode {
     // Kill the velocity
     let body = coastingConfiguration()
     body.velocity = .zero
-    let effect = warpEffect(direction: \.warpInShader)
-    playfield.addWithScaling(effect)
-    effect.run(SKAction.sequence([SKAction.wait(forDuration: warpTime), SKAction.removeFromParent()])) {
-      // After the warp effect finishes, add the ship for real
+    playfield.addWithScaling(warpInEffect(texture: shipTexture, position: position, rotation: zRotation) {
       playfield.addWithScaling(self)
-    }
+    })
   }
 
   // MARK: - Shooting
@@ -410,12 +378,12 @@ class Ship: SKNode {
   }
 
   /// Fire a laser
-  /// - Parameter shot: <#shot description#>
+  /// - Parameter shot: The node for the laser
   func shoot(laser shot: SKNode) {
     shot.zRotation = zRotation
     let shotDirection = CGVector(angle: zRotation)
     shot.position = position + shotDirection.scale(by: 0.5 * shipTexture.size().width)
-    shot.physicsBody?.velocity = shotDirection.scale(by: Globals.gameConfig.playerShotSpeed)
+    shot.requiredPhysicsBody().velocity = shotDirection.scale(by: Globals.gameConfig.playerShotSpeed)
     lasersRemaining -= 1
   }
   

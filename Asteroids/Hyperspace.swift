@@ -8,6 +8,8 @@
 
 import SpriteKit
 
+// MARK: Stuff for u_time
+
 // Notes about u_time and shaders...
 //
 // It seems that u_time is zero when it first gets used in some shader.  All well and
@@ -141,14 +143,18 @@ func setStartTimeAttrib(_ effect: SKSpriteNode, view: SKView?) {
   effect.setValue(SKAttributeValue(float: Float(startUtime)), forAttribute: "a_start_time")
 }
 
+// MARK: - Hyperspace shaders
+
+/// The amount of time for warp effects
+let warpTime = 0.5
+
 /// A down-the-drain (or reverse of that) shader, used when the player jumps to
 /// hyperspace
 /// - Parameters:
 ///   - texture: The texture to animate
 ///   - inward: `true` for shrinking effect, `false` for the reverse
-///   - warpTime: The time duration of the effect
 /// - Returns: A shader for the effect
-func swirlShader(forTexture texture: SKTexture, inward: Bool, warpTime: Double) -> SKShader {
+func swirlShader(forTexture texture: SKTexture, inward: Bool) -> SKShader {
   // Be careful not to assume that the texture has v_tex_coord ranging in (0, 0) to
   // (1, 1)!  If the texture is part of a texture atlas, this is not true.  I could
   // make another attribute or uniform to pass in the textureRect info, but since I
@@ -203,9 +209,8 @@ func swirlShader(forTexture texture: SKTexture, inward: Bool, warpTime: Double) 
 ///
 /// - Parameters:
 ///   - texture: The texture to warp
-///   - warpTime: The time duration for the effect
 /// - Returns: A shader for the effect
-func fanFoldShader(forTexture texture: SKTexture, warpTime: Double) -> SKShader {
+func fanFoldShader(forTexture texture: SKTexture) -> SKShader {
   let rect = texture.textureRect()
   let shaderSource = """
   void main() {
@@ -246,7 +251,6 @@ func fanFoldShader(forTexture texture: SKTexture, warpTime: Double) -> SKShader 
 /// - Parameters:
 ///   - position: The position where the effect should happen
 ///   - angle: Amount to twirl in radians
-///   - duration: The duration of the effect
 /// - Returns: A sprite that animates the effect
 func starBlink(at position: CGPoint, throughAngle angle: CGFloat, duration: Double) -> SKSpriteNode {
   let star = SKSpriteNode(imageNamed: "star1")
@@ -263,4 +267,84 @@ func starBlink(at position: CGPoint, throughAngle angle: CGFloat, duration: Doub
     SKAction.removeFromParent()
     ]))
   return star
+}
+
+// MARK: - Shader caches
+
+/// A cache for various types of texture-dependent shaders
+class ShaderCache {
+  /// The function that makes the shader for a given texture
+  let builder: (_ texture: SKTexture) -> SKShader
+  /// A dictionary holding the constructed shaders
+  var shaders = [SKTexture: SKShader]()
+
+  /// Create a new shader cache
+  /// - Parameter builder: A closure that constructs the shader for a given texture
+  init(builder: @escaping (_ texture: SKTexture) -> SKShader) {
+    self.builder = builder
+  }
+
+  /// Get the shader for a texture if it exists
+  /// - Parameter texture: The texture
+  /// - Returns: The shader if it exists, else `nil`
+  func findShader(texture: SKTexture) -> SKShader? {
+    return shaders[texture]
+  }
+
+  /// Get the shader corresponding to a texture
+  /// - Parameter texture: The texture
+  /// - Returns: The shader for effect specialized to the texture
+  func getShader(texture: SKTexture) -> SKShader {
+    if let result = shaders[texture] {
+      return result
+    }
+    let result = builder(texture)
+    shaders[texture] = result
+    return result
+  }
+}
+
+extension Globals {
+  static let swirlInShaders = ShaderCache { swirlShader(forTexture: $0, inward: true) }
+  static let swirlOutShaders = ShaderCache { swirlShader(forTexture: $0, inward: false) }
+  static let fanFoldShaders = ShaderCache { fanFoldShader(forTexture: $0) }
+}
+
+func precompileShaders() {
+  for imageName in ["ship_blue", "retroship"] {
+    let texture = Globals.textureCache.findTexture(imageNamed: imageName)
+    _ = Globals.swirlInShaders.getShader(texture: texture)
+    _ = Globals.swirlOutShaders.getShader(texture: texture)
+  }
+  for imageName in ["ufo_green", "ufo_blue", "ufo_red"] {
+    let texture = Globals.textureCache.findTexture(imageNamed: imageName)
+    _ = Globals.fanFoldShaders.getShader(texture: texture)
+  }
+}
+
+// MARK: - Create hyperspace effects
+
+func warpOutEffect(texture: SKTexture, position: CGPoint, rotation: CGFloat) -> [SKNode] {
+  let shader = Globals.swirlInShaders.findShader(texture: texture) ?? Globals.fanFoldShaders.getShader(texture: texture)
+  let effect = SKSpriteNode(texture: texture)
+  effect.name = "warpOutEffect"
+  effect.position = position
+  effect.zRotation = rotation
+  effect.shader = shader
+  setStartTimeAttrib(effect, view: nil)
+  effect.run(SKAction.sequence([SKAction.wait(forDuration: warpTime), SKAction.removeFromParent()]))
+  let star = starBlink(at: position, throughAngle: .pi, duration: 2 * warpTime)
+  return [effect, star]
+}
+
+func warpInEffect(texture: SKTexture, position: CGPoint, rotation: CGFloat, whenDone: @escaping () -> Void) -> SKNode {
+  let shader = Globals.swirlOutShaders.getShader(texture: texture)
+  let effect = SKSpriteNode(texture: texture)
+  effect.name = "warpInEffect"
+  effect.position = position
+  effect.zRotation = rotation
+  effect.shader = shader
+  setStartTimeAttrib(effect, view: nil)
+  effect.run(SKAction.sequence([SKAction.wait(forDuration: warpTime), SKAction.removeFromParent()]), completion: whenDone)
+  return effect
 }
