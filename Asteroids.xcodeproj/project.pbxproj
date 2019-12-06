@@ -28,6 +28,7 @@
 		FD158A25238FF9EA00180EC9 /* Touchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD158A24238FF9EA00180EC9 /* Touchable.swift */; };
 		FD1B389E234ACC5E00674161 /* ufo3loop.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD1B389D234ACC5E00674161 /* ufo3loop.wav */; };
 		FD1B38A0234C904C00674161 /* CyclicCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD1B389F234C904C00674161 /* CyclicCache.swift */; };
+		FD2518EE239A66F400029466 /* SKHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD2518ED239A66F400029466 /* SKHelpers.swift */; };
 		FD28DB5422DFFA87009446A2 /* meteorhuge2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD28DB4D22DFFA87009446A2 /* meteorhuge2@2x.png */; };
 		FD28DB5522DFFA87009446A2 /* ufo_yellow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD28DB4E22DFFA87009446A2 /* ufo_yellow@2x.png */; };
 		FD28DB5622DFFA87009446A2 /* meteorhuge3@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD28DB4F22DFFA87009446A2 /* meteorhuge3@2x.png */; };
@@ -134,6 +135,7 @@
 		FD158A24238FF9EA00180EC9 /* Touchable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Touchable.swift; sourceTree = "<group>"; };
 		FD1B389D234ACC5E00674161 /* ufo3loop.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo3loop.wav; sourceTree = "<group>"; };
 		FD1B389F234C904C00674161 /* CyclicCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyclicCache.swift; sourceTree = "<group>"; };
+		FD2518ED239A66F400029466 /* SKHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SKHelpers.swift; sourceTree = "<group>"; };
 		FD28DB4D22DFFA87009446A2 /* meteorhuge2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "meteorhuge2@2x.png"; sourceTree = "<group>"; };
 		FD28DB4E22DFFA87009446A2 /* ufo_yellow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ufo_yellow@2x.png"; sourceTree = "<group>"; };
 		FD28DB4F22DFFA87009446A2 /* meteorhuge3@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "meteorhuge3@2x.png"; sourceTree = "<group>"; };
@@ -342,6 +344,7 @@
 				FD46BD71231415B7008C1F99 /* Playfield.swift */,
 				FD4D53BF2306B47900718938 /* ReservesDisplay.swift */,
 				FD53167422DB24EC00F09E57 /* Ship.swift */,
+				FD2518ED239A66F400029466 /* SKHelpers.swift */,
 				FD4D53C623080E7300718938 /* Sounds.swift */,
 				FDDF488622D2A700006FB86F /* SpriteCache.swift */,
 				FD158A20238BF4CA00180EC9 /* TextureBitmap.swift */,
@@ -583,6 +586,7 @@
 				FDD44F95233787ED00C13609 /* IntroScene.swift in Sources */,
 				FDD831F622F187D200CA4EC6 /* GameConfig.swift in Sources */,
 				FD79323622D20FE600E7D336 /* AppDelegate.swift in Sources */,
+				FD2518EE239A66F400029466 /* SKHelpers.swift in Sources */,
 				FD7635B02354A410000543E7 /* GameCenter.swift in Sources */,
 				FD158A25238FF9EA00180EC9 /* Touchable.swift in Sources */,
 				FDDF488722D2A700006FB86F /* SpriteCache.swift in Sources */,

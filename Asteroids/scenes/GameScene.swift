@@ -633,7 +633,7 @@ class GameScene: GameTutorialScene {
     }
     ufosKilledWithoutDying = 0
     audio.soundEffect(.playerExplosion, at: player.position)
-    addExplosion(player.explode())
+    addToPlayfield(player.explode())
     stopSpawningUFOs()
     playfield.changeSpeed(to: 0.25)
     // Lasers live for a bit less than a second.  If the player fires and immediately

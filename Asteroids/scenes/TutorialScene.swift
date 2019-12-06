@@ -119,7 +119,7 @@ class TutorialScene: GameTutorialScene {
 
   func destroyPlayer() {
     let pieces = player.explode()
-    addExplosion(pieces)
+    addToPlayfield(pieces)
     audio.soundEffect(.playerExplosion)
     let messages = [
       "@No problem@, that'll buff right out. Take another ship.",

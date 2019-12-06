@@ -8,7 +8,7 @@
 
 import CoreGraphics
 
-/// Various helpers for `CGSize`
+// MARK: CGSize helpers
 extension CGSize {
   /// Scale uniformly in both direction
   /// - Parameter amount: The amount to scale by
@@ -50,7 +50,7 @@ extension CGSize {
   }
 }
 
-/// Various helpers for `CGVector`
+// MARK: - CGVector helpers
 extension CGVector {
   /// A unit vector at the specified angle
   /// - Parameter angle: Radians
@@ -120,7 +120,7 @@ extension CGVector {
   }
 }
 
-/// Various helpers for `CGPoint`
+// MARK: - CGPoint helpers
 extension CGPoint {
   static func +(left: CGPoint, right: CGVector) -> CGPoint {
     return CGPoint(x: left.x + right.dx, y: left.y + right.dy)
@@ -138,6 +138,8 @@ extension CGPoint {
     return CGVector(dx: left.x - right.x, dy: left.y - right.y)
   }
 }
+
+// MARK: - Geometry primitives
 
 /// The minimum distance between a point and a line segment
 ///

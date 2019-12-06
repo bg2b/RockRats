@@ -82,40 +82,6 @@ func setOf(_ categories: [ObjectCategories]) -> UInt32 {
   return categories.reduce(0) { $0 | $1.rawValue }
 }
 
-extension SKNode {
-  /// Wait for a given time, then run an action
-  /// - Parameters:
-  ///   - time: Number of seconds to wait
-  ///   - action: `SKAction` to run
-  func wait(for time: Double, then action: SKAction) {
-    run(SKAction.sequence([SKAction.wait(forDuration: time), action]))
-  }
-
-  /// Wait for a given time, then do something
-  /// - Parameters:
-  ///   - time: Number of seconds to wait
-  ///   - action: Closure to execute after that
-  func wait(for time: Double, then action: @escaping (() -> Void)) {
-    wait(for: time, then: SKAction.run(action))
-  }
-
-  /// Get the physics body of a node that must have one
-  /// - Returns: The physics body
-  func requiredPhysicsBody() -> SKPhysicsBody {
-    guard let body = physicsBody else { fatalError("Node \(name ?? "<unknown name>") is missing a physics body") }
-    return body
-  }
-}
-
-extension SKSpriteNode {
-  /// Get the texture of a sprite node that must have one
-  /// - Returns: The texture
-  func requiredTexture() -> SKTexture {
-    guard let texture = texture else { fatalError("SpriteNode \(name ?? "<unknown name>") is missing a texture") }
-    return texture
-  }
-}
-
 extension Globals {
   /// `currentTime` of  last call to `update`
   static var lastUpdateTime = 0.0
@@ -123,6 +89,8 @@ extension Globals {
   /// repeatedly
   static var asteroidSplitEffectsCache = CyclicCache<Int, SKEmitterNode>(cacheId: "Asteroid split effects cache")
 }
+
+// MARK: - Base class for all scenes
 
 /// The root class of all the scenes in the game
 ///
@@ -621,11 +589,11 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     removeAsteroid(asteroid)
   }
 
-  /// Add a bunch of explosion fragments to the playfield
-  /// - Parameter pieces: The fragments
-  func addExplosion(_ pieces: [SKNode]) {
-    for p in pieces {
-      playfield.addWithScaling(p)
+  /// Add some sort of effect to the playfield
+  /// - Parameter nodes: The things to add
+  func addToPlayfield(_ nodes: [SKNode]) {
+    for node in nodes {
+      playfield.addWithScaling(node)
     }
   }
 
@@ -640,9 +608,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   func warpOutUFO(_ ufo: UFO) {
     ufos.remove(ufo)
     audio.soundEffect(.ufoWarpOut, at: ufo.position)
-    let effects = ufo.warpOut()
-    playfield.addWithScaling(effects[0])
-    playfield.addWithScaling(effects[1])
+    addToPlayfield(ufo.warpOut())
   }
 
   /// Make all UFOs jump to hyperspace and leave the playfield
@@ -685,10 +651,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
       if ufo.requiredPhysicsBody().isOnScreen {
         let delay = Double.random(in: 0.5 * averageDelay ... 1.5 * averageDelay)
         maxDelay = max(maxDelay, delay)
-        ufo.run(SKAction.sequence([
-          SKAction.wait(forDuration: delay),
-          SKAction.run({ self.warpOutUFO(ufo) })
-          ]), withKey: "warpOut")
+        ufo.run(.wait(for: delay) { self.warpOutUFO(ufo) }, withKey: "warpOut")
       } else {
         logging("Cleanup on unlaunched ufo")
         ufo.cleanup()
@@ -774,7 +737,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     ufo.removeAction(forKey: "warpOut")
     ufos.remove(ufo)
     audio.soundEffect(.ufoExplosion, at: ufo.position)
-    addExplosion(ufo.explode())
+    addToPlayfield(ufo.explode())
   }
 
   /// Handle a collision between a UFO shot and an asteroid

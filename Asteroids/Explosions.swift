@@ -79,13 +79,14 @@ struct Explosion {
 
   /// Create an explosion for a texture
   /// - Parameter texture: The texture that's going to blow up
-  init(texture: SKTexture) {
+  /// - Parameter cuts: Cut the texture into approimxately this many pieces in each direction
+  init(texture: SKTexture, cuts: Int) {
     // Create rectangles that represent the cut-up texture
     var subRects = [CGRect]()
     let textureSize = texture.size()
     let textureWidth = textureSize.width
     let textureHeight = textureSize.height
-    let cutSize = min(textureWidth, textureHeight) / 6
+    let cutSize = min(textureWidth, textureHeight) / CGFloat(cuts)
     makeExplosionGrid(rect: CGRect(origin: .zero, size: textureSize), wantedSize: cutSize, pieces: &subRects)
     // Build sprite nodes for all the pieces
     var pieces = [SKNode]()
@@ -109,6 +110,7 @@ struct Explosion {
       body.categoryBitMask = ObjectCategories.fragment.rawValue
       body.contactTestBitMask = 0
       body.collisionBitMask = setOf([.fragment, .asteroid, .player, .ufo])
+      body.fieldBitMask = 0
       body.linearDamping = 0
       body.angularDamping = 0
       body.restitution = 0.9
@@ -136,38 +138,46 @@ struct Explosion {
 /// When something blows up, (an instance of) this class is responsible for either
 /// making a new `Explosion` or recycling one that was created earlier.
 class ExplosionCache {
-  /// A dictionary mapping textures to explosions for that texture
-  var explosions = [SKTexture: [Explosion]]()
+  /// A key for the cache
+  struct ExplosionCacheKey: Hashable {
+    let texture: SKTexture
+    let cuts: Int
+  }
+  /// A dictionary mapping textures and number of cuts to explosions
+  var explosions = [ExplosionCacheKey: [Explosion]]()
   /// The number of explosions created
   var created = 0
-  /// The number of explosions that are waiting for recycling
+  /// The number of explosions that are waiting for reuse
   var recycled = 0
 
   /// Get an explosion for a texture
   /// - Parameter texture: The texture that's going to blow up
+  /// - Parameter cuts: An approximate number of pieces to cut the texture into in each direction
   /// - Returns: An explosion for the texture
-  func findOrMakeExplosion(texture: SKTexture) -> Explosion {
-    if explosions[texture] == nil {
-      explosions[texture] = []
+  func findOrMakeExplosion(texture: SKTexture, cuts: Int) -> Explosion {
+    let key = ExplosionCacheKey(texture: texture, cuts: cuts)
+    if explosions[key] == nil {
+      explosions[key] = []
     }
-    if explosions[texture]!.isEmpty {
+    if explosions[key]!.isEmpty {
       // There's no available explosion (either none have been made, or they're all
       // in use), so make a new one
       created += 1
-      return Explosion(texture: texture)
+      return Explosion(texture: texture, cuts: cuts)
     }
     // Grab an existing explosion from the cache
     recycled -= 1
-    return explosions[texture]!.popLast()!
+    return explosions[key]!.popLast()!
   }
 
   /// Put an explosion back in the cache
   /// - Parameters:
   ///   - explosion: The explosion that has finished
   ///   - texture: The texture that it corresponds to
-  func doneWithExplosion(_ explosion: Explosion, texture: SKTexture) {
+  ///   - cuts: The number of pieces that were used when cutting
+  func doneWithExplosion(_ explosion: Explosion, texture: SKTexture, cuts: Int) {
     recycled += 1
-    explosions[texture]!.append(explosion)
+    explosions[ExplosionCacheKey(texture: texture, cuts: cuts)]!.append(explosion)
   }
 
   /// Print some stats for debugging
@@ -188,9 +198,10 @@ extension Globals {
 ///   - velocity: The sprite's velocity
 ///   - position: The sprite's position
 ///   - duration: How long the explosion should last
+///   - cuts: Cut the sprite in each direction into about this many pieces
 /// - Returns: A list of nodes to add to the playfield
-func makeExplosion(texture: SKTexture, angle: CGFloat, velocity: CGVector, at position: CGPoint, duration: Double) -> [SKNode] {
-  let explosion = Globals.explosionCache.findOrMakeExplosion(texture: texture)
+func makeExplosion(texture: SKTexture, angle: CGFloat, velocity: CGVector, at position: CGPoint, duration: Double, cuts: Int = 6) -> [SKNode] {
+  let explosion = Globals.explosionCache.findOrMakeExplosion(texture: texture, cuts: cuts)
   let waitAndRemove = SKAction.sequence([
     SKAction.wait(forDuration: 0.75 * duration),
     SKAction.fadeOut(withDuration: 0.25 * duration),
@@ -222,7 +233,7 @@ func makeExplosion(texture: SKTexture, angle: CGFloat, velocity: CGVector, at po
   recycler.run(SKAction.sequence([
     SKAction.wait(forDuration: duration + 0.5),
     SKAction.run {
-      Globals.explosionCache.doneWithExplosion(explosion, texture: texture)
+      Globals.explosionCache.doneWithExplosion(explosion, texture: texture, cuts: cuts)
     },
     SKAction.removeFromParent()]))
   return explosion.pieces

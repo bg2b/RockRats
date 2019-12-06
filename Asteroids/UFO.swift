@@ -157,7 +157,6 @@ class UFO: SKNode {
     // Texture and warp shader
     let textures = ["green", "blue", "red"]
     ufoTexture = Globals.textureCache.findTexture(imageNamed: "ufo_\(textures[typeIndex])")
-//    warpOutShader = fanFoldShader(forTexture: ufoTexture, warpTime: warpTime)
     super.init()
     name = "ufo"
     let ufo = SKSpriteNode(texture: ufoTexture)

@@ -9,6 +9,92 @@
 import SpriteKit
 import GameKit
 
+// MARK: Demolition derby UFOs
+
+/// A UFO that feels a strange affinity for others
+class SmashyUFO: SKNode {
+  /// The UFO's texture
+  let ufoTexture: SKTexture
+  /// How fast the UFO prefers to go
+  let desiredSpeedRange = CGFloat(150) ... 350
+  /// How massive the UFO is
+  let mass: CGFloat
+
+  // MARK: - Initialization
+
+  /// Make a smashy UFO
+  override init() {
+    let type = Int.random(in: 0 ..< 3)
+    ufoTexture = Globals.textureCache.findTexture(imageNamed: "ufo_\(["green", "blue", "red"][type])")
+    mass = 1 - 0.25 * CGFloat(type)
+    super.init()
+    name = "smashyUFO"
+    let sprite = SKSpriteNode(texture: ufoTexture)
+    sprite.name = "smashySprite"
+    addChild(sprite)
+    let radius = 0.5 * ufoTexture.size().width
+    let body = SKPhysicsBody(circleOfRadius: radius)
+    body.mass = mass
+    body.categoryBitMask = ObjectCategories.ufo.rawValue
+    body.collisionBitMask = 0
+    body.contactTestBitMask = ObjectCategories.ufo.rawValue
+    body.linearDamping = 0
+    body.angularDamping = 0
+    body.angularVelocity = .random(in: -2 * .pi ... 2 * .pi)
+    physicsBody = body
+    // Originally I had an SKFieldNode for attraction between UFOs, but it performed
+    // horribly with either iOS 12 and/or older devices (don't know which was really
+    // responsible), so I'll instead just calculate the forces explicitly in fly().
+  }
+
+  required init(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented SmashyUFO")
+  }
+
+  // MARK: - Movement
+
+  /// Make the UFO fly around
+  func fly(_ smashies: Set<SmashyUFO>) {
+    let body = requiredPhysicsBody()
+    let speed = body.velocity.length()
+    if speed > desiredSpeedRange.upperBound {
+      body.velocity = body.velocity.scale(by: 0.95)
+    } else if speed < 0.1 * desiredSpeedRange.lowerBound {
+      body.velocity = CGVector(angle: .random(in: 0 ... 2 * .pi)).scale(by: .random(in: desiredSpeedRange))
+    } else if speed < desiredSpeedRange.lowerBound {
+      body.velocity = body.velocity.scale(by: 1.05)
+    }
+    if Int.random(in: 0 ..< 100) == 0 {
+      body.angularVelocity = .random(in: -2 * .pi ... 2 * .pi)
+    }
+    for ufo in smashies {
+      guard ufo != self else { continue }
+      let r = ufo.position - position
+      // The + 1 shouldn't be needed since the collision ought to be flagged long
+      // before it would be possible to get to small distances, but I stuck it in
+      // just to avoid a one-in-a-zillion division-by-0 crash in case of lag.
+      body.applyForce(r.scale(by: 200 * mass * ufo.mass / (r.length() + 1)))
+    }
+  }
+
+  // MARK: - Death and hyperspace
+
+  /// Make the UFO explode
+  func explode() -> [SKNode] {
+    let velocity = requiredPhysicsBody().velocity
+    removeFromParent()
+    return makeExplosion(texture: ufoTexture, angle: zRotation, velocity: velocity, at: position, duration: 2, cuts: 5)
+  }
+
+  /// Make the UFO jump to hyperspace
+  func warpOut() -> [SKNode] {
+    removeFromParent()
+    return warpOutEffect(texture: ufoTexture, position: position, rotation: zRotation)
+  }
+}
+
+// MARK: - High scores
+
 /// Ensure that a name that won't make the high scores list too wide
 /// - Parameter playerName: The name to be display
 /// - Returns: The name unchanged if it's short, otherwise an abbreviated name
@@ -32,6 +118,12 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
   /// This is `true` when I'm presenting the view controller supplied by Game Center
   /// with achievements and high scores
   var showingGCVC = false
+  /// Demolition derby UFOs
+  var smashies = Set<SmashyUFO>()
+  /// Key for UFO spawning action
+  let spawnSmashiesKey = "spawnSmashies"
+
+  // MARK: - Initialization
 
   /// Make the labels for a line in the high scores display
   ///
@@ -185,75 +277,7 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     scores.addChild(highScores)
   }
 
-  /// Start a new game
-  func startGame() {
-    switchToScene { return GameScene(size: self.fullFrame.size) }
-  }
-
-  /// Switch back to the main menu
-  func mainMenu() {
-    showWhenQuiescent(Globals.menuScene)
-  }
-
-  /// The Game Center status has changed, so update `gcButton`'s enabled/disabled
-  /// state to match
-  /// - Parameter notification: A notification indicating what happened
-  @objc func gcStateChanged(_ notification: Notification) {
-    logging("High score scene got notification of Game Center state change")
-    if notification.object as? Bool ?? false {
-      gcButton.enable()
-    } else {
-      gcButton.disable()
-    }
-  }
-
-  /// Enforce pausing when showing the Game Center view controller.
-  override var forcePause: Bool { showingGCVC }
-
-  /// Display the view controller from Game Center with leaderboards and achievements
-  func showGameCenter() {
-    guard let rootVC = view?.window?.rootViewController, Globals.gcInterface.enabled else {
-      logging("Can't show Game Center")
-      return
-    }
-    let gcvc = GKGameCenterViewController()
-    gcvc.gameCenterDelegate = self
-    // The high scores scene includes information from the Game Center leaderboards
-    // already, so default to showing the player's achievements.
-    gcvc.viewState = .achievements
-    gcvc.leaderboardTimeScope = .week
-    isPaused = true
-    showingGCVC = true
-    rootVC.present(gcvc, animated: true)
-  }
-
-  /// Called when the Game Center view controller should be dismissed
-  /// - Parameter gcvc: The Game Center view controller
-  func gameCenterViewControllerDidFinish(_ gcvc: GKGameCenterViewController) {
-    gcvc.dismiss(animated: true) {
-      self.showingGCVC = false
-      self.isPaused = false
-    }
-  }
-
-  /// Not much to see here
-  /// - Parameter view: The view that will present the scene
-  override func didMove(to view: SKView) {
-    super.didMove(to: view)
-    logging("\(name!) finished didMove to view")
-  }
-
-  /// Not much to see here (yet)
-  ///
-  /// - Todo:
-  ///   Add some animations to the high score scene
-  ///
-  /// - Parameter currentTime: The current game time
-  override func update(_ currentTime: TimeInterval) {
-    super.update(currentTime)
-  }
-
-  /// Construct a new high score scene
+  /// Make a new high score scene
   /// - Parameters:
   ///   - size: The size of the scene
   ///   - score: The score of the just-played game (or `nil` if the previous scene
@@ -330,6 +354,162 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
   }
 
   required init(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented by HighScoreScene")
+    super.init(coder: aDecoder)
+  }
+
+  // MARK: - Button actions
+
+  /// Start a new game
+  func startGame() {
+    warpOutSmashies()
+    switchToScene { GameScene(size: self.fullFrame.size) }
+  }
+
+  /// Switch back to the main menu
+  func mainMenu() {
+    warpOutSmashies()
+    showWhenQuiescent(Globals.menuScene)
+  }
+
+  // MARK: - Game Center
+
+  /// The Game Center status has changed, so update `gcButton`'s enabled/disabled
+  /// state to match
+  /// - Parameter notification: A notification indicating what happened
+  @objc func gcStateChanged(_ notification: Notification) {
+    logging("High score scene got notification of Game Center state change")
+    if notification.object as? Bool ?? false {
+      gcButton.enable()
+    } else {
+      gcButton.disable()
+    }
+  }
+
+  /// Enforce pausing when showing the Game Center view controller
+  override var forcePause: Bool { showingGCVC }
+
+  /// Display the view controller from Game Center with leaderboards and achievements
+  func showGameCenter() {
+    guard let rootVC = view?.window?.rootViewController, Globals.gcInterface.enabled else {
+      logging("Can't show Game Center")
+      return
+    }
+    let gcvc = GKGameCenterViewController()
+    gcvc.gameCenterDelegate = self
+    // The high scores scene includes information from the Game Center leaderboards
+    // already, so default to showing the player's achievements.
+    gcvc.viewState = .achievements
+    gcvc.leaderboardTimeScope = .week
+    isPaused = true
+    showingGCVC = true
+    rootVC.present(gcvc, animated: true)
+  }
+
+  /// This is called when the Game Center view controller should be dismissed
+  /// - Parameter gcvc: The Game Center view controller
+  func gameCenterViewControllerDidFinish(_ gcvc: GKGameCenterViewController) {
+    gcvc.dismiss(animated: true) {
+      self.showingGCVC = false
+      self.isPaused = false
+    }
+  }
+
+  // MARK: - Demolition derby
+
+  /// Warp out one UFO
+  /// - Parameter ufo: The UFO to get rid of
+  func warpOutSmashy(_ ufo: SmashyUFO) {
+    smashies.remove(ufo)
+    audio.soundEffect(.ufoWarpOut, at: ufo.position)
+    addToPlayfield(ufo.warpOut())
+  }
+
+  /// End the demolition derby
+  func warpOutSmashies() {
+    removeAction(forKey: spawnSmashiesKey)
+    for ufo in smashies {
+      let delay = Double.random(in: 0.5 ... 1.5)
+      ufo.run(SKAction.sequence([
+        SKAction.wait(forDuration: delay),
+        SKAction.run({ self.warpOutSmashy(ufo) })
+        ]))
+    }
+  }
+
+  /// A UFO goes boom
+  ///
+  /// There's no sound effect here because all the collisions are between two UFOs,
+  /// and it sounds better when there's only one sound effect played for the
+  /// collision.
+  ///
+  /// - Parameter ufo: The UFO to destroy
+  func destroySmashy(_ ufo: SmashyUFO) {
+    addToPlayfield(ufo.explode())
+    smashies.remove(ufo)
+  }
+
+  /// Two UFOs had a head-on collision
+  /// - Parameters:
+  ///   - ufo1: The first UFO
+  ///   - ufo2: The second UFO
+  func smashiesCollided(ufo1: SKNode, ufo2: SKNode) {
+    audio.soundEffect(.ufoExplosion, at: ufo1.position)
+    destroySmashy(ufo1 as! SmashyUFO)
+    destroySmashy(ufo2 as! SmashyUFO)
+  }
+
+  /// Handle possible contacts
+  /// - Parameter contact: Info about the contact from the physics engine
+  func didBegin(_ contact: SKPhysicsContact) {
+    when(contact, isBetween: .ufo, and: .ufo) { smashiesCollided(ufo1: $0, ufo2: $1) }
+  }
+
+  /// Create a reckless UFO
+  ///
+  /// This method constantly respawns itself until stopped by `warpOutSmashies`
+  func spawnSmashies() {
+    if smashies.count < 4 {
+      let ufo = SmashyUFO()
+      let offset = 0.55 * ufo.ufoTexture.size().width
+      let pos: CGPoint
+      let x = CGFloat.random(in: -fullFrame.minX ... fullFrame.maxX + fullFrame.height)
+      if x < fullFrame.maxX {
+        // Spawn on top or bottom
+        let y = Bool.random() ? fullFrame.minY - offset : fullFrame.maxY + offset
+        pos = CGPoint(x: x, y: y)
+      } else {
+        let y = x - fullFrame.maxX + fullFrame.minY
+        pos = CGPoint(x: Bool.random() ? fullFrame.minX - offset : fullFrame.maxX + offset, y: y)
+      }
+      ufo.position = pos
+      let targetPoint = CGPoint(x: fullFrame.midX, y: fullFrame.midY) +
+        CGVector(angle: .random(in: 0 ... 2 * .pi)).scale(by: 0.5 * fullFrame.height)
+      let displacement = targetPoint - pos
+      let v = displacement.scale(by: .random(in: ufo.desiredSpeedRange) / displacement.length())
+      playfield.addWithScaling(ufo)
+      let body = ufo.requiredPhysicsBody()
+      body.velocity = v
+      body.isOnScreen = false
+      smashies.insert(ufo)
+    }
+    run(.wait(for: .random(in: 2 ... 3), then: spawnSmashies), withKey: spawnSmashiesKey)
+  }
+
+  /// Kick off the UFO demolition derby
+  /// - Parameter view: The view that will present the scene
+  override func didMove(to view: SKView) {
+    super.didMove(to: view)
+    run(.wait(for: 2, then: spawnSmashies), withKey: spawnSmashiesKey)
+    logging("\(name!) finished didMove to view")
+  }
+
+  /// Main update loop
+  /// - Parameter currentTime: The current game time
+  override func update(_ currentTime: TimeInterval) {
+    super.update(currentTime)
+    for ufo in smashies {
+      ufo.fly(smashies)
+    }
+    playfield.wrapCoordinates()
   }
 }

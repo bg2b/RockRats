@@ -373,9 +373,7 @@ class GameTutorialScene: BasicScene {
     // are not active in the tutorial.
     let blastFromThePast = (score % 100 == 79)
     let backToTheFuture = (score % 100 == 88)
-    let effects = player.warpOut()
-    playfield.addWithScaling(effects[0])
-    playfield.addWithScaling(effects[1])
+    addToPlayfield(player.warpOut())
     audio.soundEffect(.warpOut, at: player.position)
     // Don't stick them at the very edge of the screen since it looks odd.
     let jumpRegion = gameFrame.insetBy(dx: 0.05 * gameFrame.width, dy: 0.05 * gameFrame.height)
