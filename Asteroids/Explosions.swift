@@ -202,10 +202,9 @@ extension Globals {
 /// - Returns: A list of nodes to add to the playfield
 func makeExplosion(texture: SKTexture, angle: CGFloat, velocity: CGVector, at position: CGPoint, duration: Double, cuts: Int = 6) -> [SKNode] {
   let explosion = Globals.explosionCache.findOrMakeExplosion(texture: texture, cuts: cuts)
-  let waitAndRemove = SKAction.sequence([
-    SKAction.wait(forDuration: 0.75 * duration),
-    SKAction.fadeOut(withDuration: 0.25 * duration),
-    SKAction.removeFromParent()])
+  let waitAndRemove = SKAction.sequence([.wait(forDuration: 0.75 * duration),
+                                         .fadeOut(withDuration: 0.25 * duration),
+                                         .removeFromParent()])
   for (piece, delta) in zip(explosion.pieces, explosion.deltas) {
     // If this explosion is recycled, then the pieces will have alpha == 0 due to the
     // fadeOut in the action above, so I have to reset that.  Also, if it's due to a
@@ -230,11 +229,8 @@ func makeExplosion(texture: SKTexture, angle: CGFloat, velocity: CGVector, at po
   guard let recycler = explosion.pieces.last, recycler.name == "recycler" else { fatalError("Recycler node for explosion is missing") }
   // The last node (not part of the zip above and not drawn) is responsible for
   // waiting a bit of extra time and then recycling the explosion.
-  recycler.run(SKAction.sequence([
-    SKAction.wait(forDuration: duration + 0.5),
-    SKAction.run {
-      Globals.explosionCache.doneWithExplosion(explosion, texture: texture, cuts: cuts)
-    },
-    SKAction.removeFromParent()]))
+  recycler.run(.sequence([.wait(forDuration: duration + 0.5),
+                          .run { Globals.explosionCache.doneWithExplosion(explosion, texture: texture, cuts: cuts)  },
+                          .removeFromParent()]))
   return explosion.pieces
 }

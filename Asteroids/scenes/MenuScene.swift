@@ -100,7 +100,7 @@ class MenuScene: BasicScene {
     if asteroids.count < 15 {
       spawnAsteroid(size: ["big", "huge"].randomElement()!)
     }
-    wait(for: 1) { self.spawnAsteroids() }
+    wait(for: 1, then: spawnAsteroids)
   }
 
   /// Make a UFO if there are sufficient asteroids
@@ -112,7 +112,7 @@ class MenuScene: BasicScene {
       spawnUFO(ufo: ufo)
       shotsToFire[ufo] = .random(in: 3 ... 10)
     }
-    wait(for: 5) { self.spawnUFOs() }
+    wait(for: 5, then: spawnUFOs)
   }
 
   /// Make a UFO warp out; this is an override because I need to update `shotsToFire`
@@ -251,8 +251,8 @@ class MenuScene: BasicScene {
     Globals.gameConfig = loadGameConfig(forMode: "menu")
     Globals.gameConfig.currentWaveNumber = 1
     // Now start the regular spawning actions for UFOs and asteroids
-    wait(for: 1) { self.spawnAsteroids() }
-    wait(for: 10) { self.spawnUFOs() }
+    wait(for: 1, then: spawnAsteroids)
+    wait(for: 10, then: spawnUFOs)
     logging("\(name!) finished didMove to view")
   }
 
@@ -269,9 +269,7 @@ class MenuScene: BasicScene {
           self.fireUFOLaser(angle: angle, position: position, speed: speed)
           self.shotsToFire[ufo] = self.shotsToFire[ufo]! - 1
           if self.shotsToFire[ufo]! == 0 {
-            ufo.wait(for: .random(in: 1 ... 3)) {
-              self.warpOutUFO(ufo)
-            }
+            ufo.wait(for: .random(in: 1 ... 3)) { self.warpOutUFO(ufo) }
           }
         }
       }

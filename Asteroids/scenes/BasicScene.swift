@@ -219,12 +219,11 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   ///   - bright: How bright to get during the twinkle
   func twinkleAction(period: Double, from dim: CGFloat, to bright: CGFloat) -> SKAction {
     let twinkleDuration = 0.4
-    let delay = SKAction.wait(forDuration: period - twinkleDuration)
     let brighten = SKAction.fadeAlpha(to: bright, duration: 0.5 * twinkleDuration)
     brighten.timingMode = .easeIn
     let fade = SKAction.fadeAlpha(to: dim, duration: 0.5 * twinkleDuration)
     fade.timingMode = .easeOut
-    return SKAction.repeatForever(SKAction.sequence([brighten, fade, delay]))
+    return SKAction.repeatForever(.sequence([brighten, fade, .wait(forDuration: period - twinkleDuration)]))
   }
 
   /// Make an individual star
@@ -552,7 +551,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
       emitter.removeFromParent()
     }
     emitter.removeAllActions()
-    emitter.run(SKAction.sequence([SKAction.wait(forDuration: 0.5), SKAction.removeFromParent()]))
+    emitter.run(.wait(for: 0.5, then: .removeFromParent()))
     emitter.position = asteroid.position
     emitter.isPaused = true
     emitter.resetSimulation()
@@ -822,9 +821,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// - Parameter newScene: The scene to switch to
   func showWhenQuiescent(_ newScene: SKScene) {
     if playfield.isQuiescent(transient: setOf([.playerShot, .ufo, .ufoShot, .fragment])) {
-      wait(for: 0.25) {
-        self.switchScene(to: newScene)
-      }
+      wait(for: 0.25) { self.switchScene(to: newScene) }
     } else {
       wait(for: 0.25) { self.showWhenQuiescent(newScene) }
     }
@@ -843,7 +840,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
         self.showWhenQuiescent(nextScene)
       }
     } else {
-      wait(for: 0.25) { self.switchWhenReady() }
+      wait(for: 0.25, then: switchWhenReady)
     }
   }
 
@@ -853,8 +850,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   func makeSceneInBackground(_ sceneCreation: @escaping () -> SKScene) {
     // Some scene creation can be a little time-consuming and might cause the update
     // loop to lag, so run it in the background.
-    run(SKAction.run({ self.nextScene = sceneCreation() },
-                     queue: DispatchQueue.global(qos: .utility)))
+    run(.run({ self.nextScene = sceneCreation() }, queue: DispatchQueue.global(qos: .utility)))
   }
 
   /// Create a new scene asynchronously (to avoid lag), then transition when it's

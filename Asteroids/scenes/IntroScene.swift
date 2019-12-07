@@ -90,7 +90,7 @@ class IntroScene: BasicScene {
   /// Displays "Incoming transmission..."
   func incoming() {
     incomingLabel.typeIn(text: standBy, attributes: attributes, sound: transmissionSounds) {
-      self.wait(for: 3) { self.header() }
+      self.wait(for: 3, then: self.header)
     }
   }
 
@@ -108,7 +108,7 @@ class IntroScene: BasicScene {
   func intro() {
     introLabel.isHidden = false
     introLabel.typeIn(text: introduction, attributes: attributes, sound: transmissionSounds) {
-      self.doneButton.run(SKAction.sequence([SKAction.unhide(), SKAction.fadeIn(withDuration: 0.5)]))
+      self.doneButton.run(.sequence([.unhide(), .fadeIn(withDuration: 0.5)]))
     }
   }
 
@@ -133,9 +133,7 @@ class IntroScene: BasicScene {
   /// - Parameter view: The view that will display the scene
   override func didMove(to view: SKView) {
     super.didMove(to: view)
-    wait(for: 1) {
-      self.incoming()
-    }
+    wait(for: 1, then: incoming)
     logging("\(name!) finished didMove to view")
   }
 
@@ -177,7 +175,7 @@ class IntroScene: BasicScene {
       Subject: @Promotion!@
       """
       introduction = """
-      @Congratulations on your promotion@ to Lt Commander! I remember the day you \
+      @Congratulations@ on your promotion to @Lt Commander@! I remember the day you \
       joined as a new recruit, still wet behind the ears, but confident that you \
       could make it as a @Rock Rat@. That confidence was justified, and then some. \
       Now you face a @new challenge@, training the next generation of superstar \

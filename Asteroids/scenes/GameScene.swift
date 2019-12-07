@@ -152,13 +152,9 @@ class GameScene: GameTutorialScene {
     let gameScore = gc.enabled ? gc.saveScore(score) : GameScore(points: score)
     _ = UserData.highScores.addScore(gameScore)
     if gc.enabled {
-      wait(for: 2) {
-        gc.loadLeaderboards()
-      }
+      wait(for: 2) { gc.loadLeaderboards() }
     }
-    wait(for: 4) {
-      self.prepareHighScoreScene(gameScore: gameScore)
-    }
+    wait(for: 4) { self.prepareHighScoreScene(gameScore: gameScore) }
   }
 
   /// Create the retro mode shader
@@ -233,7 +229,7 @@ class GameScene: GameTutorialScene {
   }
 
   /// Play the first part of a heartbeat sound, wait a bit, play the second part, and
-  /// then repeat
+  /// then reschedule `heartbeat`
   func heartbeat() {
     if heartbeatOn {
       audio.soundEffect(.heartbeatHigh)
@@ -241,7 +237,7 @@ class GameScene: GameTutorialScene {
       wait(for: fractionBetween * currentHeartbeatRate) {
         self.audio.soundEffect(.heartbeatLow)
         self.currentHeartbeatRate = max(0.98 * self.currentHeartbeatRate, self.heartbeatRateMax)
-        self.wait(for: (1 - fractionBetween) * self.currentHeartbeatRate) { self.heartbeat() }
+        self.wait(for: (1 - fractionBetween) * self.currentHeartbeatRate, then: self.heartbeat)
       }
     }
   }
@@ -279,7 +275,7 @@ class GameScene: GameTutorialScene {
       // seconds (see destroyPlayer).  If no points have been scored within 4 seconds
       // and the player is out of lives, then this action can be cancelled by
       // respawnOrGameOver.
-      run(SKAction.sequence([SKAction.wait(forDuration: 4.1), SKAction.run { self.nextWave() }]), withKey: "spawnWave")
+      run(.wait(for: 4.1, then: nextWave), withKey: "spawnWave")
     }
   }
 
@@ -354,15 +350,15 @@ class GameScene: GameTutorialScene {
     centralDisplay.alpha = 1.0
     centralDisplay.isHidden = false
     let growAndFade = SKAction.sequence([
-      SKAction.scale(to: 1.0, duration: 0.25),
-      SKAction.wait(forDuration: duration),
-      SKAction.fadeOut(withDuration: 0.5),
-      SKAction.hide(),
+      .scale(to: 1.0, duration: 0.25),
+      .wait(forDuration: duration),
+      .fadeOut(withDuration: 0.5),
+      .hide(),
       // This slight extra delay makes sure that the WAVE # is gone from the screen
       // before spawnWave is called.  Without this delay, in extreme cases (like 100
       // asteroids spawned) there would be a slight stutter with the ghost of the
       // message still displayed.
-      SKAction.wait(forDuration: 0.25)
+      .wait(forDuration: 0.25)
       ])
     if let action = action {
       centralDisplay.run(growAndFade, completion: action)
@@ -544,9 +540,7 @@ class GameScene: GameTutorialScene {
       // already plenty of UFOs, or they just killed a UFO.  Wait a bit and then try
       // again.
       logging("Cannot spawn UFO at the moment, waiting")
-      run(SKAction.sequence([SKAction.wait(forDuration: 2),
-                             SKAction.run { self.maybeSpawnUFO()}]),
-          withKey: "spawnUFOs")
+      run(.wait(for: 2, then: maybeSpawnUFO), withKey: "spawnUFOs")
     } else {
       // Do the spawn
       spawnUFO(ufo: UFO(brothersKilled: ufosToAvenge, audio: audio))
@@ -576,9 +570,7 @@ class GameScene: GameTutorialScene {
     let meanTimeToNextUFO = ufoSpawningRate * Globals.gameConfig.value(for: \.meanUFOTime)
     let delay = Double.random(in: 0.75 * meanTimeToNextUFO ... 1.25 * meanTimeToNextUFO)
     logging("Try to spawn UFO in \(delay) seconds, relativeDuration \(ufoSpawningRate)")
-    run(SKAction.sequence([SKAction.wait(forDuration: delay),
-                           SKAction.run { self.maybeSpawnUFO() }]),
-        withKey: "spawnUFOs")
+    run(.wait(for: delay, then: maybeSpawnUFO), withKey: "spawnUFOs")
   }
 
   /// Turn off UFO spawning (e.g., because the player died or a new wave is starting)
@@ -610,12 +602,10 @@ class GameScene: GameTutorialScene {
         self.endGameSaveProgress()
         self.saveScoreAndPrepareHighScores()
         self.displayMessage("Game Over", forTime: 4)
-        self.wait(for: 6) {
-          // saveScoreAndPrepareHighScores has been preparing the high score scene in
-          // the background.  After GAME OVER has been displayed for a while,
-          // transition whenever the scene is ready.
-          self.switchWhenReady()
-        }
+        // saveScoreAndPrepareHighScores has been preparing the high score scene in
+        // the background.  After Game Over has been displayed for a while,
+        // transition whenever the scene is ready.
+        self.wait(for: 6, then: self.switchWhenReady)
       }
     }
   }

@@ -429,10 +429,7 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     removeAction(forKey: spawnSmashiesKey)
     for ufo in smashies {
       let delay = Double.random(in: 0.5 ... 1.5)
-      ufo.run(SKAction.sequence([
-        SKAction.wait(forDuration: delay),
-        SKAction.run({ self.warpOutSmashy(ufo) })
-        ]))
+      ufo.run(.wait(for: delay) { self.warpOutSmashy(ufo) })
     }
   }
 

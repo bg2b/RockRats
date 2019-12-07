@@ -90,8 +90,7 @@ class Ship: SKNode {
     // large core.  Add one more moderate core step to complete the animation loop.
     fire.append(fire[1])
     let fireSize = fire[0].size()
-    var fireAnimation = SKAction.animate(with: fire, timePerFrame: 0.1, resize: false, restore: true)
-    fireAnimation = SKAction.repeatForever(fireAnimation)
+    let fireAnimation = SKAction.repeatForever(.animate(with: fire, timePerFrame: 0.1, resize: false, restore: true))
     // The returned sprites are based off fire[0] but stretched by different amounts
     // for the different thrust levels
     var flames = [SKSpriteNode]()

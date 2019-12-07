@@ -256,16 +256,10 @@ func starBlink(at position: CGPoint, throughAngle angle: CGFloat, duration: Doub
   let star = SKSpriteNode(imageNamed: "star1")
   star.position = position
   star.scale(to: CGSize(width: 0, height: 0))
-  star.run(SKAction.sequence([
-    SKAction.group([
-      SKAction.sequence([
-        SKAction.scale(to: 2, duration: 0.5 * duration),
-        SKAction.scale(to: 0, duration: 0.5 * duration)
-        ]),
-      SKAction.rotate(byAngle: angle, duration: duration),
-      ]),
-    SKAction.removeFromParent()
-    ]))
+  star.run(.sequence([.group([.sequence([.scale(to: 2, duration: 0.5 * duration),
+                                         .scale(to: 0, duration: 0.5 * duration)]),
+                              .rotate(byAngle: angle, duration: duration)]),
+                      .removeFromParent()]))
   return star
 }
 
@@ -332,7 +326,7 @@ func warpOutEffect(texture: SKTexture, position: CGPoint, rotation: CGFloat) -> 
   effect.zRotation = rotation
   effect.shader = shader
   setStartTimeAttrib(effect, view: nil)
-  effect.run(SKAction.sequence([SKAction.wait(forDuration: warpTime), SKAction.removeFromParent()]))
+  effect.run(.wait(for: warpTime, then: .removeFromParent()))
   let star = starBlink(at: position, throughAngle: .pi, duration: 2 * warpTime)
   return [effect, star]
 }
@@ -345,6 +339,6 @@ func warpInEffect(texture: SKTexture, position: CGPoint, rotation: CGFloat, when
   effect.zRotation = rotation
   effect.shader = shader
   setStartTimeAttrib(effect, view: nil)
-  effect.run(SKAction.sequence([SKAction.wait(forDuration: warpTime), SKAction.removeFromParent()]), completion: whenDone)
+  effect.run(.wait(for: warpTime, then: .removeFromParent()), completion: whenDone)
   return effect
 }

@@ -396,12 +396,12 @@ class GameTutorialScene: BasicScene {
     }
   }
 
-  /// This gets called periodically to add a bit to the player's energy reserves.
+  /// Add a bit to the player's energy reserves and then reschedule `replenishEnergy`
   func replenishEnergy() {
     if player.parent != nil {
       energyBar.addToLevel(5)
     }
-    wait(for: 0.5) { self.replenishEnergy() }
+    wait(for: 0.5, then: replenishEnergy)
   }
 
   /// Make a game or tutorial scene of a given size

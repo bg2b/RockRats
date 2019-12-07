@@ -103,7 +103,7 @@ class TutorialScene: GameTutorialScene {
     if attemptsRemaining == 0 {
       // We didn't find a safe position so wait a bit and try again.  This should't
       // really happen in the tutorial.
-      wait(for: 0.5) { self.spawnPlayer() }
+      wait(for: 0.5, then: spawnPlayer)
     } else {
       energyBar.fill()
       audio.soundEffect(.warpIn, at: spawnPosition)
@@ -175,8 +175,7 @@ class TutorialScene: GameTutorialScene {
     button.action = action
     button.alpha = 0
     button.disable()
-    button.run(SKAction.sequence([SKAction.fadeIn(withDuration: 0.25),
-                                  SKAction.run { button.enable() }]))
+    button.run(.sequence([.fadeIn(withDuration: 0.25), .run { button.enable() }]))
     addChild(button)
     moveOnButton = button
   }
@@ -184,15 +183,13 @@ class TutorialScene: GameTutorialScene {
   func removeMoveOnButton() {
     guard let button = moveOnButton else { return }
     button.disable()
-    button.run(SKAction.sequence([SKAction.fadeOut(withDuration: 0.25),
-                                  SKAction.removeFromParent()]))
+    button.run(.sequence([.fadeOut(withDuration: 0.25), .removeFromParent()]))
     moveOnButton = nil
   }
 
   func fadeOutInstructions(then action: @escaping () -> Void) {
     removeMoveOnButton()
-    instructionsLabel.run(SKAction.sequence([SKAction.fadeOut(withDuration: 0.25),
-                                             SKAction.hide()]), completion: action)
+    instructionsLabel.run(.sequence([.fadeOut(withDuration: 0.25), .hide()]), completion: action)
   }
 
   func moveOnThen(action: @escaping () -> Void) -> (() -> Void) {
@@ -557,9 +554,7 @@ class TutorialScene: GameTutorialScene {
     replenishEnergy()
     livesDisplay.showReserves(3)
     deathCount = 0
-    wait(for: 1) {
-      self.tutorial1()
-    }
+    wait(for: 1, then: tutorial1)
     logging("\(name!) finished didMove to view")
   }
 

@@ -212,9 +212,7 @@ class Button: SKNode {
     // no confirmation.
     decorations[currentDecoration].isHidden = true
     confirmDecoration.isHidden = false
-    wait(for: 3) {
-      self.resetAndCancelConfirmation()
-    }
+    wait(for: 3, then: resetAndCancelConfirmation)
   }
 
   /// Rotate the button's displayed decoration (for toggle or multi-alternative buttons).
