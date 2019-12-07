@@ -28,6 +28,10 @@
 		FD158A25238FF9EA00180EC9 /* Touchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD158A24238FF9EA00180EC9 /* Touchable.swift */; };
 		FD1B389E234ACC5E00674161 /* ufo3loop.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD1B389D234ACC5E00674161 /* ufo3loop.wav */; };
 		FD1B38A0234C904C00674161 /* CyclicCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD1B389F234C904C00674161 /* CyclicCache.swift */; };
+		FD1F0479239BEB6F001BD4DC /* firework2.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD1F0475239BEB6F001BD4DC /* firework2.wav */; };
+		FD1F047A239BEB6F001BD4DC /* firework3.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD1F0476239BEB6F001BD4DC /* firework3.wav */; };
+		FD1F047B239BEB6F001BD4DC /* firework4.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD1F0477239BEB6F001BD4DC /* firework4.wav */; };
+		FD1F047C239BEB6F001BD4DC /* firework1.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD1F0478239BEB6F001BD4DC /* firework1.wav */; };
 		FD2518EE239A66F400029466 /* SKHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD2518ED239A66F400029466 /* SKHelpers.swift */; };
 		FD28DB5422DFFA87009446A2 /* meteorhuge2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD28DB4D22DFFA87009446A2 /* meteorhuge2@2x.png */; };
 		FD28DB5522DFFA87009446A2 /* ufo_yellow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD28DB4E22DFFA87009446A2 /* ufo_yellow@2x.png */; };
@@ -135,6 +139,10 @@
 		FD158A24238FF9EA00180EC9 /* Touchable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Touchable.swift; sourceTree = "<group>"; };
 		FD1B389D234ACC5E00674161 /* ufo3loop.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo3loop.wav; sourceTree = "<group>"; };
 		FD1B389F234C904C00674161 /* CyclicCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyclicCache.swift; sourceTree = "<group>"; };
+		FD1F0475239BEB6F001BD4DC /* firework2.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = firework2.wav; sourceTree = "<group>"; };
+		FD1F0476239BEB6F001BD4DC /* firework3.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = firework3.wav; sourceTree = "<group>"; };
+		FD1F0477239BEB6F001BD4DC /* firework4.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = firework4.wav; sourceTree = "<group>"; };
+		FD1F0478239BEB6F001BD4DC /* firework1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = firework1.wav; sourceTree = "<group>"; };
 		FD2518ED239A66F400029466 /* SKHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SKHelpers.swift; sourceTree = "<group>"; };
 		FD28DB4D22DFFA87009446A2 /* meteorhuge2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "meteorhuge2@2x.png"; sourceTree = "<group>"; };
 		FD28DB4E22DFFA87009446A2 /* ufo_yellow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ufo_yellow@2x.png"; sourceTree = "<group>"; };
@@ -268,6 +276,10 @@
 		FD4D53C323080BFD00718938 /* sounds */ = {
 			isa = PBXGroup;
 			children = (
+				FD1F0478239BEB6F001BD4DC /* firework1.wav */,
+				FD1F0475239BEB6F001BD4DC /* firework2.wav */,
+				FD1F0476239BEB6F001BD4DC /* firework3.wav */,
+				FD1F0477239BEB6F001BD4DC /* firework4.wav */,
 				FD9BA03C23683B2B00468636 /* heartbeat1.wav */,
 				FD9BA03D23683B2B00468636 /* heartbeat2.wav */,
 				6523C0832316E54D0071AB4B /* ufo1loop.wav */,
@@ -509,6 +521,8 @@
 				FD0C070B22D8925E00F19A55 /* starfield_black@2x.png in Resources */,
 				FD53169322DC1A0600F09E57 /* lasersmall_red@2x.png in Resources */,
 				FD53168422DB445100F09E57 /* meteorbig3@2x.png in Resources */,
+				FD1F0479239BEB6F001BD4DC /* firework2.wav in Resources */,
+				FD1F047A239BEB6F001BD4DC /* firework3.wav in Resources */,
 				FD537DD6231BE385003312B3 /* ufo_laser.wav in Resources */,
 				FD28DB5A22DFFA87009446A2 /* ufo_green@2x.png in Resources */,
 				FD4D53CB2308206D00718938 /* player_laser.wav in Resources */,
@@ -526,6 +540,7 @@
 				FD0C070A22D8925E00F19A55 /* starfield_violet@2x.png in Resources */,
 				6523C0822316E5400071AB4B /* ufo2loop.wav in Resources */,
 				FDD831F922F1AE0D00CA4EC6 /* confignormal.json in Resources */,
+				FD1F047B239BEB6F001BD4DC /* firework4.wav in Resources */,
 				FD53169022DC1A0600F09E57 /* laserbig_blue@2x.png in Resources */,
 				FD4D53D1230843C900718938 /* meteorsmall_hit.wav in Resources */,
 				FD53168F22DC1A0600F09E57 /* laserbig_red@2x.png in Resources */,
@@ -545,6 +560,7 @@
 				FD4D53C523080D3600718938 /* player_explosion.wav in Resources */,
 				FD9BA03F23683B2B00468636 /* heartbeat2.wav in Resources */,
 				FD53168322DB445100F09E57 /* meteorbig4@2x.png in Resources */,
+				FD1F047C239BEB6F001BD4DC /* firework1.wav in Resources */,
 				FD79324322D20FE700E7D336 /* Assets.xcassets in Resources */,
 				FD28DB5622DFFA87009446A2 /* meteorhuge3@2x.png in Resources */,
 				FDD44F972338C60700C13609 /* transmission.wav in Resources */,
