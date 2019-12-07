@@ -10,10 +10,16 @@ import SpriteKit
 import SafariServices
 
 /// Game credits and acknowledgements
-class CreditsScene: BasicScene {
+class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
+  /// This is `true` when displaying a hyperlink via Safari
+  var showingLink = false
+
+  // MARK: - Initialization
+
   /// Build the stuff in the scene
   func initCredits() {
-    let attributes = AttrStyles(fontName: AppAppearance.font, fontSize: 40)
+    let fontSize = CGFloat(40)
+    let attributes = AttrStyles(fontName: AppAppearance.font, fontSize: fontSize)
     let credits = SKNode()
     credits.name = "credits"
     credits.setZ(.info)
@@ -48,9 +54,7 @@ class CreditsScene: BasicScene {
     // The actual credits in the center
     let creditsLabels = SKNode()
     creditsLabels.name = "creditsLabels"
-    // There are several sections, and I want more control over the spacing between
-    // sections than is obtained by making one big label with some line breaks, so
-    // I'll make one label per section instead.
+    // There are several sections, each with a line or two of text followed by a link
     let creditsText = [
       ("Designed & Programmed by\n@Daniel Long@ and @David Long@",
        "rockrats.davidlong.org"),
@@ -70,16 +74,19 @@ class CreditsScene: BasicScene {
       creditsLabel.verticalAlignmentMode = .top
       creditsLabel.position = CGPoint(x: 0, y: nextLabelY)
       creditsLabels.addChild(creditsLabel)
-      nextLabelY -= creditsLabel.frame.height + 10
+      nextLabelY -= creditsLabel.frame.height + 0.25 * fontSize
+      // Putting links in a button doesn't match the rest of the credits, but I want
+      // to indicate that they're activatable in some way.  I settled on using the
+      // same green as the button borders for the link text.
       let linkLabel = SKLabelNode(text: link)
       linkLabel.fontName = AppAppearance.font
-      linkLabel.fontSize = 40
+      linkLabel.fontSize = fontSize
       linkLabel.fontColor = AppAppearance.borderColor
       linkLabel.horizontalAlignmentMode = .left
       linkLabel.verticalAlignmentMode = .top
       linkLabel.position = CGPoint(x: 0, y: nextLabelY)
       creditsLabels.addChild(Touchable(linkLabel) { [unowned self] in self.showLink(link) })
-      nextLabelY -= linkLabel.frame.height + 30
+      nextLabelY -= linkLabel.frame.height + 0.75 * fontSize
     }
     let wantedMidY = 0.5 * (title.frame.minY + playButton.calculateAccumulatedFrame().maxY)
     // Center credits vertically at wantedMidY
@@ -90,6 +97,21 @@ class CreditsScene: BasicScene {
     creditsLabels.position = CGPoint(x: creditsX, y: creditsY)
     credits.addChild(creditsLabels)
   }
+
+  /// Make a new scene to display the credits
+  /// - Parameter size: The size of the scene
+  override init(size: CGSize) {
+    super.init(size: size)
+    name = "creditsScene"
+    initGameArea(avoidSafeArea: false)
+    initCredits()
+  }
+
+  required init(coder aDecoder: NSCoder) {
+    super.init(coder: aDecoder)
+  }
+
+  // MARK: - Button actions
 
   /// Start a new game
   func startGame() {
@@ -106,6 +128,13 @@ class CreditsScene: BasicScene {
     switchToScene { SettingsScene(size: self.fullFrame.size) }
   }
 
+  // MARK: - Safari
+
+  /// Enforce pausing when showing a link via Safari
+  override var forcePause: Bool { showingLink }
+
+  /// Display a hyperlink
+  /// - Parameter link: The link, minus the initial https://
   func showLink(_ link: String) {
     guard let rootVC = view?.window?.rootViewController else {
       logging("No view controller to show \(link)")
@@ -113,8 +142,18 @@ class CreditsScene: BasicScene {
     }
     guard let url = URL(string: "https://" + link) else { fatalError("Invalid link \(link)") }
     let config = SFSafariViewController.Configuration()
-    let vc = SFSafariViewController(url: url, configuration: config)
-    rootVC.present(vc, animated: true)
+    let sfvc = SFSafariViewController(url: url, configuration: config)
+    sfvc.delegate = self
+    isPaused = true
+    showingLink = true
+    rootVC.present(sfvc, animated: true)
+  }
+
+  /// This is called when the Safari is closed
+  /// - Parameter sfvc: The Safari view controller
+  func safariViewControllerDidFinish(_ sfvc: SFSafariViewController) {
+    showingLink = false
+    isPaused = false
   }
 
   override func didMove(to view: SKView) {
@@ -124,18 +163,5 @@ class CreditsScene: BasicScene {
 
   override func update(_ currentTime: TimeInterval) {
     super.update(currentTime)
-  }
-
-  /// Make a new scene to display the credits
-  /// - Parameter size: The size of the scene
-  override init(size: CGSize) {
-    super.init(size: size)
-    name = "creditsScene"
-    initGameArea(avoidSafeArea: false)
-    initCredits()
-  }
-
-  required init(coder aDecoder: NSCoder) {
-    super.init(coder: aDecoder)
   }
 }
