@@ -8,6 +8,8 @@
 
 import SpriteKit
 
+// MARK: Special scores for hidden achievements
+
 /// A score associated with a hidden achievement
 struct SpecialScore {
   let score: Int
@@ -24,6 +26,8 @@ let specialScores = [
   SpecialScore(score: 2001, display: "A Space Oddity", achievement: .spaceOddity),
   SpecialScore(score: 3720, display: "3720 to 1", achievement: .whatAreTheOdds),
 ]
+
+// MARK: - The game is afoot
 
 /// The scene for playing a game (surprise!)
 ///
@@ -80,6 +84,8 @@ class GameScene: GameTutorialScene {
   /// Whatever the current heartbeat rate is, gradually decreases
   var currentHeartbeatRate = 0.0
 
+  // MARK: - Initialization
+
   /// Add score and central display to game area (lives display, energy bar, and
   /// pause controls are added by the `super.initInfo()`)
   override func initInfo() {
@@ -105,56 +111,6 @@ class GameScene: GameTutorialScene {
     centralDisplay.verticalAlignmentMode = .center
     centralDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.midY)
     moreInfo.addChild(centralDisplay)
-  }
-
-  /// Force quit the game
-  ///
-  /// Turns off the heartbeat and saves achievement progress before calling
-  /// `super.doQuit()` to transition back to the menu.
-  override func doQuit() {
-    stopHeartbeat()
-    endGameSaveProgress()
-    super.doQuit()
-  }
-
-  /// Update game counters, achievement progress, etc., at the end of a game (or upon
-  /// quit)
-  func endGameSaveProgress() {
-    updateGameCounters()
-    if Globals.gcInterface.enabled {
-      reportHiddenProgress()
-      Globals.gcInterface.flushProgress()
-    }
-  }
-
-  /// Start creation of the high scores scene
-  ///
-  /// After the scene construction finishes and the GAME OVER message has been
-  /// displayed for a while, this is the scene that will be shown.
-  ///
-  /// - Parameter gameScore: The score earned in the game
-  func prepareHighScoreScene(gameScore: GameScore) {
-    makeSceneInBackground { HighScoreScene(size: self.fullFrame.size, score: gameScore) }
-  }
-
-  /// End of game, report the score to Game Center (if active) and get ready to
-  /// transition to the high scores scene
-  func saveScoreAndPrepareHighScores() {
-    // When Game Center is active, I need to report the score and refresh
-    // leaderboards.  When game over calls this method, I have 6 seconds before the
-    // earliest possible transition to the high scores screen.  It doesn't take long
-    // to create the high scores scene, so I'll report the score immediately, then
-    // wait a couple of seconds to refresh Game Center leaderboards, and then a
-    // couple more seconds for the leaderboard data to load.  If the leaderboard data
-    // doesn't load in time, I'll wind up creating the high scores scene with
-    // somewhat out-of-date Game Center scores, but whatevs.
-    let gc = Globals.gcInterface!
-    let gameScore = gc.enabled ? gc.saveScore(score) : GameScore(points: score)
-    _ = UserData.highScores.addScore(gameScore)
-    if gc.enabled {
-      wait(for: 2) { gc.loadLeaderboards() }
-    }
-    wait(for: 4) { self.prepareHighScoreScene(gameScore: gameScore) }
   }
 
   /// Create the retro mode shader
@@ -202,31 +158,56 @@ class GameScene: GameTutorialScene {
     self.shader = shader
   }
 
-  /// Spawn a wave of asteroids
-  func spawnWave() {
-    if Globals.gameConfig.waveNumber() == 11 {
-      reportAchievement(achievement: .spinalTap)
-    }
-    let numAsteroids = Globals.gameConfig.numAsteroids()
-    for _ in 1...numAsteroids {
-      spawnAsteroid(size: "huge")
-    }
-    logging("Spawned next wave")
-    // UFOs will start appearing after a full duration period
-    ufoSpawningRate = 1
-    spawnUFOs()
+  /// Make a new game scene
+  /// - Parameter size: The size of the scene
+  override init(size: CGSize) {
+    super.init(size: size)
+    name = "gameScene"
+    initFutureShader()
+    player = Ship(getJoystickDirection: { [unowned self] in return self.joystickDirection }, audio: audio)
+    setRetroMode(enabled: achievementIsCompleted(.blastFromThePast) && UserData.retroMode.value)
+    physicsWorld.contactDelegate = self
   }
 
-  /// Display the WAVE ## message, wait a bit, and then spawn asteroids
-  func nextWave() {
-    Globals.gameConfig.nextWave()
-    ufosToAvenge = 0
-    ufosKilledWithoutDying = 0
-    numberOfUFOsThisWave = 0
-    displayMessage("WAVE \(Globals.gameConfig.waveNumber())", forTime: 1.5) {
-      self.spawnWave()
+  required init(coder aDecoder: NSCoder) {
+    super.init(coder: aDecoder)
+  }
+
+  // MARK: - Central display
+
+  /// Display a message in the center of the screen for some time, then do something
+  ///
+  /// There's an animation to make the message expand in from a tiny size, then pause
+  /// and fade out.
+  ///
+  /// - Parameters:
+  ///   - message: The message to show
+  ///   - duration: Number of seconds to show the message
+  ///   - action: What to do after the message fades out
+  func displayMessage(_ message: String, forTime duration: Double, then action: (() -> Void)? = nil) {
+    centralDisplay.text = message
+    centralDisplay.setScale(0.0)
+    centralDisplay.alpha = 1.0
+    centralDisplay.isHidden = false
+    let growAndFade = SKAction.sequence([
+      .scale(to: 1.0, duration: 0.25),
+      .wait(forDuration: duration),
+      .fadeOut(withDuration: 0.5),
+      .hide(),
+      // This slight extra delay makes sure that the WAVE # is gone from the screen
+      // before spawnWave is called.  Without this delay, in extreme cases (like 100
+      // asteroids spawned) there would be a slight stutter with the ghost of the
+      // message still displayed.
+      .wait(forDuration: 0.25)
+      ])
+    if let action = action {
+      centralDisplay.run(growAndFade, completion: action)
+    } else {
+      centralDisplay.run(growAndFade)
     }
   }
+
+  // MARK: - Heartbeat sounds
 
   /// Play the first part of a heartbeat sound, wait a bit, play the second part, and
   /// then reschedule `heartbeat`
@@ -263,20 +244,27 @@ class GameScene: GameTutorialScene {
     currentHeartbeatRate = heartbeatRateInitial
   }
 
-  /// When an asteroid is removed, check to see if I should start a new wave
-  override func asteroidRemoved() {
-    if asteroids.isEmpty && !gameOver {
-      normalHeartbeatRate()
-      stopSpawningUFOs()
-      logging("Last asteroid removed, going to spawn a wave")
-      // If the player dies from colliding with the last asteroid, then I have to
-      // wait long enough for any of the player's remaining lasers to possibly hit a
-      // UFO and score enough points for an extra life.  That wait is currently 4
-      // seconds (see destroyPlayer).  If no points have been scored within 4 seconds
-      // and the player is out of lives, then this action can be cancelled by
-      // respawnOrGameOver.
-      run(.wait(for: 4.1, then: nextWave), withKey: "spawnWave")
-    }
+  // MARK: - Scoring
+
+  /// How many points is a destroyed asteroid worth?
+  /// - Parameter asteroid: The asteroid that was hit
+  /// - Returns: The point value
+  func asteroidPoints(_ asteroid: SKNode) -> Int {
+    guard let name = asteroid.name else { fatalError("Asteroid should have a name") }
+    // Small is not actually used...
+    if name.contains("small") { return 20 }
+    if name.contains("med") { return 10 }
+    if name.contains("big") { return 5 }
+    assert(name.contains("huge"), "Asteroids should be small, med, big, or huge")
+    return 2
+  }
+
+  /// How many points is a destroyed UFO worth?
+  /// - Parameter ufo: The UFO that was hit
+  /// - Returns: The point value
+  func ufoPoints(_ ufo: SKNode) -> Int {
+    guard let ufo = ufo as? UFO else { fatalError("The ufo doesn't have the UFO nature") }
+    return [20, 50, 100][ufo.type.rawValue]
   }
 
   /// Add some points to the player's score
@@ -328,43 +316,112 @@ class GameScene: GameTutorialScene {
     }
   }
 
+  // MARK: - Asteroid spawning
+
+  /// When an asteroid is removed, check to see if I should start a new wave
+  override func asteroidRemoved() {
+    if asteroids.isEmpty && !gameOver {
+      normalHeartbeatRate()
+      stopSpawningUFOs()
+      logging("Last asteroid removed, going to spawn a wave")
+      // If the player dies from colliding with the last asteroid, then I have to
+      // wait long enough for any of the player's remaining lasers to possibly hit a
+      // UFO and score enough points for an extra life.  That wait is currently 4
+      // seconds (see destroyPlayer).  If no points have been scored within 4 seconds
+      // and the player is out of lives, then this action can be cancelled by
+      // respawnOrGameOver.
+      run(.wait(for: 4.1, then: nextWave), withKey: "spawnWave")
+    }
+  }
+
+  /// Spawn a wave of asteroids
+  func spawnWave() {
+    if Globals.gameConfig.waveNumber() == 11 {
+      reportAchievement(achievement: .spinalTap)
+    }
+    let numAsteroids = Globals.gameConfig.numAsteroids()
+    for _ in 1...numAsteroids {
+      spawnAsteroid(size: "huge")
+    }
+    logging("Spawned next wave")
+    // UFOs will start appearing after a full duration period
+    ufoSpawningRate = 1
+    spawnUFOs()
+  }
+
+  /// Display the WAVE ## message, wait a bit, and then spawn asteroids
+  func nextWave() {
+    Globals.gameConfig.nextWave()
+    ufosToAvenge = 0
+    ufosKilledWithoutDying = 0
+    numberOfUFOsThisWave = 0
+    displayMessage("WAVE \(Globals.gameConfig.waveNumber())", forTime: 1.5) {
+      self.spawnWave()
+    }
+  }
+
+  // MARK: - UFO spawning
+
+  /// Consider spawning a UFO
+  ///
+  /// This is called periodically by an action started in `spawnUFOs`.  If conditions
+  /// are right (the player is not dead/respawning/warping, there wouldn't be too
+  /// many UFOs, etc.), then make a new UFO and start it launching.  Otherwise, wait
+  /// a short time and then try to spawn again.  Once a UFO successfully spawns,
+  /// increase the spawning rate and call `spawnUFOs` again.
+  func maybeSpawnUFO() {
+    if player.parent == nil || ufos.count >= Globals.gameConfig.value(for: \.maxUFOs) || pauseUFOSpawning > 0 {
+      // Don't spawn at this moment; either the player is dead/warping, or there are
+      // already plenty of UFOs, or they just killed a UFO.  Wait a bit and then try
+      // again.
+      logging("Cannot spawn UFO at the moment, waiting")
+      run(.wait(for: 2, then: maybeSpawnUFO), withKey: "spawnUFOs")
+    } else {
+      // Do the spawn
+      spawnUFO(ufo: UFO(brothersKilled: ufosToAvenge, audio: audio))
+      numberOfUFOsThisWave += 1
+      // Once a UFO spawns, don't be quite so eager to spawn a second
+      pauseUFOSpawning += 1
+      wait(for: 4) { self.pauseUFOSpawning -= 1 }
+      if ufos.count == 2 {
+        reportAchievement(achievement: .doubleTrouble)
+      }
+      // Increase tempo of spawning
+      ufoSpawningRate = max(0.5 * ufoSpawningRate, 0.125)
+      spawnUFOs()
+    }
+  }
+
+  /// Start spawning UFOs
+  ///
+  /// The delay to the first potential spawn is controlled by `ufoSpawningRate` (and
+  /// the `gameConfig` value).  After that delay, try to spawn a UFO; once the spawn
+  /// succeeds, it will call `spawnUFOs` again (possibly with an adjusted delay).
+  func spawnUFOs() {
+    guard ufoSpawningRate > 0 else {
+      fatalError("spawnUFOs called with ufoSpawningRate == 0")
+    }
+    removeAction(forKey: "spawnUFOs") // Remove any existing scheduled spawn
+    let meanTimeToNextUFO = ufoSpawningRate * Globals.gameConfig.value(for: \.meanUFOTime)
+    let delay = Double.random(in: 0.75 * meanTimeToNextUFO ... 1.25 * meanTimeToNextUFO)
+    logging("Try to spawn UFO in \(delay) seconds, relativeDuration \(ufoSpawningRate)")
+    run(.wait(for: delay, then: maybeSpawnUFO), withKey: "spawnUFOs")
+  }
+
+  /// Turn off UFO spawning (e.g., because the player died or a new wave is starting)
+  func stopSpawningUFOs() {
+    removeAction(forKey: "spawnUFOs")
+    // Spawning rate zero means "don't spawn UFOs"
+    ufoSpawningRate = 0
+  }
+
+  // MARK: - Player birth and death
+
   /// Update the reserve ships
   /// - Parameter amount: The amount by which to change the number of reserves
   func updateLives(_ amount: Int) {
     livesRemaining += amount
     livesDisplay.showReserves(livesRemaining)
-  }
-
-  /// Display a message in the center of the screen for some time, then do something
-  ///
-  /// There's an animation to make the message expand in from a tiny size, then pause
-  /// and fade out.
-  ///
-  /// - Parameters:
-  ///   - message: The message to show
-  ///   - duration: Number of seconds to show the message
-  ///   - action: What to do after the message fades out
-  func displayMessage(_ message: String, forTime duration: Double, then action: (() -> Void)? = nil) {
-    centralDisplay.text = message
-    centralDisplay.setScale(0.0)
-    centralDisplay.alpha = 1.0
-    centralDisplay.isHidden = false
-    let growAndFade = SKAction.sequence([
-      .scale(to: 1.0, duration: 0.25),
-      .wait(forDuration: duration),
-      .fadeOut(withDuration: 0.5),
-      .hide(),
-      // This slight extra delay makes sure that the WAVE # is gone from the screen
-      // before spawnWave is called.  Without this delay, in extreme cases (like 100
-      // asteroids spawned) there would be a slight stutter with the ghost of the
-      // message still displayed.
-      .wait(forDuration: 0.25)
-      ])
-    if let action = action {
-      centralDisplay.run(growAndFade, completion: action)
-    } else {
-      centralDisplay.run(growAndFade)
-    }
   }
 
   /// Spawn the player
@@ -414,26 +471,64 @@ class GameScene: GameTutorialScene {
     }
   }
 
-  /// How many points is a destroyed asteroid worth?
-  /// - Parameter asteroid: The asteroid that was hit
-  /// - Returns: The point value
-  func asteroidPoints(_ asteroid: SKNode) -> Int {
-    guard let name = asteroid.name else { fatalError("Asteroid should have a name") }
-    // Small is not actually used...
-    if name.contains("small") { return 20 }
-    if name.contains("med") { return 10 }
-    if name.contains("big") { return 5 }
-    assert(name.contains("huge"), "Asteroids should be small, med, big, or huge")
-    return 2
+  /// The player died, decide whether to respawn them or end the game
+  ///
+  /// This routine is called some time after the player is destroyed.  A delay is
+  /// needed so that any shots that the player might have fired will either expire or
+  /// hit their targets.  Only after all the shots are gone do I know whether they
+  /// might have just gotten enough points for an extra life.  (In other words, this
+  /// routine is not called until it's certain that `livesRemaining` is stable.)
+  ///
+  /// In either case, any UFOs that are flying around should warp out.
+  func respawnOrGameOver() {
+    let delay = warpOutUFOs() + 1
+    if livesRemaining > 0 {
+      wait(for: delay) { self.spawnPlayer() }
+    } else {
+      gameOver = true
+      stopHeartbeat()
+      self.removeAction(forKey: "spawnWave")
+      wait(for: delay) {
+        self.audio.soundEffect(.gameOver)
+        self.endGameSaveProgress()
+        self.saveScoreAndPrepareHighScores()
+        self.displayMessage("Game Over", forTime: 4)
+        // saveScoreAndPrepareHighScores has been preparing the high score scene in
+        // the background.  After Game Over has been displayed for a while,
+        // transition whenever the scene is ready.
+        self.wait(for: 6, then: self.switchWhenReady)
+      }
+    }
   }
 
-  /// How many points is a destroyed UFO worth?
-  /// - Parameter ufo: The UFO that was hit
-  /// - Returns: The point value
-  func ufoPoints(_ ufo: SKNode) -> Int {
-    guard let ufo = ufo as? UFO else { fatalError("The ufo doesn't have the UFO nature") }
-    return [20, 50, 100][ufo.type.rawValue]
+  /// The player died in some way
+  ///
+  /// Make an explosion, award `rightPlaceWrongTime` if appropriate, turn off UFO
+  /// spawning and reset various UFO-related counters.
+  ///
+  /// There's a slow-motion effect so that the player can appreciate their demise in
+  /// all its glory ;-).
+  func destroyPlayer() {
+    if Globals.lastUpdateTime - lastWarpInTime <= 0.1 {
+      reportAchievement(achievement: .rightPlaceWrongTime)
+    }
+    ufosKilledWithoutDying = 0
+    audio.soundEffect(.playerExplosion, at: player.position)
+    addToPlayfield(player.explode())
+    stopSpawningUFOs()
+    playfield.changeSpeed(to: 0.25)
+    // Lasers live for a bit less than a second.  If the player fires and immediately
+    // dies, then due to the slow-motion effect that can get stretched to a bit less
+    // than 4 seconds.  If the player was going to hit anything to score some points
+    // and gain a life, then it should have happened by the time respawnOrGameOver is
+    // called.
+    wait(for: 4) {
+      self.playfield.changeSpeed(to: 1)
+      self.respawnOrGameOver()
+    }
   }
+
+  // MARK: - Contact handling
 
   /// Remove a player laser that missed
   /// - Parameter laser: The laser being removed
@@ -527,116 +622,6 @@ class GameScene: GameTutorialScene {
     destroyUFO(ufo as! UFO)
   }
 
-  /// Consider spawning a UFO
-  ///
-  /// This is called periodically by an action started in `spawnUFOs`.  If conditions
-  /// are right (the player is not dead/respawning/warping, there wouldn't be too
-  /// many UFOs, etc.), then make a new UFO and start it launching.  Otherwise, wait
-  /// a short time and then try to spawn again.  Once a UFO successfully spawns,
-  /// increase the spawning rate and call `spawnUFOs` again.
-  func maybeSpawnUFO() {
-    if player.parent == nil || ufos.count >= Globals.gameConfig.value(for: \.maxUFOs) || pauseUFOSpawning > 0 {
-      // Don't spawn at this moment; either the player is dead/warping, or there are
-      // already plenty of UFOs, or they just killed a UFO.  Wait a bit and then try
-      // again.
-      logging("Cannot spawn UFO at the moment, waiting")
-      run(.wait(for: 2, then: maybeSpawnUFO), withKey: "spawnUFOs")
-    } else {
-      // Do the spawn
-      spawnUFO(ufo: UFO(brothersKilled: ufosToAvenge, audio: audio))
-      numberOfUFOsThisWave += 1
-      // Once a UFO spawns, don't be quite so eager to spawn a second
-      pauseUFOSpawning += 1
-      wait(for: 4) { self.pauseUFOSpawning -= 1 }
-      if ufos.count == 2 {
-        reportAchievement(achievement: .doubleTrouble)
-      }
-      // Increase tempo of spawning
-      ufoSpawningRate = max(0.5 * ufoSpawningRate, 0.125)
-      spawnUFOs()
-    }
-  }
-
-  /// Start spawning UFOs
-  ///
-  /// The delay to the first potential spawn is controlled by `ufoSpawningRate` (and
-  /// the `gameConfig` value).  After that delay, try to spawn a UFO; once the spawn
-  /// succeeds, it will call `spawnUFOs` again (possibly with an adjusted delay).
-  func spawnUFOs() {
-    guard ufoSpawningRate > 0 else {
-      fatalError("spawnUFOs called with ufoSpawningRate == 0")
-    }
-    removeAction(forKey: "spawnUFOs") // Remove any existing scheduled spawn
-    let meanTimeToNextUFO = ufoSpawningRate * Globals.gameConfig.value(for: \.meanUFOTime)
-    let delay = Double.random(in: 0.75 * meanTimeToNextUFO ... 1.25 * meanTimeToNextUFO)
-    logging("Try to spawn UFO in \(delay) seconds, relativeDuration \(ufoSpawningRate)")
-    run(.wait(for: delay, then: maybeSpawnUFO), withKey: "spawnUFOs")
-  }
-
-  /// Turn off UFO spawning (e.g., because the player died or a new wave is starting)
-  func stopSpawningUFOs() {
-    removeAction(forKey: "spawnUFOs")
-    // Spawning rate zero means "don't spawn UFOs"
-    ufoSpawningRate = 0
-  }
-
-  /// The player died, decide whether to respawn them or end the game
-  ///
-  /// This routine is called some time after the player is destroyed.  A delay is
-  /// needed so that any shots that the player might have fired will either expire or
-  /// hit their targets.  Only after all the shots are gone do I know whether they
-  /// might have just gotten enough points for an extra life.  (In other words, this
-  /// routine is not called until it's certain that `livesRemaining` is stable.)
-  ///
-  /// In either case, any UFOs that are flying around should warp out.
-  func respawnOrGameOver() {
-    let delay = warpOutUFOs() + 1
-    if livesRemaining > 0 {
-      wait(for: delay) { self.spawnPlayer() }
-    } else {
-      gameOver = true
-      stopHeartbeat()
-      self.removeAction(forKey: "spawnWave")
-      wait(for: delay) {
-        self.audio.soundEffect(.gameOver)
-        self.endGameSaveProgress()
-        self.saveScoreAndPrepareHighScores()
-        self.displayMessage("Game Over", forTime: 4)
-        // saveScoreAndPrepareHighScores has been preparing the high score scene in
-        // the background.  After Game Over has been displayed for a while,
-        // transition whenever the scene is ready.
-        self.wait(for: 6, then: self.switchWhenReady)
-      }
-    }
-  }
-
-  /// The player died in some way
-  ///
-  /// Make an explosion, award `rightPlaceWrongTime` if appropriate, turn off UFO
-  /// spawning and reset various UFO-related counters.
-  ///
-  /// There's a slow-motion effect so that the player can appreciate their demise in
-  /// all its glory ;-).
-  func destroyPlayer() {
-    if Globals.lastUpdateTime - lastWarpInTime <= 0.1 {
-      reportAchievement(achievement: .rightPlaceWrongTime)
-    }
-    ufosKilledWithoutDying = 0
-    audio.soundEffect(.playerExplosion, at: player.position)
-    addToPlayfield(player.explode())
-    stopSpawningUFOs()
-    playfield.changeSpeed(to: 0.25)
-    // Lasers live for a bit less than a second.  If the player fires and immediately
-    // dies, then due to the slow-motion effect that can get stretched to a bit less
-    // than 4 seconds.  If the player was going to hit anything to score some points
-    // and gain a life, then it should have happened by the time respawnOrGameOver is
-    // called.
-    wait(for: 4) {
-      self.playfield.changeSpeed(to: 1)
-      self.respawnOrGameOver()
-    }
-  }
-
   /// A UFO shot the player
   ///
   /// Handles getting-shot achievements `redShirt` and `itsATrap`, and sets
@@ -695,6 +680,60 @@ class GameScene: GameTutorialScene {
     when(contact, isBetween: .ufoShot, and: .player) { ufoLaserHit(laser: $0, player: $1)}
   }
 
+  // MARK: - End of game
+
+  /// Force quit the game
+  ///
+  /// Turns off the heartbeat and saves achievement progress before calling
+  /// `super.doQuit()` to transition back to the menu.
+  override func doQuit() {
+    stopHeartbeat()
+    endGameSaveProgress()
+    super.doQuit()
+  }
+
+  /// Update game counters, achievement progress, etc., at the end of a game (or upon
+  /// quit)
+  func endGameSaveProgress() {
+    updateGameCounters()
+    if Globals.gcInterface.enabled {
+      reportHiddenProgress()
+      Globals.gcInterface.flushProgress()
+    }
+  }
+
+  /// Start creation of the high scores scene
+  ///
+  /// After the scene construction finishes and the GAME OVER message has been
+  /// displayed for a while, this is the scene that will be shown.
+  ///
+  /// - Parameter gameScore: The score earned in the game
+  func prepareHighScoreScene(gameScore: GameScore) {
+    makeSceneInBackground { HighScoreScene(size: self.fullFrame.size, score: gameScore) }
+  }
+
+  /// End of game, report the score to Game Center (if active) and get ready to
+  /// transition to the high scores scene
+  func saveScoreAndPrepareHighScores() {
+    // When Game Center is active, I need to report the score and refresh
+    // leaderboards.  When game over calls this method, I have 6 seconds before the
+    // earliest possible transition to the high scores screen.  It doesn't take long
+    // to create the high scores scene, so I'll report the score immediately, then
+    // wait a couple of seconds to refresh Game Center leaderboards, and then a
+    // couple more seconds for the leaderboard data to load.  If the leaderboard data
+    // doesn't load in time, I'll wind up creating the high scores scene with
+    // somewhat out-of-date Game Center scores, but whatevs.
+    let gc = Globals.gcInterface!
+    let gameScore = gc.enabled ? gc.saveScore(score) : GameScore(points: score)
+    _ = UserData.highScores.addScore(gameScore)
+    if gc.enabled {
+      wait(for: 2) { gc.loadLeaderboards() }
+    }
+    wait(for: 4) { self.prepareHighScoreScene(gameScore: gameScore) }
+  }
+
+  // MARK: - Playing a game
+
   /// Start a new game
   /// - Parameter view: The view that will present the scene
   override func didMove(to view: SKView) {
@@ -721,6 +760,7 @@ class GameScene: GameTutorialScene {
     logging("\(name!) finished didMove to view")
   }
 
+
   /// Main update loop
   /// - Parameter currentTime: The game time
   override func update(_ currentTime: TimeInterval) {
@@ -737,20 +777,5 @@ class GameScene: GameTutorialScene {
     player.fly()
     playfield.wrapCoordinates()
     audio.update()
-  }
-
-  /// Make a new game scene
-  /// - Parameter size: The size of the scene
-  override init(size: CGSize) {
-    super.init(size: size)
-    name = "gameScene"
-    initFutureShader()
-    player = Ship(getJoystickDirection: { [unowned self] in return self.joystickDirection }, audio: audio)
-    setRetroMode(enabled: achievementIsCompleted(.blastFromThePast) && UserData.retroMode.value)
-    physicsWorld.contactDelegate = self
-  }
-
-  required init(coder aDecoder: NSCoder) {
-    super.init(coder: aDecoder)
   }
 }
