@@ -9,6 +9,8 @@
 import SpriteKit
 import GameKit
 
+// MARK: Main menu
+
 /// The main menu scene
 ///
 /// There's only one of these, created at start on app launch and stored in
@@ -47,6 +49,8 @@ class MenuScene: BasicScene {
   /// can activate).  So the buttons have to be reset to their starting states upon
   /// coming back to the menu.
   var buttons = [Button]()
+
+  // MARK: - Initialization
 
   /// Build all the stuff in the menu
   func initMenu() {
@@ -92,6 +96,152 @@ class MenuScene: BasicScene {
     buttons.append(settingsButton)
     menu.addChild(settingsButton)
   }
+
+  /// Create a new menu scene
+  /// - Parameter size: The size of the scene
+  override init(size: CGSize) {
+    super.init(size: size)
+    name = "menuScene"
+    initGameArea(avoidSafeArea: false)
+    initMenu()
+    physicsWorld.contactDelegate = self
+    isUserInteractionEnabled = true
+  }
+
+  required init(coder aDecoder: NSCoder) {
+    super.init(coder: aDecoder)
+  }
+
+  // MARK: - Button actions
+
+  /// Make the UFOs go away in preparation for a scene switch
+  func prepareForSwitch() {
+    getRidOfUFOs = true
+    _ = warpOutUFOs(averageDelay: 0.25)
+  }
+
+  /// Go to the game settings
+  func showSettings() {
+    guard beginSceneSwitch() else { return }
+    prepareForSwitch()
+    switchToScene { SettingsScene(size: self.fullFrame.size) }
+  }
+
+  /// Start a new game
+  func startGame() {
+    guard beginSceneSwitch() else { return }
+    prepareForSwitch()
+    switchToScene { GameScene(size: self.fullFrame.size) }
+  }
+
+  /// Show the high scores screen
+  func showHighScores() {
+    guard beginSceneSwitch() else { return }
+    prepareForSwitch()
+    switchToScene { HighScoreScene(size: self.fullFrame.size, score: nil) }
+  }
+
+  // MARK: - Game Center authentication
+
+  /// Enforce pausing if the Game Center authentication controller is shown.
+  override var forcePause: Bool { presentingGCAuth }
+
+  /// Game Center calls this to request authentication
+  ///
+  /// When this gets called with `nil`, it means either that Game Center is now
+  /// successfully authenticated, or that it's given up trying to authenticate
+  /// because the player dismissed the authentication view controller.
+  ///
+  /// This method just stores the view controller.  When the menu scene is shown and
+  /// the stored view controller isn't `nil`, then it will be presented.
+  ///
+  /// - Parameter viewController: A view controller to show for authentication, `nil`
+  ///   if nothing to show
+  func setGameCenterAuth(viewController: UIViewController?) {
+    gameCenterAuthVC = viewController
+    if gameCenterAuthVC == nil {
+      logging("\(name!) clears Game Center view controller")
+      presentingGCAuth = false
+      isPaused = false
+    } else {
+      logging("\(name!) sets Game Center view controller")
+    }
+  }
+
+  /// Check if Game Center wants to authenticate, and show its view controller if so
+  func gameCenterAuth() {
+    if let gcvc = gameCenterAuthVC, !presentingGCAuth, let rootVC = view?.window?.rootViewController {
+      logging("\(name!) will present Game Center view controller")
+      presentingGCAuth = true
+      isPaused = true
+      rootVC.present(gcvc, animated: true)
+    }
+  }
+
+  // MARK: - Coming back to the menu
+
+  /// Set up for the menu scene to be shown and kick off the background animation
+  ///
+  /// This is a little more involved than for most scenes because there's only one
+  /// menu scene that is created, and it is returned to repeatedly.  The reason for
+  /// having just one scene is because it looks better for the asteroids and things
+  /// to stick around rather than starting with an empty scene every time.
+  ///
+  /// - Parameter view: The view that will show the menu
+  override func didMove(to view: SKView) {
+    super.didMove(to: view)
+    // Any earlier scene transition that the menu initiated has obviously finished,
+    // so reset the switching flag
+    switchingScenes = false
+    // If a touch was in progress for some button and the user pressed another button
+    // that caused a scene transition, then the first button will be stuck in a
+    // half-touched state when we come back to the menu.  So be sure to clear the
+    // state of all the buttons.
+    buttons.forEach { $0.resetAndCancelConfirmation() }
+    // The player may have turned audio on or off in the settings
+    audio.muted = UserData.audioIsMuted.value
+    // Reset the number of things the player has tapped; they have to do the full
+    // number in one go to get the `tooMuchTime` achievement.
+    bubblesPopped = 0
+    // The high score might have changed
+    highScore.text = "High Score: \(UserData.highScores.highest)"
+    // Allow UFOs
+    getRidOfUFOs = false
+    Globals.gameConfig = loadGameConfig(forMode: "menu")
+    Globals.gameConfig.currentWaveNumber = 1
+    // Kick off the regular spawning actions for UFOs and asteroids
+    wait(for: 1, then: spawnAsteroids)
+    // The first time into the menu there won't be any asteroids, so wait longer
+    // before starting the UFOs to ensure that they'll have something to shoot at
+    wait(for: (asteroids.count > 5 ? 5 : 10), then: spawnUFOs)
+    logging("\(name!) finished didMove to view")
+  }
+
+  // MARK: - Touch handling
+
+  /// For (non-button) touches, find asteroids or UFOs that are touched and destroy them
+  /// - Parameters:
+  ///   - touches: The touches that just began
+  ///   - event: The event the touches belong to
+  override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    guard let touch = touches.first else { return }
+    let location = touch.location(in: self)
+    for touched in nodes(at: location) {
+      // You can't destroy anything without a physics body
+      guard let body = touched.physicsBody else { continue }
+      if body.isA(.asteroid) {
+        touchedAsteroid(touched as! SKSpriteNode)
+      } else if body.isA(.ufo) {
+        touchedUFO(touched as! UFO)
+      }
+    }
+  }
+
+  override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {}
+  override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {}
+  override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {}
+
+  // MARK: - Background animation
 
   /// Spawn an asteroid if there aren't many in existence
   ///
@@ -165,103 +315,6 @@ class MenuScene: BasicScene {
     when(contact, isBetween: .ufo, and: .ufo) { ufosCollided(ufo1: $0, ufo2: $1) }
   }
 
-  /// Make the UFOs go away in preparation for a scene switch
-  func prepareForSwitch() {
-    getRidOfUFOs = true
-    _ = warpOutUFOs(averageDelay: 0.25)
-  }
-
-  /// Go to the game settings
-  func showSettings() {
-    guard beginSceneSwitch() else { return }
-    prepareForSwitch()
-    switchToScene { SettingsScene(size: self.fullFrame.size) }
-  }
-
-  /// Start a new game
-  func startGame() {
-    guard beginSceneSwitch() else { return }
-    prepareForSwitch()
-    switchToScene { GameScene(size: self.fullFrame.size) }
-  }
-
-  /// Show the high scores screen
-  func showHighScores() {
-    guard beginSceneSwitch() else { return }
-    prepareForSwitch()
-    switchToScene { HighScoreScene(size: self.fullFrame.size, score: nil) }
-  }
-
-  /// Enforce pausing if the Game Center authentication controller is shown.
-  override var forcePause: Bool { presentingGCAuth }
-
-  /// Game Center calls this to request authentication
-  ///
-  /// When this gets called with `nil`, it means either that Game Center is now
-  /// successfully authenticated, or that it's given up trying to authenticate
-  /// because the player dismissed the authentication view controller.
-  ///
-  /// This method just stores the view controller.  When the menu scene is shown and
-  /// the stored view controller isn't `nil`, then it will be presented.
-  ///
-  /// - Parameter viewController: A view controller to show for authentication, `nil`
-  ///   if nothing to show
-  func setGameCenterAuth(viewController: UIViewController?) {
-    gameCenterAuthVC = viewController
-    if gameCenterAuthVC == nil {
-      logging("\(name!) clears Game Center view controller")
-      presentingGCAuth = false
-      isPaused = false
-    } else {
-      logging("\(name!) sets Game Center view controller")
-    }
-  }
-
-  /// Check if Game Center wants to authenticate, and show its view controller if so
-  func gameCenterAuth() {
-    if let gcvc = gameCenterAuthVC, !presentingGCAuth, let rootVC = view?.window?.rootViewController {
-      logging("\(name!) will present Game Center view controller")
-      presentingGCAuth = true
-      isPaused = true
-      rootVC.present(gcvc, animated: true)
-    }
-  }
-
-  /// Set up for the menu scene to be shown
-  ///
-  /// This is a little more involved than for most scenes because there's only one
-  /// menu scene that is created, and it is returned to repeatedly.  The reason for
-  /// having just one scene is because it looks better for the asteroids and things
-  /// to stick around rather than starting with an empty scene every time.
-  ///
-  /// - Parameter view: The view that will show the menu
-  override func didMove(to view: SKView) {
-    super.didMove(to: view)
-    // Any earlier scene transition that the menu initiated has obviously finished,
-    // so reset the switching flag
-    switchingScenes = false
-    // If a touch was in progress for some button and the user pressed another button
-    // that caused a scene transition, then the first button will be stuck in a
-    // half-touched state when we come back to the menu.  So be sure to clear the
-    // state of all the buttons.
-    buttons.forEach { $0.resetAndCancelConfirmation() }
-    // The player may have turned audio on or off in the settings
-    audio.muted = UserData.audioIsMuted.value
-    // Reset the number of things the player has tapped; they have to do the full
-    // number in one go to get the `tooMuchTime` achievement.
-    bubblesPopped = 0
-    // The high score might have changed
-    highScore.text = "High Score: \(UserData.highScores.highest)"
-    // Allow UFOs
-    getRidOfUFOs = false
-    Globals.gameConfig = loadGameConfig(forMode: "menu")
-    Globals.gameConfig.currentWaveNumber = 1
-    // Kick off the regular spawning actions for UFOs and asteroids
-    wait(for: 1, then: spawnAsteroids)
-    wait(for: 10, then: spawnUFOs)
-    logging("\(name!) finished didMove to view")
-  }
-
   /// Main update loop for the menu
   ///
   /// Moves UFOs and checks to see if Game Center wants to authenticate.
@@ -282,42 +335,5 @@ class MenuScene: BasicScene {
     }
     playfield.wrapCoordinates()
     gameCenterAuth()
-  }
-
-  /// Create a new menu scene
-  /// - Parameter size: The size of the scene
-  override init(size: CGSize) {
-    super.init(size: size)
-    name = "menuScene"
-    initGameArea(avoidSafeArea: false)
-    initMenu()
-    physicsWorld.contactDelegate = self
-    isUserInteractionEnabled = true
-  }
-
-  /// For (non-button) touches, find asteroids or UFOs that are touched and destroy them
-  /// - Parameters:
-  ///   - touches: The touches that just began
-  ///   - event: The event the touches belong to
-  override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-    guard let touch = touches.first else { return }
-    let location = touch.location(in: self)
-    for touched in nodes(at: location) {
-      // You can't destroy anything without a physics body
-      guard let body = touched.physicsBody else { continue }
-      if body.isA(.asteroid) {
-        touchedAsteroid(touched as! SKSpriteNode)
-      } else if body.isA(.ufo) {
-        touchedUFO(touched as! UFO)
-      }
-    }
-  }
-
-  override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {}
-  override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {}
-  override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {}
-
-  required init(coder aDecoder: NSCoder) {
-    super.init(coder: aDecoder)
   }
 }
