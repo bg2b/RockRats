@@ -9,6 +9,8 @@
 import SpriteKit
 import AVFoundation
 
+// MARK: Introduction and conclusion
+
 /// The scene for displaying the app's introduction
 ///
 /// This is the first screen shown.  It consists of an "incoming transmission...", a
@@ -36,6 +38,8 @@ class IntroScene: BasicScene {
   var doneButton: Button!
   /// Some background sounds that are supposed to indicate data transmission
   var transmissionSounds: ContinuousPositionalAudio!
+
+  // MARK: - Initialization
 
   /// Create the stuff in the introduction scene
   func initIntro() {
@@ -85,61 +89,6 @@ class IntroScene: BasicScene {
     transmissionSounds = audio.continuousAudio(.transmission, at: self)
     transmissionSounds.playerNode.volume = 0
     transmissionSounds.playerNode.play()
-  }
-
-  /// Displays "Incoming transmission..."
-  func incoming() {
-    incomingLabel.typeIn(text: standBy, attributes: attributes, sound: transmissionSounds) {
-      self.wait(for: 3, then: self.header)
-    }
-  }
-
-  /// Displays the message header
-  func header() {
-    incomingLabel.typeIn(text: messageHeader, attributes: attributes, sound: transmissionSounds) {
-      self.wait(for: 5) {
-        self.incomingLabel.isHidden = true
-        self.intro()
-      }
-    }
-  }
-
-  /// Displays the main part of the message
-  func intro() {
-    introLabel.isHidden = false
-    introLabel.typeIn(text: introduction, attributes: attributes, sound: transmissionSounds) {
-      self.doneButton.run(.sequence([.unhide(), .fadeIn(withDuration: 0.5)]))
-    }
-  }
-
-  /// Handles clicks of the done button
-  func done() {
-    guard beginSceneSwitch() else { fatalError("Done button in IntroScene found scene switch already in progress???") }
-    if UserData.hasDoneIntro.value {
-      // They're just replaying the intro (or conclusion) from the settings
-      if conclusion {
-        makeSceneInBackground { CreditsScene(size: self.fullFrame.size) }
-      } else {
-        nextScene = Globals.menuScene
-      }
-    } else {
-      // First time the game has launched, take them through the tutorial
-      makeSceneInBackground { TutorialScene(size: self.fullFrame.size) }
-    }
-    UserData.hasDoneIntro.value = true
-    switchWhenReady()
-  }
-
-  /// Kick off the introduction
-  /// - Parameter view: The view that will display the scene
-  override func didMove(to view: SKView) {
-    super.didMove(to: view)
-    wait(for: 1, then: incoming)
-    logging("\(name!) finished didMove to view")
-  }
-
-  override func update(_ currentTime: TimeInterval) {
-    super.update(currentTime)
   }
 
   /// Create an intro or conclusion scene
@@ -196,5 +145,64 @@ class IntroScene: BasicScene {
     messageHeader = ""
     introduction = ""
     super.init(coder: aDecoder)
+  }
+
+  // MARK: - Message display
+
+  /// Displays "Incoming transmission..."
+  func incoming() {
+    incomingLabel.typeIn(text: standBy, attributes: attributes, sound: transmissionSounds) {
+      self.wait(for: 3, then: self.header)
+    }
+  }
+
+  /// Displays the message header
+  func header() {
+    incomingLabel.typeIn(text: messageHeader, attributes: attributes, sound: transmissionSounds) {
+      self.wait(for: 5) {
+        self.incomingLabel.isHidden = true
+        self.intro()
+      }
+    }
+  }
+
+  /// Displays the main part of the message
+  func intro() {
+    introLabel.isHidden = false
+    introLabel.typeIn(text: introduction, attributes: attributes, sound: transmissionSounds) {
+      self.doneButton.run(.sequence([.unhide(), .fadeIn(withDuration: 0.5)]))
+    }
+  }
+
+  /// Kick off the introduction
+  /// - Parameter view: The view that will display the scene
+  override func didMove(to view: SKView) {
+    super.didMove(to: view)
+    wait(for: 1, then: incoming)
+    logging("\(name!) finished didMove to view")
+  }
+
+  override func update(_ currentTime: TimeInterval) {
+    super.update(currentTime)
+  }
+
+  // MARK: - End of scene
+
+  /// Handles clicks of the done button
+  func done() {
+    guard beginSceneSwitch() else { fatalError("Done button in IntroScene found scene switch already in progress???") }
+    if UserData.hasDoneIntro.value {
+      // They're just replaying the intro (or conclusion) from the settings
+      if conclusion {
+        makeSceneInBackground { CreditsScene(size: self.fullFrame.size) }
+      } else {
+        nextScene = Globals.menuScene
+      }
+    } else {
+      // First time the game has launched, take them through the tutorial
+      makeSceneInBackground { TutorialScene(size: self.fullFrame.size) }
+    }
+    UserData.hasDoneIntro.value = true
+    switchWhenReady()
   }
 }
