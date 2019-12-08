@@ -738,18 +738,10 @@ class GameScene: GameTutorialScene {
   /// - Parameter view: The view that will present the scene
   override func didMove(to view: SKView) {
     super.didMove(to: view)
-    joystickTouch = nil
-    fireOrWarpTouches.removeAll()
     Globals.gameConfig = loadGameConfig(forMode: "normal")
     Globals.gameConfig.currentWaveNumber = 0
-    score = 0
-    addToScore(0)
-    lastWarpInTime = 0
-    timesUFOsShot = 0
     livesRemaining = Globals.gameConfig.initialLives
-    extraLivesAwarded = 0
     updateLives(0)
-    gameOver = false
     energyBar.fill()
     replenishEnergy()
     wait(for: 1) {
@@ -759,7 +751,6 @@ class GameScene: GameTutorialScene {
     }
     logging("\(name!) finished didMove to view")
   }
-
 
   /// Main update loop
   /// - Parameter currentTime: The game time
