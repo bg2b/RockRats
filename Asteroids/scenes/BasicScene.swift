@@ -8,6 +8,8 @@
 
 import SpriteKit
 
+// MARK: zPositions
+
 /// The main zPositions used in the app
 enum LevelZs: CGFloat {
   case background = -200
@@ -23,6 +25,8 @@ extension SKNode {
     zPosition = z.rawValue
   }
 }
+
+// MARK: - Physics body categories
 
 /// Different types of objects, plus flags to indicate when something is off-screen
 /// and when its coordinates have been wrapped by the playfield
@@ -82,6 +86,8 @@ func setOf(_ categories: [ObjectCategories]) -> UInt32 {
   return categories.reduce(0) { $0 | $1.rawValue }
 }
 
+// MARK: - Random global stuff
+
 extension Globals {
   /// `currentTime` of  last call to `update`
   static var lastUpdateTime = 0.0
@@ -125,6 +131,8 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// background thread; after the variable becomes non-`nil` the transition occurs.
   var nextScene: SKScene? = nil
 
+  // MARK: - Pausing
+
   /// Pauses the scene when set.  This is an override of SKScene's property of the
   /// same name because SpriteKit's automatic pausing/unpausing for stuff like the
   /// app going into the background/foreground can screw things up if the scene is
@@ -145,6 +153,18 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// Subclasses override this to indicate when they should remain paused despite
   /// SpriteKit's best efforts to mess them up.
   var forcePause: Bool { false }
+
+  /// Turn the game area's filter on or off
+  ///
+  /// The filter is used when a game is paused to blur the game area (except for the
+  /// resume/cancel buttons).
+  ///
+  /// - Parameter enable: `true` if the filter should be turned on
+  func setGameAreaBlur(_ enable: Bool) {
+    gameArea.shouldEnableEffects = enable && gameArea.filter != nil
+  }
+
+  // MARK: - Initialization
 
   /// Create shader that will repeat a texture
   ///
@@ -330,54 +350,56 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     audio = SceneAudio(stereoEffectsFrame: gameFrame, audioEngine: audioEngine)
   }
 
-  /// Turn the game area's filter on or off
+  /// Initialize a new basic scene of a given size
   ///
-  /// The filter is used when a game is paused to blur the game area (except for the
-  /// resume/cancel buttons).
-  ///
-  /// - Parameter enable: `true` if the filter should be turned on
-  func setGameAreaBlur(_ enable: Bool) {
-    gameArea.shouldEnableEffects = enable && gameArea.filter != nil
+  /// This should be overridden by subclasses of `BasicScene`, but be sure to call
+  /// `super.init()`.  The subclass initializer should also call `initGameArea`
+  /// (which is defined in `BasicScene`).  It can't be called here because only the
+  /// subclass knows whether it wants to be full screen or clip the game area to the
+  /// device's safe area.
+  override init(size: CGSize) {
+    super.init(size: size)
+    fullFrame = CGRect(x: -0.5 * size.width, y: -0.5 * size.height, width: size.width, height: size.height)
+    scaleMode = .aspectFill
+    anchorPoint = CGPoint(x: 0.5, y: 0.5)
+    physicsWorld.gravity = .zero
+    preloadAsteroidSplitEffects()
   }
 
-  /// Create a UFO shot
-  ///
-  /// When a shot gets created, it also gets an action that will automatically remove
-  /// it after it has travelled an appropriate amount of time.  The action will
-  /// handle the case of shots that miss, and the physics engine will signal
-  /// collisions for shots that don't.
-  ///
-  /// - Parameters:
-  ///   - angle: The shot's direction of travel
-  ///   - position: The starting position of the shot
-  ///   - speed: How fast the shot should travel
-  func fireUFOLaser(angle: CGFloat, position: CGPoint, speed: CGFloat) {
-    let laser = Globals.spriteCache.findSprite(imageNamed: "lasersmall_red") { sprite in
-      let texture = sprite.requiredTexture()
-      let ht = texture.size().height
-      let body = SKPhysicsBody(circleOfRadius: 0.5 * ht,
-                               center: CGPoint(x: 0.5 * (texture.size().width - ht), y: 0))
-      body.allowsRotation = false
-      body.linearDamping = 0
-      body.categoryBitMask = ObjectCategories.ufoShot.rawValue
-      body.collisionBitMask = 0
-      body.contactTestBitMask = setOf([.asteroid, .player])
-      sprite.physicsBody = body
+  required init(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented by BasicScene or its subclasses")
+  }
+
+
+  // MARK: - Deinitialization
+
+  /// Remove actions from an entire node hierarchy
+  /// - Parameter node: The root of the hierarchy
+  func removeActionsForEverything(node: SKNode) {
+    node.removeAllActions()
+    for child in node.children {
+      removeActionsForEverything(node: child)
     }
-    laser.wait(for: Double(0.9 * gameFrame.height / speed)) { self.removeUFOLaser(laser) }
-    playfield.addWithScaling(laser)
-    laser.position = position
-    laser.zRotation = angle
-    laser.requiredPhysicsBody().velocity = CGVector(angle: angle).scale(by: speed)
-    audio.soundEffect(.ufoShot, at: position)
   }
 
-  /// Destory a UFO shot
-  /// - Parameter laser: The shot to clean up
-  func removeUFOLaser(_ laser: SKSpriteNode) {
-    assert(laser.name == "lasersmall_red")
-    Globals.spriteCache.recycleSprite(laser)
+  /// Get a scene into a collectable state
+  ///
+  /// Call `cleanup` from `willMove(from:)` when a scene will be destroyed if the
+  /// scene's state is uncertain.  I use this for game scenes especially because it's
+  /// hard to be sure of a consistent state at the time of scene transition because
+  /// of the possibility that the player quit in the middle of the game.  At the time
+  /// of the quit, the game is paused, so all kinds of actions and things may be
+  /// running, the playfield may be full of sprites, etc.  I need to fix up
+  /// everything so that the scene will get garbage collected cleanly.  First tell
+  /// the playfield to recycle sprites.  Then cancel all actions so that any closures
+  /// which may have captured something that would lead to a retain cycle get nuked
+  /// from orbit.
+  func cleanup() {
+    playfield.recycle()
+    removeActionsForEverything(node: self)
   }
+
+  // MARK: - Asteroids
 
   /// Create an asteroid and add it to the playfield
   ///
@@ -591,6 +613,47 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     removeAsteroid(asteroid)
   }
 
+  // MARK: - UFOs
+
+  /// Create a UFO shot
+  ///
+  /// When a shot gets created, it also gets an action that will automatically remove
+  /// it after it has travelled an appropriate amount of time.  The action will
+  /// handle the case of shots that miss, and the physics engine will signal
+  /// collisions for shots that don't.
+  ///
+  /// - Parameters:
+  ///   - angle: The shot's direction of travel
+  ///   - position: The starting position of the shot
+  ///   - speed: How fast the shot should travel
+  func fireUFOLaser(angle: CGFloat, position: CGPoint, speed: CGFloat) {
+    let laser = Globals.spriteCache.findSprite(imageNamed: "lasersmall_red") { sprite in
+      let texture = sprite.requiredTexture()
+      let ht = texture.size().height
+      let body = SKPhysicsBody(circleOfRadius: 0.5 * ht,
+                               center: CGPoint(x: 0.5 * (texture.size().width - ht), y: 0))
+      body.allowsRotation = false
+      body.linearDamping = 0
+      body.categoryBitMask = ObjectCategories.ufoShot.rawValue
+      body.collisionBitMask = 0
+      body.contactTestBitMask = setOf([.asteroid, .player])
+      sprite.physicsBody = body
+    }
+    laser.wait(for: Double(0.9 * gameFrame.height / speed)) { self.removeUFOLaser(laser) }
+    playfield.addWithScaling(laser)
+    laser.position = position
+    laser.zRotation = angle
+    laser.requiredPhysicsBody().velocity = CGVector(angle: angle).scale(by: speed)
+    audio.soundEffect(.ufoShot, at: position)
+  }
+
+  /// Destory a UFO shot
+  /// - Parameter laser: The shot to clean up
+  func removeUFOLaser(_ laser: SKSpriteNode) {
+    assert(laser.name == "lasersmall_red")
+    Globals.spriteCache.recycleSprite(laser)
+  }
+
   /// Add some sort of effect to the playfield
   /// - Parameter nodes: The things to add
   func addToPlayfield(_ nodes: [SKNode]) {
@@ -742,6 +805,8 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     addToPlayfield(ufo.explode())
   }
 
+  // MARK: - Contact handling
+
   /// Handle a collision between a UFO shot and an asteroid
   /// - Parameters:
   ///   - laser: The UFO's shot
@@ -780,6 +845,15 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
 
   /// Handle a contact notice from the physics engine for objects of a given type
   ///
+  /// Subclasses should provide a didBegin method and set themselves as the
+  /// contactDelegate for physicsWorld.  E.g. ```
+  ///  func didBegin(_ contact: SKPhysicsContact) {
+  ///    when(contact, isBetween: .ufoShot, and: .asteroid) { ufoLaserHit(laser: $0, asteroid: $1) }
+  ///    when(contact, isBetween: .ufo, and: .asteroid) { ufoCollided(ufo: $0, asteroid: $1) }
+  ///    ...
+  ///  }
+  /// ```
+  ///
   /// This method handles making sure the objects are still active in the scene (in
   /// case a previous contact did something to them) and getting the objects into the
   /// right order for the action according to their category.
@@ -804,6 +878,8 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
       action(node2, node1)
     }
   }
+
+  // MARK: - Scene switching
 
   /// Use `guard beginSceneSwitch` before starting scene transitions
   ///
@@ -884,60 +960,6 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     switchWhenReady()
   }
 
-  /// The update loop
-  ///
-  /// Subclasses should provide a didBegin method and set themselves as the
-  /// contactDelegate for physicsWorld.  E.g. ```
-  ///  func didBegin(_ contact: SKPhysicsContact) {
-  ///    when(contact, isBetween: .ufoShot, and: .asteroid) { ufoLaserHit(laser: $0, asteroid: $1) }
-  ///    when(contact, isBetween: .ufo, and: .asteroid) { ufoCollided(ufo: $0, asteroid: $1) }
-  ///    ...
-  ///  }
-  /// ```
-  ///
-  /// They should also provide an update method with their own frame logic, e.g., ```
-  ///  override func update(_ currentTime: TimeInterval) {
-  ///    super.update(currentTime)
-  ///    ufos.forEach {
-  ///      $0.fly(player: player, playfield: playfield) {
-  ///        (angle, position, speed) in self.fireUFOLaser(angle: angle, position: position, speed: speed)
-  ///      }
-  ///    }
-  ///    playfield.wrapCoordinates()
-  ///    ...
-  ///  }
-  /// ```
-  override func update(_ currentTime: TimeInterval) {
-    super.update(currentTime)
-    Globals.lastUpdateTime = currentTime
-    logging("\(name!) update", "time \(currentTime)")
-    // Mostly getUtimeOffset just returns immediately, but when a scene first start
-    // running, it will compute the offset between currentTime and the u_time seen by
-    // shaders.  Most of our effect shaders need to have an effective time that
-    // always starts at zero, and we use that offset plus currentTime to provide it.
-    _ = getUtimeOffset(view: view)
-  }
-
-  /// Initialize a new basic scene of a given size
-  ///
-  /// This should be overridden by subclasses of `BasicScene`, but be sure to call
-  /// `super.init()`.  The subclass initializer should also call `initGameArea`
-  /// (which is defined in `BasicScene`).  It can't be called here because only the
-  /// subclass knows whether it wants to be full screen or clip the game area to the
-  /// device's safe area.
-  override init(size: CGSize) {
-    super.init(size: size)
-    fullFrame = CGRect(x: -0.5 * size.width, y: -0.5 * size.height, width: size.width, height: size.height)
-    scaleMode = .aspectFill
-    anchorPoint = CGPoint(x: 0.5, y: 0.5)
-    physicsWorld.gravity = .zero
-    preloadAsteroidSplitEffects()
-  }
-
-  required init(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented by BasicScene or its subclasses")
-  }
-
   /// Subclasses should override this to do stuff like start a new game
   override func didMove(to view: SKView) {
     logging("Cache stats:")
@@ -957,29 +979,32 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     resetUtimeOffset()
   }
 
-  /// Remove actions from an entire node hierarchy
-  /// - Parameter node: The root of the hierarchy
-  func removeActionsForEverything(node: SKNode) {
-    node.removeAllActions()
-    for child in node.children {
-      removeActionsForEverything(node: child)
-    }
-  }
+  // MARK: - Main update loop
 
-  /// Get a scene into a collectable state
+  /// The update loop
   ///
-  /// Call `cleanup` from `willMove(from:)` when a scene will be destroyed if the
-  /// scene's state is uncertain.  We use this for game scenes especially because
-  /// it's hard to be sure we're in a consistent state at the time of scene
-  /// transition because of the possibility that the player quit in the middle of the
-  /// game.  At the time of the quit, the game is paused, so all kinds of actions and
-  /// things may be running, the playfield may be full of sprites, etc.  We need to
-  /// fix up everything so that the scene will get garbage collected cleanly.  First
-  /// we tell the playfield to recycle sprites.  Then we cancel all actions so that
-  /// any closures which may have captured something that would lead to a retain
-  /// cycle get nuked from orbit.
-  func cleanup() {
-    playfield.recycle()
-    removeActionsForEverything(node: self)
+  /// Subclasses should provide an update method with their own frame logic, e.g., ```
+  ///  override func update(_ currentTime: TimeInterval) {
+  ///    super.update(currentTime)
+  ///    ufos.forEach {
+  ///      $0.fly(player: player, playfield: playfield) {
+  ///        (angle, position, speed) in self.fireUFOLaser(angle: angle, position: position, speed: speed)
+  ///      }
+  ///    }
+  ///    playfield.wrapCoordinates()
+  ///    ...
+  ///  }
+  /// ```
+  ///
+  /// Be sure to call `super.update` in the subclasses method.
+  override func update(_ currentTime: TimeInterval) {
+    super.update(currentTime)
+    Globals.lastUpdateTime = currentTime
+    logging("\(name!) update", "time \(currentTime)")
+    // Mostly getUtimeOffset just returns immediately, but when a scene first start
+    // running, it will compute the offset between currentTime and the u_time seen by
+    // shaders.  Most of our effect shaders need to have an effective time that
+    // always starts at zero, and we use that offset plus currentTime to provide it.
+    _ = getUtimeOffset(view: view)
   }
 }
