@@ -147,6 +147,7 @@ class SettingsScene: BasicScene {
   /// the promoted achievement has been done, then there will be a separate replay
   /// conclusion button.
   func replayIntro() {
+    guard beginSceneSwitch() else { return }
     var showConclusion = false
     if levelIsReached(achievement: .rockRat, level: 3) && !achievementIsCompleted(.promoted) {
       // Game Center has to be enabled to get here, since levelIsReached will have
@@ -159,16 +160,19 @@ class SettingsScene: BasicScene {
 
   /// Replay the conclusion scene
   func replayConclusion() {
+    guard beginSceneSwitch() else { return }
     switchToScene { IntroScene(size: self.fullFrame.size, conclusion: true) }
   }
 
   /// Replay the tutorial
   func replayTutorial() {
+    guard beginSceneSwitch() else { return }
     switchToScene { TutorialScene(size: self.fullFrame.size) }
   }
 
   /// Go back to the main menu
   func mainMenu() {
+    guard beginSceneSwitch() else { return }
     showWhenQuiescent(Globals.menuScene)
   }
 

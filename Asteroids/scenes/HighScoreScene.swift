@@ -361,12 +361,14 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
 
   /// Start a new game
   func startGame() {
+    guard beginSceneSwitch() else { return }
     warpOutSmashies()
     switchToScene { GameScene(size: self.fullFrame.size) }
   }
 
   /// Switch back to the main menu
   func mainMenu() {
+    guard beginSceneSwitch() else { return }
     warpOutSmashies()
     showWhenQuiescent(Globals.menuScene)
   }

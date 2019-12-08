@@ -173,18 +173,21 @@ class MenuScene: BasicScene {
 
   /// Go to the game settings
   func showSettings() {
+    guard beginSceneSwitch() else { return }
     prepareForSwitch()
     switchToScene { SettingsScene(size: self.fullFrame.size) }
   }
 
   /// Start a new game
   func startGame() {
+    guard beginSceneSwitch() else { return }
     prepareForSwitch()
     switchToScene { GameScene(size: self.fullFrame.size) }
   }
 
   /// Show the high scores screen
   func showHighScores() {
+    guard beginSceneSwitch() else { return }
     prepareForSwitch()
     switchToScene { HighScoreScene(size: self.fullFrame.size, score: nil) }
   }
@@ -234,23 +237,26 @@ class MenuScene: BasicScene {
   /// - Parameter view: The view that will show the menu
   override func didMove(to view: SKView) {
     super.didMove(to: view)
+    // Any earlier scene transition that the menu initiated has obviously finished,
+    // so reset the switching flag
+    switchingScenes = false
     // If a touch was in progress for some button and the user pressed another button
     // that caused a scene transition, then the first button will be stuck in a
     // half-touched state when we come back to the menu.  So be sure to clear the
     // state of all the buttons.
     buttons.forEach { $0.resetAndCancelConfirmation() }
-    // The player may have turned audio on or off in the settings.
+    // The player may have turned audio on or off in the settings
     audio.muted = UserData.audioIsMuted.value
     // Reset the number of things the player has tapped; they have to do the full
     // number in one go to get the `tooMuchTime` achievement.
     bubblesPopped = 0
-    // The high score might have changed.
+    // The high score might have changed
     highScore.text = "High Score: \(UserData.highScores.highest)"
     // Allow UFOs
     getRidOfUFOs = false
     Globals.gameConfig = loadGameConfig(forMode: "menu")
     Globals.gameConfig.currentWaveNumber = 1
-    // Now start the regular spawning actions for UFOs and asteroids
+    // Kick off the regular spawning actions for UFOs and asteroids
     wait(for: 1, then: spawnAsteroids)
     wait(for: 10, then: spawnUFOs)
     logging("\(name!) finished didMove to view")

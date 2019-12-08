@@ -114,6 +114,7 @@ class IntroScene: BasicScene {
 
   /// Handles clicks of the done button
   func done() {
+    guard beginSceneSwitch() else { fatalError("Done button in IntroScene found scene switch already in progress???") }
     if UserData.hasDoneIntro.value {
       // They're just replaying the intro (or conclusion) from the settings
       if conclusion {

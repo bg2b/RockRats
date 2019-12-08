@@ -118,7 +118,10 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   var asteroids = Set<SKSpriteNode>()
   /// All the UFOs (some may be off-screen still)
   var ufos = Set<UFO>()
-  /// The scene that to transition to.  To avoid lag, this is typically created on a
+  /// Becomes `true` when getting ready to switch scenes; see `beginSceneSwitch`
+  /// discussion.
+  var switchingScenes = false
+  /// The next scene to transition to.  To avoid lag, this is typically created on a
   /// background thread; after the variable becomes non-`nil` the transition occurs.
   var nextScene: SKScene? = nil
 
@@ -799,6 +802,26 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
       action(node1, node2)
     } else if b2.isA(type1) && b1.isA(type2) {
       action(node2, node1)
+    }
+  }
+
+  /// Use `guard beginSceneSwitch` before starting scene transitions
+  ///
+  /// Things like button actions that switch scenes must call this at the start of
+  /// the process, and should abort immediately if the return value is `false`.  This
+  /// is used to avoid race conditions between actions that would like to switch
+  /// scenes.  The first action sets `switchingScenes` to `true` by calling this and
+  /// receives the go-ahead.  Subsequent actions are informed that scene switching is
+  /// already in progress.
+  ///
+  /// - Returns: `true` means proceed, `false` indicates that some other scene switch is happening
+  func beginSceneSwitch() -> Bool {
+    if switchingScenes {
+      logging("beginSceneSwitch says NO")
+      return false
+    } else {
+      switchingScenes = true
+      return true
     }
   }
 

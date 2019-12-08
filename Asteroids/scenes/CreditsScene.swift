@@ -115,18 +115,21 @@ class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
 
   /// Start a new game
   func startGame() {
+    guard beginSceneSwitch() else { return }
     stopFireworks()
     switchToScene { return GameScene(size: self.fullFrame.size) }
   }
 
   /// Switch back to the main menu
   func mainMenu() {
+    guard beginSceneSwitch() else { return }
     stopFireworks()
     showWhenQuiescent(Globals.menuScene)
   }
 
   /// Show the game settings
   func showSettings() {
+    guard beginSceneSwitch() else { return }
     stopFireworks()
     switchToScene { SettingsScene(size: self.fullFrame.size) }
   }

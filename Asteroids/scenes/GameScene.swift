@@ -134,7 +134,7 @@ class GameScene: GameTutorialScene {
   ///
   /// - Parameter gameScore: The score earned in the game
   func prepareHighScoreScene(gameScore: GameScore) {
-    self.makeSceneInBackground { HighScoreScene(size: self.fullFrame.size, score: gameScore) }
+    makeSceneInBackground { HighScoreScene(size: self.fullFrame.size, score: gameScore) }
   }
 
   /// End of game, report the score to Game Center (if active) and get ready to
