@@ -8,6 +8,8 @@
 
 import SpriteKit
 
+// MARK: Game settings
+
 /// Game settings scene
 ///
 /// Sound, credits, ship appearance (if the player discovered retro mode), replay
@@ -23,6 +25,8 @@ class SettingsScene: BasicScene {
   var retroButton: Button!
   /// The button that resets the achievements in Game Center
   var resetAchievementsButton: Button!
+
+  // MARK: - Initialization
 
   /// Create the stuff the for the settings scene
   func initSettings() {
@@ -140,6 +144,21 @@ class SettingsScene: BasicScene {
     settings.addChild(vstack)
   }
 
+  /// Create the settings scene
+  /// - Parameter size: The size of the scene
+  override init(size: CGSize) {
+    super.init(size: size)
+    name = "settingsScene"
+    initGameArea(avoidSafeArea: false)
+    initSettings()
+  }
+
+  required init(coder aDecoder: NSCoder) {
+    super.init(coder: aDecoder)
+  }
+
+  // MARK: - Button actions
+
   /// Replay the intro scene
   ///
   /// If they've reached the top level but have not seen the conclusion screen, then
@@ -208,6 +227,8 @@ class SettingsScene: BasicScene {
     logging("Scores reset")
   }
 
+  // MARK: - Game Center
+
   /// Reset all Game Center achievements
   ///
   /// We also have to reset the game counters for things like asteroids and UFOs
@@ -244,18 +265,5 @@ class SettingsScene: BasicScene {
 
   override func update(_ currentTime: TimeInterval) {
     super.update(currentTime)
-  }
-
-  /// Create the settings scene
-  /// - Parameter size: The size of the scene
-  override init(size: CGSize) {
-    super.init(size: size)
-    name = "settingsScene"
-    initGameArea(avoidSafeArea: false)
-    initSettings()
-  }
-
-  required init(coder aDecoder: NSCoder) {
-    super.init(coder: aDecoder)
   }
 }
