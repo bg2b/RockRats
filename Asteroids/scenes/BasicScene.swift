@@ -182,16 +182,16 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// - Parameter texture: The texture to repeat
   func tilingShader(forTexture texture: SKTexture) -> SKShader {
     // Do not to assume that the texture has v_tex_coord ranging in (0, 0) to (1, 1)!
-    // If the texture is part of a texture atlas, this is not true.  Since we only
-    // use this for a particular texture, we just pass in the texture and hard-code
-    // the required v_tex_coord transformations.  For this case, the INPUT
-    // v_tex_coord is from (0,0) to (1,1), since it corresponds to the coordinates in
-    // the shape node that we're tiling.  The OUTPUT v_tex_coord has to be in the
-    // space of the texture, so it needs a scale and shift.
+    // If the texture is part of a texture atlas, this is not true.  Since I only use
+    // this for a particular texture, I just pass in the texture and hard-code the
+    // required v_tex_coord transformations.  For this case, the INPUT v_tex_coord is
+    // from (0,0) to (1,1), since it corresponds to the coordinates in the shape node
+    // that I'm tiling.  The OUTPUT v_tex_coord has to be in the space of the
+    // texture, so it needs a scale and shift.
     //
     // (Actually I moved the background texture out of the texture atlas because
     // there seemed to be some weirdness that gave a slight green tinge to a border
-    // in the latest Xcode for an iOS 12 device.  Since we're tiling the whole
+    // in the latest Xcode for an iOS 12 device.  Since I'm tiling the whole
     // background anyway, having it not in the atlas won't affect the draw count.)
     let rect = texture.textureRect()
     let shaderSource = """
@@ -217,7 +217,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
 
   /// Make the background of the entire game
   ///
-  /// We use a single background tile (256x256 pixels I think) and repeat that over
+  /// I use a single background tile (256x256 pixels I think) and repeat that over
   /// the whole screen with various flips so that it looks not very uniform.
   func initBackground() {
     let background = SKShapeNode(rect: gameFrame)
@@ -306,11 +306,11 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
 
   /// Create the game area
   ///
-  /// The main game scene avoids the safe area since we don't want the player's ship
+  /// The main game scene avoids the safe area since I don't want the player's ship
   /// to get into regions where it's obscured.  Other scenes go edge-to-edge.
   ///
   /// Currently the aspect ratio restriction is never used.  It might make sense to
-  /// limit the aspect ratio for phones though, since otherwise we've got a lot of
+  /// limit the aspect ratio for phones though, since otherwise there's a lot of
   /// left-right area.
   ///
   /// This should be called at initialization time, but it needs to be done from one
@@ -417,7 +417,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     guard let numTypes = typesForSize[size] else { fatalError("Incorrect asteroid size") }
     var type = Int.random(in: 1 ... numTypes)
     if Int.random(in: 1 ... 4) != 1 {
-      // Prefer the last type for each size (where we can use a circular physics
+      // Prefer the last type for each size (where I can use a circular physics
       // body), rest just for variety.
       type = numTypes
     }
@@ -438,7 +438,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
         texture = sprite.requiredTexture()
       }
       // Huge and big asteroids of all types except the default have irregular shape,
-      // so we use a pixel-perfect physics body for those.  Everything else gets a
+      // so I use a pixel-perfect physics body for those.  Everything else gets a
       // circle.
       let body = (type == numTypes || size == "med" || size == "small" ?
         SKPhysicsBody(circleOfRadius: 0.5 * texture.size().width) :
@@ -463,12 +463,12 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     } else if speed > maxSpeed {
       finalVelocity = velocity.scale(by: maxSpeed / speed)
     }
-    // Important: addChild must be done BEFORE setting the velocity.  If it's after,
-    // then the addChild mucks with the velocity a little bit, which is totally
-    // bizarre and also can totally screw us up.  If the asteroid is being spawned,
-    // we've calculated the initial position and velocity so that it will get onto
-    // the screen, but if the velocity gets tweaked, then that guarantee is out the
-    // window.
+    // Important: addWithScaling must be done BEFORE setting the velocity.  If it's
+    // after, then the addChild mucks with the velocity a little bit, which is
+    // totally bizarre and also can totally screw things up.  If the asteroid is
+    // being spawned, I've calculated the initial position and velocity so that it
+    // will get onto the screen, but if the velocity gets tweaked, then that
+    // guarantee is out the window.
     playfield.addWithScaling(asteroid)
     let body = asteroid.requiredPhysicsBody()
     body.velocity = finalVelocity
@@ -597,7 +597,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     makeAsteroidSplitEffect(asteroid, ofSize: size)
     audio.soundEffect(hitEffect[size], at: pos)
     // Don't split med or small asteroids.  Size progression should go huge -> big -> med,
-    // but we include small just for completeness in case we change our minds later.
+    // but I include small just for completeness in case I change my mind later.
     if size >= 2 {
       // Choose a random direction for the first child and project to get that child's velocity
       let velocity1Angle = CGVector(angle: velocity.angle() + .random(in: -0.4 * .pi ... 0.4 * .pi))
@@ -678,39 +678,39 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
 
   /// Make all UFOs jump to hyperspace and leave the playfield
   ///
-  /// This is how we get rid of UFOs.  For example, the main menu calls this when a
-  /// UFO is flying around and the player wants to start a new game or something.  In
-  /// the game, the UFOs leave after the player dies.
+  /// This is the method to call to get rid of UFOs.  For example, the main menu
+  /// calls this when a UFO is flying around and the player wants to start a new game
+  /// or something.  In the game, the UFOs leave after the player dies.
   ///
   /// This method also takes care of removing UFOs that have spawned by not launched
-  /// (see `spawnUFO` discussion).
+  /// (see discussion below and in `spawnUFO`).
   ///
   /// - Parameter averageDelay: Approximate amount of time before the UFO warps
   /// - Returns: The maximum delay among all the UFOs; wait at least this long
   ///   before scene transition, respawn, etc.
   func warpOutUFOs(averageDelay: Double = 1) -> Double {
     // This is a little involved, but here's the idea.  The player has just died and
-    // we've delayed a bit to let any of his existing shots hit stuff.  After the
+    // I've delayed a bit to let any of his existing shots hit stuff.  After the
     // shots are gone, any remaining UFOs will warp out before the player respawns or
-    // we show GAME OVER.  We warp out the UFOs by having each run an action that
-    // waits for a random delay before calling ufo.warpOut.  While the UFO is
-    // delaying though, it might hit an asteroid and be destroyed, so the action has
-    // a "warpOut" key through which we can cancel it.  This function returns the
+    // I show Game Over.  I warp out the UFOs by having each run an action that waits
+    // for a random delay before calling ufo.warpOut.  While the UFO is delaying
+    // though, it might hit an asteroid and be destroyed, so the action has a
+    // "warpOut" key through which I can cancel it.  This function returns the
     // maximum warpOut delay for all the UFOs; respawnOrGameOver will wait a bit
     // longer than that before triggering whatever it's going to do.
     //
     // One further caveat...
     //
-    // When a UFO gets added by spawnUFO, it's initially way off the playfield, but
-    // its audio will start so as to give the player a chance to prepare.  After a
-    // second, an action will trigger to launch the UFO.  It gets moved to just off
-    // the screen and its velocity is set so that it will move and become visible,
-    // and as soon as isOnScreen becomes true, it will start flying normally.  For
-    // warpOuts of these UFOs, everything will happen as you expect with the usual
-    // animations.  However, for a UFO that has been spawned but not yet launched, we
-    // still want warpOutUFOs to get rid of it.  These we'll just nuke immediately,
-    // but be sure to call their cleanup method to give them a chance to do any
-    // housekeeping that they may need.
+    // When a UFO gets added by spawnUFO, it's initially off the playfield to the
+    // left or right, but its audio will start so as to give the player a chance to
+    // prepare.  After a second, an action will trigger to launch the UFO.  The UFO
+    // gets moved vertically to a good spot and its velocity is set so that it will
+    // move and become visible, and as soon as isOnScreen becomes true, it will start
+    // flying normally.  For warpOuts of these launched UFOs, everything will happen
+    // as you expect with the usual animations.  However, for a UFO that has been
+    // spawned but not yet launched, warpOutUFOs should still get rid of it.  These
+    // I'll just nuke immediately, but be sure to call their cleanup method to give
+    // them a chance to do any housekeeping that they may need.
     var maxDelay = 0.0
     ufos.forEach { ufo in
       if ufo.requiredPhysicsBody().isOnScreen {
@@ -735,8 +735,8 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// the middle vertically, but that will change).  Then there's a pause.  The UFO's
   /// audio will be running during that time, and since the UFO's left-or-right
   /// location is set, the player will get an audio clue as to which side the UFO
-  /// will enter on.  (Provided if they're wearing headphones or using something like
-  /// an iPad Pro with speakers that can do stereo while in landscape mode.)
+  /// will enter on.  (Provided they're wearing headphones or using something like an
+  /// iPad Pro with speakers that can do stereo while in landscape mode.)
   ///
   /// `launchUFO` is scheduled for after the pause.  That method searches for a
   /// suitable vertical position for the UFO to enter.  Then it sets the UFOs
@@ -747,7 +747,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   func spawnUFO(ufo: UFO) {
     playfield.addWithScaling(ufo)
     ufos.insert(ufo)
-    // Position the UFO just off the screen on one side or another.  We set the side
+    // Position the UFO just off the screen on one side or another.  I set the side
     // here so that the positional audio will give a clue about where it's coming
     // from.  Actual choice of Y position and beginning of movement happens after a
     // delay.
@@ -762,7 +762,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// - Parameter ufo: The UFO to launch
   func launchUFO(_ ufo: UFO) {
     let ufoRadius = 0.5 * ufo.size.diagonal()
-    // Try to find a safe spawning position, but if we can't find one after some
+    // Try to find a safe spawning position, but if I can't find one after some
     // number of tries, just go ahead and spawn anyway.
     var bestPosition: CGPoint? = nil
     var bestClearance = CGFloat.infinity
@@ -797,7 +797,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// - Parameter ufo: The UFO to nuke
   func destroyUFO(_ ufo: UFO) {
     // If the player was destroyed earlier, the UFO will have been scheduled for
-    // warpOut.  But if it just got destroyed (by hitting an asteroid) we have to be
+    // warpOut.  But if it just got destroyed (by hitting an asteroid) I have to be
     // sure to cancel the warp.
     ufo.removeAction(forKey: "warpOut")
     ufos.remove(ufo)
@@ -823,7 +823,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   func ufoCollided(ufo: SKNode, asteroid: SKNode) {
     // I'm not sure if this check is needed anyway, but non-launched UFOs have
     // isDynamic set to false so that they're holding.  Make sure that the UFO has
-    // been launched before we'll flag a collision.
+    // been launched before flagging a collision.
     guard ufo.requiredPhysicsBody().isDynamic else { return }
     splitAsteroid(asteroid as! SKSpriteNode)
     destroyUFO(ufo as! UFO)
@@ -836,7 +836,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   func ufosCollided(ufo1: SKNode, ufo2: SKNode) {
     // I'm not sure if these check is needed anyway, but non-launched UFOs have
     // isDynamic set to false so that they're holding.  Make sure that the UFO has
-    // been launched before we'll flag a collision.
+    // been launched before flagging a collision.
     guard ufo1.requiredPhysicsBody().isDynamic else { return }
     guard ufo2.requiredPhysicsBody().isDynamic else { return }
     destroyUFO(ufo1 as! UFO)
@@ -1003,8 +1003,8 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     logging("\(name!) update", "time \(currentTime)")
     // Mostly getUtimeOffset just returns immediately, but when a scene first start
     // running, it will compute the offset between currentTime and the u_time seen by
-    // shaders.  Most of our effect shaders need to have an effective time that
-    // always starts at zero, and we use that offset plus currentTime to provide it.
+    // shaders.  Most of the effect shaders need to have an effective time that
+    // always starts at zero, and I use the offset plus currentTime to provide it.
     _ = getUtimeOffset(view: view)
   }
 }
