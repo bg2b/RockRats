@@ -8,6 +8,8 @@
 
 import SpriteKit
 
+// MARK: Game/tutorial base class
+
 /// Things common to game and tutorial (but not in the BasicScene superclass)
 ///
 /// This scene includes the player's ship and controls, the remaining ships display,
@@ -44,9 +46,73 @@ class GameTutorialScene: BasicScene {
   /// locations.
   var fireOrWarpTouches = [UITouch: CGPoint]()
 
-  func initControls() {
-    isUserInteractionEnabled = true
+  // MARK: - Initialization
+
+  /// Build information and control interface elements that are common to the game
+  /// and the tutorial.
+  func initInfo() {
+    // All of the stuff in here sits above the playfield, at z == LevelZs.info.
+    let info = SKNode()
+    info.name = "info"
+    info.setZ(.info)
+    // info sits under gameArea in the hierarchy, so it's subject to whatever sort of
+    // blurring effect is used when the game is paused.
+    gameArea.addChild(info)
+    // Remaining ships in upper left.
+    livesDisplay = ReservesDisplay()
+    livesDisplay.position = CGPoint(x: gameFrame.minX + 20, y: gameFrame.maxY - 20)
+    info.addChild(livesDisplay)
+    // Energy reserves in upper right.
+    energyBar = EnergyBar(maxLength: 20)
+    info.addChild(energyBar)
+    energyBar.position = CGPoint(x: gameFrame.maxX - 20, y: gameFrame.maxY - 20)
+    let pauseControls = SKNode()
+    // The pause/continue/quit controls are directly under the scene in the hierarchy
+    // and _not_ under gameArea, so they don't get blurred when the game pauses.
+    addChild(pauseControls)
+    pauseControls.name = "pauseControls"
+    pauseControls.setZ(.info)
+    let pauseTexture = Globals.textureCache.findTexture(imageNamed: "pause")
+    pauseButton = Touchable(SKSpriteNode(texture: pauseTexture, size: pauseTexture.size())) {
+      [unowned self] in self.doPause()
+    }
+    // The pause icon sits just below the remaining ships and is mostly transparent.
+    // When touched, it'll hide itself and show the continue/quit buttons.
+    pauseButton.alpha = 0.1
+    pauseButton.position = CGPoint(x: gameFrame.minX + pauseTexture.size().width / 2 + 10,
+                                   y: livesDisplay.position.y - pauseTexture.size().height / 2 - 20)
+    pauseControls.addChild(pauseButton)
+    // Two nice big buttons in the center of the screen for continue and quit.
+    // They're only unhidden when the game pauses.
+    let buttonSize = CGSize(width: 250, height: 200)
+    continueButton = Button(imageNamed: "bigplaybutton", imageColor: AppAppearance.playButtonColor, size: buttonSize)
+    continueButton.action = { [unowned self] in self.doContinue() }
+    continueButton.position = CGPoint(x: gameFrame.midX - 0.5 * buttonSize.width - 50, y: gameFrame.midY)
+    continueButton.isHidden = true
+    pauseControls.addChild(continueButton)
+    quitButton = Button(imageNamed: "bigcancelbutton", imageColor: AppAppearance.dangerButtonColor, size: buttonSize)
+    quitButton.action = { [unowned self] in self.doQuit() }
+    quitButton.position = CGPoint(x: 2 * gameFrame.midX - continueButton.position.x, y: continueButton.position.y)
+    quitButton.isHidden = true
+    pauseControls.addChild(quitButton)
   }
+
+  /// Make a game or tutorial scene of a given size
+  /// - Parameter size: The size of the scene
+  override init(size: CGSize) {
+    super.init(size: size)
+    name = "gameTutorialScene"
+    initGameArea(avoidSafeArea: true)
+    initInfo()
+    isUserInteractionEnabled = true
+    physicsWorld.contactDelegate = self
+  }
+
+  required init(coder aDecoder: NSCoder) {
+    super.init(coder: aDecoder)
+  }
+
+  // MARK: - Touch handling
 
   /// Handle the start of touches to control the ship
   /// - Parameters:
@@ -141,54 +207,7 @@ class GameTutorialScene: BasicScene {
     touchesEnded(touches, with: event)
   }
 
-  /// Build information and control interface elements that are common to the game
-  /// and the tutorial.
-  func initInfo() {
-    // All of the stuff in here sits above the playfield, at z == LevelZs.info.
-    let info = SKNode()
-    info.name = "info"
-    info.setZ(.info)
-    // info sits under gameArea in the hierarchy, so it's subject to whatever sort of
-    // blurring effect is used when the game is paused.
-    gameArea.addChild(info)
-    // Remaining ships in upper left.
-    livesDisplay = ReservesDisplay()
-    livesDisplay.position = CGPoint(x: gameFrame.minX + 20, y: gameFrame.maxY - 20)
-    info.addChild(livesDisplay)
-    // Energy reserves in upper right.
-    energyBar = EnergyBar(maxLength: 20)
-    info.addChild(energyBar)
-    energyBar.position = CGPoint(x: gameFrame.maxX - 20, y: gameFrame.maxY - 20)
-    let pauseControls = SKNode()
-    // The pause/continue/quit controls are directly under the scene in the hierarchy
-    // and _not_ under gameArea, so they don't get blurred when the game pauses.
-    addChild(pauseControls)
-    pauseControls.name = "pauseControls"
-    pauseControls.setZ(.info)
-    let pauseTexture = Globals.textureCache.findTexture(imageNamed: "pause")
-    pauseButton = Touchable(SKSpriteNode(texture: pauseTexture, size: pauseTexture.size())) {
-      [unowned self] in self.doPause()
-    }
-    // The pause icon sits just below the remaining ships and is mostly transparent.
-    // When touched, it'll hide itself and show the continue/quit buttons.
-    pauseButton.alpha = 0.1
-    pauseButton.position = CGPoint(x: gameFrame.minX + pauseTexture.size().width / 2 + 10,
-                                   y: livesDisplay.position.y - pauseTexture.size().height / 2 - 20)
-    pauseControls.addChild(pauseButton)
-    // Two nice big buttons in the center of the screen for continue and quit.
-    // They're only unhidden when the game pauses.
-    let buttonSize = CGSize(width: 250, height: 200)
-    continueButton = Button(imageNamed: "bigplaybutton", imageColor: AppAppearance.playButtonColor, size: buttonSize)
-    continueButton.action = { [unowned self] in self.doContinue() }
-    continueButton.position = CGPoint(x: gameFrame.midX - 0.5 * buttonSize.width - 50, y: gameFrame.midY)
-    continueButton.isHidden = true
-    pauseControls.addChild(continueButton)
-    quitButton = Button(imageNamed: "bigcancelbutton", imageColor: AppAppearance.dangerButtonColor, size: buttonSize)
-    quitButton.action = { [unowned self] in self.doQuit() }
-    quitButton.position = CGPoint(x: 2 * gameFrame.midX - continueButton.position.x, y: continueButton.position.y)
-    quitButton.isHidden = true
-    pauseControls.addChild(quitButton)
-  }
+  // MARK: - Pause, continue, and quit
 
   /// Enforce pausing when gamePaused is true so that SpriteKit's
   /// auto-pausing/unpausing doesn't mess us up.
@@ -219,9 +238,26 @@ class GameTutorialScene: BasicScene {
 
   /// Abort the game/tutorial immediately and go back to the main menu.
   func doQuit() {
+    guard beginSceneSwitch() else { fatalError("Force quit in GameTutorialScene found scene switch in progress???") }
     audio.stop()
     switchScene(to: Globals.menuScene)
   }
+
+  /// Clean up a game or tutorial scene
+  ///
+  /// The scene is leaving its view and will be destroyed in a moment.  If this is
+  /// happening because of doQuit, then the scene may be in a complicated state that
+  /// I can't easily characterize.  So I force things into a state where the scene
+  /// can get garbage collected cleanly.
+  ///
+  /// - Parameter view: The view that the scene is leaving
+  override func willMove(from view: SKView) {
+    super.willMove(from: view)
+    cleanup()
+    logging("\(name!) finished willMove from view")
+  }
+
+  // MARK: - Spawn point safety
 
   /// Determine if a potential spawn point is safe from an asteroid track, accounting
   /// for possible wrapping.
@@ -282,6 +318,8 @@ class GameTutorialScene: BasicScene {
     return true
   }
 
+  // MARK: - Player lasers
+
   /// Handle the player's request to shoot.  Doesn't actually shoot if they have
   /// insufficient energy or too many shots in-flight.
   func fireLaser() {
@@ -320,6 +358,8 @@ class GameTutorialScene: BasicScene {
   func laserExpired(_ laser: SKSpriteNode) {
     removeLaser(laser)
   }
+
+  // MARK: - Hyperspace jumps
 
   /// Turn on/off the scene's special retro effects shader
   ///
@@ -360,8 +400,8 @@ class GameTutorialScene: BasicScene {
   ///
   /// - Parameter enabled: `true` to enable retro mode
   func setRetroMode(enabled: Bool) {
-    self.setRetroFilter(enabled: enabled)
-    self.player.setAppearance(to: enabled ? .retro : .modern)
+    setRetroFilter(enabled: enabled)
+    player.setAppearance(to: enabled ? .retro : .modern)
   }
 
   /// Handle the player's jump request.  They still need sufficient energy or they're
@@ -396,40 +436,13 @@ class GameTutorialScene: BasicScene {
     }
   }
 
+  // MARK: - Energy regeneration
+
   /// Add a bit to the player's energy reserves and then reschedule `replenishEnergy`
   func replenishEnergy() {
     if player.parent != nil {
       energyBar.addToLevel(5)
     }
     wait(for: 0.5, then: replenishEnergy)
-  }
-
-  /// Make a game or tutorial scene of a given size
-  /// - Parameter size: The size of the scene
-  override init(size: CGSize) {
-    super.init(size: size)
-    name = "gameTutorialScene"
-    initGameArea(avoidSafeArea: true)
-    initInfo()
-    initControls()
-    physicsWorld.contactDelegate = self
-  }
-
-  required init(coder aDecoder: NSCoder) {
-    super.init(coder: aDecoder)
-  }
-
-  /// Clean up a game or tutorial scene
-  ///
-  /// The scene is leaving its view and will be destroyed in a moment.  If this is
-  /// happening because of doQuit, then the scene may be in a complicated state that
-  /// I can't easily characterize.  So I force things into a state where the scene
-  /// can get garbage collected cleanly.
-  ///
-  /// - Parameter view: The view that the scene is leaving
-  override func willMove(from view: SKView) {
-    super.willMove(from: view)
-    cleanup()
-    logging("\(name!) finished willMove from view")
   }
 }
