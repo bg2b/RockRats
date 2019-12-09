@@ -18,14 +18,13 @@ class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
 
   /// Build the stuff in the scene
   func initCredits() {
-    let fontSize = CGFloat(40)
-    let attributes = AttrStyles(fontName: AppAppearance.font, fontSize: fontSize)
+    let attributes = AttrStyles(fontName: AppAppearance.font, fontSize: 40)
     let credits = SKNode()
     credits.name = "credits"
     credits.setZ(.info)
     addChild(credits)
     // Title
-    let title = SKLabelNode(fontNamed: AppAppearance.font)
+    let title = SKLabelNode(fontNamed: attributes.fontName)
     title.fontSize = 100
     title.fontColor = AppAppearance.highlightTextColor
     title.text = "Credits"
@@ -74,19 +73,19 @@ class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
       creditsLabel.verticalAlignmentMode = .top
       creditsLabel.position = CGPoint(x: 0, y: nextLabelY)
       creditsLabels.addChild(creditsLabel)
-      nextLabelY -= creditsLabel.frame.height + 0.25 * fontSize
+      nextLabelY -= creditsLabel.frame.height + 0.25 * attributes.fontSize
       // Putting links in a button doesn't match the rest of the credits, but I want
       // to indicate that they're activatable in some way.  I settled on using the
       // same green as the button borders for the link text.
       let linkLabel = SKLabelNode(text: link)
-      linkLabel.fontName = AppAppearance.font
-      linkLabel.fontSize = fontSize
+      linkLabel.fontName = attributes.fontName
+      linkLabel.fontSize = attributes.fontSize
       linkLabel.fontColor = AppAppearance.borderColor
       linkLabel.horizontalAlignmentMode = .left
       linkLabel.verticalAlignmentMode = .top
       linkLabel.position = CGPoint(x: 0, y: nextLabelY)
       creditsLabels.addChild(Touchable(linkLabel) { [unowned self] in self.showLink(link) })
-      nextLabelY -= linkLabel.frame.height + 0.75 * fontSize
+      nextLabelY -= linkLabel.frame.height + 0.75 * attributes.fontSize
     }
     let wantedMidY = 0.5 * (title.frame.minY + playButton.calculateAccumulatedFrame().maxY)
     // Center credits vertically at wantedMidY

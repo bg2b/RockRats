@@ -10,6 +10,10 @@ import SpriteKit
 
 /// Styles use for making attributed text
 struct AttrStyles {
+  /// The font name being used
+  let fontName: String
+  /// The font size being used
+  let fontSize: CGFloat
   /// Normal text
   let textAttributes: [NSAttributedString.Key: Any]
   /// Highlighted text
@@ -18,6 +22,8 @@ struct AttrStyles {
   let hiddenAttributes: [NSAttributedString.Key: Any]
 
   init(fontName: String, fontSize: CGFloat) {
+    self.fontName = fontName
+    self.fontSize = fontSize
     var attributes = [NSAttributedString.Key: Any]()
     attributes[.font] = UIFont(name: fontName, size: fontSize)
     attributes[.foregroundColor] = AppAppearance.textColor
