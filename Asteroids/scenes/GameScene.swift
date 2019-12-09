@@ -64,8 +64,6 @@ class GameScene: GameTutorialScene {
   /// The label in the middle of the screen that displays wave numbers or Gave Over
   /// (usually hidden)
   var centralDisplay: SKLabelNode!
-  /// How many reserve ships they have left; the current ship doesn't count in this.
-  var livesRemaining = 0
   /// How many extra ships they've received.  The difference between this and the
   /// number that should have been awarded based on score is what triggers the
   /// awarding of an extra.
@@ -415,13 +413,6 @@ class GameScene: GameTutorialScene {
   }
 
   // MARK: - Player birth and death
-
-  /// Update the reserve ships
-  /// - Parameter amount: The amount by which to change the number of reserves
-  func updateLives(_ amount: Int) {
-    livesRemaining += amount
-    livesDisplay.showReserves(livesRemaining)
-  }
 
   /// Spawn the player
   ///

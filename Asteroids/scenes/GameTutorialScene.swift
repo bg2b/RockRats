@@ -32,6 +32,8 @@ class GameTutorialScene: BasicScene {
   var score = 0
   /// The display of the number of reserve ships
   var livesDisplay: ReservesDisplay!
+  /// How many reserve ships they have left; the current ship doesn't count in this.
+  var livesRemaining = 0
   /// The display of the player's energy reserves
   var energyBar: EnergyBar!
   /// The point of the (virtual) joystick's origin
@@ -257,7 +259,7 @@ class GameTutorialScene: BasicScene {
     logging("\(name!) finished willMove from view")
   }
 
-  // MARK: - Spawn point safety
+  // MARK: - Spawning
 
   /// Determine if a potential spawn point is safe from an asteroid track, accounting
   /// for possible wrapping.
@@ -316,6 +318,13 @@ class GameTutorialScene: BasicScene {
       }
     }
     return true
+  }
+
+  /// Update the reserve ships
+  /// - Parameter amount: The amount by which to change the number of reserves
+  func updateLives(_ amount: Int) {
+    livesRemaining += amount
+    livesDisplay.showReserves(livesRemaining)
   }
 
   // MARK: - Player lasers
