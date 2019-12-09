@@ -100,7 +100,7 @@ class GameScene: GameTutorialScene {
     scoreDisplay.fontColor = AppAppearance.textColor
     scoreDisplay.text = "0"
     scoreDisplay.name = "score"
-    scoreDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.maxY - 50)
+    scoreDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.maxY - scoreDisplay.fontSize)
     moreInfo.addChild(scoreDisplay)
     centralDisplay = SKLabelNode(fontNamed: AppAppearance.font)
     centralDisplay.fontSize = 100
