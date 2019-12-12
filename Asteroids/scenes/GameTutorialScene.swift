@@ -195,7 +195,7 @@ class GameTutorialScene: BasicScene {
         if isJumpRequest(touch, startLocation: startLocation) {
           hyperspaceJump()
         } else {
-          fireLaser()
+          _ = fireLaser()
         }
       }
     }
@@ -331,8 +331,9 @@ class GameTutorialScene: BasicScene {
 
   /// Handle the player's request to shoot.  Doesn't actually shoot if they have
   /// insufficient energy or too many shots in-flight.
-  func fireLaser() {
-    guard player.canShoot(energyBar) else { return }
+  /// - Returns: `true` if a shot was fired
+  func fireLaser() -> Bool {
+    guard player.canShoot(energyBar) else { return false }
     let laser = Globals.spriteCache.findSprite(imageNamed: "lasersmall_green") { sprite in
       let texture = sprite.requiredTexture()
       // The physics body is just a little circle at the front end of the laser,
@@ -352,6 +353,7 @@ class GameTutorialScene: BasicScene {
     playfield.addWithScaling(laser)
     player.shoot(laser: laser)
     audio.soundEffect(.playerShot, at: player.position)
+    return true
   }
 
   /// Remove a laser; recycles the sprite and tells the player's ship so that it can
