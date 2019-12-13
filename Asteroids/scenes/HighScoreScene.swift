@@ -283,6 +283,7 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
   ///   - score: The score of the just-played game (or `nil` if the previous scene
   ///     was the main menu)
   init(size: CGSize, score: GameScore?) {
+    logging("HighScoreScene init")
     super.init(size: size)
     name = "highScoreScene"
     initGameArea(avoidSafeArea: false)
@@ -355,6 +356,10 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
 
   required init(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
+  }
+
+  deinit {
+    logging("HighScoreScene deinit \(self.hash)")
   }
 
   // MARK: - Button actions

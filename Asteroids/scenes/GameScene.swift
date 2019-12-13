@@ -159,6 +159,7 @@ class GameScene: GameTutorialScene {
   /// Make a new game scene
   /// - Parameter size: The size of the scene
   override init(size: CGSize) {
+    logging("GameScene init")
     super.init(size: size)
     name = "gameScene"
     initFutureShader()
@@ -168,6 +169,10 @@ class GameScene: GameTutorialScene {
 
   required init(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
+  }
+
+  deinit {
+    logging("GameScene deinit \(self.hash)")
   }
 
   // MARK: - Central display

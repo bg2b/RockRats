@@ -96,6 +96,7 @@ class IntroScene: BasicScene {
   ///   - size: The size of the scene
   ///   - conclusion: `true` for the conclusion, `false` for the introduction
   init(size: CGSize, conclusion: Bool) {
+    logging("IntroScene init")
     self.conclusion = conclusion
     if !conclusion {
       // They're a new recruit...
@@ -145,6 +146,10 @@ class IntroScene: BasicScene {
     messageHeader = ""
     introduction = ""
     super.init(coder: aDecoder)
+  }
+
+  deinit {
+    logging("IntroScene deinit \(self.hash)")
   }
 
   // MARK: - Message display

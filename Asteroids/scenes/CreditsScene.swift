@@ -100,6 +100,7 @@ class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
   /// Make a new scene to display the credits
   /// - Parameter size: The size of the scene
   override init(size: CGSize) {
+    logging("CreditsScene init")
     super.init(size: size)
     name = "creditsScene"
     initGameArea(avoidSafeArea: false)
@@ -108,6 +109,10 @@ class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
 
   required init(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
+  }
+
+  deinit {
+    logging("CreditsScene deinit \(self.hash)")
   }
 
   // MARK: - Button actions

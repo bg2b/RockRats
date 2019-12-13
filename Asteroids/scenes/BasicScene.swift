@@ -359,6 +359,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// device's safe area.
   override init(size: CGSize) {
     super.init(size: size)
+    logging("BasicScene init \(self.hash)")
     fullFrame = CGRect(x: -0.5 * size.width, y: -0.5 * size.height, width: size.width, height: size.height)
     scaleMode = .aspectFill
     anchorPoint = CGPoint(x: 0.5, y: 0.5)

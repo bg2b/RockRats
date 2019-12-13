@@ -139,6 +139,7 @@ class TutorialScene: GameTutorialScene {
   /// - Parameters:
   ///   - size: The size of the scene
   override init(size: CGSize) {
+    logging("TutorialScene init")
     super.init(size: size)
     name = "tutorialScene"
     initTutorial()
@@ -149,6 +150,10 @@ class TutorialScene: GameTutorialScene {
 
   required init(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
+  }
+
+  deinit {
+    logging("TutorialScene deinit \(self.hash)")
   }
 
   // MARK: - Messages

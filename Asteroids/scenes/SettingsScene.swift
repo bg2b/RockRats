@@ -147,6 +147,7 @@ class SettingsScene: BasicScene {
   /// Create the settings scene
   /// - Parameter size: The size of the scene
   override init(size: CGSize) {
+    logging("SettingsScene init")
     super.init(size: size)
     name = "settingsScene"
     initGameArea(avoidSafeArea: false)
@@ -155,6 +156,10 @@ class SettingsScene: BasicScene {
 
   required init(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
+  }
+
+  deinit {
+    logging("SettingsScene deinit \(self.hash)")
   }
 
   // MARK: - Button actions
