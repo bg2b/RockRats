@@ -16,6 +16,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     // Override point for customization after application launch.
+    let buildVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") ?? "unknown"
+    logging("Rock Rats build version \(buildVersion) starts")
     logging("application(didFinishLaunchingWithOoptions:)")
     // Set up iCloud key-value store
     NSUbiquitousKeyValueStore.default.synchronize()
