@@ -17,6 +17,7 @@ enum Achievement: String, CaseIterable {
   // Hidden
   case leeroyJenkins = "leeroyJenkins"
   case redShirt = "redShirt"
+  case rockSplat = "rockSplat"
   case blastFromThePast = "blastFromThePast"
   case backToTheFuture = "backToTheFuture"
   case hanShotFirst = "hanShotFirst"

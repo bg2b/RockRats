@@ -581,6 +581,7 @@ class TutorialScene: GameTutorialScene {
         message = "That's doing it the hard way"
       } else {
         message = "Rock Rat? @Rock SPLAT!@"
+        reportAchievement(achievement: .rockSplat)
       }
       self.showMessage(message, delay: 2, then: self.trainingComplete)
     }
