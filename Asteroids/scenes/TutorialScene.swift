@@ -26,7 +26,7 @@ class TutorialScene: GameTutorialScene {
   /// Label that tells what the gesture does, just below `instructionLabel`
   var toDoLabel: SKLabelNode!
   /// Amount of time to delay between showing instructions and showing a gesture
-  let instructionDelay = 0.5
+  let instructionDelay = 1.0
   /// Touch tutor shapes
   var touchShapes: [SKNode]!
   /// Label for the gesture that the tutor is showing
