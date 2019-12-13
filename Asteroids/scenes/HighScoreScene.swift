@@ -79,16 +79,23 @@ class SmashyUFO: SKNode {
 
   // MARK: - Death and hyperspace
 
+  func cleanup() {
+    // Be sure that any actions (which may have a closure with a self reference for
+    // the scene, leading to a retain cycle) get nuked.
+    removeAllActions()
+    removeFromParent()
+  }
+
   /// Make the UFO explode
   func explode() -> [SKNode] {
     let velocity = requiredPhysicsBody().velocity
-    removeFromParent()
+    cleanup()
     return makeExplosion(texture: ufoTexture, angle: zRotation, velocity: velocity, at: position, duration: 2, cuts: 5)
   }
 
   /// Make the UFO jump to hyperspace
   func warpOut() -> [SKNode] {
-    removeFromParent()
+    cleanup()
     return warpOutEffect(texture: ufoTexture, position: position, rotation: zRotation)
   }
 }
@@ -436,7 +443,9 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     removeAction(forKey: spawnSmashiesKey)
     for ufo in smashies {
       let delay = Double.random(in: 0.5 ... 1.5)
-      ufo.run(.wait(for: delay) { self.warpOutSmashy(ufo) })
+      // Run the warp out action with a key so that destroySmashy can cancel it in
+      // case of a collision before the warp happens
+      ufo.run(.wait(for: delay) { self.warpOutSmashy(ufo) }, withKey: "warpOut")
     }
   }
 
@@ -448,6 +457,8 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
   ///
   /// - Parameter ufo: The UFO to destroy
   func destroySmashy(_ ufo: SmashyUFO) {
+    // Be sure to cancel any pending warp
+    ufo.removeAction(forKey: "warpOut")
     addToPlayfield(ufo.explode())
     smashies.remove(ufo)
   }
