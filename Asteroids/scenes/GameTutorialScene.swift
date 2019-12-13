@@ -240,9 +240,19 @@ class GameTutorialScene: BasicScene {
 
   /// Abort the game/tutorial immediately and go back to the main menu.
   func doQuit() {
-    guard beginSceneSwitch() else { fatalError("Force quit in GameTutorialScene found scene switch in progress???") }
+    guard beginSceneSwitch() else { fatalError("doQuit in GameTutorialScene found scene switch in progress???") }
     audio.stop()
     switchScene(to: Globals.menuScene)
+  }
+
+  /// Disallow pausing
+  ///
+  /// Used at the end of a game when preparing to transition out to another scene and
+  /// the `doQuit` should not be called
+  func disablePause() {
+    assert(continueButton.isHidden && quitButton.isHidden)
+    pauseButton.isUserInteractionEnabled = false
+    pauseButton.run(.sequence([.fadeOut(withDuration: 0.25), .hide()]))
   }
 
   /// Clean up a game or tutorial scene

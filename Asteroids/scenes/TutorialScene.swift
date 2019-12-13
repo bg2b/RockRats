@@ -571,8 +571,13 @@ class TutorialScene: GameTutorialScene {
 
   /// End of tutorial, go back to the menu
   func trainingComplete() {
+    disablePause()
+    guard beginSceneSwitch() else { fatalError("trainingComplete in TutorialScene found scene switch in progress???") }
     hideInstructions {
-      self.showMessage("Training complete", delay: 3, then: self.mainMenu)
+      self.showMessage("Training complete", delay: 3) {
+        // Switch back to the main menu
+        self.showWhenQuiescent(Globals.menuScene)
+      }
     }
   }
 
@@ -590,12 +595,6 @@ class TutorialScene: GameTutorialScene {
       }
       self.showMessage(message, delay: 2, then: self.trainingComplete)
     }
-  }
-
-  /// Switch back to the main menu
-  func mainMenu() {
-    guard beginSceneSwitch() else { return }
-    showWhenQuiescent(Globals.menuScene)
   }
 
   // MARK: - Contact handling

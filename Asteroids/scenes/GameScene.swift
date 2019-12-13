@@ -480,17 +480,22 @@ class GameScene: GameTutorialScene {
     if livesRemaining > 0 {
       wait(for: delay) { self.spawnPlayer() }
     } else {
+      // If the player wanted to rage quit after losing their last ship, they had
+      // time to do it by now.  At this point, I'll always progress to the high
+      // scores scene.
+      disablePause()
+      guard beginSceneSwitch() else { fatalError("respawnOrGameOver in GameScene found scene switch in progress???") }
       gameOver = true
       stopHeartbeat()
-      self.removeAction(forKey: "spawnWave")
+      removeAction(forKey: "spawnWave")
       wait(for: delay) {
         self.audio.soundEffect(.gameOver)
         self.endGameSaveProgress()
+        // Start building the high scores scene in the background
         self.saveScoreAndPrepareHighScores()
         self.displayMessage("Game Over", forTime: 4)
-        // saveScoreAndPrepareHighScores has been preparing the high score scene in
-        // the background.  After Game Over has been displayed for a while,
-        // transition whenever the scene is ready.
+        // After Game Over has been displayed for a while, transition whenever the
+        // high scores scene is ready.
         self.wait(for: 6, then: self.switchWhenReady)
       }
     }
