@@ -219,6 +219,7 @@ class MenuScene: BasicScene {
         // they stick around long enough, then poke them to leave a review.
         run(.sequence([.wait(forDuration: 2), .run { self.askForReview() }]), withKey: "askForReview")
       }
+      assert(shotsToFire.isEmpty)
     }
     // Any earlier scene transition that the menu initiated has obviously finished,
     // so reset the switching flag
@@ -295,11 +296,14 @@ class MenuScene: BasicScene {
     wait(for: 5, then: spawnUFOs)
   }
 
-  /// Make a UFO warp out; this is an override because I need to update `shotsToFire`
-  /// - Parameter ufo: The UFO that's leaving
-  override func warpOutUFO(_ ufo: UFO) {
+  /// Remove a UFO
+  ///
+  /// This is an override because I need to update `shotsToFire`.
+  ///
+  /// - Parameter ufo: The UFO that's being removed
+  override func removeUFO(_ ufo: UFO) {
     shotsToFire.removeValue(forKey: ufo)
-    super.warpOutUFO(ufo)
+    super.removeUFO(ufo)
   }
 
   /// The player tapped something and destroyed it
@@ -317,13 +321,6 @@ class MenuScene: BasicScene {
   func touchedAsteroid(_ asteroid: SKSpriteNode) {
     splitAsteroid(asteroid)
     poppedSomething()
-  }
-
-  /// A UFO is being destroyed; this is an override because I need to update `shotsToFire`
-  /// - Parameter ufo: The UFO that is being nuked
-  override func destroyUFO(_ ufo: UFO) {
-    shotsToFire.removeValue(forKey: ufo)
-    super.destroyUFO(ufo)
   }
 
   /// The player touched a UFO
@@ -358,7 +355,9 @@ class MenuScene: BasicScene {
           self.fireUFOLaser(angle: angle, position: position, speed: speed)
           self.shotsToFire[ufo] = self.shotsToFire[ufo]! - 1
           if self.shotsToFire[ufo]! == 0 {
-            ufo.wait(for: .random(in: 1 ... 3)) { self.warpOutUFO(ufo) }
+            // Use a key here so that if the UFO happens to get destroyed before the
+            // warp out, then the action can be cancelled.
+            ufo.run(.wait(for: .random(in: 1 ... 3)) { self.warpOutUFO(ufo) }, withKey: "warpOut")
           }
         }
       }

@@ -663,16 +663,24 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     }
   }
 
+  /// Remove a UFO from the set of UFOs
+  ///
+  /// This is a separate function in case a subclass needs to override it to do some
+  /// housekeeping of its own when a UFO is removed.
+  ///
+  /// - Parameter ufo: The UFO to remove
+  func removeUFO(_ ufo: UFO) {
+    ufos.remove(ufo)
+  }
+
   /// Make a UFO warp out immediately, with suitable visual effect
   ///
-  /// You shouldn't call this directly; let `warpOutUFOs` do it since that also
-  /// handles stuff like UFOs that aren't yet launched.  However, subclasses might
-  /// want to override this in order to do additional actions (but be sure they call
-  /// `super.warpOutUFO(_)`).
+  /// Be careful when calling this directly because of UFOs that may have spawned but
+  /// not launched.  If trying to get rid of all UFOs, use `warpOutUFOs`.
   ///
   /// - Parameter ufo: The UFO that should warp
   func warpOutUFO(_ ufo: UFO) {
-    ufos.remove(ufo)
+    removeUFO(ufo)
     audio.soundEffect(.ufoWarpOut, at: ufo.position)
     addToPlayfield(ufo.warpOut())
   }
@@ -721,7 +729,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
       } else {
         logging("Cleanup on unlaunched ufo")
         ufo.cleanup()
-        ufos.remove(ufo)
+        removeUFO(ufo)
       }
     }
     return maxDelay
@@ -801,7 +809,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     // warpOut.  But if it just got destroyed (by hitting an asteroid) I have to be
     // sure to cancel the warp.
     ufo.removeAction(forKey: "warpOut")
-    ufos.remove(ufo)
+    removeUFO(ufo)
     audio.soundEffect(.ufoExplosion, at: ufo.position)
     addToPlayfield(ufo.explode())
   }
