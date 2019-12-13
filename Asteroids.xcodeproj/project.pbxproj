@@ -23,6 +23,7 @@
 		FD0C070D22D8925E00F19A55 /* starfield_purple@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD0C070522D8925E00F19A55 /* starfield_purple@2x.png */; };
 		FD0C070E22D8925E00F19A55 /* ship_orange@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD0C070622D8925E00F19A55 /* ship_orange@2x.png */; };
 		FD0C070F22D8925E00F19A55 /* ship_red@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD0C070722D8925E00F19A55 /* ship_red@2x.png */; };
+		FD0E046B23A3B9E600376E76 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FD0E046A23A3B9E600376E76 /* StoreKit.framework */; };
 		FD158A21238BF4CA00180EC9 /* TextureBitmap.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD158A20238BF4CA00180EC9 /* TextureBitmap.swift */; };
 		FD158A23238F6A6C00180EC9 /* AttributedText.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD158A22238F6A6C00180EC9 /* AttributedText.swift */; };
 		FD158A25238FF9EA00180EC9 /* Touchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD158A24238FF9EA00180EC9 /* Touchable.swift */; };
@@ -134,6 +135,7 @@
 		FD0C070522D8925E00F19A55 /* starfield_purple@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "starfield_purple@2x.png"; sourceTree = "<group>"; };
 		FD0C070622D8925E00F19A55 /* ship_orange@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ship_orange@2x.png"; sourceTree = "<group>"; };
 		FD0C070722D8925E00F19A55 /* ship_red@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ship_red@2x.png"; sourceTree = "<group>"; };
+		FD0E046A23A3B9E600376E76 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		FD158A20238BF4CA00180EC9 /* TextureBitmap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureBitmap.swift; sourceTree = "<group>"; };
 		FD158A22238F6A6C00180EC9 /* AttributedText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttributedText.swift; sourceTree = "<group>"; };
 		FD158A24238FF9EA00180EC9 /* Touchable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Touchable.swift; sourceTree = "<group>"; };
@@ -247,6 +249,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FD0E046B23A3B9E600376E76 /* StoreKit.framework in Frameworks */,
 				FD7635B32354AE1A000543E7 /* GameKit.framework in Frameworks */,
 				FDDCB1462364874D00FF9F1C /* CloudKit.framework in Frameworks */,
 			);
@@ -307,6 +310,7 @@
 		FD7635B12354AE19000543E7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FD0E046A23A3B9E600376E76 /* StoreKit.framework */,
 				FDDCB1452364874D00FF9F1C /* CloudKit.framework */,
 				FD7635B22354AE1A000543E7 /* GameKit.framework */,
 			);

@@ -359,6 +359,11 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     }
     // Display the top ten combined scores
     initScores(score: score, highScores: Array(highScores.prefix(10)))
+    if score != nil {
+      // A game was just finished
+      UserData.gamesPlayed.value += 1
+      logging("A game was played, \(UserData.gamesPlayed.value) so far")
+    }
   }
 
   required init(coder aDecoder: NSCoder) {

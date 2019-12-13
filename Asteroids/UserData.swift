@@ -198,6 +198,12 @@ class UserData {
   /// Retro mode preference (ignored if Game Center is disabled or the player does
   /// not have the blastFromThePast achievement)
   static var retroMode = DefaultsValue<Bool>(name: "retroMode", defaultValue: false)
+  /// Number of games played on this device
+  static var gamesPlayed = DefaultsValue<Int>(name: "gamesPlayed", defaultValue: 0)
+  /// Number of games played when a review was last requested
+  static var gamesPlayedWhenReviewRequested = DefaultsValue<Int>(name: "gamesPlayedWhenReviewRequested", defaultValue: 0)
+  /// Number of times a review has been requested
+  static var reviewsRequested = DefaultsValue<Int>(name: "reviewsRequested", defaultValue: 0)
   /// Local player high scores (not global scores from Game Center)
   static var highScores = HighScores()
   /// Whoever is logged into Game Center, or "anon" if no one

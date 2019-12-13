@@ -8,6 +8,7 @@
 
 import SpriteKit
 import GameKit
+import StoreKit
 
 // MARK: Main menu
 
@@ -115,7 +116,10 @@ class MenuScene: BasicScene {
   // MARK: - Button actions
 
   /// Make the UFOs go away in preparation for a scene switch
+  ///
+  /// Also stops any pending review request
   func prepareForSwitch() {
+    cancelReviewRequest()
     getRidOfUFOs = true
     _ = warpOutUFOs(averageDelay: 0.25)
   }
@@ -178,6 +182,20 @@ class MenuScene: BasicScene {
     }
   }
 
+  // MARK: - Reviews
+
+  /// Ask for a review and save the number of games played
+  func askForReview() {
+    SKStoreReviewController.requestReview()
+    UserData.reviewsRequested.value += 1
+    UserData.gamesPlayedWhenReviewRequested.value = UserData.gamesPlayed.value
+  }
+
+  /// If the user wants to move on, stop the action that would request a review
+  func cancelReviewRequest() {
+    removeAction(forKey: "askForReview")
+  }
+
   // MARK: - Coming back to the menu
 
   /// Set up for the menu scene to be shown and kick off the background animation
@@ -190,6 +208,18 @@ class MenuScene: BasicScene {
   /// - Parameter view: The view that will show the menu
   override func didMove(to view: SKView) {
     super.didMove(to: view)
+    if switchingScenes {
+      // Getting here means that this is a transition back to the menu after doing
+      // something.  See about asking for a review.
+      let gamesSinceLastReview = UserData.gamesPlayed.value - UserData.gamesPlayedWhenReviewRequested.value
+      let numRequests = UserData.reviewsRequested.value
+      let gamesBeforeAsking = [10, 20, 50]
+      if gamesSinceLastReview >= gamesBeforeAsking[min(numRequests, gamesBeforeAsking.count - 1)] {
+        // A reasonable number of games have been played since the last request.  If
+        // they stick around long enough, then poke them to leave a review.
+        run(.sequence([.wait(forDuration: 2), .run { self.askForReview() }]), withKey: "askForReview")
+      }
+    }
     // Any earlier scene transition that the menu initiated has obviously finished,
     // so reset the switching flag
     switchingScenes = false
