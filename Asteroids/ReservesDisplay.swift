@@ -21,7 +21,7 @@ class ReservesDisplay: SKNode {
   var shipIcons = [SKSpriteNode]()
   /// A numeric display at the end of the icons for extras
   let numericDisplay: SKLabelNode
-  /// Possible messages to show where there are no more reserves
+  /// Possible messages to show when there are no more reserves
   let dontDieMessages = [
     "Don't die",
     "Livin' on a prayer",
