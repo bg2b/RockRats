@@ -58,7 +58,7 @@ class SettingsScene: BasicScene {
     muteButton = Button(imagesNamed: ["soundnone", "soundsmall", "soundmed", "soundbig"],
                         imageColor: AppAppearance.buttonColor, size: buttonSize)
     muteButton.selectedValue = UserData.audioLevel.value
-    muteButton.action = { [unowned self] in self.toggleSound() }
+    muteButton.action = { [unowned self] in self.setVolume() }
     muteButton.position = CGPoint(x: nextButtonX, y: 0)
     nextButtonX += buttonSize.width + buttonSpacing
     bottomButtons.addChild(muteButton)
@@ -206,7 +206,7 @@ class SettingsScene: BasicScene {
   /// Scenes read userDefaults.audioLevel when they're constructed.  The main menu is
   /// special though, since it's only made once.  Its didMove(to:) will switch the
   /// sound as appropriate.
-  func toggleSound() {
+  func setVolume() {
     UserData.audioLevel.value = muteButton.selectedValue
     audio.level = muteButton.selectedValue
     audio.soundEffect(.playerShot)
