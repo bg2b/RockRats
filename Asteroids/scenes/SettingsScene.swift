@@ -19,12 +19,36 @@ import SpriteKit
 /// I don't really like the way the central buttons are layed out.  Maybe I can
 /// eventually think of something more attractive.
 class SettingsScene: BasicScene {
-  /// The sound on/off button
-  var muteButton: Button!
+  /// The sound volume button
+  var volumeButton: Button!
+  /// The heartbeat on/off button
+  var heartbeatButton: Button!
+  /// The controls left/right button
+  var controlsButton: Button!
   /// Ship appearance button (normal, retro)
   var retroButton: Button!
   /// The button that resets the achievements in Game Center
   var resetAchievementsButton: Button!
+
+  static func stackedLabels(_ lines: [String], fontColor: UIColor) -> SKNode {
+    let stack = SKNode()
+    let fontSize = CGFloat(30)
+    var nextY = CGFloat(0)
+    for line in lines {
+      let label = SKLabelNode(fontNamed: AppAppearance.font)
+      label.fontSize = fontSize
+      label.fontColor = fontColor
+      label.text = line
+      label.horizontalAlignmentMode = .center
+      label.verticalAlignmentMode = .center
+      label.position = CGPoint(x: 0, y: nextY)
+      nextY -= fontSize
+      stack.addChild(label)
+    }
+    let currentMidY = stack.calculateAccumulatedFrame().midY
+    stack.position = CGPoint(x: 0, y: -currentMidY)
+    return stack
+  }
 
   // MARK: - Initialization
 
@@ -43,101 +67,92 @@ class SettingsScene: BasicScene {
     title.position = CGPoint(x: fullFrame.midX, y: fullFrame.maxY - title.fontSize)
     settings.addChild(title)
     // Buttons at the bottom
-    let bottomButtons = SKNode()
-    bottomButtons.name = "bottomButtons"
     let buttonSize = CGSize(width: 150, height: 100)
     let buttonSpacing = CGFloat(20)
-    var nextButtonX = CGFloat(0)
     // Main menu button
     let menuButton = Button(imageNamed: "homebutton", imageColor: AppAppearance.buttonColor, size: buttonSize)
     menuButton.action = { [unowned self] in self.mainMenu() }
-    menuButton.position = CGPoint(x: nextButtonX, y: 0)
-    nextButtonX += buttonSize.width + buttonSpacing
-    bottomButtons.addChild(menuButton)
-    // Sound on/off
-    muteButton = Button(imagesNamed: ["soundnone", "soundsmall", "soundmed", "soundbig"],
-                        imageColor: AppAppearance.buttonColor, size: buttonSize)
-    muteButton.selectedValue = UserData.audioLevel.value
-    muteButton.action = { [unowned self] in self.setVolume() }
-    muteButton.position = CGPoint(x: nextButtonX, y: 0)
-    nextButtonX += buttonSize.width + buttonSpacing
-    bottomButtons.addChild(muteButton)
+    // Play button
+    let playButton = Button(imageNamed: "playbutton", imageColor: AppAppearance.playButtonColor, size: buttonSize)
+    playButton.action = { [unowned self] in self.startGame() }
+    // Game credits
+    let creditsButton = Button(imageNamed: "infobutton", imageColor: AppAppearance.buttonColor, size: buttonSize)
+    creditsButton.action = { [unowned self] in self.showCredits() }
+    let bottomHstack = horizontalStack(nodes: [menuButton, playButton, creditsButton], minSpacing: buttonSpacing)
+    bottomHstack.position = CGPoint(x: bottomHstack.position.x,
+                                    y: fullFrame.minY + buttonSize.height + buttonSpacing - bottomHstack.position.y)
+    settings.addChild(bottomHstack)
+
+    // Replaying intro, tutorial, etc.
+    var replayTypes = ["Intro", "Help"]
+    if achievementIsCompleted(.promoted) {
+      replayTypes.append("Ending")
+    }
+    var replayButtons = [Button]()
+    for replayType in replayTypes {
+      let labelStack = SettingsScene.stackedLabels(["Replay", replayType], fontColor: AppAppearance.textColor)
+      let replayButton = Button(forNode: labelStack, size: buttonSize)
+      replayButton.name = "replay" + replayType + "Button"
+      replayButtons.append(replayButton)
+    }
+    replayButtons[0].action = { [unowned self] in self.replayIntro() }
+    replayButtons[1].action = { [unowned self] in self.replayTutorial() }
+    if replayButtons.count >= 3 {
+      replayButtons[2].action = { [unowned self] in self.replayConclusion() }
+    }
+    let replayHstack = horizontalStack(nodes: replayButtons, minSpacing: buttonSpacing)
+    // Resetting scores and achievements
+    let resetButtonImages = ["resetscores", "resetgamecenter"]
+    var resetButtons = [Button]()
+    for resetImage in resetButtonImages {
+      let resetButton = Button(imageNamed: resetImage, imageColor: .white, size: buttonSize)
+      resetButton.name = resetImage + "Button"
+      resetButton.requiresConfirmation(SettingsScene.stackedLabels(["Confirm", "Reset"],
+                                                                   fontColor: AppAppearance.dangerButtonColor))
+      resetButtons.append(resetButton)
+    }
+    resetButtons[0].action = { [unowned self] in self.resetScores() }
+    resetButtons[1].action = { [unowned self] in self.resetAchievements() }
+    resetAchievementsButton = resetButtons[1]
+    NotificationCenter.default.addObserver(self, selector: #selector(gcStateChanged), name: .authenticationChanged, object: nil)
+    if !Globals.gcInterface.enabled {
+      resetAchievementsButton.disable()
+    }
+    let resetHstack = horizontalStack(nodes: resetButtons, minSpacing: buttonSpacing)
+    // Options like sound volume and control preferences
+    var optionButtons = [Button]()
+    volumeButton = Button(imagesNamed: ["soundnone", "soundsmall", "soundmed", "soundbig"],
+                          imageColor: AppAppearance.buttonColor, size: buttonSize)
+    volumeButton.selectedValue = UserData.audioLevel.value
+    volumeButton.action = { [unowned self] in self.setVolume() }
+    optionButtons.append(volumeButton)
+    heartbeatButton = Button(imagesNamed: ["heartbeatoff", "heartbeaton"],
+                             imageColor: AppAppearance.buttonColor, size: buttonSize)
+    heartbeatButton.selectedValue = UserData.heartbeatMuted.value ? 0 : 1
+    heartbeatButton.action = { [unowned self] in self.toggleHeartbeat() }
+    if volumeButton.selectedValue == 0 {
+      heartbeatButton.disable()
+    }
+    optionButtons.append(heartbeatButton)
+    controlsButton = Button(imagesNamed: ["controlsleft", "controlsright"],
+                            imageColor: AppAppearance.buttonColor, size: buttonSize)
+    controlsButton.selectedValue = UserData.joystickOnLeft.value ? 0 : 1
+    controlsButton.action = { [unowned self] in self.toggleControls() }
+    optionButtons.append(controlsButton)
     // This retro/modern selection is only available if the player has the
     // `blastFromThePast` achievement.
     if achievementIsCompleted(.blastFromThePast) {
       retroButton = Button(imagesNamed: ["shipmodern", "shipretro"], imageColor: .white, size: buttonSize)
       retroButton.selectedValue = (UserData.retroMode.value ? 1 : 0)
       retroButton.action = { [unowned self] in self.toggleRetro() }
-      retroButton.position = CGPoint(x: nextButtonX, y: 0)
-      nextButtonX += buttonSize.width + buttonSpacing
-      bottomButtons.addChild(retroButton)
+      optionButtons.append(retroButton)
     }
-    // Game credits
-    let creditsButton = Button(imageNamed: "infobutton", imageColor: AppAppearance.buttonColor, size: buttonSize)
-    creditsButton.action = { [unowned self] in self.showCredits() }
-    creditsButton.position = CGPoint(x: nextButtonX, y: 0)
-    bottomButtons.addChild(creditsButton)
-    bottomButtons.position = .zero
-    let bottomFrame = bottomButtons.calculateAccumulatedFrame()
-    let buttonY = fullFrame.minY + buttonSize.height + buttonSpacing
-    // Center the bottom row of buttons on fullFrame.x, buttonY
-    bottomButtons.position = CGPoint(x: fullFrame.midX - bottomFrame.midX, y: buttonY - bottomFrame.midY)
-    settings.addChild(bottomButtons)
-    // Now for the buttons in the middle.  I'll stick everything under a single node
-    // (vstack) and then center that vertically between the title and the bottom
-    // buttons.
-    let vstack = SKNode()
-    vstack.name = "vstack"
-    let buttonFontSize = CGFloat(50)
-    let textButtonSize = CGSize(width: 650, height: buttonFontSize)
-    var nextButtonY = CGFloat(0)
-    // Button to replay the intro scene.  This is also how to trigger the hidden
-    // conclusion scene once the player has earned the top Rock Rat achievement.
-    let introButton = Button(forText: "Introduction", fontSize: buttonFontSize, size: textButtonSize)
-    introButton.name = "introButton"
-    introButton.action = { [unowned self] in self.replayIntro() }
-    introButton.position = CGPoint(x: 0, y: nextButtonY)
-    nextButtonY -= introButton.calculateAccumulatedFrame().height + 0.5 * buttonSpacing
-    vstack.addChild(introButton)
-    // Replay tutorial
-    let tutorialButton = Button(forText: "Tutorial", fontSize: buttonFontSize, size: textButtonSize)
-    tutorialButton.name = "tutorialButton"
-    tutorialButton.action = { [unowned self] in self.replayTutorial() }
-    tutorialButton.position = CGPoint(x: 0, y: nextButtonY)
-    nextButtonY -= tutorialButton.calculateAccumulatedFrame().height + 0.5 * buttonSpacing
-    vstack.addChild(tutorialButton)
-    // If they saw the conclusion once and got the promoted achievement, add a
-    // separate button to replay the conclusion.
-    if achievementIsCompleted(.promoted) {
-      let conclusionButton = Button(forText: "Conclusion", fontSize: buttonFontSize, size: textButtonSize)
-      conclusionButton.name = "introButton"
-      conclusionButton.action = { [unowned self] in self.replayConclusion() }
-      conclusionButton.position = CGPoint(x: 0, y: nextButtonY)
-      nextButtonY -= conclusionButton.calculateAccumulatedFrame().height + 0.5 * buttonSpacing
-      vstack.addChild(conclusionButton)
-    }
-    // Extra space before dangerous items
-    nextButtonY -= buttonSpacing
-    // Reset (local) high scores
-    let resetScoresButton = Button(forText: "Reset Scores", confirmText: "Confirm Reset", fontSize: buttonFontSize, size: textButtonSize)
-    resetScoresButton.name = "resetScoresButton"
-    resetScoresButton.action = { [unowned self] in self.resetScores() }
-    resetScoresButton.position = CGPoint(x: 0, y: nextButtonY)
-    nextButtonY -= resetScoresButton.calculateAccumulatedFrame().height + 0.5 * buttonSpacing
-    vstack.addChild(resetScoresButton)
-    // Reset Game Center achievements
-    resetAchievementsButton = Button(forText: "Reset Achievements", confirmText: "Confirm Reset", fontSize: buttonFontSize, size: textButtonSize)
-    resetAchievementsButton.name = "resetAchievementsButton"
-    resetAchievementsButton.action = { [unowned self] in self.resetAchievements() }
-    resetAchievementsButton.position = CGPoint(x: 0, y: nextButtonY)
-    // The resetAchievementsButton has to track the status of Game Center's
-    // authentication.
-    if !Globals.gcInterface.enabled {
-      resetAchievementsButton.disable()
-    }
-    NotificationCenter.default.addObserver(self, selector: #selector(gcStateChanged), name: .authenticationChanged, object: nil)
-    vstack.addChild(resetAchievementsButton)
-    let wantedMidY = 0.5 * (title.frame.minY + bottomButtons.calculateAccumulatedFrame().maxY)
+    let optionsHstack = horizontalStack(nodes: optionButtons, minSpacing: buttonSpacing)
+
+    let vstack = verticalStack(nodes: [replayHstack, resetHstack, optionsHstack], minSpacing: buttonSpacing)
+
+    //vstack.addChild(resetAchievementsButton)
+    let wantedMidY = 0.5 * (title.frame.minY + bottomHstack.calculateAccumulatedFrame().maxY)
     // Center verticalStack vertically at wantedMidY
     vstack.position = .zero
     let vstackY = round(wantedMidY - vstack.calculateAccumulatedFrame().midY)
@@ -201,25 +216,52 @@ class SettingsScene: BasicScene {
     showWhenQuiescent(Globals.menuScene)
   }
 
+  /// Start a new game
+  func startGame() {
+    guard beginSceneSwitch() else { return }
+    switchToScene { GameScene(size: self.fullFrame.size) }
+  }
+
+  /// Display the credits scene
+  func showCredits() {
+    switchToScene { CreditsScene(size: self.fullFrame.size) }
+  }
+
   /// Adjust the sound volume
   ///
   /// Scenes read userDefaults.audioLevel when they're constructed.  The main menu is
   /// special though, since it's only made once.  Its didMove(to:) will switch the
   /// sound as appropriate.
   func setVolume() {
-    UserData.audioLevel.value = muteButton.selectedValue
-    audio.level = muteButton.selectedValue
+    UserData.audioLevel.value = volumeButton.selectedValue
+    audio.level = volumeButton.selectedValue
     audio.soundEffect(.playerShot)
+    if volumeButton.selectedValue == 0 {
+      heartbeatButton.disable()
+    } else {
+      heartbeatButton.enable()
+    }
+  }
+
+  /// Toggle retro/modern appearance
+  func toggleHeartbeat() {
+    UserData.heartbeatMuted.value = (heartbeatButton.selectedValue == 0)
+    if !UserData.heartbeatMuted.value {
+      audio.soundEffect(.heartbeatHigh)
+      wait(for: 0.25) {
+        self.audio.soundEffect(.heartbeatLow)
+      }
+    }
+  }
+
+  /// Toggle controls left/right
+  func toggleControls() {
+    UserData.joystickOnLeft.value = (controlsButton.selectedValue == 0)
   }
 
   /// Toggle retro/modern appearance
   func toggleRetro() {
     UserData.retroMode.value = (retroButton.selectedValue == 1)
-  }
-
-  /// Display the credits scene
-  func showCredits() {
-    switchToScene { CreditsScene(size: self.fullFrame.size) }
   }
 
   /// Reset all local high scores

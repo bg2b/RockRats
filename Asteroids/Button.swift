@@ -92,6 +92,12 @@ class Button: SKNode {
     self.init(imagesNamed: [imageName], imageColor: imageColor, size: size)
   }
 
+  convenience init(forNode node: SKNode, size: CGSize) {
+    self.init(around: node, minSize: size)
+    addChild(node)
+    decorations.append(node)
+  }
+
   /// Make a button displaying some text
   /// - Parameters:
   ///   - text: The text shown in the button
@@ -133,6 +139,15 @@ class Button: SKNode {
 
   required init(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented by Button")
+  }
+
+  /// Add a confirmation requirement for the button
+  /// - Parameter confirmDecoration: The decoration to show for confirmation
+  func requiresConfirmation(_ confirmDecoration: SKNode) {
+    border.strokeColor = AppAppearance.dangerBorderColor
+    self.confirmDecoration = confirmDecoration
+    addChild(confirmDecoration)
+    confirmDecoration.isHidden = true
   }
 
   /// Used to read a cyclic button's state (the decoration index), or to set it

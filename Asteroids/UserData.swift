@@ -195,6 +195,10 @@ class UserData {
   static var hasDoneIntro = DefaultsValue<Bool>(name: "hasDoneIntro", defaultValue: false)
   /// Audio volume preference
   static var audioLevel = DefaultsValue<Int>(name: "audioLevel", defaultValue: 2)
+  /// Heartbeat on/off preference
+  static var heartbeatMuted = DefaultsValue<Bool>(name: "heartbeatMuted", defaultValue: false)
+  /// `true` if the joystick is on the left
+  static var joystickOnLeft = DefaultsValue<Bool>(name: "controlsOnLeft", defaultValue: true)
   /// Retro mode preference (ignored if Game Center is disabled or the player does
   /// not have the blastFromThePast achievement)
   static var retroMode = DefaultsValue<Bool>(name: "retroMode", defaultValue: false)

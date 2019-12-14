@@ -315,11 +315,19 @@ class TutorialScene: GameTutorialScene {
       // Poor man's centering...
       touchLabel.text = "    Slide\nand hold"
     } else {
-      // Put the label to the right
-      touchLabel.position = position + CGVector(dx: 0.75 * shapeSize, dy: 0)
-      touchLabel.horizontalAlignmentMode = .left
+      if UserData.joystickOnLeft.value {
+        // Put the label to the right
+        touchLabel.position = position + CGVector(dx: 0.75 * shapeSize, dy: 0)
+        touchLabel.horizontalAlignmentMode = .left
+        touchLabel.text = "Slide\nand hold"
+      } else {
+        // Put the label to the left
+        touchLabel.position = position + CGVector(dx: -0.75 * shapeSize, dy: 0)
+        touchLabel.horizontalAlignmentMode = .right
+        // Poor man's right justification
+        touchLabel.text = "        Slide\nand hold"
+      }
       touchLabel.verticalAlignmentMode = .center
-      touchLabel.text = "Slide\nand hold"
     }
     let initialDelay = 0.25
     let moveTime = 0.5
@@ -347,7 +355,8 @@ class TutorialScene: GameTutorialScene {
     // Add an amount for a slide
     cornerOffset = cornerOffset + CGVector(dx: 0.5 * 1.25 * slideAmount, dy: 0.5 * 1.25 * slideAmount)
     // Final start point
-    return CGPoint(x: gameFrame.minX, y: gameFrame.minY) + cornerOffset
+    let onLeft = CGPoint(x: gameFrame.minX, y: gameFrame.minY) + cornerOffset
+    return UserData.joystickOnLeft.value ? onLeft : CGPoint(x: -onLeft.x, y: onLeft.y)
   }
 
   /// Make the touch tutor show a tap-tap-tap gesture
@@ -392,10 +401,16 @@ class TutorialScene: GameTutorialScene {
     }
     touchLabel.isHidden = false
     touchLabel.numberOfLines = 1
-    // Label to the left
     let shapeSize = touchShapes[0].frame.width
-    touchLabel.position = position + CGVector(dx: -0.75 * shapeSize, dy: 0)
-    touchLabel.horizontalAlignmentMode = .right
+    if UserData.joystickOnLeft.value {
+      // Label to the left
+      touchLabel.position = position + CGVector(dx: -0.75 * shapeSize, dy: 0)
+      touchLabel.horizontalAlignmentMode = .right
+    } else {
+      // Label to the right
+      touchLabel.position = position + CGVector(dx: 0.75 * shapeSize, dy: 0)
+      touchLabel.horizontalAlignmentMode = .left
+    }
     touchLabel.verticalAlignmentMode = .center
     touchLabel.text = "Swipe"
     let initialDelay = 0.1

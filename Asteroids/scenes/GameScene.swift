@@ -748,7 +748,9 @@ class GameScene: GameTutorialScene {
     energyBar.fill()
     replenishEnergy()
     wait(for: 1) {
-      self.startHearbeat()
+      if !UserData.heartbeatMuted.value {
+        self.startHearbeat()
+      }
       self.nextWave()
       self.wait(for: 3) { self.spawnPlayer() }
     }

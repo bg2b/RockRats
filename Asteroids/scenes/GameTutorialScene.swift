@@ -125,7 +125,7 @@ class GameTutorialScene: BasicScene {
     guard !gamePaused else { return }
     for touch in touches {
       let location = touch.location(in: self)
-      if location.x > fullFrame.midX {
+      if location.x * (UserData.joystickOnLeft.value ? 1 : -1) > fullFrame.midX {
         // Touches on this side are for firing or warping.
         fireOrWarpTouches[touch] = location
       } else if joystickTouch == nil {
@@ -136,7 +136,7 @@ class GameTutorialScene: BasicScene {
     }
   }
 
-  /// Returns true if a touch has moved enough to indicate a hyperspace jump request.
+  /// Returns `true` if a touch has moved enough to indicate a hyperspace jump request
   /// - Parameters:
   ///   - touch: The touch that moved
   ///   - startLocation: The location where the touch started
