@@ -22,8 +22,8 @@ import SpriteKit
 class Button: SKNode {
   /// The border of the button, highlighted during touch processing
   let border: SKShapeNode
-  /// The labels or pictures sit inside the button; the button cycles through these
-  /// upon activation
+  /// The labels or pictures inside the button; the button cycles through these upon
+  /// activation
   var decorations = [SKNode]()
   /// The index of the current button decoration
   var currentDecoration = 0
@@ -35,13 +35,16 @@ class Button: SKNode {
   /// A closure that will be called when the button activates
   var action: (() -> Void)? = nil
 
-  /// Make a button whose decorations are managed separately.
+  /// Make a button border that fits around a node
+  ///
+  /// The decorations are managed separatedly outside of this initializer.
+  ///
   /// - Parameters:
   ///   - node: A node whose frame should be enclosed by the button
   ///   - minSize: The minimum size of the button
   ///   - borderColor: Color of the button's outline (optional, default green)
   init(around node: SKNode, minSize: CGSize, borderColor: UIColor = AppAppearance.borderColor) {
-    let nodeSize = node.frame.size
+    let nodeSize = node.calculateAccumulatedFrame().size
     // Padding is total amount for both sides, so 20 = 10 points on each
     let padding = CGFloat(20)
     let size = CGSize(width: max(nodeSize.width + padding, minSize.width), height: max(nodeSize.height + padding, minSize.height))
@@ -80,7 +83,7 @@ class Button: SKNode {
     decorations = sprites
   }
 
-  /// Make a button displaying an image.
+  /// Make a button displaying an image
   /// - Parameters:
   ///   - imageName: The name of the image to be display
   ///   - imageColor: The tint color for the image
@@ -89,7 +92,7 @@ class Button: SKNode {
     self.init(imagesNamed: [imageName], imageColor: imageColor, size: size)
   }
 
-  /// Make a button displaying some text.
+  /// Make a button displaying some text
   /// - Parameters:
   ///   - text: The text shown in the button
   ///   - fontSize: The font size (font is the app's standard font)
@@ -107,7 +110,7 @@ class Button: SKNode {
     decorations.append(label)
   }
 
-  /// Make a button displaying text that requires confirmation.
+  /// Make a button displaying text that requires confirmation
   /// - Parameters:
   ///   - text: The text shown initially
   ///   - confirmText: The text shown to prompt for confirmation
@@ -132,7 +135,7 @@ class Button: SKNode {
     fatalError("init(coder:) has not been implemented by Button")
   }
 
-  /// Used to read a cyclic button's state (the decoration index), or to set it.
+  /// Used to read a cyclic button's state (the decoration index), or to set it
   var selectedValue: Int {
     get { currentDecoration }
     set {
@@ -149,12 +152,14 @@ class Button: SKNode {
   func enable() {
     isUserInteractionEnabled = true
     alpha = 1
+    resetTouch()
   }
 
-  // Disable the button
+  /// Disable the button
   func disable() {
     isUserInteractionEnabled = false
     alpha = 0.5
+    resetTouch()
   }
 
   /// Reset the button's touch processing
@@ -216,7 +221,7 @@ class Button: SKNode {
     wait(for: 3, then: resetAndCancelConfirmation)
   }
 
-  /// Rotate the button's displayed decoration (for toggle or multi-alternative buttons).
+  /// Rotate the button's displayed decoration (for toggle or multi-alternative buttons)
   ///
   /// This has no effect if the button has only one decoration.
   func nextDecoration() {
