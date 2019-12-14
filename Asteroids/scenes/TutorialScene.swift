@@ -49,12 +49,12 @@ class TutorialScene: GameTutorialScene {
     let tutorialStuff = SKNode()
     tutorialStuff.name = "tutorialStuff"
     tutorialStuff.setZ(.info)
-    addChild(tutorialStuff)
+    gameArea.addChild(tutorialStuff)
     attributes = AttrStyles(fontName: AppAppearance.font, fontSize: 40)
     // Central label
     centralLabel = SKLabelNode()
     centralLabel.name = "centralLabel"
-    centralLabel.position = CGPoint(x: fullFrame.midX, y: fullFrame.midY)
+    centralLabel.position = CGPoint(x: gameFrame.midX, y: gameFrame.midY)
     centralLabel.horizontalAlignmentMode = .center
     centralLabel.verticalAlignmentMode = .center
     centralLabel.isHidden = true
@@ -62,7 +62,7 @@ class TutorialScene: GameTutorialScene {
     // Instructions and subinstructions at the top
     instructionLabel = SKLabelNode()
     instructionLabel.name = "instructionLabel"
-    instructionLabel.position = CGPoint(x: fullFrame.midX, y: fullFrame.maxY - attributes.fontSize)
+    instructionLabel.position = CGPoint(x: gameFrame.midX, y: gameFrame.maxY - attributes.fontSize)
     instructionLabel.isHidden = true
     tutorialStuff.addChild(instructionLabel)
     toDoLabel = SKLabelNode()
