@@ -162,7 +162,7 @@ class SceneAudio {
         playerNode.play()
       }
       // Set the muted state based on the user's preference
-      muted = UserData.audioIsMuted.value
+      level = UserData.audioLevel.value
     } catch {
       logging("Cannot start audio engine, \(error.localizedDescription)")
     }
@@ -170,10 +170,10 @@ class SceneAudio {
 
   // MARK: - Audio control
 
-  /// Is the scene's audio all muted?
-  var muted: Bool {
-    get { audioEngine.mainMixerNode.outputVolume == 0 }
-    set { audioEngine.mainMixerNode.outputVolume = (newValue ? 0 : 1) }
+  /// The audio level, 0 (off) - 3 (full)
+  var level: Int {
+    get { Int(audioEngine.mainMixerNode.outputVolume * 3) }
+    set { audioEngine.mainMixerNode.outputVolume = Float(newValue) / 3 }
   }
 
   /// Pause all sounds
@@ -224,7 +224,7 @@ class SceneAudio {
   func soundEffect(_ sound: SoundEffect, at position: CGPoint = .zero) {
     // Don't bother doing anything if the audio didn't initialize correctly or if the
     // scene is muted
-    guard audioEngine.isRunning, !muted else { return }
+    guard audioEngine.isRunning, level > 0 else { return }
     // Grab the buffer for the effect and schedule it on the next player
     let buffer = Globals.sounds.cachedAudioBuffer(sound)
     let playerNode = playerNodes[nextPlayerNode]

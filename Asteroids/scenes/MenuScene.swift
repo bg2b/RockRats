@@ -229,8 +229,8 @@ class MenuScene: BasicScene {
     // half-touched state when we come back to the menu.  So be sure to clear the
     // state of all the buttons.
     buttons.forEach { $0.resetAndCancelConfirmation() }
-    // The player may have turned audio on or off in the settings
-    audio.muted = UserData.audioIsMuted.value
+    // The player may have adjusted the audio level in the settings
+    audio.level = UserData.audioLevel.value
     // Reset the number of things the player has tapped; they have to do the full
     // number in one go to get the `tooMuchTime` achievement.
     bubblesPopped = 0

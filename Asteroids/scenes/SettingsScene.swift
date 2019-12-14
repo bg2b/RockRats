@@ -55,8 +55,9 @@ class SettingsScene: BasicScene {
     nextButtonX += buttonSize.width + buttonSpacing
     bottomButtons.addChild(menuButton)
     // Sound on/off
-    muteButton = Button(imagesNamed: ["soundon", "soundoff"], imageColor: AppAppearance.buttonColor, size: buttonSize)
-    muteButton.selectedValue = (UserData.audioIsMuted.value ? 1 : 0)
+    muteButton = Button(imagesNamed: ["soundnone", "soundsmall", "soundmed", "soundbig"],
+                        imageColor: AppAppearance.buttonColor, size: buttonSize)
+    muteButton.selectedValue = UserData.audioLevel.value
     muteButton.action = { [unowned self] in self.toggleSound() }
     muteButton.position = CGPoint(x: nextButtonX, y: 0)
     nextButtonX += buttonSize.width + buttonSpacing
@@ -200,20 +201,15 @@ class SettingsScene: BasicScene {
     showWhenQuiescent(Globals.menuScene)
   }
 
-  /// Turn the sound on and off
+  /// Adjust the sound volume
   ///
-  /// Scenes read userDefaults.audioIsMuted when they're constructed.  The main menu
-  /// is special though, since it's only made once.  Its didMove(to:) will switch the
+  /// Scenes read userDefaults.audioLevel when they're constructed.  The main menu is
+  /// special though, since it's only made once.  Its didMove(to:) will switch the
   /// sound as appropriate.
   func toggleSound() {
-    if muteButton.selectedValue == 1 {
-      // Muted
-      audio.muted = true
-      UserData.audioIsMuted.value = true
-    } else {
-      audio.muted = false
-      UserData.audioIsMuted.value = false
-    }
+    UserData.audioLevel.value = muteButton.selectedValue
+    audio.level = muteButton.selectedValue
+    audio.soundEffect(.playerShot)
   }
 
   /// Toggle retro/modern appearance

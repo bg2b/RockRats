@@ -138,6 +138,7 @@ class Button: SKNode {
     set {
       decorations.forEach { $0.isHidden = true }
       decorations[newValue].isHidden = false
+      currentDecoration = newValue
     }
   }
 

@@ -193,8 +193,8 @@ struct HighScores {
 class UserData {
   /// `true` when the intro scene has been played on this device
   static var hasDoneIntro = DefaultsValue<Bool>(name: "hasDoneIntro", defaultValue: false)
-  /// Audio off/on preference
-  static var audioIsMuted = DefaultsValue<Bool>(name: "audioIsMuted", defaultValue: false)
+  /// Audio volume preference
+  static var audioLevel = DefaultsValue<Int>(name: "audioLevel", defaultValue: 2)
   /// Retro mode preference (ignored if Game Center is disabled or the player does
   /// not have the blastFromThePast achievement)
   static var retroMode = DefaultsValue<Bool>(name: "retroMode", defaultValue: false)
