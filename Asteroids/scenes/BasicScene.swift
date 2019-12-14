@@ -122,6 +122,8 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   var audio: SceneAudio!
   /// All the asteroids (some may be off-screen still)
   var asteroids = Set<SKSpriteNode>()
+  /// When `false`, getting an asteroid with the Little Prince is not allowed
+  var littlePrinceAllowed = true
   /// All the UFOs (some may be off-screen still)
   var ufos = Set<UFO>()
   /// Becomes `true` when getting ready to switch scenes; see `beginSceneSwitch`
@@ -425,8 +427,11 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     var name = "meteor\(size)\(type)"
     // For amusement, if the player has gotten the Little Prince achievement, then on
     // rare occasions spawn an asteroid with the Prince and his friends on it.
-    if size == "huge" && type == numTypes && Int.random(in: 0 ..< 100) == 0 && achievementIsCompleted(.littlePrince) {
+    if littlePrinceAllowed && size == "huge" && type == numTypes &&
+      Int.random(in: 0 ..< 100) == 0 && achievementIsCompleted(.littlePrince) {
       name = "meteorhugeprince"
+      // Don't allow another until liitlePrinceAllowed is reset
+      littlePrinceAllowed = false
     }
     let asteroid = Globals.spriteCache.findSprite(imageNamed: name) { sprite in
       let texture: SKTexture

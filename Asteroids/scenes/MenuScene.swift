@@ -219,7 +219,6 @@ class MenuScene: BasicScene {
         // they stick around long enough, then poke them to leave a review.
         run(.sequence([.wait(forDuration: 2), .run { self.askForReview() }]), withKey: "askForReview")
       }
-      assert(shotsToFire.isEmpty)
     }
     // Any earlier scene transition that the menu initiated has obviously finished,
     // so reset the switching flag
@@ -240,6 +239,8 @@ class MenuScene: BasicScene {
     getRidOfUFOs = false
     Globals.gameConfig = loadGameConfig(forMode: "menu")
     Globals.gameConfig.currentWaveNumber = 1
+    // Allow spawning of a Little Prince asteroid
+    littlePrinceAllowed = true
     // Kick off the regular spawning actions for UFOs and asteroids
     wait(for: 1, then: spawnAsteroids)
     // The first time into the menu there won't be any asteroids, so wait longer

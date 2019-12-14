@@ -341,6 +341,9 @@ class GameScene: GameTutorialScene {
     if Globals.gameConfig.waveNumber() == 11 {
       reportAchievement(achievement: .spinalTap)
     }
+    // One Little Prince asteroid is allowed per wave; if one spawns, the
+    // littlePrinceAllowed flag will be cleared so that another can't
+    littlePrinceAllowed = true
     let numAsteroids = Globals.gameConfig.numAsteroids()
     for _ in 1...numAsteroids {
       spawnAsteroid(size: "huge")
