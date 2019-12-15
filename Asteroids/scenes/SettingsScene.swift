@@ -105,7 +105,7 @@ class SettingsScene: BasicScene {
     let resetButtonImages = ["resetscores", "resetgamecenter"]
     var resetButtons = [Button]()
     for resetImage in resetButtonImages {
-      let resetButton = Button(imageNamed: resetImage, imageColor: .white, size: buttonSize)
+      let resetButton = Button(imageNamed: resetImage, imageColor: AppAppearance.dangerButtonColor, size: buttonSize)
       resetButton.name = resetImage + "Button"
       resetButton.requiresConfirmation(SettingsScene.stackedLabels(["Confirm", "Reset"],
                                                                    fontColor: AppAppearance.dangerButtonColor))

@@ -258,7 +258,7 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     let menuButton = Button(imageNamed: "homebutton", imageColor: AppAppearance.buttonColor, size: buttonSize)
     menuButton.action = { [unowned self] in self.mainMenu() }
     // Go the the Game Center interface
-    gcButton = Button(imageNamed: "gamecenterbutton", imageColor: .white, size: buttonSize)
+    gcButton = Button(imageNamed: "gamecenter", imageColor: AppAppearance.yellow, size: buttonSize)
     gcButton.action = { [unowned self] in self.showGameCenter() }
     // The Game Center button might need to be disabled
     if !Globals.gcInterface.enabled {
