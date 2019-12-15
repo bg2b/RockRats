@@ -313,13 +313,13 @@ class GameCenterInterface {
       }
     }
     // If the app was running and the player logged in, but then they put it in the
-    // background, go off and change their Game Center display name, and then come
-    // back and play a game, the display name in the high score list (which is coming
-    // from the userDefaults stuff) might not be updated with the changed name.
-    // Reporting the score gives us the updated display name for the local player
-    // though, so I may as well ensure that it's recorded here.  The high score list
-    // is built after saveScore, so it'll get the new name.
-    savePlayerName(primaryPlayerID, playerName: GKLocalPlayer.local.displayName)
+    // background, go off and change their Game Center name, and then come back and
+    // play a game, the name in the high score list (which is coming from the
+    // UserDefaults stuff) might not be updated with the changed name.  Reporting the
+    // score gives us the updated name for the local player though, so I may as well
+    // ensure that it's recorded here.  The high score list is built after saveScore,
+    // so it'll get the new name.
+    savePlayerName(primaryPlayerID, playerName: GKLocalPlayer.local.alias)
     return GameScore(score: gcScore)
   }
 
