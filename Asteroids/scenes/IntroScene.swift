@@ -108,7 +108,7 @@ class IntroScene: BasicScene {
       Subject: @Intro Briefing@
       """
       introduction = """
-      It's tough working in the belt. Whether you're from Luna City, Mars Colony, \
+      It's tough working in @the belt@. Whether you're from Luna City, Mars Colony, \
       or good old Terra, out here you're a @long way@ from home. Cleaning the fields \
       from mining debris is a @dangerous@ job; the pay's good for a reason... \
       You're here because you're a @hotshot@ pilot, and Central suspects \
