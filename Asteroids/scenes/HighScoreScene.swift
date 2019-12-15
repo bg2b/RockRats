@@ -310,7 +310,7 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
         }
       }
       var globalScores = [GameScore]()
-      for rank in ranks {
+      for rank in 1 ... gc.leaderboardScores.count {
         // This style keeps the Game Center names.
         // let globalScore = GameScore(score: gc.leaderboardScores[rank - 1])
         //
@@ -324,7 +324,7 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
         // their name, but it serves them right...)
         let globalScore = GameScore(score: gc.leaderboardScores[rank - 1], displayName: "Weekly #\(rank)")
         globalScores.append(globalScore)
-        if (highScores.firstIndex { sameScore($0, globalScore) }) == nil {
+        if ranks.contains(rank) && (highScores.firstIndex { sameScore($0, globalScore) }) == nil {
           highScores.append(globalScore)
         }
       }
