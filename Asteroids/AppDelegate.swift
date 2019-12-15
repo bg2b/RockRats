@@ -21,6 +21,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     logging("application(didFinishLaunchingWithOoptions:)")
     // Set up iCloud key-value store
     NSUbiquitousKeyValueStore.default.synchronize()
+    if #available(iOS 13, *) {
+      // Dark mode looks better with the app's theme for iOS-provided view
+      // controllers (e.g., from Game Center or Safari services).  Unfortunately the
+      // review controller doesn't work with this yet, but I can't find any way to
+      // force that one to show dark mode.
+      window?.overrideUserInterfaceStyle = .dark
+    }
     return true
   }
 
