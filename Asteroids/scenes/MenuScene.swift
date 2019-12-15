@@ -77,25 +77,19 @@ class MenuScene: BasicScene {
     // Buttons at the bottom
     let buttonSize = CGSize(width: 150, height: 100)
     let buttonSpacing = CGFloat(20)
-    let buttonY = fullFrame.minY + buttonSize.height + buttonSpacing
-    // New gamee
+    // New game
     let playButton = Button(imageNamed: "playbutton", imageColor: AppAppearance.playButtonColor, size: buttonSize)
-    playButton.position = CGPoint(x: fullFrame.midX, y: buttonY)
     playButton.action = { [unowned self] in self.startGame() }
-    buttons.append(playButton)
-    menu.addChild(playButton)
     // High scores
     let highScoresButton = Button(imageNamed: "highscoresbutton", imageColor: AppAppearance.buttonColor, size: buttonSize)
-    highScoresButton.position = CGPoint(x: playButton.position.x + buttonSize.width + buttonSpacing, y: playButton.position.y)
     highScoresButton.action = { [unowned self] in self.showHighScores() }
-    buttons.append(highScoresButton)
-    menu.addChild(highScoresButton)
     // Settings
     let settingsButton = Button(imageNamed: "settingsbutton", imageColor: AppAppearance.buttonColor, size: buttonSize)
-    settingsButton.position = CGPoint(x: playButton.position.x - buttonSize.width - buttonSpacing, y: playButton.position.y)
     settingsButton.action = { [unowned self] in self.showSettings() }
-    buttons.append(settingsButton)
-    menu.addChild(settingsButton)
+    let bottomHstack = horizontalStack(nodes: [settingsButton, playButton, highScoresButton], minSpacing: buttonSpacing)
+    bottomHstack.position = CGPoint(x: bottomHstack.position.x,
+                                    y: fullFrame.minY + buttonSize.height + buttonSpacing - bottomHstack.position.y)
+    menu.addChild(bottomHstack)
   }
 
   /// Create a new menu scene

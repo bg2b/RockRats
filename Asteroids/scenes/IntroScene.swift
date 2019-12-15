@@ -68,7 +68,7 @@ class IntroScene: BasicScene {
     intro.addChild(introLabel)
     introLabel.isHidden = true
     // The button that ends the scene
-    doneButton = Button(forText: (!conclusion ? "Find Out" : "Acknowledge"), fontSize: 50, size: CGSize(width: 350, height: 50))
+    doneButton = Button(forText: (!conclusion ? "Find Out" : "Acknowledge"), fontSize: 50, size: CGSize(width: 100, height: 50))
     doneButton.position = CGPoint(x: fullFrame.midX, y: 0)
     doneButton.action = { [unowned self] in self.done() }
     intro.addChild(doneButton)

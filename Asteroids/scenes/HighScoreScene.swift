@@ -251,20 +251,14 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     // Buttons at the bottom
     let buttonSize = CGSize(width: 150, height: 100)
     let buttonSpacing = CGFloat(20)
-    let buttonY = fullFrame.minY + buttonSize.height + buttonSpacing
     // New game
     let playButton = Button(imageNamed: "playbutton", imageColor: AppAppearance.playButtonColor, size: buttonSize)
-    playButton.position = CGPoint(x: fullFrame.midX, y: buttonY)
     playButton.action = { [unowned self] in self.startGame() }
-    scores.addChild(playButton)
     // Main menu
     let menuButton = Button(imageNamed: "homebutton", imageColor: AppAppearance.buttonColor, size: buttonSize)
-    menuButton.position = CGPoint(x: playButton.position.x - buttonSize.width - buttonSpacing, y: playButton.position.y)
     menuButton.action = { [unowned self] in self.mainMenu() }
-    scores.addChild(menuButton)
     // Go the the Game Center interface
     gcButton = Button(imageNamed: "gamecenterbutton", imageColor: .white, size: buttonSize)
-    gcButton.position = CGPoint(x: playButton.position.x + buttonSize.width + buttonSpacing, y: playButton.position.y)
     gcButton.action = { [unowned self] in self.showGameCenter() }
     // The Game Center button might need to be disabled
     if !Globals.gcInterface.enabled {
@@ -273,10 +267,13 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     // If the Game Center state changes, I have to change the button's
     // enabled/disabled state too.
     NotificationCenter.default.addObserver(self, selector: #selector(gcStateChanged), name: .authenticationChanged, object: nil)
-    scores.addChild(gcButton)
+    let bottomHstack = horizontalStack(nodes: [menuButton, playButton, gcButton], minSpacing: buttonSpacing)
+    bottomHstack.position = CGPoint(x: bottomHstack.position.x,
+                                    y: fullFrame.minY + buttonSize.height + buttonSpacing - bottomHstack.position.y)
+    scores.addChild(bottomHstack)
     // The actual high scores
     let highScores = highScoreLines(highScores, highlighted: highlighted)
-    let wantedMidY = 0.5 * (title.frame.minY + playButton.calculateAccumulatedFrame().maxY)
+    let wantedMidY = 0.5 * (title.frame.minY + bottomHstack.calculateAccumulatedFrame().maxY)
     // Center highScores vertically at wantedMidY
     highScores.position = .zero
     let highScoresY = round(wantedMidY - highScores.calculateAccumulatedFrame().midY)

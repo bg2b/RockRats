@@ -34,22 +34,19 @@ class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
     // Buttons at the bottom
     let buttonSize = CGSize(width: 150, height: 100)
     let buttonSpacing = CGFloat(20)
-    let buttonY = fullFrame.minY + buttonSize.height + buttonSpacing
     // New game
     let playButton = Button(imageNamed: "playbutton", imageColor: AppAppearance.playButtonColor, size: buttonSize)
-    playButton.position = CGPoint(x: fullFrame.midX, y: buttonY)
     playButton.action = { [unowned self] in self.startGame() }
-    credits.addChild(playButton)
     // Main menu
     let menuButton = Button(imageNamed: "homebutton", imageColor: AppAppearance.buttonColor, size: buttonSize)
-    menuButton.position = CGPoint(x: playButton.position.x - buttonSize.width - buttonSpacing, y: playButton.position.y)
     menuButton.action = { [unowned self] in self.mainMenu() }
-    credits.addChild(menuButton)
     // Settings screen
     let settingsButton = Button(imageNamed: "settingsbutton", imageColor: AppAppearance.buttonColor, size: buttonSize)
-    settingsButton.position = CGPoint(x: playButton.position.x + buttonSize.width + buttonSpacing, y: playButton.position.y)
     settingsButton.action = { [unowned self] in self.showSettings() }
-    credits.addChild(settingsButton)
+    let bottomHstack = horizontalStack(nodes: [menuButton, playButton, settingsButton], minSpacing: buttonSpacing)
+    bottomHstack.position = CGPoint(x: bottomHstack.position.x,
+                                    y: fullFrame.minY + buttonSize.height + buttonSpacing - bottomHstack.position.y)
+    credits.addChild(bottomHstack)
     // The actual credits in the center
     let creditsLabels = SKNode()
     creditsLabels.name = "creditsLabels"
@@ -87,7 +84,7 @@ class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
       creditsLabels.addChild(Touchable(linkLabel) { [unowned self] in self.showLink(link) })
       nextLabelY -= linkLabel.frame.height + 0.75 * attributes.fontSize
     }
-    let wantedMidY = 0.5 * (title.frame.minY + playButton.calculateAccumulatedFrame().maxY)
+    let wantedMidY = 0.5 * (title.frame.minY + bottomHstack.calculateAccumulatedFrame().maxY)
     // Center credits vertically at wantedMidY
     creditsLabels.position = .zero
     let creditsFrame = creditsLabels.calculateAccumulatedFrame()
