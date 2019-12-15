@@ -13,9 +13,9 @@ import SpriteKit
 /// Things common to game and tutorial (but not in the BasicScene superclass)
 ///
 /// This scene includes the player's ship and controls, the remaining ships display,
-/// and the energy reserve display.  Also handles game pausing and resuming/quitting,
-/// and the special retro mode (though retro mode never gets enabled in the
-/// tutorial).
+/// and the energy reserve display.  It also handles game pausing and
+/// resuming/quitting, and the special retro mode (though retro mode never gets
+/// enabled in the tutorial).
 class GameTutorialScene: BasicScene {
   /// Set to true when the pause button is pressed
   var gamePaused = false
@@ -51,26 +51,26 @@ class GameTutorialScene: BasicScene {
   // MARK: - Initialization
 
   /// Build information and control interface elements that are common to the game
-  /// and the tutorial.
+  /// and the tutorial
   func initInfo() {
     // All of the stuff in here sits above the playfield, at z == LevelZs.info.
     let info = SKNode()
     info.name = "info"
     info.setZ(.info)
     // info sits under gameArea in the hierarchy, so it's subject to whatever sort of
-    // blurring effect is used when the game is paused.
+    // blurring effect is used when the game is paused
     gameArea.addChild(info)
-    // Remaining ships in upper left.
+    // Remaining ships in upper left
     livesDisplay = ReservesDisplay()
     livesDisplay.position = CGPoint(x: gameFrame.minX + 20, y: gameFrame.maxY - 20)
     info.addChild(livesDisplay)
-    // Energy reserves in upper right.
+    // Energy reserves in upper right
     energyBar = EnergyBar(maxLength: 20)
     info.addChild(energyBar)
     energyBar.position = CGPoint(x: gameFrame.maxX - 20, y: gameFrame.maxY - 20)
     let pauseControls = SKNode()
     // The pause/continue/quit controls are directly under the scene in the hierarchy
-    // and _not_ under gameArea, so they don't get blurred when the game pauses.
+    // and _not_ under gameArea, so they don't get blurred when the game pauses
     addChild(pauseControls)
     pauseControls.name = "pauseControls"
     pauseControls.setZ(.info)
@@ -121,18 +121,18 @@ class GameTutorialScene: BasicScene {
   ///   - touches: The new touches
   ///   - event: The event the touches belong to
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-    // Ignore new touches when the game is paused.
+    // Ignore new touches when the game is paused
     guard !gamePaused else { return }
     for touch in touches {
       let location = touch.location(in: self)
       if location.x * (UserData.joystickOnLeft.value ? 1 : -1) > fullFrame.midX {
-        // Touches on this side are for firing or warping.
+        // Touches on this side are for firing or warping
         fireOrWarpTouches[touch] = location
       } else if joystickTouch == nil {
-        // Touches on this side are for the (virtual) joystick.
+        // Touches on this side are for the (virtual) joystick
         joystickLocation = location
         joystickTouch = touch
-      } // Else the joystick is already active, so ignore the touch.
+      } // Else the joystick is already active, so ignore the touch
     }
   }
 
@@ -156,11 +156,11 @@ class GameTutorialScene: BasicScene {
     guard !gamePaused else { return }
     for touch in touches {
       if touch == joystickTouch {
-        // This is a movement of the joystick.
+        // This is a movement of the joystick
         let location = touch.location(in: self)
         let delta = (location - joystickLocation).rotate(by: -.pi / 2)
         let offset = delta.length()
-        // Measure the movement in terms of a certain physical distance, so convert to points.
+        // Measure the movement in terms of a certain physical distance, so convert to points
         joystickDirection = delta.scale(by: min(offset / (Globals.ptsToGameUnits * 0.5 * 100), 1.0) / offset)
       } else {
         guard let startLocation = fireOrWarpTouches[touch] else { continue }
@@ -179,12 +179,12 @@ class GameTutorialScene: BasicScene {
   ///   - touches: The touches that finished
   ///   - event: The event the touches belong to
   override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-    // Don't guard at the beginning with gamePaused.  A touch that started while the
+    // Don't guard at the beginning with gamePaused!  A touch that started while the
     // game was active should still be removed from what I'm tracking if the player
     // pauses the game and then ends the touch.
     for touch in touches {
       if touch == joystickTouch {
-        // Reset the joystick as soon as they lift their finger.
+        // Reset the joystick as soon as they lift their finger
         joystickDirection = .zero
         joystickTouch = nil
       } else {
@@ -212,11 +212,11 @@ class GameTutorialScene: BasicScene {
   // MARK: - Pause, continue, and quit
 
   /// Enforce pausing when gamePaused is true so that SpriteKit's
-  /// auto-pausing/unpausing doesn't mess us up.
+  /// auto-pausing/unpausing doesn't mess us up
   override var forcePause: Bool { gamePaused }
   
   /// Pause the game, blur the playing area, hide the pause button, show the
-  /// continue/quit buttons.
+  /// continue/quit buttons
   func doPause() {
     pauseButton.isHidden = true
     continueButton.isHidden = false
@@ -227,7 +227,7 @@ class GameTutorialScene: BasicScene {
     audio.pause()
   }
 
-  /// Undo the effects of doPause and resume play.
+  /// Undo the effects of doPause and resume play
   func doContinue() {
     pauseButton.isHidden = false
     continueButton.isHidden = true
@@ -238,7 +238,7 @@ class GameTutorialScene: BasicScene {
     audio.resume()
   }
 
-  /// Abort the game/tutorial immediately and go back to the main menu.
+  /// Abort the game/tutorial immediately and go back to the main menu
   func doQuit() {
     guard beginSceneSwitch() else { fatalError("doQuit in GameTutorialScene found scene switch in progress???") }
     audio.stop()
@@ -272,13 +272,13 @@ class GameTutorialScene: BasicScene {
   // MARK: - Spawning
 
   /// Determine if a potential spawn point is safe from an asteroid track, accounting
-  /// for possible wrapping.
+  /// for possible wrapping
   /// - Parameters:
   ///   - point: Candidate spawn
   ///   - pathStart: Start of asteroid track
   ///   - pathEnd: End of asteroid track
   ///   - clearance: How much clearance is needed between the point and the track
-  /// - Returns: true if there's sufficient clearance from the track
+  /// - Returns: `true` if there's sufficient clearance from the track
   func isSafe(point: CGPoint, pathStart: CGPoint, pathEnd: CGPoint, clearance: CGFloat) -> Bool {
     // Method: generate "image" points in wrapped positions and make sure that all
     // clear the segment.  This seems easier than trying to simulate the wrapping of
@@ -301,7 +301,7 @@ class GameTutorialScene: BasicScene {
   }
 
   /// Determine if a potential spawn point is safe for a given amount of time,
-  /// accounting for asteroid wrapping.
+  /// accounting for asteroid wrapping
   /// - Parameters:
   ///   - point: Candidate spawn
   ///   - time: Desired amount of safe time
@@ -339,8 +339,11 @@ class GameTutorialScene: BasicScene {
 
   // MARK: - Player lasers
 
-  /// Handle the player's request to shoot.  Doesn't actually shoot if they have
-  /// insufficient energy or too many shots in-flight.
+  /// Handle the player's request to shoot
+  ///
+  /// Doesn't actually shoot if they have insufficient energy or too many shots
+  /// in-flight
+  ///
   /// - Returns: `true` if a shot was fired
   func fireLaser() -> Bool {
     guard player.canShoot(energyBar) else { return false }
@@ -367,7 +370,7 @@ class GameTutorialScene: BasicScene {
   }
 
   /// Remove a laser; recycles the sprite and tells the player's ship so that it can
-  /// update its shots-in-flight count.
+  /// update its shots-in-flight count
   func removeLaser(_ laser: SKSpriteNode) {
     assert(laser.name == "lasersmall_green")
     Globals.spriteCache.recycleSprite(laser)
@@ -425,8 +428,9 @@ class GameTutorialScene: BasicScene {
     player.setAppearance(to: enabled ? .retro : .modern)
   }
 
-  /// Handle the player's jump request.  They still need sufficient energy or they're
-  /// not going anywhere.
+  /// Handle the player's jump request
+  ///
+  /// They still need sufficient energy or they're not going anywhere
   func hyperspaceJump() {
     guard player.canJump(energyBar) else { return }
     // I have the achievement checking and retro effect enabling/disabling here just
@@ -436,19 +440,19 @@ class GameTutorialScene: BasicScene {
     let backToTheFuture = (score % 100 == 88)
     addToPlayfield(player.warpOut())
     audio.soundEffect(.warpOut, at: player.position)
-    // Don't stick them at the very edge of the screen since it looks odd.
+    // Don't stick them at the very edge of the screen since it looks odd
     let jumpRegion = gameFrame.insetBy(dx: 0.05 * gameFrame.width, dy: 0.05 * gameFrame.height)
     let jumpPosition = CGPoint(x: .random(in: jumpRegion.minX ... jumpRegion.maxX),
                                y: .random(in: jumpRegion.minY ... jumpRegion.maxY))
     wait(for: 1) {
       if blastFromThePast && !self.shouldEnableEffects {
         // Warping at a score ending in 79 (to honor Asteroid's 1979 release) turns
-        // on retro mode.
+        // on retro mode
         self.setRetroMode(enabled: true)
         reportAchievement(achievement: .blastFromThePast)
       } else if backToTheFuture && self.shouldEnableEffects {
         // Warping at a score ending in 88 (MPH) when in retro mode deactivates retro
-        // and goes Back to the Future.
+        // and goes Back to the Future
         self.setRetroMode(enabled: false)
         reportAchievement(achievement: .backToTheFuture)
       }
