@@ -55,7 +55,7 @@ struct GameScore: Equatable {
     playerID = score.player.primaryPlayerID
     // I'm deliberately using alias instead of displayName because I don't like iOS
     // 12's "Me".
-    // Originalyy I was using the displayName and filtering it like this
+    // Originally I was using the displayName and filtering it like this
     //   String(score.player.displayName.filter { $0.isASCII })
     // with the filtering necessary to get rid of iOS 12's quote marks.  Should
     // filtering still be used?
