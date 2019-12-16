@@ -23,6 +23,7 @@ enum SoundEffect: String, CaseIterable {
   case asteroidSmallHit = "meteorsmall_hit"
   case warpIn = "warpin"
   case warpOut = "warpout"
+  case warpFail = "warpfail"
   case extraLife = "extra_life"
   case heartbeatHigh = "heartbeat1"
   case heartbeatLow = "heartbeat2"

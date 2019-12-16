@@ -25,6 +25,7 @@
 		FD0C070F22D8925E00F19A55 /* ship_red@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD0C070722D8925E00F19A55 /* ship_red@2x.png */; };
 		FD0E046B23A3B9E600376E76 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FD0E046A23A3B9E600376E76 /* StoreKit.framework */; };
 		FD0E046D23A560F000376E76 /* Alignment.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0E046C23A560F000376E76 /* Alignment.swift */; };
+		FD0E046F23A71FE500376E76 /* warpfail.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD0E046E23A71FE500376E76 /* warpfail.wav */; };
 		FD158A21238BF4CA00180EC9 /* TextureBitmap.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD158A20238BF4CA00180EC9 /* TextureBitmap.swift */; };
 		FD158A23238F6A6C00180EC9 /* AttributedText.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD158A22238F6A6C00180EC9 /* AttributedText.swift */; };
 		FD158A25238FF9EA00180EC9 /* Touchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD158A24238FF9EA00180EC9 /* Touchable.swift */; };
@@ -138,6 +139,7 @@
 		FD0C070722D8925E00F19A55 /* ship_red@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ship_red@2x.png"; sourceTree = "<group>"; };
 		FD0E046A23A3B9E600376E76 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		FD0E046C23A560F000376E76 /* Alignment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alignment.swift; sourceTree = "<group>"; };
+		FD0E046E23A71FE500376E76 /* warpfail.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = warpfail.wav; sourceTree = "<group>"; };
 		FD158A20238BF4CA00180EC9 /* TextureBitmap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureBitmap.swift; sourceTree = "<group>"; };
 		FD158A22238F6A6C00180EC9 /* AttributedText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttributedText.swift; sourceTree = "<group>"; };
 		FD158A24238FF9EA00180EC9 /* Touchable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Touchable.swift; sourceTree = "<group>"; };
@@ -302,6 +304,7 @@
 				FD4D53D423085AF800718938 /* player_engines.wav */,
 				FD4D53C423080D3600718938 /* player_explosion.wav */,
 				FDD44F962338C60700C13609 /* transmission.wav */,
+				FD0E046E23A71FE500376E76 /* warpfail.wav */,
 				FDA43B29230C2A1D00A29347 /* warpin.wav */,
 				FDA43B27230C1DC600A29347 /* warpout.wav */,
 				FDA43B1D2308A1A600A29347 /* extra_life.wav */,
@@ -575,6 +578,7 @@
 				FD4D53D0230843C900718938 /* meteormed_hit.wav in Resources */,
 				FD28DB5922DFFA87009446A2 /* ufo_blue@2x.png in Resources */,
 				FD53167222DAA8EA00F09E57 /* fire3@2x.png in Resources */,
+				FD0E046F23A71FE500376E76 /* warpfail.wav in Resources */,
 				FDE04B2922D5FEA30011A529 /* star2@2x.png in Resources */,
 				FD7AE4AD237C48CC00CAF082 /* asteroids.ttf in Resources */,
 				FDA43B28230C1DC600A29347 /* warpout.wav in Resources */,

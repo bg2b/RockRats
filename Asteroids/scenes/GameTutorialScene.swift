@@ -432,7 +432,10 @@ class GameTutorialScene: BasicScene {
   ///
   /// They still need sufficient energy or they're not going anywhere
   func hyperspaceJump() {
-    guard player.canJump(energyBar) else { return }
+    guard player.canJump(energyBar) else {
+      audio.soundEffect(.warpFail, at: player.position)
+      return
+    }
     // I have the achievement checking and retro effect enabling/disabling here just
     // because it's convenient.  The tutorial always has score == 0, so those parts
     // are not active in the tutorial.
