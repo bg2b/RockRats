@@ -56,9 +56,12 @@ class GameScene: GameTutorialScene {
   /// A fraction that multiples meanUFOTime, used to modulate the spawning rate
   /// according to circumstances
   var ufoSpawningRate = 0.0
-  /// Increments just after the player kills a UFO, then decrements a couple of
+  /// Becomes `true` just after the player kills a UFO, then `false` a couple of
   /// seconds later; used to hold off a ready-to-spawn UFO for just a bit
-  var pauseUFOSpawning = 0
+  var pauseUFOSpawning = false
+  /// Becomes `true` after a UFO spawns and set back to `false` after about half a
+  /// period; used to delay spawning when that would lead to multiple UFOs at once
+  var pauseMultiSpawn = false
   /// How many times UFOs have fired a shot, used by the `redShirt` achievement
   var timesUFOsShot = 0
   /// The label in the middle of the screen that displays wave numbers or Gave Over
@@ -375,19 +378,23 @@ class GameScene: GameTutorialScene {
   /// a short time and then try to spawn again.  Once a UFO successfully spawns,
   /// increase the spawning rate and call `spawnUFOs` again.
   func maybeSpawnUFO() {
-    if player.parent == nil || ufos.count >= Globals.gameConfig.value(for: \.maxUFOs) || pauseUFOSpawning > 0 {
+    if player.parent == nil || ufos.count >= Globals.gameConfig.value(for: \.maxUFOs) ||
+      pauseUFOSpawning || (pauseMultiSpawn && !ufos.isEmpty) {
       // Don't spawn at this moment; either the player is dead/warping, or there are
-      // already plenty of UFOs, or they just killed a UFO.  Wait a bit and then try
-      // again.
+      // already plenty of UFOs, or they just killed a UFO, or the spawn would give
+      // multiple UFOs and it hasn't been very long since the previous spawn.  Wait a
+      // bit and then try again.
       logging("Cannot spawn UFO at the moment, waiting")
       run(.wait(for: 2, then: maybeSpawnUFO), withKey: "spawnUFOs")
     } else {
       // Do the spawn
       spawnUFO(ufo: UFO(brothersKilled: ufosToAvenge, audio: audio))
       numberOfUFOsThisWave += 1
-      // Once a UFO spawns, don't be quite so eager to spawn a second
-      pauseUFOSpawning += 1
-      wait(for: 4) { self.pauseUFOSpawning -= 1 }
+      // Once a UFO spawns, don't be eager to spawn a second
+      pauseMultiSpawn = true
+      run(.sequence([.wait(forDuration: 0.5 * Globals.gameConfig.value(for: \.meanUFOTime)),
+                     .run { self.pauseMultiSpawn = false }]),
+          withKey: "multiSpawnDelay")
       if ufos.count == 2 {
         reportAchievement(achievement: .doubleTrouble)
       }
@@ -416,6 +423,8 @@ class GameScene: GameTutorialScene {
   /// Turn off UFO spawning (e.g., because the player died or a new wave is starting)
   func stopSpawningUFOs() {
     removeAction(forKey: "spawnUFOs")
+    removeAction(forKey: "multiSpawnDelay")
+    pauseMultiSpawn = false
     // Spawning rate zero means "don't spawn UFOs"
     ufoSpawningRate = 0
   }
@@ -601,8 +610,13 @@ class GameScene: GameTutorialScene {
     } else {
       ufosKilledWithoutDying += 1
       ufosToAvenge += 1
-      pauseUFOSpawning += 1
-      wait(for: 2) { self.pauseUFOSpawning -= 1 }
+      pauseUFOSpawning = true
+      wait(for: 2) { self.pauseUFOSpawning = false }
+      if ufos.isEmpty {
+        // No need to worry about spawning multiple UFOs anymore
+        removeAction(forKey: "multiSpawnDelay")
+        pauseMultiSpawn = false
+      }
       if ufosKilledWithoutDying == 12 {
         reportAchievement(achievement: .armedAndDangerous)
       }
