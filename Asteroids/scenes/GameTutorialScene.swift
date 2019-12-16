@@ -433,7 +433,10 @@ class GameTutorialScene: BasicScene {
   /// They still need sufficient energy or they're not going anywhere
   func hyperspaceJump() {
     guard player.canJump(energyBar) else {
-      audio.soundEffect(.warpFail, at: player.position)
+      if player.parent != nil {
+        // They didn't jump due to lack of energy
+        audio.soundEffect(.warpFail, at: player.position)
+      }
       return
     }
     // I have the achievement checking and retro effect enabling/disabling here just
