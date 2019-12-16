@@ -636,7 +636,7 @@ class GameScene: GameTutorialScene {
     }
     addToScore(ufoPoints(ufo))
     removeLaser(laser as! SKSpriteNode)
-    destroyUFO(ufo as! UFO)
+    destroyUFO(ufo as! UFO, collision: false)
   }
 
   /// A UFO shot the player
@@ -680,7 +680,7 @@ class GameScene: GameTutorialScene {
       reportAchievement(achievement: .leeroyJenkins)
     }
     addToScore(ufoPoints(ufo))
-    destroyUFO(ufo as! UFO)
+    destroyUFO(ufo as! UFO, collision: true)
     destroyPlayer()
   }
 

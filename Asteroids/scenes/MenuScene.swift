@@ -321,7 +321,7 @@ class MenuScene: BasicScene {
   /// The player touched a UFO
   /// - Parameter ufo: The UFO that they touched
   func touchedUFO(_ ufo: UFO) {
-    destroyUFO(ufo)
+    destroyUFO(ufo, collision: false)
     poppedSomething()
   }
 

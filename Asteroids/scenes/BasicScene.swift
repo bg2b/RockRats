@@ -808,15 +808,17 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// Requires a bit of care because UFOs may have actions scheduled when this gets
   /// called.
   ///
-  /// - Parameter ufo: The UFO to nuke
-  func destroyUFO(_ ufo: UFO) {
+  /// - Parameters:
+  ///   - ufo: The UFO to nuke
+  ///   - collision: `true` if this is the result of a ship-ship collision
+  func destroyUFO(_ ufo: UFO, collision: Bool) {
     // If the player was destroyed earlier, the UFO will have been scheduled for
     // warpOut.  But if it just got destroyed (by hitting an asteroid) I have to be
     // sure to cancel the warp.
     ufo.removeAction(forKey: "warpOut")
     removeUFO(ufo)
     audio.soundEffect(.ufoExplosion, at: ufo.position)
-    addToPlayfield(ufo.explode())
+    addToPlayfield(ufo.explode(collision: collision))
   }
 
   // MARK: - Contact handling
@@ -840,7 +842,9 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     // been launched before flagging a collision.
     guard ufo.requiredPhysicsBody().isDynamic else { return }
     splitAsteroid(asteroid as! SKSpriteNode)
-    destroyUFO(ufo as! UFO)
+    // This one doesn't count as a collision for UFO explosion purposes since the
+    // asteroid doesn't make a bunch of fragments
+    destroyUFO(ufo as! UFO, collision: false)
   }
 
   /// Handle a collision between two UFOs
@@ -853,8 +857,8 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     // been launched before flagging a collision.
     guard ufo1.requiredPhysicsBody().isDynamic else { return }
     guard ufo2.requiredPhysicsBody().isDynamic else { return }
-    destroyUFO(ufo1 as! UFO)
-    destroyUFO(ufo2 as! UFO)
+    destroyUFO(ufo1 as! UFO, collision: true)
+    destroyUFO(ufo2 as! UFO, collision: true)
   }
 
   /// Handle a contact notice from the physics engine for objects of a given type

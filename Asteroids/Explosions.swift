@@ -180,6 +180,21 @@ class ExplosionCache {
     explosions[ExplosionCacheKey(texture: texture, cuts: cuts)]!.append(explosion)
   }
 
+  /// Create explosions for the common stuff that will blow up
+  ///
+  /// This makes more copies of some things than are typically needed, and it's
+  /// possible for more to be needed in some circumstances, but explosions get
+  /// created dynamically if required so whatevs.
+  func preload() {
+    for cuts in 5 ... 6 {
+      for imageName in ["ufo_green", "ufo_blue", "ufo_red", "retroship", "ship_blue"] {
+        let texture = Globals.textureCache.findTexture(imageNamed: imageName)
+        let explosions = (0 ..< 2).map { _ in self.findOrMakeExplosion(texture: texture, cuts: cuts) }
+        explosions.forEach { doneWithExplosion($0, texture: texture, cuts: cuts) }
+      }
+    }
+  }
+
   /// Print some stats for debugging
   func stats() {
     logging("Explosion cache created \(created) explosions; \(recycled) are in the recycle bin")

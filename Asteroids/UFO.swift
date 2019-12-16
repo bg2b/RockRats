@@ -380,9 +380,16 @@ class UFO: SKNode {
 
   /// Make the UFO explode
   /// - Returns: An array of nodes to add to the playfield to animate the explosion
-  func explode() -> [SKNode] {
+  func explode(collision: Bool) -> [SKNode] {
     let velocity = requiredPhysicsBody().velocity
     cleanup()
-    return makeExplosion(texture: ufoTexture, angle: zRotation, velocity: velocity, at: position, duration: 2)
+    if collision {
+      // Two ships/UFOs collided.  Some older devices lag when using full resolution
+      // explosions in this case, but since the UFO debris is mixed up with the
+      // fragments of the other ship, lower resolution explosions look OK.
+      return makeExplosion(texture: ufoTexture, angle: zRotation, velocity: velocity, at: position, duration: 2, cuts: 5)
+    } else {
+      return makeExplosion(texture: ufoTexture, angle: zRotation, velocity: velocity, at: position, duration: 2)
+    }
   }
 }

@@ -26,6 +26,8 @@ class GameViewController: UIViewController {
       logging("\(Globals.ptsToGameUnits) game units per pt")
       // Make physics bodies for irregular shapes
       Globals.conformingPhysicsCache.preload()
+      // Make explosions
+      Globals.explosionCache.preload()
       // Build custom shaders for special effects
       precompileShaders()
       let size = CGSize(width: 768 * aspect, height: 768)
