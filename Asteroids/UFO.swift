@@ -84,6 +84,14 @@ func aim(at p: CGVector, targetVelocity v: CGVector, shotSpeed s: CGFloat) -> CG
   return aim(at: p.rotate(by: -theta), targetSpeed: v.length(), shotSpeed: s)
 }
 
+/// Bound a quantity from below, but without the kink of a hard min
+/// - Parameters:
+///   - d: The quantity to limit
+///   - minValue: The minimum value
+func smoothLimit(_ d: CGFloat, minValue: CGFloat) -> CGFloat {
+  return sqrt((d - minValue) * (d - minValue) + minValue) + d
+}
+
 // MARK: - UFO stuff
 
 /// UFOs shoot at the player, but maybe they're just misunderstood
@@ -223,7 +231,7 @@ class UFO: SKNode {
       }
       body.angularVelocity = copysign(.pi * 2, -body.angularVelocity)
     }
-    let ourRadius = 0.5 * size.diagonal()
+    let ourRadius = 0.5 * size.width
     let forceScale = Globals.gameConfig.value(for: \.ufoDodging)[typeIndex] * 1000
     let shotAnticipation = Globals.gameConfig.value(for: \.ufoShotAnticipation)[typeIndex]
     var totalForce = CGVector.zero
@@ -237,7 +245,7 @@ class UFO: SKNode {
     var potentialTarget: SKNode? = (player?.parent != nil ? player : nil)
     var targetDistance = CGFloat.infinity
     var playerDistance = CGFloat.infinity
-    let interestingDistance = 0.33 * min(bounds.width, bounds.height)
+    let interestingDistance = 0.5 * min(bounds.width, bounds.height)
     for node in playfield.children {
       // Be sure not to consider off-screen things.  That happens if the last asteroid is
       // destroyed while the UFO is flying around and a new wave spawns.
@@ -258,7 +266,7 @@ class UFO: SKNode {
           // Kamikazes are alway attracted to the player no matter where they are, but I'll
           // give an initial delay using the same first-shot mechanism before this kicks in.
           if attackEnabled {
-            totalForce = totalForce + r.scale(by: kamikazeAcceleration * 1000 / d)
+            totalForce = totalForce + r.scale(by: kamikazeAcceleration * 1000 / sqrt(smoothLimit(d, minValue: ourRadius)))
           }
           continue
         }
@@ -266,9 +274,9 @@ class UFO: SKNode {
         guard d <= interestingDistance else { continue }
         var objectRadius = CGFloat(0)
         if body.isA(.asteroid) {
-          objectRadius = 0.5 * (node as! SKSpriteNode).size.diagonal()
+          objectRadius = 0.5 * (node as! SKSpriteNode).size.width
         } else if body.isA(.ufo) {
-          objectRadius = 0.5 * (node as! UFO).size.diagonal()
+          objectRadius = 0.5 * (node as! UFO).size.width
         } else if body.isA(.player) {
           objectRadius = 0.5 * (node as! Ship).size.diagonal()
           playerDistance = d
@@ -279,9 +287,13 @@ class UFO: SKNode {
         }
         d -= ourRadius + objectRadius
         // Limit the force so as not to poke the UFO by an enormous amount
-        let dmin = CGFloat(20)
-        let dlim = 0.5 * (sqrt((d - dmin) * (d - dmin) + dmin) + d)
-        totalForce = totalForce + r.scale(by: -forceScale / (dlim * dlim))
+        let dlim = smoothLimit(d, minValue: 20)
+        if body.isA(.asteroid) {
+          // Make the UFOs a little more responsive to distant asteroids
+          totalForce = totalForce + r.scale(by: -forceScale / (dlim * sqrt(dlim)))
+        } else {
+          totalForce = totalForce + r.scale(by: -forceScale / (dlim * dlim))
+        }
       }
     }
     body.applyForce(totalForce)
