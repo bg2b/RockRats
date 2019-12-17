@@ -392,8 +392,7 @@ class GameScene: GameTutorialScene {
       numberOfUFOsThisWave += 1
       // Once a UFO spawns, don't be eager to spawn a second
       pauseMultiSpawn = true
-      run(.sequence([.wait(forDuration: 0.5 * Globals.gameConfig.value(for: \.meanUFOTime)),
-                     .run { self.pauseMultiSpawn = false }]),
+      run(.wait(for: 0.5 * Globals.gameConfig.value(for: \.meanUFOTime)) { self.pauseMultiSpawn = false },
           withKey: "multiSpawnDelay")
       if ufos.count == 2 {
         reportAchievement(achievement: .doubleTrouble)

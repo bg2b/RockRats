@@ -211,7 +211,7 @@ class MenuScene: BasicScene {
       if gamesSinceLastReview >= gamesBeforeAsking[min(numRequests, gamesBeforeAsking.count - 1)] {
         // A reasonable number of games have been played since the last request.  If
         // they stick around long enough, then poke them to leave a review.
-        run(.sequence([.wait(forDuration: 2), .run { self.askForReview() }]), withKey: "askForReview")
+        run(.wait(for: 2) { self.askForReview() }, withKey: "askForReview")
       }
     }
     // Any earlier scene transition that the menu initiated has obviously finished,
