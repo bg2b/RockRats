@@ -10,16 +10,18 @@ import SpriteKit
 import AVFoundation
 
 extension SKLabelNode {
+  // swiftlint:disable:function_parameter_count
   /// Helper routine for `typeIn(text:attributes:sound:whenDone:)`
   /// - Parameters:
   ///   - text: The text to show
   ///   - index: Start the effect from this position (pass `startIndex` initially)
   ///   - attributes: Attributes for formatting the text
   ///   - sound: The sound to play while the effect is running
-  ///   - delay: Time between characters
   ///   - whenDone: A closure to run when the effect finishes
   func typeIn(text: String, at index: String.Index, attributes: AttrStyles,
-              sound: ContinuousPositionalAudio, delay: Double, whenDone: (() -> Void)?) {
+              sound: ContinuousPositionalAudio, whenDone: (() -> Void)?) {
+    // The between-character delay
+    let delay = 2.0 / 60
     if index == text.startIndex {
       sound.playerNode.volume = 1
     }
@@ -51,7 +53,7 @@ extension SKLabelNode {
           sound.playerNode.volume = 1
         }
         self.typeIn(text: text, at: text.index(after: index), attributes: attributes,
-                    sound: sound, delay: delay, whenDone: whenDone)
+                    sound: sound, whenDone: whenDone)
       }
     } else {
       attributedText = makeAttributed(text: text, until: index, attributes: attributes)
@@ -68,7 +70,6 @@ extension SKLabelNode {
   ///   - sound: A sound to play while the effect is running
   ///   - whenDone: A closure to run when the effect finishes
   func typeIn(text: String, attributes: AttrStyles, sound: ContinuousPositionalAudio, whenDone: (() -> Void)?) {
-    let delay = 2.0 / 60
-    typeIn(text: text, at: text.startIndex, attributes: attributes, sound: sound, delay: delay, whenDone: whenDone)
+    typeIn(text: text, at: text.startIndex, attributes: attributes, sound: sound, whenDone: whenDone)
   }
 }

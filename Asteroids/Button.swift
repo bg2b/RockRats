@@ -29,11 +29,11 @@ class Button: SKNode {
   var currentDecoration = 0
   /// If this is non-`nil`, the button requires a second confirmation press;
   /// `confirmDecoration` is shown during that process.
-  var confirmDecoration: SKNode? = nil
+  var confirmDecoration: SKNode?
   /// The touch that the button is currently processing
-  var clickTouch: UITouch? = nil
+  var clickTouch: UITouch?
   /// A closure that will be called when the button activates
-  var action: (() -> Void)? = nil
+  var action: (() -> Void)?
 
   /// Make a button border that fits around a node
   ///
@@ -256,13 +256,9 @@ class Button: SKNode {
   ///   - touches: Some touches
   ///   - event: The event the touches belong to
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-    guard enabled else { return }
-    for touch in touches {
-      if clickTouch == nil {
-        clickTouch = touch
-        border.glowWidth = 3
-      }
-    }
+    guard enabled, clickTouch == nil, let touch = touches.first else { return }
+    clickTouch = touch
+    border.glowWidth = 3
   }
 
   /// Continue button touch processing

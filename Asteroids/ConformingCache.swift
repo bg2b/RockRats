@@ -145,7 +145,7 @@ extension ImageMask {
         let q1 = hull[hull.count - 2]
         let q2 = hull[hull.count - 1]
         if orient(q1, q2, p) > 0 { break }
-        let _ = hull.removeLast()
+        _ = hull.removeLast()
       }
       hull.append(p)
     }
@@ -227,7 +227,7 @@ class ConformingPhysicsCache {
     let conformingTextures = [
       "ship_blue", "retroship",
       "meteorbig1", "meteorbig2", "meteorbig3",
-      "meteorhuge1", "meteorhuge2",
+      "meteorhuge1", "meteorhuge2"
     ]
     for textureName in conformingTextures {
       _ = makeBody(texture: Globals.textureCache.findTexture(imageNamed: textureName), preloadName: textureName)

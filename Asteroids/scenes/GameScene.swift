@@ -24,7 +24,7 @@ let specialScores = [
   SpecialScore(score: 1701, display: "NCC-1701", achievement: .keepOnTrekking),
   SpecialScore(score: 1984, display: "I'm watching you", achievement: .bigBrother),
   SpecialScore(score: 2001, display: "A Space Oddity", achievement: .spaceOddity),
-  SpecialScore(score: 3720, display: "3720 to 1", achievement: .whatAreTheOdds),
+  SpecialScore(score: 3720, display: "3720 to 1", achievement: .whatAreTheOdds)
 ]
 
 // MARK: - The game is afoot
@@ -302,18 +302,16 @@ class GameScene: GameTutorialScene {
     // middle of blasting a bunch of asteroids and would zip past the score without
     // having time to appreciate the message.  So there's some delaying before the
     // actual reportAchievement.
-    for special in specialScores {
-      if score == special.score {
-        // Don't display the special message immediately in case the player is in the
-        // middle of blasting a bunch of stuff and will zoom past it.
-        wait(for: 0.75) {
-          if self.score == special.score {
-            self.scoreDisplay.text = special.display
-            // Then wait a bit more to make sure they've had time to notice the message.
-            self.wait(for: 1.5) {
-              if self.score == special.score {
-                reportAchievement(achievement: special.achievement)
-              }
+    for special in specialScores where score == special.score {
+      // Don't display the special message immediately in case the player is in the
+      // middle of blasting a bunch of stuff and will zoom past it.
+      wait(for: 0.75) {
+        if self.score == special.score {
+          self.scoreDisplay.text = special.display
+          // Then wait a bit more to make sure they've had time to notice the message.
+          self.wait(for: 1.5) {
+            if self.score == special.score {
+              reportAchievement(achievement: special.achievement)
             }
           }
         }
@@ -551,8 +549,7 @@ class GameScene: GameTutorialScene {
   /// Count consecutive hits and award achievements at various levels
   func consecutiveHit() {
     consecutiveHits += 1
-    switch consecutiveHits
-    {
+    switch consecutiveHits {
     case 10:
       reportAchievement(achievement: .archer)
     case 15:

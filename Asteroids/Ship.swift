@@ -385,7 +385,7 @@ class Ship: SKNode {
     shot.requiredPhysicsBody().velocity = shotDirection.scale(by: Globals.gameConfig.playerShotSpeed)
     lasersRemaining -= 1
   }
-  
+
   func laserDestroyed() {
     assert(lasersRemaining < Globals.gameConfig.playerMaxShots, "Player has too many lasers")
     lasersRemaining += 1

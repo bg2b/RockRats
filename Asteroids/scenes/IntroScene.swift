@@ -82,9 +82,9 @@ class IntroScene: BasicScene {
     let desiredTopY = gameFrame.maxY - 0.5 * (gameFrame.height - totalHeight)
     let desiredBottomY = gameFrame.minY + 0.5 * (gameFrame.height - totalHeight)
     // Put the top of the intro at desiredTopY
-    introLabel.position = introLabel.position + CGVector(dx: 0, dy: desiredTopY - introFrame.maxY)
+    introLabel.position += CGVector(dx: 0, dy: desiredTopY - introFrame.maxY)
     // Put the bottom of the button at desiredBottomY
-    doneButton.position = doneButton.position + CGVector(dx: 0, dy: desiredBottomY - goFrame.minY)
+    doneButton.position += CGVector(dx: 0, dy: desiredBottomY - goFrame.minY)
     // Sounds that get modulated by the type-in effect of the labels
     transmissionSounds = audio.continuousAudio(.transmission, at: self)
     transmissionSounds.playerNode.volume = 0

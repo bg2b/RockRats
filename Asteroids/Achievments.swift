@@ -154,7 +154,7 @@ func reportRepeatableAchievement(achievement: Achievement) {
 ///   - soFar: The amount of progress (a count of how many times something was done)
 /// - Returns: An optional possibly larger amount of progress (see discussion)
 func reportAchievement(achievement: Achievement, soFar: Int) -> Int? {
-  var result: Int? = nil
+  var result: Int?
   if let gc = Globals.gcInterface, gc.enabled {
     if let levels = achievementLevels[achievement] {
       logging("Reporting progress in multi-level achievement \(achievement.gameCenterID)")

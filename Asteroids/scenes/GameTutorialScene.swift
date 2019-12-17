@@ -43,7 +43,7 @@ class GameTutorialScene: BasicScene {
   var joystickDirection = CGVector.zero
   /// The touch corresponding to the virtual joystick
   /// - This is set by touchesBegan, tracked in touchesMoved, and cleared in touchesEnded.
-  var joystickTouch: UITouch? = nil
+  var joystickTouch: UITouch?
   /// A dictionary mapping possible fire and hyperspace jump touches to their staring
   /// locations.
   var fireOrWarpTouches = [UITouch: CGPoint]()
@@ -214,7 +214,7 @@ class GameTutorialScene: BasicScene {
   /// Enforce pausing when gamePaused is true so that SpriteKit's
   /// auto-pausing/unpausing doesn't mess us up
   override var forcePause: Bool { gamePaused }
-  
+
   /// Pause the game, blur the playing area, hide the pause button, show the
   /// continue/quit buttons
   func doPause() {
@@ -376,7 +376,7 @@ class GameTutorialScene: BasicScene {
     Globals.spriteCache.recycleSprite(laser)
     player.laserDestroyed()
   }
-  
+
   /// This is called as a laser's end-of-life action.  It removes the laser, plus
   /// subclasses can override this if they need to do some extra processing.
   func laserExpired(_ laser: SKSpriteNode) {

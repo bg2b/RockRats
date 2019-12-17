@@ -9,6 +9,7 @@
 import CoreGraphics
 
 // MARK: CGSize helpers
+
 extension CGSize {
   /// Scale uniformly in both direction
   /// - Parameter amount: The amount to scale by
@@ -33,24 +34,25 @@ extension CGSize {
     return hypot(width, height)
   }
 
-  static func +(left: CGSize, right: CGSize) -> CGSize {
+  static func + (left: CGSize, right: CGSize) -> CGSize {
     return CGSize(width: left.width + right.width, height: left.height + right.height)
   }
 
-  static func -(left: CGSize, right: CGSize) -> CGSize {
+  static func - (left: CGSize, right: CGSize) -> CGSize {
     return CGSize(width: left.width - right.width, height: left.height - right.height)
   }
 
-  static func *(left: CGSize, right: CGSize) -> CGSize {
+  static func * (left: CGSize, right: CGSize) -> CGSize {
     return CGSize(width: left.width * right.width, height: left.height * right.height)
   }
 
-  static func /(left: CGSize, right: CGSize) -> CGSize {
+  static func / (left: CGSize, right: CGSize) -> CGSize {
     return CGSize(width: left.width / right.width, height: left.height / right.height)
   }
 }
 
 // MARK: - CGVector helpers
+
 extension CGVector {
   /// A unit vector at the specified angle
   /// - Parameter angle: Radians
@@ -111,30 +113,43 @@ extension CGVector {
     return CGVector(dx: c * dx - s * dy, dy: s * dx + c * dy)
   }
 
-  static func +(left: CGVector, right: CGVector) -> CGVector {
+  static func += (left: inout CGVector, right: CGVector) {
+    left = left + right // swiftlint:disable:this shorthand_operator
+  }
+
+  static func -= (left: inout CGVector, right: CGVector) {
+    left = left - right // swiftlint:disable:this shorthand_operator
+  }
+
+  static func + (left: CGVector, right: CGVector) -> CGVector {
     return CGVector(dx: left.dx + right.dx, dy: left.dy + right.dy)
   }
 
-  static func -(left: CGVector, right: CGVector) -> CGVector {
+  static func - (left: CGVector, right: CGVector) -> CGVector {
     return CGVector(dx: left.dx - right.dx, dy: left.dy - right.dy)
   }
 }
 
 // MARK: - CGPoint helpers
+
 extension CGPoint {
-  static func +(left: CGPoint, right: CGVector) -> CGPoint {
+  static func += (left: inout CGPoint, right: CGVector) {
+    left = left + right // swiftlint:disable:this shorthand_operator
+  }
+
+  static func + (left: CGPoint, right: CGVector) -> CGPoint {
     return CGPoint(x: left.x + right.dx, y: left.y + right.dy)
   }
 
-  static func +(left: CGPoint, right: CGPoint) -> CGPoint {
+  static func + (left: CGPoint, right: CGPoint) -> CGPoint {
     return CGPoint(x: left.x + right.x, y: left.y + right.y)
   }
 
-  static func -(left: CGPoint, right: CGVector) -> CGPoint {
+  static func - (left: CGPoint, right: CGVector) -> CGPoint {
     return CGPoint(x: left.x - right.dx, y: left.y - right.dy)
   }
 
-  static func -(left: CGPoint, right: CGPoint) -> CGVector {
+  static func - (left: CGPoint, right: CGPoint) -> CGVector {
     return CGVector(dx: left.x - right.x, dy: left.y - right.y)
   }
 }

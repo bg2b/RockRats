@@ -112,7 +112,7 @@ class UFO: SKNode {
   /// The current (desired) cruising speed
   var currentSpeed: CGFloat
   /// Makes UFO noises if desired
-  var engineSounds: ContinuousPositionalAudio? = nil
+  var engineSounds: ContinuousPositionalAudio?
   /// Average time between shots
   let meanShotTime: Double
   /// Time before attacking; negative means hostilities have commenced and the UFO is
@@ -194,7 +194,7 @@ class UFO: SKNode {
     body.angularVelocity = .pi * 2
     physicsBody = body
   }
-  
+
   required init(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented by UFO")
   }
@@ -258,7 +258,7 @@ class UFO: SKNode {
           let vhat = body.velocity.scale(by: 1 / body.velocity.length())
           if r.dotProd(vhat) > 0 {
             // Project only if the shot is moving towards the UFO
-            r = r - r.project(unitVector: vhat).scale(by: shotAnticipation)
+            r -= r.project(unitVector: vhat).scale(by: shotAnticipation)
           }
         }
         var d = r.length()
@@ -266,7 +266,7 @@ class UFO: SKNode {
           // Kamikazes are alway attracted to the player no matter where they are, but I'll
           // give an initial delay using the same first-shot mechanism before this kicks in.
           if attackEnabled {
-            totalForce = totalForce + r.scale(by: kamikazeAcceleration * 1000 / sqrt(smoothLimit(d, minValue: ourRadius)))
+            totalForce += r.scale(by: kamikazeAcceleration * 1000 / sqrt(smoothLimit(d, minValue: ourRadius)))
           }
           continue
         }
@@ -290,9 +290,9 @@ class UFO: SKNode {
         let dlim = smoothLimit(d, minValue: 20)
         if body.isA(.asteroid) {
           // Make the UFOs a little more responsive to distant asteroids
-          totalForce = totalForce + r.scale(by: -forceScale / (dlim * sqrt(dlim)))
+          totalForce += r.scale(by: -forceScale / (dlim * sqrt(dlim)))
         } else {
-          totalForce = totalForce + r.scale(by: -forceScale / (dlim * dlim))
+          totalForce += r.scale(by: -forceScale / (dlim * dlim))
         }
       }
     }
@@ -301,8 +301,7 @@ class UFO: SKNode {
     if type != .kamikaze {
       if body.velocity.length() > currentSpeed {
         body.velocity = body.velocity.scale(by: 0.95)
-      }
-      else if body.velocity.length() < currentSpeed {
+      } else if body.velocity.length() < currentSpeed {
         body.velocity = body.velocity.scale(by: 1.05)
       }
     }

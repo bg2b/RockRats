@@ -48,9 +48,9 @@ class GameCenterInterface {
   /// appropriate point.
   let presenter: (UIViewController?) -> Void
   /// The primary ID of whoever successfully logged in last
-  var lastPlayerID: String? = nil
+  var lastPlayerID: String?
   /// A set of all the valid achievement identifiers, retrieved from Game Center.
-  var achievementIdentifiers: Set<String>? = nil
+  var achievementIdentifiers: Set<String>?
   /// The identifiers of all the local player's achievements and their completion
   /// percentages as retrieved from Game Center.  If the player has zero percent on
   /// some achievement, it's not in the dictionary.
@@ -60,7 +60,7 @@ class GameCenterInterface {
   /// flushed at the end of a game.
   var playerAchievementsProgress = [String: Double]()
   /// The local player's score and rank from a leaderboard fetch
-  var localPlayerScore: GKScore? = nil
+  var localPlayerScore: GKScore?
   /// Scores retrieved from Game Center from a leaderboard fetch
   var leaderboardScores = [GKScore]()
 
@@ -362,7 +362,7 @@ class GameCenterInterface {
     leaderboard.playerScope = .global
     leaderboard.range = NSRange(1 ... 15)
     leaderboard.timeScope = .week
-    leaderboard.loadScores() { [weak self] scores, error in
+    leaderboard.loadScores { [weak self] scores, error in
       guard let self = self else { return }
       if let error = error {
         logging("Error requesting scores from Game Center: \(error.localizedDescription)")

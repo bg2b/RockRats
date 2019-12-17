@@ -131,7 +131,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   var switchingScenes = false
   /// The next scene to transition to.  To avoid lag, this is typically created on a
   /// background thread; after the variable becomes non-`nil` the transition occurs.
-  var nextScene: SKScene? = nil
+  var nextScene: SKScene?
 
   // MARK: - Pausing
 
@@ -372,7 +372,6 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   required init(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented by BasicScene or its subclasses")
   }
-
 
   // MARK: - Deinitialization
 
@@ -778,7 +777,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     let ufoRadius = 0.5 * ufo.size.diagonal()
     // Try to find a safe spawning position, but if I can't find one after some
     // number of tries, just go ahead and spawn anyway.
-    var bestPosition: CGPoint? = nil
+    var bestPosition: CGPoint?
     var bestClearance = CGFloat.infinity
     for _ in 0 ..< 10 {
       let pos = CGPoint(x: ufo.position.x, y: .random(in: 0.9 * gameFrame.minY ... 0.9 * gameFrame.maxY))

@@ -163,7 +163,7 @@ class TutorialScene: GameTutorialScene {
   ///   - message: What to show
   ///   - delay: Amount of time to wait
   ///   - action: What to do afterwards
-  func showMessage(_ message: String, delay: Double, then action: @escaping () -> ()) {
+  func showMessage(_ message: String, delay: Double, then action: @escaping () -> Void) {
     centralLabel.attributedText = makeAttributed(text: message, until: message.endIndex, attributes: attributes)
     centralLabel.alpha = 0
     centralLabel.run(.sequence([
@@ -351,9 +351,9 @@ class TutorialScene: GameTutorialScene {
     // Initial offset from the corner
     var cornerOffset = CGVector(dx: 50, dy: 50)
     // Add clearance for the touch shapes
-    cornerOffset = cornerOffset + CGVector(dx: 0.5 * touchShapes[0].frame.width, dy: 0.5 * touchShapes[0].frame.height)
+    cornerOffset += CGVector(dx: 0.5 * touchShapes[0].frame.width, dy: 0.5 * touchShapes[0].frame.height)
     // Add an amount for a slide
-    cornerOffset = cornerOffset + CGVector(dx: 0.5 * 1.25 * slideAmount, dy: 0.5 * 1.25 * slideAmount)
+    cornerOffset += CGVector(dx: 0.5 * 1.25 * slideAmount, dy: 0.5 * 1.25 * slideAmount)
     // Final start point
     let onLeft = CGPoint(x: gameFrame.minX, y: gameFrame.minY) + cornerOffset
     return UserData.joystickOnLeft.value ? onLeft : CGPoint(x: -onLeft.x, y: onLeft.y)

@@ -39,7 +39,7 @@ class MenuScene: BasicScene {
   ///
   /// The next time the menu is displayed, this will be presented.  `nil` means
   /// either Game Center is successfully authenticated or that it's given up.
-  weak var gameCenterAuthVC: UIViewController? = nil
+  weak var gameCenterAuthVC: UIViewController?
   /// `true` when `gameCenterAuthVC` is being shown
   var presentingGCAuth = false
   /// All of the buttons used in the scene

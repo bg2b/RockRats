@@ -86,7 +86,7 @@ class ReservesDisplay: SKNode {
   /// - Parameter numReserves: The number of reserves to show
   func showReserves(_ numReserves: Int) {
     // Hide icons beyond numReserves
-    shipIcons.enumerated().forEach() { $1.isHidden = ($0 >= numReserves) }
+    shipIcons.enumerated().forEach { $1.isHidden = ($0 >= numReserves) }
     if numReserves > maxIcons {
       // If too many ships, show the numeric display for extras
       numericDisplay.text = "+\(numReserves - maxIcons)"

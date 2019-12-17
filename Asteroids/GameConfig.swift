@@ -13,29 +13,29 @@ class WaveConfig: Decodable {
   /// The wave this applies to
   let waveNumber: Int
   /// Base (maximum) average seconds between UFOs
-  var meanUFOTime: Double? = nil
+  var meanUFOTime: Double?
   /// Probabilities of getting UFOs of different types
-  var ufoChances: [Double]? = nil
+  var ufoChances: [Double]?
   /// Maximum number of simultaneous UFOs
-  var maxUFOs: Int? = nil
+  var maxUFOs: Int?
   /// Multiplier for forces on UFOs (something like agility)
-  var ufoDodging: [CGFloat]? = nil
+  var ufoDodging: [CGFloat]?
   /// Multiplier indicating how well UFOs can dodge shots
-  var ufoShotAnticipation: [CGFloat]? = nil
+  var ufoShotAnticipation: [CGFloat]?
   /// How accurately UFOs shoot
-  var ufoAccuracy: [CGFloat]? = nil
+  var ufoAccuracy: [CGFloat]?
   /// `true` if UFOs consider playfield wrapping when shooting
-  var ufoShotWrapping: Bool? = nil
+  var ufoShotWrapping: Bool?
   /// Average time between UFO shots
-  var ufoMeanShotTime: [Double]? = nil
+  var ufoMeanShotTime: [Double]?
   /// The shot speed of the different UFOs
-  var ufoShotSpeed: [CGFloat]? = nil
+  var ufoShotSpeed: [CGFloat]?
   /// Maximum speed of UFOs
-  var ufoMaxSpeed: [CGFloat]? = nil
+  var ufoMaxSpeed: [CGFloat]?
   /// A factor that multiplies asteroid speed upon splitting
-  var asteroidSpeedBoost: CGFloat? = nil
+  var asteroidSpeedBoost: CGFloat?
   /// Controls blue UFO acceleration
-  var kamikazeAcceleration: CGFloat? = nil
+  var kamikazeAcceleration: CGFloat?
 
   /// Make a configuration for a given wave
   /// - Parameter waveNumber: The wave
