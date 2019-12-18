@@ -1017,7 +1017,6 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   override func update(_ currentTime: TimeInterval) {
     super.update(currentTime)
     Globals.lastUpdateTime = currentTime
-    logging("\(name!) update", "time \(currentTime)")
     // Mostly getUtimeOffset just returns immediately, but when a scene first start
     // running, it will compute the offset between currentTime and the u_time seen by
     // shaders.  Most of the effect shaders need to have an effective time that
