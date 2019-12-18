@@ -36,7 +36,7 @@
       "ufoAccuracy": [0.4, 0, 0.2],
       "ufoMeanShotTime": [3.5, 0, 2.5],
       "asteroidSpeedBoost": 1.1,
-      "kamikazeAcceleration": 0.15
+      "kamikazeAcceleration": 0.1
     },
     {
       "waveNumber": 5,
@@ -46,17 +46,18 @@
       "ufoAccuracy": [0.3, 0, 0.2],
       "ufoMeanShotTime": [3, 0, 2],
       "asteroidSpeedBoost": 1.1,
-      "kamikazeAcceleration": 0.2
+      "kamikazeAcceleration": 0.15
     },
     {
       "waveNumber": 7,
+      "maxUFOs": 2,
       "ufoDodging": [8, 12, 8],
       "ufoShotAnticipation": [0.05, 0.2, 0.05],
       "ufoChances": [0.25, 0.325, 0.325],
-      "ufoAccuracy": [0.2, 0, 0.15],
-      "ufoMeanShotTime": [2.5, 0, 1.5],
+      "ufoAccuracy": [0.2, 0, 0.17],
+      "ufoMeanShotTime": [2.5, 0, 1.75],
       "asteroidSpeedBoost": 1.15,
-      "kamikazeAcceleration": 0.25
+      "kamikazeAcceleration": 0.2
     },
     {
       "waveNumber": 9,
@@ -65,31 +66,29 @@
       "ufoChances": [0, 0.5, 0.5],
       "ufoShotWrapping": true,
       "ufoAccuracy": [0.2, 0, 0.15],
-      "ufoMeanShotTime": [2, 0, 1.25],
+      "ufoMeanShotTime": [2, 0, 1.5],
       "asteroidSpeedBoost": 1.2,
-      "kamikazeAcceleration": 0.3
-    },
-    {
-      "waveNumber": 10,
-      "maxUFOs": 2,
-      "ufoDodging": [13, 17, 13],
-      "ufoChances": [0, 0.25, 0.75],
-      "ufoShotAnticipation": [0.15, 0.3, 0.15],
-      "ufoAccuracy": [0.2, 0, 0.15],
-      "asteroidSpeedBoost": 1.25
+      "kamikazeAcceleration": 0.25
     },
     {
       "waveNumber": 11,
+      "ufoDodging": [13, 17, 13],
+      "ufoChances": [0, 0.25, 0.75],
+      "ufoShotAnticipation": [0.15, 0.3, 0.15],
+      "ufoAccuracy": [0.2, 0, 0.13],
+      "ufoMeanShotTime": [1.5, 0, 1.25],
+      "asteroidSpeedBoost": 1.25,
+      "kamikazeAcceleration": 0.3
+    },
+    {
+      "waveNumber": 13,
       "ufoDodging": [15, 19, 15],
       "ufoChances": [0, 0, 1],
       "ufoShotAnticipation": [0.2, 0.35, 0.2],
       "ufoAccuracy": [0.2, 0, 0.1],
       "ufoMeanShotTime": [1.5, 0, 1],
+      "maxUFOs": 3,
       "asteroidSpeedBoost": 1.3
-    },
-    {
-      "waveNumber": 13,
-      "maxUFOs": 3
     }
   ]
 }
