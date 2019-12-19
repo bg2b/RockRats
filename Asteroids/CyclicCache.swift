@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import os.log
 
 /// A cache of values that get used repeatedly in a round-robin fashion
 ///
@@ -93,6 +94,6 @@ class CyclicCache<Key: Hashable, Value> {
     for (_, entries) in cache {
       totalItems += entries.count
     }
-    logging("\(cacheId) has \(totalItems) unique items, used \(itemsUsed)")
+    os_log("%{public}s has %d unique items, used %d", log: .app, type: .debug, cacheId, totalItems, itemsUsed)
   }
 }

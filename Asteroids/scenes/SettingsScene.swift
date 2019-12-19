@@ -7,6 +7,7 @@
 //
 
 import SpriteKit
+import os.log
 
 // MARK: Game settings
 
@@ -163,7 +164,7 @@ class SettingsScene: BasicScene {
   /// Create the settings scene
   /// - Parameter size: The size of the scene
   override init(size: CGSize) {
-    logging("SettingsScene init")
+    os_log("SettingsScene init", log: .app, type: .debug)
     super.init(size: size)
     name = "settingsScene"
     initGameArea(avoidSafeArea: false)
@@ -175,7 +176,7 @@ class SettingsScene: BasicScene {
   }
 
   deinit {
-    logging("SettingsScene deinit \(self.hash)")
+    os_log("SettingsScene deinit %{public}s", log: .app, type: .debug, "\(self.hash)")
   }
 
   // MARK: - Button actions
@@ -267,7 +268,7 @@ class SettingsScene: BasicScene {
   /// Reset all local high scores
   func resetScores() {
     UserData.highScores.reset()
-    logging("Scores reset")
+    os_log("Scores reset", log: .app, type: .debug)
   }
 
   // MARK: - Game Center
@@ -285,7 +286,7 @@ class SettingsScene: BasicScene {
       // values to zero.
       UserData.ufosDestroyedCounter.value = -1
       UserData.asteroidsDestroyedCounter.value = -1
-      logging("Achievements reset")
+      os_log("Achievements reset", log: .app, type: .debug)
     }
   }
 
@@ -293,7 +294,7 @@ class SettingsScene: BasicScene {
   /// enabled/disabled state to match
   /// - Parameter notification: A notification indicating what happened
   @objc func gcStateChanged(_ notification: Notification) {
-    logging("Settings scene got notification of Game Center state change")
+    os_log("Settings scene got notification of Game Center state change", log: .app, type: .debug)
     if notification.object as? Bool ?? false {
       resetAchievementsButton.enable()
     } else {
@@ -303,7 +304,6 @@ class SettingsScene: BasicScene {
 
   override func didMove(to view: SKView) {
     super.didMove(to: view)
-    logging("\(name!) finished didMove to view")
   }
 
   override func update(_ currentTime: TimeInterval) {

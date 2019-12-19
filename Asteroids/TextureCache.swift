@@ -7,6 +7,7 @@
 //
 
 import SpriteKit
+import os.log
 
 /// A cache of, yes, you guessed it, textures!
 class TextureCache {
@@ -36,7 +37,7 @@ class TextureCache {
 
   /// Print some random statistics
   func stats() {
-    print("Texture cache loaded \(textures.count) textures, used \(used)")
+    os_log("Texture cache loaded %d textures, used %d", log: .app, type: .debug, textures.count, used)
   }
 }
 

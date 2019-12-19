@@ -8,6 +8,7 @@
 
 import SpriteKit
 import GameKit
+import os.log
 
 /// A Game Center achievement
 ///
@@ -99,24 +100,22 @@ let achievementLevels = [
 /// Report a simple achievment as completed
 /// - Parameter achievement: The achievement
 func reportAchievement(achievement: Achievement) {
-  if let gc = Globals.gcInterface, gc.enabled {
-    if let status = gc.statusOfAchievement(achievement.gameCenterID) {
-      if status == 100 {
-        logging("Achievement \(achievement.rawValue) already completed")
-      } else {
-        gc.reportCompletion(achievement.gameCenterID)
-        if achievement.isHidden {
-          // When the player gets a new hidden achievement, count their progress
-          // towards useTheSource.
-          reportHiddenProgress()
-        }
-      }
+  guard let gc = Globals.gcInterface, gc.enabled else { return }
+  if let status = gc.statusOfAchievement(achievement.gameCenterID) {
+    if status == 100 {
+      os_log("Achievement %{public}s already completed", log: .app, type: .info, achievement.rawValue)
     } else {
-      // We don't know the status for some reason
-      logging("Achievement \(achievement.rawValue) with no status (maybe not in Game Center yet)")
+      os_log("Achievement %{public}s completed", log: .app, type: .info, achievement.rawValue)
+      gc.reportCompletion(achievement.gameCenterID)
+      if achievement.isHidden {
+        // When the player gets a new hidden achievement, count their progress
+        // towards useTheSource.
+        reportHiddenProgress()
+      }
     }
   } else {
-    logging("Achievement \(achievement.rawValue) but Game Center is disabled")
+    // We don't know the status for some reason
+    os_log("Achievement %{public}s with no status (not in Game Center?)", log: .app, type: .error, achievement.rawValue)
   }
 }
 
@@ -126,9 +125,9 @@ func reportAchievement(achievement: Achievement) {
 ///
 /// - Parameter achievement: The achievement just completed
 func reportRepeatableAchievement(achievement: Achievement) {
-  if let gc = Globals.gcInterface, gc.enabled {
-    gc.reportCompletion(achievement.gameCenterID)
-  }
+  guard let gc = Globals.gcInterface, gc.enabled else { return }
+  os_log("Repeatable achievement %{public}s completed", log: .app, type: .info, achievement.rawValue)
+  gc.reportCompletion(achievement.gameCenterID)
 }
 
 /// Report progress towards a multi-level achievement
@@ -154,22 +153,18 @@ func reportRepeatableAchievement(achievement: Achievement) {
 ///   - soFar: The amount of progress (a count of how many times something was done)
 /// - Returns: An optional possibly larger amount of progress (see discussion)
 func reportAchievement(achievement: Achievement, soFar: Int) -> Int? {
+  guard let levels = achievementLevels[achievement] else { fatalError("Achievement \(achievement.rawValue) missing levels") }
+  guard let gc = Globals.gcInterface, gc.enabled else { return nil }
+  os_log("Multi-level achievement %{public}s at %d", log: .app, type: .info, achievement.gameCenterID, soFar)
   var result: Int?
-  if let gc = Globals.gcInterface, gc.enabled {
-    if let levels = achievementLevels[achievement] {
-      logging("Reporting progress in multi-level achievement \(achievement.gameCenterID)")
-      for level in 0 ..< levels.count {
-        let progress = gc.reportProgress(achievement.gameCenterLevelID(level),
-                                         knownProgress: floor(Double(soFar) / Double(levels[level]) * 100))
-        let minSoFar = Int(floor(progress / 100.0 * Double(levels[level])))
-        // See if the amount of progress must be larger than what was passed in
-        if minSoFar > soFar {
-          result = max(result ?? 0, minSoFar)
-        }
-      }
+  for level in 0 ..< levels.count {
+    let progress = gc.reportProgress(achievement.gameCenterLevelID(level),
+                                     knownProgress: floor(Double(soFar) / Double(levels[level]) * 100))
+    let minSoFar = Int(floor(progress / 100.0 * Double(levels[level])))
+    // See if the amount of progress must be larger than what was passed in
+    if minSoFar > soFar {
+      result = max(result ?? 0, minSoFar)
     }
-  } else {
-    logging("Achievement \(achievement.rawValue) but Game Center is disabled")
   }
   return result
 }
@@ -209,13 +204,15 @@ func levelIsReached(achievement: Achievement, level: Int) -> Bool {
 /// the last hidden achievement was done, then it'll get picked up at that time.
 func reportHiddenProgress() {
   guard let gc = Globals.gcInterface, gc.enabled else { return }
-  var numFound = 0
+  var numHidden = 0.0
+  var numFound = 0.0
   for achievement in Achievement.hiddenAchievements {
+    numHidden += 1
     if achievementIsCompleted(achievement) {
       numFound += 1
     }
   }
-  logging("Found \(numFound) out of \(Achievement.hiddenAchievements.count) hidden achievements")
-  _ = gc.reportProgress(Achievement.useTheSource.gameCenterID,
-                        knownProgress: floor(Double(numFound) / Double(Achievement.hiddenAchievements.count) * 100))
+  let percentFound = floor(numFound / numHidden * 100)
+  os_log("Found %g%% of %g hidden achievements", log: .app, type: .info, percentFound, numHidden)
+  _ = gc.reportProgress(Achievement.useTheSource.gameCenterID, knownProgress: percentFound)
 }

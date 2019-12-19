@@ -7,6 +7,7 @@
 //
 
 import SpriteKit
+import os.log
 
 // MARK: Special scores for hidden achievements
 
@@ -162,7 +163,7 @@ class GameScene: GameTutorialScene {
   /// Make a new game scene
   /// - Parameter size: The size of the scene
   override init(size: CGSize) {
-    logging("GameScene init")
+    os_log("GameScene init", log: .app, type: .debug)
     super.init(size: size)
     name = "gameScene"
     initFutureShader()
@@ -175,7 +176,7 @@ class GameScene: GameTutorialScene {
   }
 
   deinit {
-    logging("GameScene deinit \(self.hash)")
+    os_log("GameScene deinit %{public}s", log: .app, type: .debug, "\(self.hash)")
   }
 
   // MARK: - Central display
@@ -326,7 +327,7 @@ class GameScene: GameTutorialScene {
     if asteroids.isEmpty && !gameOver {
       normalHeartbeatRate()
       stopSpawningUFOs()
-      logging("Last asteroid removed \(Globals.lastUpdateTime), going to spawn a wave")
+      os_log("Last asteroid removed at %f, going to spawn a wave", log: .app, type: .debug, Globals.lastUpdateTime)
       // If the player dies from colliding with the last asteroid, then I have to
       // wait long enough for any of the player's remaining lasers to possibly hit a
       // UFO and score enough points for an extra life.  That wait is currently 4
@@ -349,7 +350,7 @@ class GameScene: GameTutorialScene {
     for _ in 1...numAsteroids {
       spawnAsteroid(size: "huge")
     }
-    logging("Spawned next wave \(Globals.lastUpdateTime)")
+    os_log("Spawned next wave at %f", log: .app, type: .debug, Globals.lastUpdateTime)
     // UFOs will start appearing after a full duration period
     ufoSpawningRate = 1
     spawnUFOs()
@@ -382,11 +383,11 @@ class GameScene: GameTutorialScene {
       // already plenty of UFOs, or they just killed a UFO, or the spawn would give
       // multiple UFOs and it hasn't been very long since the previous spawn.  Wait a
       // bit and then try again.
-      logging("Cannot spawn UFO at \(Globals.lastUpdateTime), waiting")
+      os_log("Cannot spawn UFO at %f", log: .app, type: .debug, Globals.lastUpdateTime)
       run(.wait(for: 2, then: maybeSpawnUFO), withKey: "spawnUFOs")
     } else {
       // Do the spawn
-      logging("Spawn UFO at \(Globals.lastUpdateTime)")
+      os_log("Spawn UFO at %f", log: .app, type: .debug, Globals.lastUpdateTime)
       spawnUFO(ufo: UFO(brothersKilled: ufosToAvenge, audio: audio))
       numberOfUFOsThisWave += 1
       // Once a UFO spawns, don't be eager to spawn a second
@@ -414,7 +415,7 @@ class GameScene: GameTutorialScene {
     removeAction(forKey: "spawnUFOs") // Remove any existing scheduled spawn
     let meanTimeToNextUFO = ufoSpawningRate * Globals.gameConfig.value(for: \.meanUFOTime)
     let delay = Double.random(in: 0.75 * meanTimeToNextUFO ... 1.25 * meanTimeToNextUFO)
-    logging("Try to spawn UFO in \(delay) seconds at \(Globals.lastUpdateTime), relativeDuration \(ufoSpawningRate)")
+    os_log("Try to spawn UFO in %f sec, rate %f, at %f", log: .app, type: .debug, delay, ufoSpawningRate, Globals.lastUpdateTime)
     run(.wait(for: delay, then: maybeSpawnUFO), withKey: "spawnUFOs")
   }
 
@@ -450,10 +451,10 @@ class GameScene: GameTutorialScene {
     if attemptsRemaining == 0 {
       // I didn't find a safe position so wait a bit and try again.  Be a little more
       // aggressive about what is considered safe.
-      logging("No safe spot to spawn player at \(Globals.lastUpdateTime), waiting")
+      os_log("No safe spot to spawn player at %f", log: .app, type: .debug, Globals.lastUpdateTime)
       wait(for: 0.5) { self.spawnPlayer(safeTime: max(safeTime - 0.25, 0)) }
     } else {
-      logging("Spawn player at \(Globals.lastUpdateTime)")
+      os_log("Spawn player at %f", log: .app, type: .debug, Globals.lastUpdateTime)
       ufosToAvenge /= 2
       killedByUFO = false
       energyBar.fill()
@@ -488,7 +489,7 @@ class GameScene: GameTutorialScene {
   ///
   /// In either case, any UFOs that are flying around should warp out.
   func respawnOrGameOver() {
-    logging("Respawn or game over at \(Globals.lastUpdateTime)")
+    os_log("Respawn or game over at %f", log: .app, type: .debug, Globals.lastUpdateTime)
     let delay = warpOutUFOs() + 1
     if livesRemaining > 0 {
       wait(for: delay) { self.spawnPlayer() }
@@ -584,7 +585,7 @@ class GameScene: GameTutorialScene {
     UserData.asteroidsDestroyed.value += 1
     if UserData.asteroidsDestroyed.value % 100 == 0 {
       if let minDestroyed = reportAchievement(achievement: .rockRat, soFar: UserData.asteroidsDestroyed.value) {
-        logging("Bumping destroyed asteroids from \(UserData.asteroidsDestroyed.value) to \(minDestroyed) because of Game Center")
+        os_log("Bumping destroyed asteroids from %d to %d", log: .app, type: .info, UserData.asteroidsDestroyed.value, minDestroyed)
         UserData.asteroidsDestroyed.value = minDestroyed
       }
     }
@@ -603,7 +604,7 @@ class GameScene: GameTutorialScene {
   ///   - laser: The shot
   ///   - ufo: The UFO that it hit
   func laserHit(laser: SKNode, ufo: SKNode) {
-    logging("UFO hit by laser at \(Globals.lastUpdateTime)")
+    os_log("UFO hit by laser at %f", log: .app, type: .debug, Globals.lastUpdateTime)
     consecutiveHit()
     if killedByUFO {
       // The player died by getting shot by a UFO and hasn't respawned yet.
@@ -631,7 +632,7 @@ class GameScene: GameTutorialScene {
     UserData.ufosDestroyed.value += 1
     if UserData.ufosDestroyed.value % 5 == 0 {
       if let minDestroyed = reportAchievement(achievement: .ufoHunter, soFar: UserData.ufosDestroyed.value) {
-        logging("Bumping destroyed UFOs from \(UserData.ufosDestroyed.value) to \(minDestroyed) because of Game Center")
+        os_log("Bumping destroyed UFOs from %d to %d", log: .app, type: .info, UserData.ufosDestroyed.value, minDestroyed)
         UserData.ufosDestroyed.value = minDestroyed
       }
     }
@@ -650,7 +651,7 @@ class GameScene: GameTutorialScene {
   ///   - laser: The UFO's shot
   ///   - player: The player
   func ufoLaserHit(laser: SKNode, player: SKNode) {
-    logging("Player shot by UFO at \(Globals.lastUpdateTime)")
+    os_log("Player shot by UFO at %f", log: .app, type: .debug, Globals.lastUpdateTime)
     if timesUFOsShot == 1 {
       reportAchievement(achievement: .redShirt)
     }
@@ -667,7 +668,7 @@ class GameScene: GameTutorialScene {
   /// The player ran into an asteroid
   /// - Parameter asteroid: The asteroid
   func playerCollided(asteroid: SKNode) {
-    logging("Player collided with asteroid at \(Globals.lastUpdateTime)")
+    os_log("Player collided with asteroid at %f", log: .app, type: .debug, Globals.lastUpdateTime)
     addToScore(asteroidPoints(asteroid))
     splitAsteroid(asteroid as! SKSpriteNode)
     destroyPlayer()
@@ -679,7 +680,7 @@ class GameScene: GameTutorialScene {
   ///
   /// - Parameter ufo: The UFO that they hit
   func playerHitUFO(ufo: SKNode) {
-    logging("Player and UFO collided at \(Globals.lastUpdateTime)")
+    os_log("Player and UFO collided at %f", log: .app, type: .debug, Globals.lastUpdateTime)
     if (ufo as! UFO).type != .kamikaze {
       reportAchievement(achievement: .leeroyJenkins)
     }
@@ -772,7 +773,6 @@ class GameScene: GameTutorialScene {
       self.nextWave()
       self.wait(for: 3) { self.spawnPlayer() }
     }
-    logging("\(name!) finished didMove to view")
   }
 
   /// Main update loop

@@ -8,6 +8,7 @@
 
 import SpriteKit
 import GameKit
+import os.log
 
 // MARK: Demolition derby UFOs
 
@@ -287,7 +288,7 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
   ///   - score: The score of the just-played game (or `nil` if the previous scene
   ///     was the main menu)
   init(size: CGSize, score: GameScore?) {
-    logging("HighScoreScene init")
+    os_log("HighScoreScene init", log: .app, type: .debug)
     super.init(size: size)
     name = "highScoreScene"
     initGameArea(avoidSafeArea: false)
@@ -332,7 +333,8 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
       highScores = highScores.sorted { $0.points > $1.points || ($0.points == $1.points && $0.date > $1.date) }
       for score in highScores {
         let date = Date(timeIntervalSinceReferenceDate: score.date)
-        print("\(score.playerName ?? "unknown") \(score.points) \(score.date) \(date)")
+        os_log("score %{public}s %d %f %{public}s", log: .app, type: .debug,
+               score.playerName ?? "unknown", score.points, score.date, "\(date)")
       }
       var playerScore = score?.points ?? 0
       // See if the player has achieved a high rank on the weekly leaderboards
@@ -359,7 +361,7 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     if score != nil {
       // A game was just finished
       UserData.gamesPlayed.value += 1
-      logging("A game was played, \(UserData.gamesPlayed.value) so far")
+      os_log("%d games played so far", log: .app, type: .debug, UserData.gamesPlayed.value)
     }
   }
 
@@ -368,7 +370,7 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
   }
 
   deinit {
-    logging("HighScoreScene deinit \(self.hash)")
+    os_log("HighScoreScene deinit %{public}s", log: .app, type: .debug, "\(self.hash)")
   }
 
   // MARK: - Button actions
@@ -393,7 +395,7 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
   /// state to match
   /// - Parameter notification: A notification indicating what happened
   @objc func gcStateChanged(_ notification: Notification) {
-    logging("High score scene got notification of Game Center state change")
+    os_log("High score scene got notification of Game Center state change", log: .app, type: .debug)
     if notification.object as? Bool ?? false {
       gcButton.enable()
     } else {
@@ -407,9 +409,10 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
   /// Display the view controller from Game Center with leaderboards and achievements
   func showGameCenter() {
     guard let rootVC = view?.window?.rootViewController, Globals.gcInterface.enabled else {
-      logging("Can't show Game Center")
+      os_log("Can't show Game Center", log: .app, type: .error)
       return
     }
+    os_log("HighScoreScene will show Game Center", log: .app, type: .debug)
     let gcvc = GKGameCenterViewController()
     gcvc.gameCenterDelegate = self
     // The high scores scene includes information from the Game Center leaderboards
@@ -424,6 +427,7 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
   /// This is called when the Game Center view controller should be dismissed
   /// - Parameter gcvc: The Game Center view controller
   func gameCenterViewControllerDidFinish(_ gcvc: GKGameCenterViewController) {
+    os_log("HighScoreScene finished showing Game Center", log: .app, type: .debug)
     gcvc.dismiss(animated: true) {
       self.showingGCVC = false
       self.isPaused = false
@@ -517,7 +521,6 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
   override func didMove(to view: SKView) {
     super.didMove(to: view)
     run(.wait(for: 2, then: spawnSmashies), withKey: spawnSmashiesKey)
-    logging("\(name!) finished didMove to view")
   }
 
   /// Main update loop

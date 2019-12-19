@@ -8,6 +8,7 @@
 
 import SpriteKit
 import SafariServices
+import os.log
 
 /// Game credits and acknowledgements
 class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
@@ -97,7 +98,7 @@ class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
   /// Make a new scene to display the credits
   /// - Parameter size: The size of the scene
   override init(size: CGSize) {
-    logging("CreditsScene init")
+    os_log("CreditsScene init", log: .app, type: .debug)
     super.init(size: size)
     name = "creditsScene"
     initGameArea(avoidSafeArea: false)
@@ -109,7 +110,7 @@ class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
   }
 
   deinit {
-    logging("CreditsScene deinit \(self.hash)")
+    os_log("CreditsScene deinit %{public}s", log: .app, type: .debug, "\(self.hash)")
   }
 
   // MARK: - Button actions
@@ -144,9 +145,10 @@ class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
   /// - Parameter link: The link, minus the initial https://
   func showLink(_ link: String) {
     guard let rootVC = view?.window?.rootViewController else {
-      logging("No view controller to show \(link)")
+      os_log("No view controller to show %{public}s", log: .app, type: .error, link)
       return
     }
+    os_log("CreditsScene will show link", log: .app, type: .debug)
     guard let url = URL(string: "https://" + link) else { fatalError("Invalid link \(link)") }
     let config = SFSafariViewController.Configuration()
     let sfvc = SFSafariViewController(url: url, configuration: config)
@@ -159,6 +161,7 @@ class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
   /// This is called when the Safari is closed
   /// - Parameter sfvc: The Safari view controller
   func safariViewControllerDidFinish(_ sfvc: SFSafariViewController) {
+    os_log("CreditsScene finished showing link", log: .app, type: .debug)
     showingLink = false
     isPaused = false
   }
@@ -262,7 +265,6 @@ class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
     // delay between bursts.  The first time that they see the credits, it gives them
     // a moment to think that it's a normal static scene before the show begins.
     run(.wait(for: .random(in: 4 ... 5), then: fireworks), withKey: "fireworks")
-    logging("\(name!) finished didMove to view")
   }
 
   override func update(_ currentTime: TimeInterval) {

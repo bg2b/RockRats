@@ -8,6 +8,7 @@
 
 import SpriteKit
 import AVFoundation
+import os.log
 
 /// A sound effect (who'd have guessed?)
 ///
@@ -103,7 +104,7 @@ class Sounds {
       }
     }
     bytes /= 1024
-    logging("Sound data \(bytes) KB for \(audioBuffers.count) sounds")
+    os_log("Sound data %d KB for %d sounds", log: .app, type: .debug, bytes, audioBuffers.count)
   }
 }
 
@@ -165,7 +166,7 @@ class SceneAudio {
       // Set the muted state based on the user's preference
       level = UserData.audioLevel.value
     } catch {
-      logging("Cannot start audio engine, \(error.localizedDescription)")
+      os_log("Cannot start audio engine, %{public}s", log: .app, type: .error, error.localizedDescription)
     }
   }
 
@@ -187,7 +188,7 @@ class SceneAudio {
     do {
       try audioEngine.start()
     } catch {
-      logging("Unable to resume audio engine, \(error.localizedDescription)")
+      os_log("Unable to resume audio engine, %{public}s", log: .app, type: .error, error.localizedDescription)
     }
   }
 

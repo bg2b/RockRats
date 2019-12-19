@@ -7,6 +7,7 @@
 //
 
 import SpriteKit
+import os.log
 
 // MARK: Stuff for u_time
 
@@ -75,7 +76,7 @@ func readUtime(view: SKView) -> Double {
   let sprite = SKSpriteNode(texture: dotTexture, size: dotTexture.size())
   sprite.shader = utimeShader
   guard let rendered = view.texture(from: sprite) else {
-    logging("readUtime failed to render shaded sprite")
+    os_log("readUtime failed to render shaded sprite", log: .app, type: .error)
     return 0
   }
   // Convert the texture into a bitmap
@@ -92,7 +93,7 @@ func readUtime(view: SKView) -> Double {
   result *= 256
   result += Double(pixel & 0xff)
   result /= 128
-  logging("u_time in shaders is \(result)")
+  os_log("u_time in shaders is %f", log: .app, type: .debug, result)
   return result
 }
 
@@ -114,11 +115,11 @@ func getUtimeOffset(view: SKView?) -> Double {
     return utimeOffset
   }
   guard let view = view else {
-    logging("No view to set utime offset")
+    os_log("No view to set utime offset", log: .app, type: .debug)
     return 0
   }
   let newOffset = readUtime(view: view) - Globals.lastUpdateTime
-  logging("utimeOffset set to \(newOffset) at time \(Globals.lastUpdateTime)")
+  os_log("utimeOffset set to %fat time %f", log: .app, type: .debug, newOffset, Globals.lastUpdateTime)
   utimeOffset = newOffset
   return newOffset
 }

@@ -7,6 +7,7 @@
 //
 
 import SpriteKit
+import os.log
 
 // TextureBitmap is declared in Hyperspace.swift
 typealias ImageMask = TextureBitmap<Bool>
@@ -235,7 +236,7 @@ class ConformingPhysicsCache {
   }
 
   func stats() {
-    logging("Conforming physics cache made \(made) physicsBodies, \(unique) are unique")
+    os_log("Conforming physics cache made %d physicsBodies, %d unique", log: .app, type: .debug, made, unique)
   }
 }
 

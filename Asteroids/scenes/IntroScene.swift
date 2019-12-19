@@ -8,6 +8,7 @@
 
 import SpriteKit
 import AVFoundation
+import os.log
 
 // MARK: Introduction and conclusion
 
@@ -96,7 +97,7 @@ class IntroScene: BasicScene {
   ///   - size: The size of the scene
   ///   - conclusion: `true` for the conclusion, `false` for the introduction
   init(size: CGSize, conclusion: Bool) {
-    logging("IntroScene init")
+    os_log("IntroScene init", log: .app, type: .debug)
     self.conclusion = conclusion
     if !conclusion {
       // They're a new recruit...
@@ -149,7 +150,7 @@ class IntroScene: BasicScene {
   }
 
   deinit {
-    logging("IntroScene deinit \(self.hash)")
+    os_log("IntroScene deinit %{public}s", log: .app, type: .debug, "\(self.hash)")
   }
 
   // MARK: - Message display
@@ -184,7 +185,6 @@ class IntroScene: BasicScene {
   override func didMove(to view: SKView) {
     super.didMove(to: view)
     wait(for: 1, then: incoming)
-    logging("\(name!) finished didMove to view")
   }
 
   override func update(_ currentTime: TimeInterval) {

@@ -7,6 +7,7 @@
 //
 
 import SpriteKit
+import os.log
 
 /// A cache for sprites that get created and destroyed a lot, e.g., asteroids of
 /// various shapes and shots.  Sprites managed by this class must not be renamed,
@@ -72,7 +73,7 @@ class SpriteCache {
 
   /// Print some random statistics
   func stats() {
-    logging("Sprite cache created \(created) unique sprites, used \(used); \(recycled) sprites are in the recycle bin")
+    os_log("Sprite cache created %d sprites, used %d, %d are in the recycle bin", log: .app, type: .debug, created, used, recycled)
   }
 }
 

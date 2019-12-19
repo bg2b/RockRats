@@ -7,6 +7,7 @@
 //
 
 import SpriteKit
+import os.log
 
 // MARK: zPositions
 
@@ -146,7 +147,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     get { super.isPaused }
     set {
       if forcePause && !newValue {
-        logging("holding isPaused at true because forcePause is true")
+        os_log("holding isPaused at true because forcePause is true", log: .app, type: .debug)
       }
       super.isPaused = newValue || forcePause
     }
@@ -361,7 +362,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// device's safe area.
   override init(size: CGSize) {
     super.init(size: size)
-    logging("BasicScene init \(self.hash)")
+    os_log("BasicScene init %{public}s", log: .app, type: .debug, "\(self.hash)")
     fullFrame = CGRect(x: -0.5 * size.width, y: -0.5 * size.height, width: size.width, height: size.height)
     scaleMode = .aspectFill
     anchorPoint = CGPoint(x: 0.5, y: 0.5)
@@ -731,7 +732,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
         maxDelay = max(maxDelay, delay)
         ufo.run(.wait(for: delay) { self.warpOutUFO(ufo) }, withKey: "warpOut")
       } else {
-        logging("Cleanup on unlaunched ufo")
+        os_log("Cleanup on unlaunched ufo", log: .app, type: .debug)
         ufo.cleanup()
         removeUFO(ufo)
       }
@@ -910,7 +911,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// - Returns: `true` means proceed, `false` indicates that some other scene switch is happening
   func beginSceneSwitch() -> Bool {
     if switchingScenes {
-      logging("beginSceneSwitch says NO")
+      os_log("beginSceneSwitch says no", log: .app, type: .debug)
       return false
     } else {
       switchingScenes = true
@@ -924,12 +925,11 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   ///   - newScene: The scene to switch to
   ///   - duration: Optional amount of time for the transition
   func switchScene(to newScene: SKScene, withDuration duration: Double = 1) {
-    logging("\(name!) switchScene to \(newScene.name!)")
+    os_log("switchScene %{public}s -> %{public}s", log: .app, type: .debug, name!, newScene.name!)
     let transition = SKTransition.fade(with: AppAppearance.transitionColor, duration: duration)
     newScene.removeAllActions()
-    logging("\(name!) about to call presentScene")
+    os_log("%{public}s calls presentScene", log: .app, type: .debug, name!)
     view?.presentScene(newScene, transition: transition)
-    logging("\(name!) finished presentScene")
   }
 
   /// Transition to a new scene when all transient stuff that might be happening in
@@ -979,19 +979,18 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
 
   /// Subclasses should override this to do stuff like start a new game
   override func didMove(to view: SKView) {
-    logging("Cache stats:")
+    os_log("%{public}s didMove to view", log: .app, type: .debug, name!)
     Globals.textureCache.stats()
     Globals.spriteCache.stats()
     Globals.explosionCache.stats()
     Globals.conformingPhysicsCache.stats()
     Globals.asteroidSplitEffectsCache.stats()
     Globals.sounds.stats()
-    logging("\(name!) didMove to view")
   }
 
   /// Subclasses should override this if needed
   override func willMove(from view: SKView) {
-    logging("\(name!) willMove from view")
+    os_log("%s willMove from view", log: .app, type: .debug, name!)
     removeAllActions()
     resetUtimeOffset()
   }

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import os.log
 
 /// A value that is saved in UserDefaults.standard.  Holds the name for the value (a
 /// string) and a default value of the appropriate type.
@@ -44,12 +45,12 @@ struct GameCounter {
       let local = localDict[playerID] ?? 0
       let iCloud = iCloudDict[playerID] ?? 0
       let result = max(local, iCloud)
-      logging("Read counter \(name) for \(playerID): local \(local), iCloud \(iCloud), result \(result)")
+      os_log("Read counter %{public}s for %s: local %d, iCloud %d, result %d", log: .app, type: .debug, name, playerID, local, iCloud, result)
       return result
     }
     set {
       let playerID = UserData.currentPlayerID.value
-      logging("Set counter \(name) for \(playerID) to \(newValue)")
+      os_log("Set counter %{public}s for %s to %d", log: .app, type: .debug, name, playerID, newValue)
       var mergedDict = UserDefaults.standard.object(forKey: name) as? [String: Int] ?? [String: Int]()
       let iCloudDict = NSUbiquitousKeyValueStore.default.object(forKey: name) as? [String: Int] ?? [String: Int]()
       for (iCloudKey, iCloudValue) in iCloudDict {
@@ -59,7 +60,7 @@ struct GameCounter {
       let mergedValue = newValue < 0 ? 0 : max(mergedDict[playerID] ?? 0, newValue)
       mergedDict[playerID] = mergedValue
       for (key, value) in mergedDict {
-        logging("Merged: player \(key), count \(value)")
+        os_log("Merged: player %s, count %d", log: .app, type: .debug, key, value)
       }
       UserDefaults.standard.set(mergedDict, forKey: name)
       NSUbiquitousKeyValueStore.default.set(mergedDict, forKey: name)
@@ -76,7 +77,7 @@ struct HighScores {
   /// Write scores in UserDefaults and iCloud
   /// - Parameter highScores: The scores to encode and save
   func writeBack(_ highScores: [GameScore]) {
-    logging("Saving \(highScores.count) high scores")
+    os_log("Saving %d high scores", log: .app, type: .debug, highScores.count)
     let encoded = highScores.map { $0.encode() }
     UserDefaults.standard.set(encoded, forKey: "highScores")
     NSUbiquitousKeyValueStore.default.set(encoded, forKey: "highScores")
@@ -259,10 +260,10 @@ func setCurrentPlayer(_ playerID: String, playerName: String, alternatePlayerID:
   if let alternatePlayerID = alternatePlayerID {
     UserData.newPlayerIDs.value[playerID] = alternatePlayerID
   }
-  logging("Player is now \(playerID) (alternate \(alternatePlayerID ?? "<none>")), name \(playerName)")
+  os_log("Player is now %s (alternate %s), name %s", log: .app, type: .debug, playerID, alternatePlayerID ?? "<none>", playerName)
   UserData.ufosDestroyed.value = UserData.ufosDestroyedCounter.value
   UserData.asteroidsDestroyed.value = UserData.asteroidsDestroyedCounter.value
-  logging("UFO counter \(UserData.ufosDestroyed.value), asteroid counter \(UserData.asteroidsDestroyed.value)")
+  os_log("UFO counter %d, asteroid counter %d", log: .app, type: .debug, UserData.ufosDestroyed.value, UserData.asteroidsDestroyed.value)
   // Synchronize in case either local or iCloud was out-of-date.
   updateGameCounters()
 }
@@ -274,7 +275,7 @@ func setCurrentPlayer(_ playerID: String, playerName: String, alternatePlayerID:
 func updateGameCounters() {
   // The current counters have been updated by playing a game.  Sync them to
   // persistent storage and iCloud.
-  logging("Updating game counters")
+  os_log("Updating game counters", log: .app, type: .debug)
   UserData.ufosDestroyedCounter.value = UserData.ufosDestroyed.value
   UserData.asteroidsDestroyedCounter.value = UserData.asteroidsDestroyed.value
   // If by some chance the same person has been playing on another device, store the

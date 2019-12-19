@@ -7,6 +7,7 @@
 //
 
 import SpriteKit
+import os.log
 
 // I have a texture that is the full thing that's supposed to explode, like a
 // spaceship or whatever.  I'll cut it up into smaller rectangles.  Each part will
@@ -197,7 +198,7 @@ class ExplosionCache {
 
   /// Print some stats for debugging
   func stats() {
-    logging("Explosion cache created \(created) explosions; \(recycled) are in the recycle bin")
+    os_log("Created %d explosions, %d have been recycled", log: .app, type: .debug, created, recycled)
   }
 }
 

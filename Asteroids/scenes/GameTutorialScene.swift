@@ -266,7 +266,6 @@ class GameTutorialScene: BasicScene {
   override func willMove(from view: SKView) {
     super.willMove(from: view)
     cleanup()
-    logging("\(name!) finished willMove from view")
   }
 
   // MARK: - Spawning

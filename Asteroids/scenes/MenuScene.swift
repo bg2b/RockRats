@@ -9,6 +9,7 @@
 import SpriteKit
 import GameKit
 import StoreKit
+import os.log
 
 // MARK: Main menu
 
@@ -158,18 +159,18 @@ class MenuScene: BasicScene {
   func setGameCenterAuth(viewController: UIViewController?) {
     gameCenterAuthVC = viewController
     if gameCenterAuthVC == nil {
-      logging("\(name!) clears Game Center view controller")
+      os_log("MenuScene clears Game Center view controller", log: .app, type: .debug)
       presentingGCAuth = false
       isPaused = false
     } else {
-      logging("\(name!) sets Game Center view controller")
+      os_log("MenuScene sets Game Center view controller", log: .app, type: .debug)
     }
   }
 
   /// Check if Game Center wants to authenticate, and show its view controller if so
   func gameCenterAuth() {
     if let gcvc = gameCenterAuthVC, !presentingGCAuth, let rootVC = view?.window?.rootViewController {
-      logging("\(name!) will present Game Center view controller")
+      os_log("MenuScene will present Game Center view controller", log: .app, type: .debug)
       presentingGCAuth = true
       isPaused = true
       rootVC.present(gcvc, animated: true)
@@ -240,7 +241,6 @@ class MenuScene: BasicScene {
     // The first time into the menu there won't be any asteroids, so wait longer
     // before starting the UFOs to ensure that they'll have something to shoot at
     wait(for: (asteroids.count > 5 ? 5 : 10), then: spawnUFOs)
-    logging("\(name!) finished didMove to view")
   }
 
   // MARK: - Touch handling

@@ -7,6 +7,7 @@
 //
 
 import SpriteKit
+import os.log
 
 // MARK: Teach the padawans, I must
 
@@ -139,7 +140,7 @@ class TutorialScene: GameTutorialScene {
   /// - Parameters:
   ///   - size: The size of the scene
   override init(size: CGSize) {
-    logging("TutorialScene init")
+    os_log("TutorialScene init", log: .app, type: .debug)
     super.init(size: size)
     name = "tutorialScene"
     initTutorial()
@@ -153,7 +154,7 @@ class TutorialScene: GameTutorialScene {
   }
 
   deinit {
-    logging("TutorialScene deinit \(self.hash)")
+    os_log("TutorialScene deinit %{public}s", log: .app, type: .debug, "\(self.hash)")
   }
 
   // MARK: - Messages
@@ -544,7 +545,7 @@ class TutorialScene: GameTutorialScene {
   }
 
   func training3() {
-    showInstructions("@Slide@ and @hold@", toDo: "to @thrust forwards@", delay: instructionDelay) {
+    showInstructions("@Slide@ and @hold@ to", toDo: "@thrust forwards@", delay: instructionDelay) {
       let delta = CGVector(dx: 0, dy: 1.25 * self.slideAmount)
       self.showSlideAndHold(position: self.movementPosition(), moveBy: delta)
       self.observeStick(direction: CGVector(dx: 1, dy: 0), successes: 0, then: self.training4)
@@ -552,7 +553,7 @@ class TutorialScene: GameTutorialScene {
   }
 
   func training4() {
-    showInstructions("@Slide@ and @hold@", toDo: "to @thrust backwards@", delay: instructionDelay) {
+    showInstructions("@Slide@ and @hold@ to", toDo: "@thrust backwards@", delay: instructionDelay) {
       let delta = CGVector(dx: 0, dy: -1.25 * self.slideAmount)
       self.showSlideAndHold(position: self.movementPosition(), moveBy: delta)
       self.observeStick(direction: CGVector(dx: -1, dy: 0), successes: 0, then: self.training5)
@@ -560,7 +561,7 @@ class TutorialScene: GameTutorialScene {
   }
 
   func training5() {
-    showInstructions("@Tap@", toDo: "to @fire lasers@", delay: instructionDelay) {
+    showInstructions("@Tap@ to", toDo: "@fire lasers@", delay: instructionDelay) {
       self.showTaps(position: self.shootAndJumpPosition())
       self.shotsFired = 0
       self.observeShooting(then: self.training6)
@@ -568,7 +569,7 @@ class TutorialScene: GameTutorialScene {
   }
 
   func training6() {
-    showInstructions("@Swipe@", toDo: "to @jump to hyperspace@", delay: instructionDelay) {
+    showInstructions("@Swipe@ to", toDo: "@jump to hyperspace@", delay: instructionDelay) {
       self.showSwipe(position: self.shootAndJumpPosition(), moveBy: CGVector(dx: 0, dy: 1.25 * self.slideAmount))
       self.hasJumped = false
       self.observeHyperspace(then: self.training7)
@@ -576,7 +577,7 @@ class TutorialScene: GameTutorialScene {
   }
 
   func training7() {
-    showInstructions("@Shoot@ lasers", toDo: "to @destroy the asteroid@", delay: instructionDelay) {
+    showInstructions("@Shoot@ lasers to", toDo: "@destroy the asteroid@", delay: instructionDelay) {
       self.spawnAsteroid(size: "huge")
       self.observeAsteroid(then: self.trainingComplete)
     }
@@ -652,7 +653,6 @@ class TutorialScene: GameTutorialScene {
     replenishEnergy()
     wait(for: 1, then: showMessageAndSpawn)
     wait(for: 5, then: training1)
-    logging("\(name!) finished didMove to view")
   }
 
   /// Main update loop

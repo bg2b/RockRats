@@ -7,6 +7,7 @@
 //
 
 import GameKit
+import os.log
 
 // At some point, playerID will become gamePlayerID on iOS ?? devices since playerID
 // is deprecated.  The alternatePlayerID is to allow a smooth transition without
@@ -81,14 +82,12 @@ class GameCenterInterface {
   init(leaderboardID: String, presenter: @escaping (_ gcvc: UIViewController?) -> Void) {
     self.leaderboardID = leaderboardID
     self.presenter = presenter
-    logging("GameCenterInterface init starts")
+    os_log("GameCenterInterface init", log: .app, type: .debug)
     GKLocalPlayer.local.authenticateHandler = { [unowned self] gcAuthorizationViewController, error in
-      logging("GKLocalPlayer authenticate handler called")
+      os_log("GKLocalPlayer authenticate handler called", log: .app, type: .debug)
       self.presenter(gcAuthorizationViewController)
-      if let error = error {
-        logging("Error in Game Center authentication: \(error.localizedDescription)")
-      }
-      logging("Game Center is \(self.enabled ? "enabled" : "not enabled")")
+      self.logError(error, in: "authentication")
+      os_log("Game Center is %{public}s", log: .app, type: .info, self.enabled ? "enabled" : "not enabled")
       if self.enabled {
         if self.achievementIdentifiers == nil {
           GKAchievementDescription.loadAchievementDescriptions { [weak self] allAchievements, error in
@@ -116,7 +115,6 @@ class GameCenterInterface {
       }
       NotificationCenter.default.post(name: .authenticationChanged, object: self.enabled)
     }
-    logging("GameCenterInterface init finishes")
   }
 
   /// Callback to receive the list of achievement identifiers from Game Center
@@ -125,38 +123,34 @@ class GameCenterInterface {
   ///   - error: Whatever error might have occurred
   func setAchievementIdentifiers(_ allAchievements: [GKAchievementDescription]?, error: Error?) {
     // I only need to set these once, since they're independent of the player
-    guard achievementIdentifiers == nil else { return }
-    if let error = error {
-      // Don't save a partial list
-      logging("Error loading Game Center achievements: \(error.localizedDescription)")
-    } else {
+    if noError(error, in: "loading achievement IDs") {
       guard let allAchievements = allAchievements else { return }
-      logging("\(allAchievements.count) possible achievements:")
-      achievementIdentifiers = Set<String>(allAchievements.map {
-        logging($0.identifier)
-        return $0.identifier
-      })
+      achievementIdentifiers = Set<String>(allAchievements.map { $0.identifier })
     }
+  }
+
+  func noError(_ error: Error?, in stage: String) -> Bool {
+    if let error = error {
+      os_log("Game Center interface %{public}s, %{public}s", log: .app, type: .error, stage, error.localizedDescription)
+      return false
+    } else {
+      return true
+    }
+  }
+
+  func logError(_ error: Error?, in stage: String) {
+    _ = noError(error, in: stage)
   }
 
   /// Request the achievements of the local player from Game Center
   func loadPlayerAchievements() {
     GKAchievement.loadAchievements { [weak self] playerAchievements, error in
-      self?.setPlayerAchievements(playerAchievements, error: error)
-    }
-  }
-
-  /// Callback to receive the list of achievements of the local player
-  /// - Parameters:
-  ///   - playerAchievements: The achievements the player has earned
-  ///   - error: Whatever error might have occurred
-  func setPlayerAchievements(_ playerAchievements: [GKAchievement]?, error: Error?) {
-    if let error = error {
-      logging("Error loading Game Center player achievements: \(error.localizedDescription)")
-    }
-    playerAchievements?.forEach {
-      self.playerAchievements[$0.identifier] = $0.percentComplete
-      logging("Achievement with id \($0.identifier) is \($0.percentComplete)% complete")
+      guard let self = self else { return }
+      self.logError(error, in: "loading player achievements")
+      playerAchievements?.forEach {
+        self.playerAchievements[$0.identifier] = $0.percentComplete
+        os_log("Achievement %{public}s is %.2f%% complete", log: .app, type: .info, $0.identifier, $0.percentComplete)
+      }
     }
   }
 
@@ -192,12 +186,12 @@ class GameCenterInterface {
     // reported to Game Center successfully when the game finishes.
     playerAchievements[identifier] = 100
     GKAchievement.report([achievement]) { [weak self] error in
-      if let error = error {
-        logging("Error reporting achievement \(identifier) to Game Center: \(error.localizedDescription)")
+      guard let self = self else { return }
+      if !self.noError(error, in: "reporting achivement \(identifier)") {
         // I don't know how this could happen, but stick this in with the progress
         // achievements and hope that the flush after a game finishes manages to
         // succeed.
-        self?.playerAchievementsProgress[identifier] = 100
+        self.playerAchievementsProgress[identifier] = 100
       }
     }
   }
@@ -241,19 +235,17 @@ class GameCenterInterface {
     for (identifier, percent) in playerAchievementsProgress {
       let achievement = GKAchievement(identifier: identifier)
       achievement.percentComplete = percent
-      logging("Achievement \(identifier) at \(percent)%")
+      os_log("Achievement %{public}s at %.2f%%", log: .app, type: .debug, identifier, percent)
       achievement.showsCompletionBanner = true
       achievements.append(achievement)
     }
     GKAchievement.report(achievements) { [weak self] error in
       guard let self = self else { return }
-      if let error = error {
-        logging("Error reporting progress achievements to Game Center: \(error.localizedDescription)")
-        // I'm not sure what can go wrong since Game Center is good about caching
-        // stuff for retry transparently to us in case of network issues.  But
-        // anyway, I'll leave playerAchievementsProgress alone.  Maybe the player
-        // will try another game and I'll have another go at flushProgress.
-      } else {
+      // I'm not sure what can go wrong since Game Center is good about caching stuff
+      // for retry transparently to us in case of network issues.  But anyway, I'll
+      // leave playerAchievementsProgress alone if there is some error.  Maybe the
+      // player will try another game and I'll have another go at flushProgress.
+      if self.noError(error, in: "reporting progress achievements") {
         // Move the completion amounts to playerAchievements to record that they've
         // been successfully sent to Game Center.
         for (identifier, percent) in self.playerAchievementsProgress {
@@ -270,12 +262,11 @@ class GameCenterInterface {
   /// no way back.
   func resetAchievements() {
     GKAchievement.resetAchievements { [weak self] error in
-      if let error = error {
-        logging("Error reseting achievements: \(error.localizedDescription)")
-      } else {
-        self?.playerAchievements.removeAll()
-        self?.playerAchievementsProgress.removeAll()
-        self?.loadPlayerAchievements()
+      guard let self = self else { return }
+      if self.noError(error, in: "resetting achievements") {
+        self.playerAchievements.removeAll()
+        self.playerAchievementsProgress.removeAll()
+        self.loadPlayerAchievements()
       }
     }
   }
@@ -302,15 +293,12 @@ class GameCenterInterface {
   /// - Parameter score: The number of points
   /// - Returns: A `GameScore` built from the `GKScore` that Game Center created
   func saveScore(_ score: Int) -> GameScore {
+    os_log("Reporting score %{public}d to Game Center", log: .app, type: .info, score)
     let gcScore = GKScore(leaderboardIdentifier: leaderboardID)
     gcScore.value = Int64(score)
     gcScore.context = hashScore(score)
     GKScore.report([gcScore]) { error in
-      if let error = error {
-        logging("Error reporting score \(score) to Game Center: \(error.localizedDescription)")
-      } else {
-        logging("Reported score \(score) to Game Center")
-      }
+      self.logError(error, in: "reporting score")
     }
     // If the app was running and the player logged in, but then they put it in the
     // background, go off and change their Game Center name, and then come back and
@@ -342,9 +330,8 @@ class GameCenterInterface {
     if let score = score {
       let player = score.player
       let valid = scoreIsValid(score) ? "valid" : "invalid"
-      logging("player \(player.alias), score \(score.value), date \(score.date), rank \(score.rank), \(valid)")
-    } else {
-      logging("none")
+      os_log("player %{public}s, score %d, date %{public}s, rank %d, %{public}s", log: .app, type: .debug,
+             player.alias, score.value, "\(score.date)", score.rank, valid)
     }
   }
 
@@ -364,9 +351,7 @@ class GameCenterInterface {
     leaderboard.timeScope = .week
     leaderboard.loadScores { [weak self] scores, error in
       guard let self = self else { return }
-      if let error = error {
-        logging("Error requesting scores from Game Center: \(error.localizedDescription)")
-      } else if let scores = scores {
+      if self.noError(error, in: "requesting scores"), let scores = scores {
         self.printScore(leaderboard.localPlayerScore)
         scores.forEach { self.printScore($0) }
         self.localPlayerScore = leaderboard.localPlayerScore
