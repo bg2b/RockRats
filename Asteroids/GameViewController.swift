@@ -41,7 +41,7 @@ class GameViewController: UIViewController {
       os_log("viewDidLoad will present %{public}s", log: .app, type: .debug, toPresent.name!)
       view.presentScene(toPresent)
       // Drawing preferences
-      view.preferredFramesPerSecond = 60
+      view.preferredFramesPerSecond = 120
       view.ignoresSiblingOrder = true
       // Debugging stuff
       // view.showsFPS = true
