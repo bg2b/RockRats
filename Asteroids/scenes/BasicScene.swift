@@ -133,6 +133,8 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// The next scene to transition to.  To avoid lag, this is typically created on a
   /// background thread; after the variable becomes non-`nil` the transition occurs.
   var nextScene: SKScene?
+  /// Signpost ID for this instance
+  let signpostID = OSSignpostID(log: .poi)
 
   // MARK: - Pausing
 

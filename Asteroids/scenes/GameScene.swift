@@ -325,9 +325,10 @@ class GameScene: GameTutorialScene {
   /// When an asteroid is removed, check to see if I should start a new wave
   override func asteroidRemoved() {
     if asteroids.isEmpty && !gameOver {
+      os_log("Last asteroid removed at %f, going to spawn a wave", log: .app, type: .debug, Globals.lastUpdateTime)
+      os_signpost(.event, log: .poi, name: "Last asteroid removed", signpostID: signpostID)
       normalHeartbeatRate()
       stopSpawningUFOs()
-      os_log("Last asteroid removed at %f, going to spawn a wave", log: .app, type: .debug, Globals.lastUpdateTime)
       // If the player dies from colliding with the last asteroid, then I have to
       // wait long enough for any of the player's remaining lasers to possibly hit a
       // UFO and score enough points for an extra life.  That wait is currently 4
@@ -340,6 +341,8 @@ class GameScene: GameTutorialScene {
 
   /// Spawn a wave of asteroids
   func spawnWave() {
+    os_log("Spawn next wave at %f", log: .app, type: .debug, Globals.lastUpdateTime)
+    os_signpost(.event, log: .poi, name: "Spawn wave", signpostID: signpostID)
     if Globals.gameConfig.waveNumber() == 11 {
       reportAchievement(achievement: .spinalTap)
     }
@@ -350,7 +353,6 @@ class GameScene: GameTutorialScene {
     for _ in 1...numAsteroids {
       spawnAsteroid(size: "huge")
     }
-    os_log("Spawned next wave at %f", log: .app, type: .debug, Globals.lastUpdateTime)
     // UFOs will start appearing after a full duration period
     ufoSpawningRate = 1
     spawnUFOs()
@@ -388,6 +390,7 @@ class GameScene: GameTutorialScene {
     } else {
       // Do the spawn
       os_log("Spawn UFO at %f", log: .app, type: .debug, Globals.lastUpdateTime)
+      os_signpost(.event, log: .poi, name: "Spawn UFO", signpostID: signpostID)
       spawnUFO(ufo: UFO(brothersKilled: ufosToAvenge, audio: audio))
       numberOfUFOsThisWave += 1
       // Once a UFO spawns, don't be eager to spawn a second
@@ -455,6 +458,7 @@ class GameScene: GameTutorialScene {
       wait(for: 0.5) { self.spawnPlayer(safeTime: max(safeTime - 0.25, 0)) }
     } else {
       os_log("Spawn player at %f", log: .app, type: .debug, Globals.lastUpdateTime)
+      os_signpost(.event, log: .poi, name: "Spawn player", signpostID: signpostID)
       ufosToAvenge /= 2
       killedByUFO = false
       energyBar.fill()
@@ -605,6 +609,7 @@ class GameScene: GameTutorialScene {
   ///   - ufo: The UFO that it hit
   func laserHit(laser: SKNode, ufo: SKNode) {
     os_log("UFO hit by laser at %f", log: .app, type: .debug, Globals.lastUpdateTime)
+    os_signpost(.event, log: .poi, name: "UFO shot by player", signpostID: signpostID)
     consecutiveHit()
     if killedByUFO {
       // The player died by getting shot by a UFO and hasn't respawned yet.
@@ -652,6 +657,7 @@ class GameScene: GameTutorialScene {
   ///   - player: The player
   func ufoLaserHit(laser: SKNode, player: SKNode) {
     os_log("Player shot by UFO at %f", log: .app, type: .debug, Globals.lastUpdateTime)
+    os_signpost(.event, log: .poi, name: "Player shot by UFO", signpostID: signpostID)
     if timesUFOsShot == 1 {
       reportAchievement(achievement: .redShirt)
     }
@@ -669,6 +675,7 @@ class GameScene: GameTutorialScene {
   /// - Parameter asteroid: The asteroid
   func playerCollided(asteroid: SKNode) {
     os_log("Player collided with asteroid at %f", log: .app, type: .debug, Globals.lastUpdateTime)
+    os_signpost(.event, log: .poi, name: "Player collided with asteroid", signpostID: signpostID)
     addToScore(asteroidPoints(asteroid))
     splitAsteroid(asteroid as! SKSpriteNode)
     destroyPlayer()
@@ -681,6 +688,7 @@ class GameScene: GameTutorialScene {
   /// - Parameter ufo: The UFO that they hit
   func playerHitUFO(ufo: SKNode) {
     os_log("Player and UFO collided at %f", log: .app, type: .debug, Globals.lastUpdateTime)
+    os_signpost(.event, log: .poi, name: "Player collided with UFO", signpostID: signpostID)
     if (ufo as! UFO).type != .kamikaze {
       reportAchievement(achievement: .leeroyJenkins)
     }
@@ -775,9 +783,22 @@ class GameScene: GameTutorialScene {
     }
   }
 
+  /// Mark the end of action execution and start of physics simulation
+  override func didEvaluateActions() {
+    os_signpost(.end, log: .poi, name: "2_actions", signpostID: signpostID)
+    os_signpost(.begin, log: .poi, name: "3_physics", signpostID: signpostID)
+  }
+
+  /// Mark the end of the render loop
+  override func didFinishUpdate() {
+    os_signpost(.end, log: .poi, name: "3_physics", signpostID: signpostID)
+  }
+
   /// Main update loop
   /// - Parameter currentTime: The game time
   override func update(_ currentTime: TimeInterval) {
+    // Mark the start of the render loop
+    os_signpost(.begin, log: .poi, name: "1_update", signpostID: signpostID)
     super.update(currentTime)
     if player.parent == nil {
       lastWarpInTime = currentTime
@@ -791,5 +812,8 @@ class GameScene: GameTutorialScene {
     player.fly()
     playfield.wrapCoordinates()
     audio.update()
+    // Mark the end of the update phase and the start of actions
+    os_signpost(.end, log: .poi, name: "1_update", signpostID: signpostID)
+    os_signpost(.begin, log: .poi, name: "2_actions", signpostID: signpostID)
   }
 }
