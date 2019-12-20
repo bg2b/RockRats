@@ -687,9 +687,9 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   ///
   /// - Parameter ufo: The UFO that should warp
   func warpOutUFO(_ ufo: UFO) {
-    removeUFO(ufo)
     audio.soundEffect(.ufoWarpOut, at: ufo.position)
     addToPlayfield(ufo.warpOut())
+    removeUFO(ufo)
   }
 
   /// Make all UFOs jump to hyperspace and leave the playfield
@@ -818,9 +818,9 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     // warpOut.  But if it just got destroyed (by hitting an asteroid) I have to be
     // sure to cancel the warp.
     ufo.removeAction(forKey: "warpOut")
-    removeUFO(ufo)
     audio.soundEffect(.ufoExplosion, at: ufo.position)
     addToPlayfield(ufo.explode(collision: collision))
+    removeUFO(ufo)
   }
 
   // MARK: - Contact handling

@@ -8,6 +8,7 @@
 
 import SpriteKit
 import AVFoundation
+import os.log
 
 // MARK: - Playfield geometry calculations
 
@@ -94,6 +95,26 @@ func smoothLimit(_ d: CGFloat, minValue: CGFloat) -> CGFloat {
 
 // MARK: - UFO stuff
 
+/// The types of UFOs
+enum UFOType: Int, CaseIterable {
+  case big = 0
+  case kamikaze
+  case small
+
+  /// Select a random UFO type according to the current game configuration
+  static func randomType() -> UFOType {
+    let typeChoice = Double.random(in: 0 ... 1)
+    let chances = Globals.gameConfig.value(for: \.ufoChances)
+    if typeChoice <= chances[0] {
+      return .big
+    } else if typeChoice <= chances[0] + chances[1] {
+      return .kamikaze
+    } else {
+      return .small
+    }
+  }
+}
+
 /// UFOs shoot at the player, but maybe they're just misunderstood
 ///
 /// This handles UFO instance creation, Designed Stupidity for flying and shooting,
@@ -102,28 +123,23 @@ func smoothLimit(_ d: CGFloat, minValue: CGFloat) -> CGFloat {
 /// Decisions about when to spawn a UFO, when they're allowed to shoot, when they
 /// should warp out, etc., are left up to the scene.
 class UFO: SKNode {
-  enum UFOType: Int {
-    case big = 0
-    case kamikaze
-    case small
-  }
   /// Type of UFO
   let type: UFOType
   /// The current (desired) cruising speed
-  var currentSpeed: CGFloat
+  var currentSpeed = CGFloat(0)
   /// Makes UFO noises if desired
   var engineSounds: ContinuousPositionalAudio?
   /// Average time between shots
-  let meanShotTime: Double
+  var meanShotTime = 0.0
   /// Time before attacking; negative means hostilities have commenced and the UFO is
   /// firing according to `meanShotTime`
-  var delayOfFirstShot: Double
+  var delayOfFirstShot = 0.0
   /// Becomes `true` when the UFO is allowed to attack
   var attackEnabled = false
   /// How accurately the UFOs shoot
-  var shotAccuracy: CGFloat
+  var shotAccuracy = CGFloat(0)
   /// How fast Kamikaze UFOs can maneuver
-  var kamikazeAcceleration: CGFloat
+  var kamikazeAcceleration = CGFloat(0)
   /// The texture for the UFO
   let ufoTexture: SKTexture
   /// The UFO's physical size
@@ -131,22 +147,9 @@ class UFO: SKNode {
 
   // MARK: - Initialization
 
-  /// Make a UFO
-  /// - Parameters:
-  ///   - brothersKilled: When the player seems to be just hunting UFOs, they start
-  ///     getting very dangerous
-  ///   - audio: The scene's audio, or `nil` if the UFO should be silent
-  required init(brothersKilled: Int, audio: SceneAudio?) {
-    // Select the UFO type according to the current game configuration
-    let typeChoice = Double.random(in: 0 ... 1)
-    let chances = Globals.gameConfig.value(for: \.ufoChances)
-    if typeChoice <= chances[0] {
-      type = .big
-    } else if typeChoice <= chances[0] + chances[1] {
-      type = .kamikaze
-    } else {
-      type = .small
-    }
+  /// Put a UFO (either newly-created, or from cache) into an appropriate initial state
+  /// - Parameter brothersKilled: How angry should the UFO be?
+  func reset(brothersKilled: Int) {
     let typeIndex = type.rawValue
     // Choose an initial speed
     let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[typeIndex]
@@ -158,10 +161,29 @@ class UFO: SKNode {
     // enable attacking.  When revenge factor starts increasing, the UFOs start
     // shooting faster, getting much quicker on the draw initially, and being much
     // more accurate in their shooting.
-    meanShotTime = Globals.gameConfig.value(for: \.ufoMeanShotTime)[typeIndex] * pow(0.75, Double(revengeFactor))
-    delayOfFirstShot = Double.random(in: 0 ... meanShotTime * pow(0.75, Double(revengeFactor)))
-    shotAccuracy = Globals.gameConfig.value(for: \.ufoAccuracy)[typeIndex] * pow(0.75, CGFloat(revengeFactor))
-    kamikazeAcceleration = Globals.gameConfig.value(for: \.kamikazeAcceleration) * pow(1.25, CGFloat(revengeFactor))
+    let smaller = pow(0.75, Double(revengeFactor))
+    meanShotTime = max(Globals.gameConfig.value(for: \.ufoMeanShotTime)[typeIndex] * smaller, 0.5)
+    delayOfFirstShot = Double.random(in: 0 ... meanShotTime * smaller)
+    shotAccuracy = Globals.gameConfig.value(for: \.ufoAccuracy)[typeIndex] * CGFloat(smaller)
+    kamikazeAcceleration = Globals.gameConfig.value(for: \.kamikazeAcceleration) / CGFloat(smaller)
+    // Gentle people, start your engines!
+    engineSounds?.playerNode.volume = 0.5
+    // When the UFO is first created, it'll start off the screen either to the left
+    // or right and will not be moving.  The scene is responsible for starting the
+    // UFO.  See the discussion of spawnUFO and launchUFO in BasicScene.
+    let body = requiredPhysicsBody()
+    body.isOnScreen = false
+    body.isDynamic = false
+    body.angularVelocity = .pi * 2
+  }
+
+  /// Make a UFO
+  /// - Parameters:
+  ///   - type: The desired type of the UFO
+  ///   - audio: The scene's audio, or `nil` if the UFO should be silent
+  required init(type: UFOType, audio: SceneAudio?) {
+    self.type = type
+    let typeIndex = type.rawValue
     // Texture and warp shader
     let textures = ["green", "blue", "red"]
     ufoTexture = Globals.textureCache.findTexture(imageNamed: "ufo_\(textures[typeIndex])")
@@ -170,14 +192,15 @@ class UFO: SKNode {
     let ufo = SKSpriteNode(texture: ufoTexture)
     ufo.name = "ufoImage"
     addChild(ufo)
-    // Make noise only if the desires it.  UFOs in non-game scenes are currently
-    // silent, since otherwise the constant whirring gets annoying
+    // Make noise if requested.  UFOs in non-game scenes are currently silent, since
+    // otherwise the constant whirring gets annoying
     if let audio = audio {
       let engineSounds = audio.continuousAudio([SoundEffect.ufoEnginesBig, .ufoEnginesMed, .ufoEnginesSmall][typeIndex], at: self)
-      engineSounds.playerNode.volume = 0.5
+      engineSounds.playerNode.volume = 0
       engineSounds.playerNode.play()
       self.engineSounds = engineSounds
     }
+    // Physics
     let body = SKPhysicsBody(circleOfRadius: 0.5 * ufoTexture.size().width)
     body.mass = 1 - 0.125 * CGFloat(typeIndex)
     body.categoryBitMask = ObjectCategories.ufo.rawValue
@@ -186,13 +209,12 @@ class UFO: SKNode {
     body.linearDamping = 0
     body.angularDamping = 0
     body.restitution = 0.9
-    // When the UFO is first created, it'll start off the screen either to the left
-    // or right and will not be moving.  The scene is responsible for starting the
-    // UFO.  See the discussion of spawnUFO and launchUFO in BasicScene.
-    body.isOnScreen = false
-    body.isDynamic = false
-    body.angularVelocity = .pi * 2
     physicsBody = body
+  }
+
+  convenience init(audio: SceneAudio?) {
+    self.init(type: UFOType.randomType(), audio: audio)
+    reset(brothersKilled: 0)
   }
 
   required init(coder aDecoder: NSCoder) {
@@ -364,7 +386,7 @@ class UFO: SKNode {
 
   /// Clean up any potential mess when a UFO is about to be removed
   func cleanup() {
-    engineSounds?.playerNode.stop()
+    engineSounds?.playerNode.volume = 0
     removeAllActions()
     removeFromParent()
   }
@@ -390,5 +412,69 @@ class UFO: SKNode {
     } else {
       return makeExplosion(texture: ufoTexture, angle: zRotation, velocity: velocity, at: position, duration: 2)
     }
+  }
+}
+
+// MARK: - Reusing UFOs
+
+/// A cache of UFOs for a scene
+class UFOCache {
+  /// The scene's audio, used when creating new UFOs
+  let audio: SceneAudio?
+  /// The number of UFOs created
+  var created = 0
+  /// The number of UFOs that have been reused
+  var reused = 0
+  /// An array of arrays holding ready-to-reuse UFOs, one array per UFO type
+  var availableUFOs = [[UFO]]()
+
+  /// Initialize the cache and pre-populate it with spare UFOs
+  init(audio: SceneAudio?) {
+    self.audio = audio
+    // Make the cache arrays
+    for _ in UFOType.allCases {
+      availableUFOs.append([])
+    }
+    // Add one UFO for each type, since that's mostly all that will be used.  On the
+    // occasions when a second UFO starts flying around, it'll be made on-demand if it
+    // happens to be the same type as the first one.
+    for type in UFOType.allCases {
+      recycle(get(type: type))
+    }
+  }
+
+  /// Print some meaningless statistics on UFO reuse
+  deinit {
+    os_log("Made %d UFOs, reused %d", log: .app, type: .debug, created, reused)
+  }
+
+  /// Get a UFO of a particular type
+  ///
+  /// Since this is used for pre-populating the cache, it does not reset the UFO.
+  ///
+  /// - Parameter type: The type of UFO wanted
+  func get(type: UFOType) -> UFO {
+    let typeIndex = type.rawValue
+    if let ufo = availableUFOs[typeIndex].popLast() {
+      reused += 1
+      return ufo
+    } else {
+      created += 1
+      return UFO(type: type, audio: audio)
+    }
+  }
+
+  /// Make a new UFO and get it ready to go
+  /// - Parameter brothersKilled: How greedy should the UFO be for revenge?
+  func getRandom(brothersKilled: Int) -> UFO {
+    let ufo = get(type: UFOType.randomType())
+    ufo.reset(brothersKilled: brothersKilled)
+    return ufo
+  }
+
+  /// Put a UFO in the cache for reuse
+  /// - Parameter ufo: The UFO whose job for now is done
+  func recycle(_ ufo: UFO) {
+    availableUFOs[ufo.type.rawValue].append(ufo)
   }
 }

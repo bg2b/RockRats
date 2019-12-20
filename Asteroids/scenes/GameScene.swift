@@ -65,6 +65,8 @@ class GameScene: GameTutorialScene {
   var pauseMultiSpawn = false
   /// How many times UFOs have fired a shot, used by the `redShirt` achievement
   var timesUFOsShot = 0
+  /// A cache of ready-to-go UFOs
+  var ufoCache: UFOCache!
   /// The label in the middle of the screen that displays wave numbers or Gave Over
   /// (usually hidden)
   var centralDisplay: SKLabelNode!
@@ -169,6 +171,7 @@ class GameScene: GameTutorialScene {
     initFutureShader()
     player = Ship(getJoystickDirection: { [unowned self] in return self.joystickDirection }, audio: audio)
     setRetroMode(enabled: achievementIsCompleted(.blastFromThePast) && UserData.retroMode.value)
+    ufoCache = UFOCache(audio: audio)
   }
 
   required init(coder aDecoder: NSCoder) {
@@ -369,7 +372,29 @@ class GameScene: GameTutorialScene {
     }
   }
 
-  // MARK: - UFO spawning
+  // MARK: - UFO spawning and recycling
+
+  /// Remove a UFO
+  ///
+  /// This is an override because I want to put the UFO back in the cache for use
+  /// later.
+  ///
+  /// - Parameter ufo: The UFO being removed
+  override func removeUFO(_ ufo: UFO) {
+    super.removeUFO(ufo)
+    ufoCache.recycle(ufo)
+  }
+
+  /// Move a UFO on to the playfield
+  ///
+  /// This is an override so that I can log the event
+  ///
+  /// - Parameter ufo: The UFO to launch
+  override func launchUFO(_ ufo: UFO) {
+    os_log("Launch UFO at %f", log: .app, type: .debug, Globals.lastUpdateTime)
+    os_signpost(.event, log: .poi, name: "Launch UFO", signpostID: signpostID)
+    super.launchUFO(ufo)
+  }
 
   /// Consider spawning a UFO
   ///
@@ -391,7 +416,7 @@ class GameScene: GameTutorialScene {
       // Do the spawn
       os_log("Spawn UFO at %f", log: .app, type: .debug, Globals.lastUpdateTime)
       os_signpost(.event, log: .poi, name: "Spawn UFO", signpostID: signpostID)
-      spawnUFO(ufo: UFO(brothersKilled: ufosToAvenge, audio: audio))
+      spawnUFO(ufo: ufoCache.getRandom(brothersKilled: ufosToAvenge))
       numberOfUFOsThisWave += 1
       // Once a UFO spawns, don't be eager to spawn a second
       pauseMultiSpawn = true

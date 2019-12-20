@@ -284,7 +284,7 @@ class MenuScene: BasicScene {
   /// Reschedules itself so that this runs repeatedly.
   func spawnUFOs() {
     if !getRidOfUFOs && asteroids.count >= 3 && ufos.count < Globals.gameConfig.value(for: \.maxUFOs) {
-      let ufo = UFO(brothersKilled: 0, audio: nil)
+      let ufo = UFO(audio: nil)
       spawnUFO(ufo: ufo)
       shotsToFire[ufo] = .random(in: 3 ... 10)
     }
