@@ -136,6 +136,8 @@ class UFO: SKNode {
   var delayOfFirstShot = 0.0
   /// Becomes `true` when the UFO is allowed to attack
   var attackEnabled = false
+  /// Becomes `true` when the UFO can change course and speed
+  var courseChangeAllowed = false
   /// How accurately the UFOs shoot
   var shotAccuracy = CGFloat(0)
   /// How fast Kamikaze UFOs can maneuver
@@ -166,6 +168,9 @@ class UFO: SKNode {
     delayOfFirstShot = Double.random(in: 0 ... meanShotTime * smaller)
     shotAccuracy = Globals.gameConfig.value(for: \.ufoAccuracy)[typeIndex] * CGFloat(smaller)
     kamikazeAcceleration = Globals.gameConfig.value(for: \.kamikazeAcceleration) / CGFloat(smaller)
+    // Don't do anything when first launched
+    attackEnabled = false
+    courseChangeAllowed = false
     // Gentle people, start your engines!
     engineSounds?.playerNode.volume = 0.5
     // When the UFO is first created, it'll start off the screen either to the left
@@ -245,13 +250,19 @@ class UFO: SKNode {
       // their homing behavior initially.
       wait(for: delayOfFirstShot) { [unowned self] in self.attackEnabled = true }
       delayOfFirstShot = -1
+      // Change course/speed at some point
+      scheduleCourseChange()
     }
     let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[typeIndex]
-    if Int.random(in: 0...100) == 0 {
+    if courseChangeAllowed {
       if type != .kamikaze {
         currentSpeed = .random(in: 0.3 * maxSpeed ... maxSpeed)
+        if .random(in: 0 ..< 5) == 0 {
+          body.velocity = body.velocity.rotate(by: .random(in: -.pi / 2 ... .pi / 2))
+        }
       }
       body.angularVelocity = copysign(.pi * 2, -body.angularVelocity)
+      scheduleCourseChange()
     }
     let ourRadius = 0.5 * size.width
     let forceScale = Globals.gameConfig.value(for: \.ufoDodging)[typeIndex] * 1000
@@ -353,6 +364,12 @@ class UFO: SKNode {
     addLaser(angle, shotPosition, shotSpeed)
     attackEnabled = false
     wait(for: .random(in: 0.5 * meanShotTime ... 1.5 * meanShotTime)) { [unowned self] in self.attackEnabled = true }
+  }
+
+  /// Schedule a future change in coure and/or speed
+  func scheduleCourseChange() {
+    courseChangeAllowed = false
+    wait(for: .random(in: 0.5 ... 1.5)) { self.courseChangeAllowed = true }
   }
 
   /// Aim an object, taking into account the UFO's position and shot speed and the
