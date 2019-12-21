@@ -369,7 +369,7 @@ class UFO: SKNode {
   /// Schedule a future change in coure and/or speed
   func scheduleCourseChange() {
     courseChangeAllowed = false
-    wait(for: .random(in: 0.5 ... 1.5)) { self.courseChangeAllowed = true }
+    wait(for: .random(in: 0.5 ... 1.5)) { [unowned self] in self.courseChangeAllowed = true }
   }
 
   /// Aim an object, taking into account the UFO's position and shot speed and the

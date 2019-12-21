@@ -43,6 +43,8 @@ enum Achievement: String, CaseIterable {
   case spaceScout = "spaceScout"
   case spaceRanger = "spaceRanger"
   case spaceAce = "spaceAce"
+  case galacticGuardian = "galacticGuardian"
+  case cosmicChampion = "cosmicChampion"
   case quickFingers = "quickFingers"
   case spinalTap = "spinalTap"
   case trickShot = "trickShot"

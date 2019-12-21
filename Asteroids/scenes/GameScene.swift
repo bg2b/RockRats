@@ -283,24 +283,30 @@ class GameScene: GameTutorialScene {
   ///
   /// - Parameter amount: The increment to the score
   func addToScore(_ amount: Int) {
-    let initialScore = score
     score += amount
     let extraLivesEarned = score / Globals.gameConfig.extraLifeScore
     if extraLivesEarned > extraLivesAwarded {
       updateLives(+1)
       audio.soundEffect(.extraLife)
       extraLivesAwarded += 1
+      switch extraLivesEarned {
+      case 3:
+        reportAchievement(achievement: .spaceCadet)
+      case 4:
+        reportAchievement(achievement: .spaceScout)
+      case 5:
+        reportAchievement(achievement: .spaceRanger)
+      case 6:
+        reportRepeatableAchievement(achievement: .spaceAce)
+      case 7:
+        reportRepeatableAchievement(achievement: .galacticGuardian)
+      case 8:
+        reportRepeatableAchievement(achievement: .cosmicChampion)
+      default:
+        break
+      }
     }
     scoreDisplay.text = "\(score)"
-    if initialScore < 3000 && score >= 3000 {
-      reportAchievement(achievement: .spaceCadet)
-    } else if initialScore < 4000 && score >= 4000 {
-      reportAchievement(achievement: .spaceScout)
-    } else if initialScore < 5000 && score >= 5000 {
-      reportAchievement(achievement: .spaceRanger)
-    } else if initialScore < 6000 && score >= 6000 {
-      reportRepeatableAchievement(achievement: .spaceAce)
-    }
     // For certain special scores, show a custom message instead of a point value and
     // award a hidden achievement.  But don't give the achievement if they're in the
     // middle of blasting a bunch of asteroids and would zip past the score without
