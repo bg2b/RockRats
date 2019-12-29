@@ -233,7 +233,7 @@ class TutorialScene: GameTutorialScene {
       player.reset()
       player.warpIn(to: position, atAngle: player.zRotation, addTo: playfield)
       audio.soundEffect(.warpIn, at: position)
-      updateLives(-1)
+      updateReserves(-1)
     }
   }
 
@@ -648,7 +648,7 @@ class TutorialScene: GameTutorialScene {
     Globals.gameConfig = loadGameConfig(forMode: "normal")
     Globals.gameConfig.currentWaveNumber = 1
     reservesRemaining = Globals.gameConfig.initialLives
-    updateLives(0)
+    updateReserves(0)
     energyBar.fill()
     replenishEnergy()
     wait(for: 1, then: showMessageAndSpawn)

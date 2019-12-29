@@ -331,7 +331,7 @@ class GameTutorialScene: BasicScene {
 
   /// Update the reserve ships
   /// - Parameter amount: The amount by which to change the number of reserves
-  func updateLives(_ amount: Int) {
+  func updateReserves(_ amount: Int) {
     reservesRemaining += amount
     reservesDisplay.showReserves(reservesRemaining)
   }

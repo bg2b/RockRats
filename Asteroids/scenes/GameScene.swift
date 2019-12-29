@@ -286,7 +286,7 @@ class GameScene: GameTutorialScene {
     score += amount
     let extraLivesEarned = score / Globals.gameConfig.extraLifeScore
     if extraLivesEarned > extraLivesAwarded {
-      updateLives(+1)
+      updateReserves(+1)
       audio.soundEffect(.extraLife)
       extraLivesAwarded += 1
       switch extraLivesEarned {
@@ -509,7 +509,7 @@ class GameScene: GameTutorialScene {
         ufoSpawningRate = 0.25
       }
       spawnUFOs()
-      updateLives(-1)
+      updateReserves(-1)
       consecutiveHits = 0
     }
   }
@@ -802,7 +802,7 @@ class GameScene: GameTutorialScene {
     Globals.gameConfig = loadGameConfig(forMode: "normal")
     Globals.gameConfig.currentWaveNumber = 0
     reservesRemaining = Globals.gameConfig.initialLives
-    updateLives(0)
+    updateReserves(0)
     energyBar.fill()
     replenishEnergy()
     wait(for: 1) {
