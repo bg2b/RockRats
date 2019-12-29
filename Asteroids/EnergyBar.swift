@@ -38,7 +38,19 @@ class EnergyBar: SKNode {
   }
 
   /// An qualitative energy level, 0 = low, 1 = moderate, 2 = high, used for colors
-  var levelIndex: Int { Int(2.999 * level / maxLevel) }
+  ///
+  /// I'm tying this to the hyperspace jump energy of the ship, so 0 = not enough to
+  /// jump, 1 = enough for one jump, 2 = enough for two jumps.
+  var levelIndex: Int {
+    switch level {
+    case 0 ..< Ship.hyperspaceEnergyCost:
+      return 0
+    case Ship.hyperspaceEnergyCost ..< 2 * Ship.hyperspaceEnergyCost:
+      return 1
+    default:
+      return 2
+    }
+  }
 
   /// Add a segment to the bar
   ///
