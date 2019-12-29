@@ -449,7 +449,7 @@ class GameTutorialScene: BasicScene {
     let jumpRegion = gameFrame.insetBy(dx: 0.05 * gameFrame.width, dy: 0.05 * gameFrame.height)
     let jumpPosition = CGPoint(x: .random(in: jumpRegion.minX ... jumpRegion.maxX),
                                y: .random(in: jumpRegion.minY ... jumpRegion.maxY))
-    wait(for: 10) { [weak self] in
+    wait(for: 1) { [weak self] in
       // Be a little paranoid in this one, since it's possible for the player to warp
       // and then pause and force-quit the scene (or for the tutorial scene to exit
       // automatically at the end).  I'm pretty sure everything would be OK even
