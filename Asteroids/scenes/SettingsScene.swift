@@ -304,11 +304,9 @@ class SettingsScene: BasicScene {
     if let gc = Globals.gcInterface, gc.enabled {
       gc.resetAchievements()
       UserData.ufosDestroyed.value = 0
+      UserData.ufosDestroyedCounter.reset()
       UserData.asteroidsDestroyed.value = 0
-      // Assigning a negative value means to force the iCloud-synchronized per-player
-      // values to zero.
-      UserData.ufosDestroyedCounter.value = -1
-      UserData.asteroidsDestroyedCounter.value = -1
+      UserData.asteroidsDestroyedCounter.reset()
       // Setting these is perhaps pointless since if the user presses the ship style
       // button these will just get changed again.  But when actually starting a
       // game, the values will be ignored unless the appropriate achievements have

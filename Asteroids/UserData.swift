@@ -39,31 +39,38 @@ struct GameCounter {
 
   /// Return a merged dictionary mapping player IDs to counter values
   func mergedDict() -> [String: Int] {
-    let now = Date().timeIntervalSinceReferenceDate
     let localDict = UserDefaults.standard.object(forKey: name) as? [String: Int] ?? [String: Int]()
-    let globalDict = NSUbiquitousKeyValueStore.default.object(forKey: name) as? [String: Int] ?? [String: Int]()
     let localDate = UserDefaults.standard.double(forKey: dateKey)
+    let globalDict = NSUbiquitousKeyValueStore.default.object(forKey: name) as? [String: Int] ?? [String: Int]()
     let globalDate = NSUbiquitousKeyValueStore.default.double(forKey: dateKey)
-    if globalDate == 0 {
-      NSUbiquitousKeyValueStore.default.set(now, forKey: dateKey)
-    }
+    os_log("Merging %{public}s, local date %f, global date %f", log: .app, type: .debug, name, localDate, globalDate)
     var result = localDict
     for (globalKey, globalValue) in globalDict {
-      if localDate == globalDate {
-        // Same generation, merge by taking the max
-        result[globalKey] = max(result[globalKey] ?? 0, globalValue)
-      } else if localDate < globalDate {
+      if localDate < globalDate {
         // iCloud has the data, typically because a counter was reset on another device
         result[globalKey] = globalValue
+      } else {
+        // Same generation, merge by taking the max
+        result[globalKey] = max(result[globalKey] ?? 0, globalValue)
       }
-      // else localDate > globalDate, but probably that never happens; just leave the
-      // local value unchanged anyway
+    }
+    if localDate < globalDate {
+      // Update generation
+      UserDefaults.standard.set(globalDate, forKey: dateKey)
+    }
+    if localDict != result {
+      UserDefaults.standard.set(result, forKey: name)
+    }
+    if globalDict != result {
+      NSUbiquitousKeyValueStore.default.set(result, forKey: name)
     }
     for (key, value) in result {
       let local = localDict[key] ?? -1
       let global = globalDict[key] ?? -1
-      os_log("Merged %{public}s: %s (%d, %d) => %d",
-             log: .app, type: .debug, name, key, local, global, value)
+      if value != local || value != global {
+        os_log("Merged %{public}s: %s (%d, %d) => %d",
+               log: .app, type: .debug, name, key, local, global, value)
+      }
     }
     return result
   }
@@ -82,20 +89,33 @@ struct GameCounter {
       return result
     }
     set {
-      let playerID = UserData.currentPlayerID.value
       var merged = mergedDict()
+      let playerID = UserData.currentPlayerID.value
       os_log("Set %{public}s for %s to %d", log: .app, type: .debug, name, playerID, newValue)
       merged[playerID] = newValue < 0 ? 0 : max(merged[playerID] ?? 0, newValue)
       UserDefaults.standard.set(merged, forKey: name)
       NSUbiquitousKeyValueStore.default.set(merged, forKey: name)
-      if newValue < 0 {
-        // Set a new generation in iCloud to ensure that the reset value will take
-        // precedence if the user plays on another device
-        let now = Date().timeIntervalSinceReferenceDate
-        UserDefaults.standard.set(now, forKey: dateKey)
-        NSUbiquitousKeyValueStore.default.set(now, forKey: dateKey)
-      }
     }
+  }
+
+  /// Zero the counter and start a new generation
+  ///
+  /// This should be called when the player resets their Game Center progress,
+  /// otherwise the multi-level achievements that depend on counter values would
+  /// immediately jump forward again.
+   mutating func reset() {
+    value = -1
+    // Set a new generation in iCloud to ensure that the reset value will take
+    // precedence if the user plays on another device
+    let now = Date().timeIntervalSinceReferenceDate
+    UserDefaults.standard.set(now, forKey: dateKey)
+    NSUbiquitousKeyValueStore.default.set(now, forKey: dateKey)
+  }
+
+  /// Reset the generation of the counter (for testing only)
+  mutating func resetGeneration() {
+    UserDefaults.standard.set(0.0, forKey: dateKey)
+    NSUbiquitousKeyValueStore.default.set(0.0, forKey: dateKey)
   }
 }
 
@@ -141,24 +161,20 @@ struct HighScores {
   /// Gets the local high scores.  Also handles updating names and synchronizing
   /// iCloud-backed and local storage.
   var value: [GameScore] {
-    let now = Date().timeIntervalSinceReferenceDate
     let local = UserDefaults.standard.object(forKey: "highScores") as? [[String: Any]] ?? [[String: Any]]()
     let localScores = local.compactMap { GameScore(fromDict: $0) }
     let localDate = UserDefaults.standard.double(forKey: "highScoresDate")
-    // If the local scores are being loaded for the first time then the local
-    // highScoresDate will be zero.  We _don't_ set it to now in this case; the
-    // globalDate below will be set to now instead, which will ensure the iCloud
-    // scores take precedence.  If we initialized localDate to now but some other
-    // device had scores from earlier stored in iCloud, then those would have an
-    // older date, and the empty local high scores would overwrite them.
     let global = NSUbiquitousKeyValueStore.default.object(forKey: "highScores") as? [[String: Any]] ?? [[String: Any]]()
     let globalScores = global.compactMap { GameScore(fromDict: $0) }
     let globalDate = NSUbiquitousKeyValueStore.default.double(forKey: "highScoresDate")
-    if globalDate == 0 {
-      NSUbiquitousKeyValueStore.default.set(now, forKey: "highScoresDate")
-    }
     var highScores: [GameScore]
-    if localDate == globalDate {
+    if localDate < globalDate {
+      // iCloud has the relevant data.  This happens if the scores get reset on a
+      // different device, or if this is the first time getting scores for this
+      // device but they've played on some other device before.
+      highScores = globalScores
+      UserDefaults.standard.set(globalDate, forKey: "highScoresDate")
+    } else {
       // iCloud and the local scores come from the same generation, so merge.
       highScores = localScores
       for score in globalScores {
@@ -166,21 +182,13 @@ struct HighScores {
           highScores.append(score)
         }
       }
-    } else if localDate < globalDate {
-      // iCloud has the relevant data.  This happens if the scores get reset on a
-      // different device, or if this is the first time getting scores for this
-      // device but they've played on some other device before.
-      highScores = globalScores
-      UserDefaults.standard.set(globalDate, forKey: "highScoresDate")
-    } else {
-      // Local has the relevant data, but I'm not sure how this could happen.
-      // Maybe if iCloud isn't available in some way?
-      highScores = localScores
-      NSUbiquitousKeyValueStore.default.set(localDate, forKey: "highScoresDate")
     }
     highScores = sortedAndTrimmed(highScores)
     highScores = updateNames(highScores)
     if highScores != localScores || highScores != globalScores {
+      for score in highScores {
+        os_log("Merged high score %{public}s %d", log: .app, type: .debug, score.playerName ?? "unknown", score.points)
+      }
       writeBack(highScores)
     }
     return highScores
@@ -216,6 +224,12 @@ struct HighScores {
     UserDefaults.standard.set(now, forKey: "highScoresDate")
     NSUbiquitousKeyValueStore.default.set(now, forKey: "highScoresDate")
     writeBack([])
+  }
+
+  /// Reset the generation for high scores (used for testing only)
+  func resetGeneration() {
+    UserDefaults.standard.set(0.0, forKey: "highScoresDate")
+    NSUbiquitousKeyValueStore.default.set(0.0, forKey: "highScoresDate")
   }
 }
 
@@ -316,4 +330,13 @@ func updateGameCounters() {
   // new values back in the local counters.
   UserData.ufosDestroyed.value = UserData.ufosDestroyedCounter.value
   UserData.asteroidsDestroyed.value = UserData.asteroidsDestroyedCounter.value
+}
+
+/// Reset the generation number for iCloud-synced stuff
+///
+/// This is only used for testing purposes.
+func resetGenerations() {
+  UserData.highScores.resetGeneration()
+  UserData.ufosDestroyedCounter.resetGeneration()
+  UserData.asteroidsDestroyedCounter.resetGeneration()
 }
