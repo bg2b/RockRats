@@ -119,7 +119,7 @@ func getUtimeOffset(view: SKView?) -> Double {
     return 0
   }
   let newOffset = readUtime(view: view) - Globals.lastUpdateTime
-  os_log("utimeOffset set to %fat time %f", log: .app, type: .debug, newOffset, Globals.lastUpdateTime)
+  os_log("utimeOffset set to %f at time %f", log: .app, type: .debug, newOffset, Globals.lastUpdateTime)
   utimeOffset = newOffset
   return newOffset
 }

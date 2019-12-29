@@ -215,7 +215,7 @@ func reportHiddenProgress() {
     }
   }
   let percentFound = floor(numFound / numHidden * 100)
-  os_log("Found %g%% of %g hidden achievements", log: .app, type: .info, percentFound, numHidden)
+  os_log("Found %f%% of %f hidden achievements", log: .app, type: .info, percentFound, numHidden)
   _ = gc.reportProgress(Achievement.useTheSource.gameCenterID, knownProgress: percentFound)
 }
 
