@@ -129,7 +129,7 @@ func reportAchievement(achievement: Achievement) {
 func reportRepeatableAchievement(achievement: Achievement) {
   guard let gc = Globals.gcInterface, gc.enabled else { return }
   os_log("Repeatable achievement %{public}s completed", log: .app, type: .info, achievement.rawValue)
-  gc.reportCompletion(achievement.gameCenterID)
+  gc.reportCompletion(achievement.gameCenterID, showBanner: !achievementIsCompleted(achievement))
 }
 
 /// Report progress towards a multi-level achievement

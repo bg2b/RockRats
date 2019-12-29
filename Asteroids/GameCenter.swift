@@ -176,10 +176,10 @@ class GameCenterInterface {
 
   /// Report a simple achievement as 100% completed
   /// - Parameter identifier: The Game Center ID of the achievement
-  func reportCompletion(_ identifier: String) {
+  func reportCompletion(_ identifier: String, showBanner: Bool = true) {
     let achievement = GKAchievement(identifier: identifier)
     achievement.percentComplete = 100
-    achievement.showsCompletionBanner = true
+    achievement.showsCompletionBanner = showBanner
     // Mark it so that statusOfAchievement will indicate that it's done and I won't
     // report it multiple times.  If the report fails for some reason, I'll fall back
     // by sticking it in playerAchievementsProgress so that hopefully it'll get

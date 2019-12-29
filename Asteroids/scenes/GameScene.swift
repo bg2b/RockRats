@@ -298,9 +298,9 @@ class GameScene: GameTutorialScene {
         reportAchievement(achievement: .spaceRanger)
       case 6:
         reportRepeatableAchievement(achievement: .spaceAce)
-      case 7:
-        reportRepeatableAchievement(achievement: .galacticGuardian)
       case 8:
+        reportRepeatableAchievement(achievement: .galacticGuardian)
+      case 10:
         reportRepeatableAchievement(achievement: .cosmicChampion)
       default:
         break
