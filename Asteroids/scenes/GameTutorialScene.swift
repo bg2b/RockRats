@@ -31,7 +31,7 @@ class GameTutorialScene: BasicScene {
   /// refers to it.  See the comments there.
   var score = 0
   /// The display of the number of reserve ships
-  var livesDisplay: ReservesDisplay!
+  var reservesDisplay: ReservesDisplay!
   /// How many reserve ships they have left; the current ship doesn't count in this.
   var livesRemaining = 0
   /// The display of the player's energy reserves
@@ -61,9 +61,9 @@ class GameTutorialScene: BasicScene {
     // blurring effect is used when the game is paused
     gameArea.addChild(info)
     // Remaining ships in upper left
-    livesDisplay = ReservesDisplay()
-    livesDisplay.position = CGPoint(x: gameFrame.minX + 20, y: gameFrame.maxY - 20)
-    info.addChild(livesDisplay)
+    reservesDisplay = ReservesDisplay()
+    reservesDisplay.position = CGPoint(x: gameFrame.minX + 20, y: gameFrame.maxY - 20)
+    info.addChild(reservesDisplay)
     // Energy reserves in upper right
     energyBar = EnergyBar(maxLength: 20)
     info.addChild(energyBar)
@@ -82,7 +82,7 @@ class GameTutorialScene: BasicScene {
     // When touched, it'll hide itself and show the continue/quit buttons.
     pauseButton.alpha = 0.1
     pauseButton.position = CGPoint(x: gameFrame.minX + pauseTexture.size().width / 2 + 10,
-                                   y: livesDisplay.position.y - pauseTexture.size().height / 2 - 20)
+                                   y: reservesDisplay.position.y - pauseTexture.size().height / 2 - 20)
     pauseControls.addChild(pauseButton)
     // Two nice big buttons in the center of the screen for continue and quit.
     // They're only unhidden when the game pauses.
@@ -333,7 +333,7 @@ class GameTutorialScene: BasicScene {
   /// - Parameter amount: The amount by which to change the number of reserves
   func updateLives(_ amount: Int) {
     livesRemaining += amount
-    livesDisplay.showReserves(livesRemaining)
+    reservesDisplay.showReserves(livesRemaining)
   }
 
   // MARK: - Player lasers

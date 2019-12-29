@@ -600,7 +600,7 @@ class TutorialScene: GameTutorialScene {
   /// They've worked hard at crashing
   func allLivesLost() {
     lastShipDestroyed = true
-    livesDisplay.isHidden = true
+    reservesDisplay.isHidden = true
     hideInstructions {
       let message: String
       if self.asteroids.isEmpty {
