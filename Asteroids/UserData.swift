@@ -43,7 +43,9 @@ struct GameCounter {
     let localDate = UserDefaults.standard.double(forKey: dateKey)
     let globalDict = NSUbiquitousKeyValueStore.default.object(forKey: name) as? [String: Int] ?? [String: Int]()
     let globalDate = NSUbiquitousKeyValueStore.default.double(forKey: dateKey)
-    os_log("Merging %{public}s, local date %f, global date %f", log: .app, type: .debug, name, localDate, globalDate)
+    if localDate != globalDate {
+      os_log("Merging %{public}s, local date %f, global date %f", log: .app, type: .debug, name, localDate, globalDate)
+    }
     var result = localDict
     for (globalKey, globalValue) in globalDict {
       if localDate < globalDate {
@@ -167,15 +169,17 @@ struct HighScores {
     let global = NSUbiquitousKeyValueStore.default.object(forKey: "highScores") as? [[String: Any]] ?? [[String: Any]]()
     let globalScores = global.compactMap { GameScore(fromDict: $0) }
     let globalDate = NSUbiquitousKeyValueStore.default.double(forKey: "highScoresDate")
+    if localDate != globalDate {
+      os_log("Merging high scores, local date %f, global date %f", log: .app, type: .debug, localDate, globalDate)
+    }
     var highScores: [GameScore]
     if localDate < globalDate {
       // iCloud has the relevant data.  This happens if the scores get reset on a
-      // different device, or if this is the first time getting scores for this
-      // device but they've played on some other device before.
+      // different device.
       highScores = globalScores
       UserDefaults.standard.set(globalDate, forKey: "highScoresDate")
     } else {
-      // iCloud and the local scores come from the same generation, so merge.
+      // iCloud and the local scores come from the same generation, so merge
       highScores = localScores
       for score in globalScores {
         if (highScores.firstIndex { sameScore(score, $0) }) == nil {
