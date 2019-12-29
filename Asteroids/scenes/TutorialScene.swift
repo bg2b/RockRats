@@ -238,13 +238,13 @@ class TutorialScene: GameTutorialScene {
   }
 
   func showMessageAndSpawn() {
-    assert(livesRemaining > 0)
+    assert(reservesRemaining > 0)
     let spawnMessages = [
       "That'll buff right out",
       "Oops",
       "Training begins!"
     ]
-    showMessage(spawnMessages[livesRemaining - 1], delay: 2) {
+    showMessage(spawnMessages[reservesRemaining - 1], delay: 2) {
       self.spawnPlayer(position: CGPoint(x: self.gameFrame.midX, y: self.gameFrame.midY))
     }
   }
@@ -255,7 +255,7 @@ class TutorialScene: GameTutorialScene {
     let pieces = player.explode()
     addToPlayfield(pieces)
     audio.soundEffect(.playerExplosion)
-    if livesRemaining > 0 {
+    if reservesRemaining > 0 {
       if asteroids.isEmpty {
         // They destroyed the last asteroid by ramming, don't bother to respawn
       } else {
@@ -647,7 +647,7 @@ class TutorialScene: GameTutorialScene {
     initGestureShapes()
     Globals.gameConfig = loadGameConfig(forMode: "normal")
     Globals.gameConfig.currentWaveNumber = 1
-    livesRemaining = Globals.gameConfig.initialLives
+    reservesRemaining = Globals.gameConfig.initialLives
     updateLives(0)
     energyBar.fill()
     replenishEnergy()

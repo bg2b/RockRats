@@ -526,7 +526,7 @@ class GameScene: GameTutorialScene {
   func respawnOrGameOver() {
     os_log("Respawn or game over at %f", log: .app, type: .debug, Globals.lastUpdateTime)
     let delay = warpOutUFOs() + 1
-    if livesRemaining > 0 {
+    if reservesRemaining > 0 {
       wait(for: delay) { self.spawnPlayer() }
     } else {
       // If the player wanted to rage quit after losing their last ship, they had
@@ -801,7 +801,7 @@ class GameScene: GameTutorialScene {
     super.didMove(to: view)
     Globals.gameConfig = loadGameConfig(forMode: "normal")
     Globals.gameConfig.currentWaveNumber = 0
-    livesRemaining = Globals.gameConfig.initialLives
+    reservesRemaining = Globals.gameConfig.initialLives
     updateLives(0)
     energyBar.fill()
     replenishEnergy()

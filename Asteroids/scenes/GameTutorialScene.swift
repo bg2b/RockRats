@@ -33,7 +33,7 @@ class GameTutorialScene: BasicScene {
   /// The display of the number of reserve ships
   var reservesDisplay: ReservesDisplay!
   /// How many reserve ships they have left; the current ship doesn't count in this.
-  var livesRemaining = 0
+  var reservesRemaining = 0
   /// The display of the player's energy reserves
   var energyBar: EnergyBar!
   /// The point of the (virtual) joystick's origin
@@ -332,8 +332,8 @@ class GameTutorialScene: BasicScene {
   /// Update the reserve ships
   /// - Parameter amount: The amount by which to change the number of reserves
   func updateLives(_ amount: Int) {
-    livesRemaining += amount
-    reservesDisplay.showReserves(livesRemaining)
+    reservesRemaining += amount
+    reservesDisplay.showReserves(reservesRemaining)
   }
 
   // MARK: - Player lasers
