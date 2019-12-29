@@ -30,7 +30,43 @@ struct DefaultsValue<T> {
 /// This is a counter that is keyed to the current Game Center player ID and
 /// synchronized between devices that are signed in to iCloud.
 struct GameCounter {
+  /// The counter name
   let name: String
+
+  /// The key for the counter's generation, used to tell which data to use in the
+  /// case of a reset
+  var dateKey: String { return name + "Date" }
+
+  /// Return a merged dictionary mapping player IDs to counter values
+  func mergedDict() -> [String: Int] {
+    let now = Date().timeIntervalSinceReferenceDate
+    let localDict = UserDefaults.standard.object(forKey: name) as? [String: Int] ?? [String: Int]()
+    let globalDict = NSUbiquitousKeyValueStore.default.object(forKey: name) as? [String: Int] ?? [String: Int]()
+    let localDate = UserDefaults.standard.double(forKey: dateKey)
+    let globalDate = NSUbiquitousKeyValueStore.default.double(forKey: dateKey)
+    if globalDate == 0 {
+      NSUbiquitousKeyValueStore.default.set(now, forKey: dateKey)
+    }
+    var result = localDict
+    for (globalKey, globalValue) in globalDict {
+      if localDate == globalDate {
+        // Same generation, merge by taking the max
+        result[globalKey] = max(result[globalKey] ?? 0, globalValue)
+      } else if localDate < globalDate {
+        // iCloud has the data, typically because a counter was reset on another device
+        result[globalKey] = globalValue
+      }
+      // else localDate > globalDate, but probably that never happens; just leave the
+      // local value unchanged anyway
+    }
+    for (key, value) in result {
+      let local = localDict[key] ?? -1
+      let global = globalDict[key] ?? -1
+      os_log("Merged %{public}s: %s (%d, %d) => %d",
+             log: .app, type: .debug, name, key, local, global, value)
+    }
+    return result
+  }
 
   /// Retrieving a GameCounter returns the maximum value of local and iCloud versions
   /// for the current player.  Setting it provides a new lower bound value (which will
@@ -39,31 +75,26 @@ struct GameCounter {
   /// As a special case, setting the counter to a negative value resets it to zero.
   var value: Int {
     get {
+      let merged = mergedDict()
       let playerID = UserData.currentPlayerID.value
-      let localDict = UserDefaults.standard.object(forKey: name) as? [String: Int] ?? [String: Int]()
-      let iCloudDict = NSUbiquitousKeyValueStore.default.object(forKey: name) as? [String: Int] ?? [String: Int]()
-      let local = localDict[playerID] ?? 0
-      let iCloud = iCloudDict[playerID] ?? 0
-      let result = max(local, iCloud)
-      os_log("Read counter %{public}s for %s: local %d, iCloud %d, result %d", log: .app, type: .debug, name, playerID, local, iCloud, result)
+      let result = merged[playerID] ?? 0
+      os_log("%{public}s for %s is %d", log: .app, type: .debug, name, playerID, result)
       return result
     }
     set {
       let playerID = UserData.currentPlayerID.value
-      os_log("Set counter %{public}s for %s to %d", log: .app, type: .debug, name, playerID, newValue)
-      var mergedDict = UserDefaults.standard.object(forKey: name) as? [String: Int] ?? [String: Int]()
-      let iCloudDict = NSUbiquitousKeyValueStore.default.object(forKey: name) as? [String: Int] ?? [String: Int]()
-      for (iCloudKey, iCloudValue) in iCloudDict {
-        mergedDict[iCloudKey] = max(mergedDict[iCloudKey] ?? 0, iCloudValue)
+      var merged = mergedDict()
+      os_log("Set %{public}s for %s to %d", log: .app, type: .debug, name, playerID, newValue)
+      merged[playerID] = newValue < 0 ? 0 : max(merged[playerID] ?? 0, newValue)
+      UserDefaults.standard.set(merged, forKey: name)
+      NSUbiquitousKeyValueStore.default.set(merged, forKey: name)
+      if newValue < 0 {
+        // Set a new generation in iCloud to ensure that the reset value will take
+        // precedence if the user plays on another device
+        let now = Date().timeIntervalSinceReferenceDate
+        UserDefaults.standard.set(now, forKey: dateKey)
+        NSUbiquitousKeyValueStore.default.set(now, forKey: dateKey)
       }
-      // Negative => reset counter
-      let mergedValue = newValue < 0 ? 0 : max(mergedDict[playerID] ?? 0, newValue)
-      mergedDict[playerID] = mergedValue
-      for (key, value) in mergedDict {
-        os_log("Merged: player %s, count %d", log: .app, type: .debug, key, value)
-      }
-      UserDefaults.standard.set(mergedDict, forKey: name)
-      NSUbiquitousKeyValueStore.default.set(mergedDict, forKey: name)
     }
   }
 }

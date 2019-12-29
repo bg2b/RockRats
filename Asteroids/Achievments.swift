@@ -99,7 +99,6 @@ enum Achievement: String, CaseIterable {
   var isHidden: Bool { Achievement.hiddenAchievements.contains(self) }
 }
 
-
 /// Report a simple achievment as completed
 /// - Parameter achievement: The achievement
 func reportAchievement(achievement: Achievement) {
