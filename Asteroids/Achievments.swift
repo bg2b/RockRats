@@ -123,7 +123,7 @@ func reportAchievement(achievement: Achievement) {
 
 /// Report completion of a repeatable achievement
 ///
-/// Currently the only one of these we have is `spaceAce`.
+/// Currently these are the higher-level score achievements (spaceAce and up)
 ///
 /// - Parameter achievement: The achievement just completed
 func reportRepeatableAchievement(achievement: Achievement) {
@@ -217,4 +217,19 @@ func reportHiddenProgress() {
   let percentFound = floor(numFound / numHidden * 100)
   os_log("Found %g%% of %g hidden achievements", log: .app, type: .info, percentFound, numHidden)
   _ = gc.reportProgress(Achievement.useTheSource.gameCenterID, knownProgress: percentFound)
+}
+
+/// Return a list of unlocked colors, determined by achievements
+func unlockedShipColors() -> [String] {
+  var result = ["blue"]
+  if achievementIsCompleted(.spaceAce) {
+    result.append("green")
+  }
+  if achievementIsCompleted(.galacticGuardian) {
+    result.append("red")
+  }
+  if achievementIsCompleted(.cosmicChampion) {
+    result.append("orange")
+  }
+  return result
 }

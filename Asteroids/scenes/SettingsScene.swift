@@ -26,8 +26,10 @@ class SettingsScene: BasicScene {
   var heartbeatButton: Button!
   /// The controls left/right button
   var controlsButton: Button!
-  /// Ship appearance button (normal, retro)
-  var retroButton: Button!
+  /// Unlocked ship styles
+  var shipStyles = [String]()
+  /// Ship appearance button (chooses modern of various colors or retro)
+  var shipStyleButton: Button!
   /// The button that resets the achievements in Game Center
   var resetAchievementsButton: Button!
 
@@ -140,13 +142,26 @@ class SettingsScene: BasicScene {
     controlsButton.selectedValue = UserData.joystickOnLeft.value ? 0 : 1
     controlsButton.action = { [unowned self] in self.toggleControls() }
     optionButtons.append(controlsButton)
+    // Get the unlocked ship colors
+    shipStyles = unlockedShipColors().map { "shipmodern_\($0)" }
     // This retro/modern selection is only available if the player has the
-    // `blastFromThePast` achievement.
+    // blastFromThePast achievement.
     if achievementIsCompleted(.blastFromThePast) {
-      retroButton = Button(imagesNamed: ["shipmodern", "shipretro"], imageColor: .white, size: buttonSize)
-      retroButton.selectedValue = (UserData.retroMode.value ? 1 : 0)
-      retroButton.action = { [unowned self] in self.toggleRetro() }
-      optionButtons.append(retroButton)
+      shipStyles.append("shipretro")
+    }
+    if shipStyles.count > 1 {
+      shipStyleButton = Button(imagesNamed: shipStyles, imageColor: .white, size: buttonSize)
+      if let retroIndex = shipStyles.firstIndex(of: "shipretro"), UserData.retroMode.value {
+        // The user has the retro mode preference set; show that selection
+        shipStyleButton.selectedValue = retroIndex
+      } else if let modernIndex = shipStyles.firstIndex(of: "shipmodern_\(UserData.shipColor.value)") {
+        // The user has picked some unlocked color
+        shipStyleButton.selectedValue = modernIndex
+      } else {
+        shipStyleButton.selectedValue = 0
+      }
+      shipStyleButton.action = { [unowned self] in self.selectShipStyle() }
+      optionButtons.append(shipStyleButton)
     }
     let optionsHstack = horizontalStack(nodes: optionButtons, minSpacing: buttonSpacing)
 
@@ -244,7 +259,7 @@ class SettingsScene: BasicScene {
     }
   }
 
-  /// Toggle retro/modern appearance
+  /// Toggle heartbeat on/off
   func toggleHeartbeat() {
     UserData.heartbeatMuted.value = (heartbeatButton.selectedValue == 0)
     if !UserData.heartbeatMuted.value {
@@ -260,9 +275,17 @@ class SettingsScene: BasicScene {
     UserData.joystickOnLeft.value = (controlsButton.selectedValue == 0)
   }
 
-  /// Toggle retro/modern appearance
-  func toggleRetro() {
-    UserData.retroMode.value = (retroButton.selectedValue == 1)
+  /// Choose the ship style
+  func selectShipStyle() {
+    let selected = shipStyles[shipStyleButton.selectedValue]
+    if selected == "shipretro" {
+      UserData.retroMode.value = true
+    } else {
+      UserData.retroMode.value = false
+      let parts = selected.split(separator: "_")
+      assert(parts.count == 2)
+      UserData.shipColor.value = String(parts[1])
+    }
   }
 
   /// Reset all local high scores

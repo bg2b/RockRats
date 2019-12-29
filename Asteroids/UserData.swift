@@ -203,6 +203,9 @@ class UserData {
   /// Retro mode preference (ignored if Game Center is disabled or the player does
   /// not have the blastFromThePast achievement)
   static var retroMode = DefaultsValue<Bool>(name: "retroMode", defaultValue: false)
+  /// Color of the player's ship (ignored if the desired color isn't unlocked by
+  /// spaceAce, galacticGuardian, or cosmicChampion)
+  static var shipColor = DefaultsValue<String>(name: "shipColor", defaultValue: "blue")
   /// Number of games played on this device
   static var gamesPlayed = DefaultsValue<Int>(name: "gamesPlayed", defaultValue: 0)
   /// Number of games played when a review was last requested

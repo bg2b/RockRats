@@ -166,7 +166,11 @@ class GameScene: GameTutorialScene {
   /// - Parameter size: The size of the scene
   init(size: CGSize) {
     os_log("GameScene init", log: .app, type: .debug)
-    super.init(size: size, shipColor: "blue")
+    var shipColor: String?
+    if unlockedShipColors().contains(UserData.shipColor.value) {
+      shipColor = UserData.shipColor.value
+    }
+    super.init(size: size, shipColor: shipColor)
     name = "gameScene"
     initFutureShader()
     setRetroMode(enabled: achievementIsCompleted(.blastFromThePast) && UserData.retroMode.value)
