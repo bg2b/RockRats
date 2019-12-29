@@ -309,6 +309,12 @@ class SettingsScene: BasicScene {
       // values to zero.
       UserData.ufosDestroyedCounter.value = -1
       UserData.asteroidsDestroyedCounter.value = -1
+      // Setting these is perhaps pointless since if the user presses the ship style
+      // button these will just get changed again.  But when actually starting a
+      // game, the values will be ignored unless the appropriate achievements have
+      // been completed.
+      UserData.retroMode.value = false
+      UserData.shipColor.value = "blue"
       os_log("Achievements reset", log: .app, type: .debug)
     }
   }
