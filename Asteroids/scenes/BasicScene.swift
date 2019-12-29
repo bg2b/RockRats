@@ -763,12 +763,14 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   func spawnUFO(ufo: UFO) {
     playfield.addWithScaling(ufo)
     ufos.insert(ufo)
-    // Position the UFO just off the screen on one side or another.  I set the side
-    // here so that the positional audio will give a clue about where it's coming
-    // from.  Actual choice of Y position and beginning of movement happens after a
-    // delay.
-    let ufoSize = 0.6 * ufo.size.diagonal()
-    let x = (Bool.random() ? gameFrame.maxX + ufoSize : gameFrame.minX - ufoSize)
+    // Position the UFO off the screen on one side or another.  I set the side here
+    // so that the positional audio will give a clue about where it's coming from.
+    // Actual choice of Y position and beginning of movement happens after a delay.
+    // The offset should be large enough that there's no chance of a collision being
+    // flagged between the player or their shots (which will be wrapping).  At launch
+    // time, I'll move the UFO a bit closer.
+    let ufoOffset = CGFloat(150)
+    let x = (Bool.random() ? gameFrame.maxX + ufoOffset : gameFrame.minX - ufoOffset)
     // Audio depends only on left/right, i.e., x.
     ufo.position = CGPoint(x: x, y: 0)
     wait(for: 1) { self.launchUFO(ufo) }
@@ -777,13 +779,21 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// Move a UFO on to the playfield; see discussion under `spawnUFO`
   /// - Parameter ufo: The UFO to launch
   func launchUFO(_ ufo: UFO) {
-    let ufoRadius = 0.5 * ufo.size.diagonal()
+    let ufoRadius = 0.5 * ufo.size.width
     // Try to find a safe spawning position, but if I can't find one after some
     // number of tries, just go ahead and spawn anyway.
     var bestPosition: CGPoint?
     var bestClearance = CGFloat.infinity
+    // Th UFO is initially a bit farther off the screen than is desirable for
+    // launching.  I'll adjust the X position so it's just barely off.
+    let ufoX: CGFloat
+    if ufo.position.x > gameFrame.maxX {
+      ufoX = gameFrame.maxX + 1.1 * ufoRadius
+    } else {
+      ufoX = gameFrame.minX - 1.1 * ufoRadius
+    }
     for _ in 0 ..< 10 {
-      let pos = CGPoint(x: ufo.position.x, y: .random(in: 0.9 * gameFrame.minY ... 0.9 * gameFrame.maxY))
+      let pos = CGPoint(x: ufoX, y: .random(in: 0.9 * gameFrame.minY ... 0.9 * gameFrame.maxY))
       var thisClearance = CGFloat.infinity
       for asteroid in asteroids {
         let bothRadii = ufoRadius + 0.5 * asteroid.size.diagonal()
