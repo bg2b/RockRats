@@ -57,6 +57,8 @@ class ShipAppearanceAlternative {
 ///   the energy, and have `canShoot` and `canJump` deduct from it as part of the
 ///   check for whether an action is possible.
 class Ship: SKNode {
+  /// Cost of a jump, a class constant since the energy bar display uses it
+  static let hyperspaceEnergyCost = 40.0
   /// A closure that gives the joystick direction, normalized so max activation is a unit vector
   let getJoystickDirection: () -> CGVector
   /// Possible looks for the ship
@@ -340,7 +342,7 @@ class Ship: SKNode {
   /// - Parameter energyBar: The energy reserve
   /// - Returns: `true` if go for jump
   func canJump(_ energyBar: EnergyBar) -> Bool {
-    return parent != nil && energyBar.useEnergy(40)
+    return parent != nil && energyBar.useEnergy(Ship.hyperspaceEnergyCost)
   }
 
   /// Make the jump to hyperspace
