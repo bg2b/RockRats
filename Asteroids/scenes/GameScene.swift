@@ -164,12 +164,11 @@ class GameScene: GameTutorialScene {
 
   /// Make a new game scene
   /// - Parameter size: The size of the scene
-  override init(size: CGSize) {
+  init(size: CGSize) {
     os_log("GameScene init", log: .app, type: .debug)
-    super.init(size: size)
+    super.init(size: size, shipColor: "blue")
     name = "gameScene"
     initFutureShader()
-    player = Ship(getJoystickDirection: { [unowned self] in return self.joystickDirection }, audio: audio)
     setRetroMode(enabled: achievementIsCompleted(.blastFromThePast) && UserData.retroMode.value)
     ufoCache = UFOCache(audio: audio)
   }

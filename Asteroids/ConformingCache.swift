@@ -226,7 +226,7 @@ class ConformingPhysicsCache {
   /// start to reduce any lags.
   func preload() {
     let conformingTextures = [
-      "ship_blue", "retroship",
+      "ship_blue", "ship_green", "ship_red", "ship_orange", "retroship",
       "meteorbig1", "meteorbig2", "meteorbig3",
       "meteorhuge1", "meteorhuge2"
     ]

@@ -25,6 +25,8 @@ class GameTutorialScene: BasicScene {
   var continueButton: Button!
   /// The button to quit the game (usually hidden)
   var quitButton: Button!
+  /// The name of the color of the player's ship
+  let shipColor: String
   /// The player's spaceship
   var player: Ship!
   /// Points earned; this is in GameTutorialScene only because `hyperspaceJump()`
@@ -61,7 +63,7 @@ class GameTutorialScene: BasicScene {
     // blurring effect is used when the game is paused
     gameArea.addChild(info)
     // Remaining ships in upper left
-    reservesDisplay = ReservesDisplay()
+    reservesDisplay = ReservesDisplay(shipColor: shipColor)
     reservesDisplay.position = CGPoint(x: gameFrame.minX + 20, y: gameFrame.maxY - 20)
     info.addChild(reservesDisplay)
     // Energy reserves in upper right
@@ -101,16 +103,19 @@ class GameTutorialScene: BasicScene {
 
   /// Make a game or tutorial scene of a given size
   /// - Parameter size: The size of the scene
-  override init(size: CGSize) {
+  init(size: CGSize, shipColor: String?) {
+    self.shipColor = shipColor ?? "blue"
     super.init(size: size)
     name = "gameTutorialScene"
     initGameArea(avoidSafeArea: true)
     initInfo()
     isUserInteractionEnabled = true
     physicsWorld.contactDelegate = self
+    player = Ship(getJoystickDirection: { [unowned self] in return self.joystickDirection }, color: self.shipColor, audio: audio)
   }
 
   required init(coder aDecoder: NSCoder) {
+    self.shipColor = "blue"
     super.init(coder: aDecoder)
   }
 

@@ -139,12 +139,11 @@ class TutorialScene: GameTutorialScene {
   /// Create a tutorial scene
   /// - Parameters:
   ///   - size: The size of the scene
-  override init(size: CGSize) {
+  init(size: CGSize) {
     os_log("TutorialScene init", log: .app, type: .debug)
-    super.init(size: size)
+    super.init(size: size, shipColor: nil)
     name = "tutorialScene"
     initTutorial()
-    player = Ship(getJoystickDirection: { [unowned self] in return self.joystickDirection }, audio: audio)
     // This is needed to set the pausing blur filter
     setRetroMode(enabled: false)
   }

@@ -306,7 +306,7 @@ extension Globals {
 }
 
 func precompileShaders() {
-  for imageName in ["ship_blue", "retroship"] {
+  for imageName in ["ship_blue", "ship_green", "ship_red", "ship_orange", "retroship"] {
     let texture = Globals.textureCache.findTexture(imageNamed: imageName)
     _ = Globals.swirlInShaders.getShader(texture: texture)
     _ = Globals.swirlOutShaders.getShader(texture: texture)

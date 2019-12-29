@@ -38,7 +38,7 @@ class ReservesDisplay: SKNode {
   let dontDie: SKLabelNode
 
   /// Make a reserve ships display display
-  override required init() {
+  init(shipColor: String) {
     // The numeric display
     numericDisplay = SKLabelNode(fontNamed: AppAppearance.font)
     numericDisplay.name = "extraShips"
@@ -57,7 +57,7 @@ class ReservesDisplay: SKNode {
     super.init()
     name = "reservesDisplay"
     // A line of sprites for the icons
-    let texture = Globals.textureCache.findTexture(imageNamed: "life_blue")
+    let texture = Globals.textureCache.findTexture(imageNamed: "life_\(shipColor)")
     let spacing = texture.size().width * 11 / 10
     numericDisplay.fontSize = texture.size().height
     dontDie.fontSize = numericDisplay.fontSize

@@ -116,12 +116,10 @@ class Ship: SKNode {
   ///   - getJoystickDirection: A closure to return the (normalized) joystick
   ///     direction.  (1, 0) means max forward thrust, (0, 1) is a maximum clockwise
   ///     turn
+  ///   - color: The ship's color name (blue, green, red, orange currently)
   ///   - audio: The scene's audio handler
-  required init(getJoystickDirection: @escaping () -> CGVector, audio: SceneAudio) {
+  required init(getJoystickDirection: @escaping () -> CGVector, color: String, audio: SceneAudio) {
     self.getJoystickDirection = getJoystickDirection
-    // Orginally color was a parameter in anticipation of some sort of multi-player,
-    // but for now the player can have any ship so long as it's blue.
-    let color = "blue"
     shipAppearances = []
     shipAppearances.append(ShipAppearanceAlternative(imageName: "ship_\(color)", warpTime: warpTime))
     shipAppearances.append(ShipAppearanceAlternative(imageName: "retroship", warpTime: warpTime))
