@@ -71,6 +71,14 @@ enum Achievement: String, CaseIterable {
   /// - Parameter level: The level number (starting from 0)
   func gameCenterLevelID(_ level: Int) -> String { return gameCenterID + String(level + 1) }
 
+  /// A dictionary mapping multi-level achievements to an array holding the different
+  /// levels, so, e.g., the first `ufoHunter` achievement is completed after destroying
+  /// 100 UFOs, the next after 300 UFOs, etc.
+  static let levels = [
+    Achievement.ufoHunter: [100, 300, 1000, 3000],
+    .rockRat: [1500, 5000, 15000, 50000]
+  ]
+
   /// The set of all hidden achievements
   ///
   /// This is initialized by calling closure, which I didn't realize was possible
@@ -91,13 +99,6 @@ enum Achievement: String, CaseIterable {
   var isHidden: Bool { Achievement.hiddenAchievements.contains(self) }
 }
 
-/// A dictionary mapping multi-level achievements to an array holding the different
-/// levels, so, e.g., the first `ufoHunter` achievement is completed after destroying
-/// 30 UFOs, the next after 100 UFOs, etc.
-let achievementLevels = [
-  Achievement.ufoHunter: [30, 100, 300, 1000],
-  .rockRat: [1500, 5000, 15000, 50000]
-]
 
 /// Report a simple achievment as completed
 /// - Parameter achievement: The achievement
@@ -155,7 +156,7 @@ func reportRepeatableAchievement(achievement: Achievement) {
 ///   - soFar: The amount of progress (a count of how many times something was done)
 /// - Returns: An optional possibly larger amount of progress (see discussion)
 func reportAchievement(achievement: Achievement, soFar: Int) -> Int? {
-  guard let levels = achievementLevels[achievement] else { fatalError("Achievement \(achievement.rawValue) missing levels") }
+  guard let levels = Achievement.levels[achievement] else { fatalError("Achievement \(achievement.rawValue) missing levels") }
   guard let gc = Globals.gcInterface, gc.enabled else { return nil }
   os_log("Multi-level achievement %{public}s at %d", log: .app, type: .info, achievement.gameCenterID, soFar)
   var result: Int?
