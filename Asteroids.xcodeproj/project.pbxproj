@@ -56,6 +56,8 @@
 		FD4D53D0230843C900718938 /* meteormed_hit.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53CD230843C900718938 /* meteormed_hit.wav */; };
 		FD4D53D1230843C900718938 /* meteorsmall_hit.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53CE230843C900718938 /* meteorsmall_hit.wav */; };
 		FD4D53D523085AF800718938 /* player_engines.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD4D53D423085AF800718938 /* player_engines.wav */; };
+		FD51580623BA0FF300B94C30 /* Skywriting.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD51580523BA0FF300B94C30 /* Skywriting.swift */; };
+		FD51580A23BAC9E100B94C30 /* fortunes.txt in Resources */ = {isa = PBXBuildFile; fileRef = FD51580923BAC9E100B94C30 /* fortunes.txt */; };
 		FD53167122DAA8EA00F09E57 /* fire1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53166E22DAA8EA00F09E57 /* fire1@2x.png */; };
 		FD53167222DAA8EA00F09E57 /* fire3@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53166F22DAA8EA00F09E57 /* fire3@2x.png */; };
 		FD53167322DAA8EA00F09E57 /* fire2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD53167022DAA8EA00F09E57 /* fire2@2x.png */; };
@@ -181,6 +183,8 @@
 		FD4D53CD230843C900718938 /* meteormed_hit.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = meteormed_hit.wav; sourceTree = "<group>"; };
 		FD4D53CE230843C900718938 /* meteorsmall_hit.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = meteorsmall_hit.wav; sourceTree = "<group>"; };
 		FD4D53D423085AF800718938 /* player_engines.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = player_engines.wav; sourceTree = "<group>"; };
+		FD51580523BA0FF300B94C30 /* Skywriting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Skywriting.swift; sourceTree = "<group>"; };
+		FD51580923BAC9E100B94C30 /* fortunes.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = fortunes.txt; sourceTree = "<group>"; };
 		FD53166E22DAA8EA00F09E57 /* fire1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fire1@2x.png"; sourceTree = "<group>"; };
 		FD53166F22DAA8EA00F09E57 /* fire3@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fire3@2x.png"; sourceTree = "<group>"; };
 		FD53167022DAA8EA00F09E57 /* fire2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fire2@2x.png"; sourceTree = "<group>"; };
@@ -367,6 +371,7 @@
 				FD4D53BF2306B47900718938 /* ReservesDisplay.swift */,
 				FD53167422DB24EC00F09E57 /* Ship.swift */,
 				FD2518ED239A66F400029466 /* SKHelpers.swift */,
+				FD51580523BA0FF300B94C30 /* Skywriting.swift */,
 				FD4D53C623080E7300718938 /* Sounds.swift */,
 				FDDF488622D2A700006FB86F /* SpriteCache.swift */,
 				FD158A20238BF4CA00180EC9 /* TextureBitmap.swift */,
@@ -378,6 +383,7 @@
 				FD79324222D20FE700E7D336 /* Assets.xcassets */,
 				FDD831F722F1ADD100CA4EC6 /* configs */,
 				FD808FC82328FE380025A71E /* fonts */,
+				FD51580923BAC9E100B94C30 /* fortunes.txt */,
 				FD4D53C323080BFD00718938 /* sounds */,
 				FD79324422D20FE700E7D336 /* LaunchScreen.storyboard */,
 				FD79323F22D20FE600E7D336 /* Main.storyboard */,
@@ -532,6 +538,7 @@
 				FD0C070B22D8925E00F19A55 /* starfield_black@2x.png in Resources */,
 				FD53169322DC1A0600F09E57 /* lasersmall_red@2x.png in Resources */,
 				FD53168422DB445100F09E57 /* meteorbig3@2x.png in Resources */,
+				FD51580A23BAC9E100B94C30 /* fortunes.txt in Resources */,
 				FD1F0479239BEB6F001BD4DC /* firework2.wav in Resources */,
 				FD1F047A239BEB6F001BD4DC /* firework3.wav in Resources */,
 				FD537DD6231BE385003312B3 /* ufo_laser.wav in Resources */,
@@ -637,6 +644,7 @@
 				FD2518EE239A66F400029466 /* SKHelpers.swift in Sources */,
 				FD7635B02354A410000543E7 /* GameCenter.swift in Sources */,
 				FD158A25238FF9EA00180EC9 /* Touchable.swift in Sources */,
+				FD51580623BA0FF300B94C30 /* Skywriting.swift in Sources */,
 				FDDF488722D2A700006FB86F /* SpriteCache.swift in Sources */,
 				FD7AE4B0237F999F00CAF082 /* SettingsScene.swift in Sources */,
 				FDF92B422322456900CC4DFE /* Hyperspace.swift in Sources */,

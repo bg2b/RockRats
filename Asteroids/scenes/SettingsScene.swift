@@ -32,6 +32,8 @@ class SettingsScene: BasicScene {
   var shipStyleButton: Button!
   /// The button that resets the achievements in Game Center
   var resetAchievementsButton: Button!
+  /// The current fortune being shown, `nil` if none
+  var fortuneNode: SKNode?
 
   static func stackedLabels(_ lines: [String], fontColor: UIColor) -> SKNode {
     let stack = SKNode()
@@ -203,7 +205,7 @@ class SettingsScene: BasicScene {
   /// the promoted achievement has been done, then there will be a separate replay
   /// conclusion button.
   func replayIntro() {
-    guard beginSceneSwitch() else { return }
+    guard prepareForSwitch() else { return }
     var showConclusion = false
     if levelIsReached(achievement: .rockRat, level: 3) && !achievementIsCompleted(.promoted) {
       // Game Center has to be enabled to get here, since levelIsReached will have
@@ -216,30 +218,31 @@ class SettingsScene: BasicScene {
 
   /// Replay the conclusion scene
   func replayConclusion() {
-    guard beginSceneSwitch() else { return }
+    guard prepareForSwitch() else { return }
     switchToScene { IntroScene(size: self.fullFrame.size, conclusion: true) }
   }
 
   /// Replay the tutorial
   func replayTutorial() {
-    guard beginSceneSwitch() else { return }
+    guard prepareForSwitch() else { return }
     switchToScene { TutorialScene(size: self.fullFrame.size) }
   }
 
   /// Go back to the main menu
   func mainMenu() {
-    guard beginSceneSwitch() else { return }
+    guard prepareForSwitch() else { return }
     showWhenQuiescent(Globals.menuScene)
   }
 
   /// Start a new game
   func startGame() {
-    guard beginSceneSwitch() else { return }
+    guard prepareForSwitch() else { return }
     switchToScene { GameScene(size: self.fullFrame.size) }
   }
 
   /// Display the credits scene
   func showCredits() {
+    guard prepareForSwitch() else { return }
     switchToScene { CreditsScene(size: self.fullFrame.size) }
   }
 
@@ -329,8 +332,52 @@ class SettingsScene: BasicScene {
     }
   }
 
+  // MARK: - Skywriting (spacewriting?)
+
+  /// Remove the currently displayed fortune, if any
+  func removeFortune() {
+    fortuneNode?.removeFromParent()
+    fortuneNode = nil
+  }
+
+  /// Skywrite a random fortune
+  ///
+  /// This method reschedules itself indirectly through `nextFortune`
+  func skywriteFortune() {
+    guard let fortune = fortunes.randomElement() else { return }
+    let (fortuneNode, delay) = skywriting(message: fortune, frame: gameFrame)
+    self.fortuneNode = fortuneNode
+    playfield.addWithScaling(fortuneNode)
+    fortuneNode.run(.wait(for: delay, then: nextFortune), withKey: "skywriting")
+  }
+
+  /// Wait a bit, then skywrite a random fortune
+  ///
+  /// This method reschedules itself indirectly through `skywriteFortune`
+  func nextFortune() {
+    removeFortune()
+    run(.wait(for: .random(in: 2 ... 3), then: skywriteFortune), withKey: "skywriting")
+  }
+
+  /// Stop skywriting and get ready to switch scenes
+  /// - Returns: `true` means go ahead, `false` means a scene switch is already in progress
+  func prepareForSwitch() -> Bool {
+    guard self.beginSceneSwitch() else { return false }
+    removeAction(forKey: "skywriting")
+    if let fortuneNode = fortuneNode {
+      fortuneNode.run(.sequence([.fadeOut(withDuration: 0.5), .wait(forDuration: 0.1), .removeFromParent()]))
+      self.fortuneNode = nil
+    }
+    return true
+  }
+
+  /// Start skywriting
+  /// - Parameter view: The view that will display the scene
   override func didMove(to view: SKView) {
     super.didMove(to: view)
+    if !fortunes.isEmpty {
+      nextFortune()
+    }
   }
 
   override func update(_ currentTime: TimeInterval) {
@@ -338,3 +385,26 @@ class SettingsScene: BasicScene {
     endOfUpdate()
   }
 }
+
+// MARK: - Fortunes
+
+let fortunes: [String] = {
+  var result = [String]()
+  if let url = Bundle.main.url(forResource: "fortunes", withExtension: "txt") {
+    do {
+      let contents = try String(contentsOf: url)
+      result = contents.split(separator: "\n").compactMap {
+        let fortune = String($0)
+        if fortune.allSatisfy({ char in skywritingFont[char] != nil }) {
+          return fortune
+        } else {
+          os_log("Missing character in fortune %{public}s", log: .app, type: .error, String(fortune))
+          return nil
+        }
+      }
+    } catch {
+      os_log("Unable to load fortunes.txt", log: .app, type: .error)
+    }
+  }
+  return result
+}()

@@ -1,0 +1,458 @@
+It is only with the heart that one can see rightly.
+You become responsible, forever, for what you have tamed.
+The land of tears is so mysterious.
+The difference between try and triumph is a little umph.
+The further in you go, the bigger it gets.
+The world is older than it was.
+If Winter comes, can Spring be far behind?
+Worse is better; design for simplicity.
+Optimization considered harmful.
+For every proverb, there is an equal and opposite proverb.
+Fast, cheap, and reliable: choose two.
+Freedom, security, and convenience: choose two.
+Reuse complicates use.
+If you have too many special cases, you're doing it wrong.
+Variables don't, constants aren't.
+Sometimes the problem is to discover what the problem is.
+Design the data, not the code.
+Do one thing at a time, and do it well.
+Generalizations are generally wrong.
+If in doubt, leave it out.
+Eschew obfuscation.
+Perfection must be reached by degrees.
+Be wary then; best safety lies in fear.
+Keep it simple.
+The unavoidable price of reliability is simplicity.
+Talk is cheap. Show me the code.
+It seems that perfection is reached not when there is nothing left to add, but when there is nothing left to take away.
+A formula is worth a thousand pictures.
+There's more than one way to do it.
+Algorithms + Data Structures = Programs
+Caches are fundamental but also dangerous.
+Writing requires thinking.
+Machines are made of iron; let them sweat.
+Small is beautiful.
+Store data in flat text files.
+Unix never says "please".
+When in doubt, use brute force.
+One of my most productive days was throwing away 1000 lines of code.
+To err is human, but to really foul things up requires a computer.
+People rock at memorizing insecure passwords.
+Avoid infinite loops.
+AI is whatever hasn't been done yet.
+Laziness is the mother of efficiency.
+You have taken yourself too seriously.
+Machines are for answers; humans are for questions.
+Computers are useless: they can only give you answers.
+Fail quickly, then try again.
+Throw the first one away.
+Make it work first, then make it work fast.
+Document "Why?"
+Save early, save often.
+Assume a spherical cow in a vacuum.
+Reality is that which, when you stop believing in it, doesn't go away.
+An articulated guess beats an unspoken assumption.
+Never attribute to malice that which is adequately explained by stupidity.
+The people have spoken, and most of it was complete gibberish.
+If we cannot be wise, we can at least be honest.
+The plural of anecdote is data.
+foo walks into a bar
+Days since off-by-one errors: -1
+Programming is like endless detangling of Christmas lights.
+I can't believe your caps lock key hasn't been remapped yet.
+Your code should be poetry, not oh-noetry.
+The easiest person to deceive is one's own self.
+We are faced with an insurmountable opportunity.
+Failure is not an option.
+The purpose of computation is insight, not numbers.
+If we knew what it was we were doing, it would not be called research.
+Doubt kills more dreams than failure.
+Heavy stuff is hard to sell online.
+Big fish swim faster than small fish.
+The dreamers of the day are dangerous, for they may act their dreams with open eyes, to make it possible.
+It's kind of fun to do the impossible.
+To iterate is human, to recurse divine.
+How can I improve the code so that this comment isn't needed?
+A comment is a failure to express yourself in code.
+All models are wrong, some are useful.
+Simplicity is a great virtue, but complexity sells better.
+Programming is telling rocks what to think.
+Code is liability.
+So long, and thanks for all the fish.
+Don't fight forces, use them.
+We are called to be architects of the future, not its victims.
+Search others for their virtue, and yourself for your vices.
+Creativity is the sudden cessation of stupidity.
+Marketing is what you do when your product is no good.
+Science is a method to keep yourself from kidding yourself.
+Emacs > Vim
+The one who controls the data controls the learner.
+Data mining: torturing the data until it confesses.
+Machine learning is probably approximately correct.
+Policy is a very weak protection.
+Government never places additional restrictions on itself.
+Technology knows no jurisdiction.
+On the web, articles you have to pay for might as well not exist.
+If you try to ban the future, it will just happen elsewhere.
+Great minds discuss ideas, average minds discuss events, small minds discuss people.
+Upon arriving in the capital-F Future, we discover it, invariably, to be the lowercase now.
+When all else fails, read the instructions.
+Don't force it; get a larger hammer.
+The other line always moves faster.
+You always find something in the last place you look.
+When in doubt, mumble.
+Adding manpower to a late software project makes it later.
+Nine women can't make a baby in one month.
+What one programmer can do in one month, two programmers can do in two months.
+An honest politician is a national calamity.
+Debugging is the process of removing bugs; programming is the process of putting them in.
+Necessity is the mother of strange bedfellows.
+There is always one more bug.
+If an experiment works, something has gone wrong.
+Inside every large problem is a small problem struggling to get out.
+Responsibility always exceeds authority.
+Later equals never.
+There's never time to do it right, but always time to do it over.
+Programmers with no money write better code.
+The sooner you fall behind, the more time you have to catch up.
+Work expands so as to fill the time available for its completion.
+If you wait until the last minute, it only takes a minute to finish.
+The one who says it cannot be done should not interrupt the one who is doing it.
+Software gets slower faster than hardware gets faster.
+Every program attempts to expand until it can read mail.
+The trick with depression is to not allow it to take you into inaction.
+What is "data" without an interpreter?
+Technology is anything that wasn't around when you were born.
+The best way to predict the future is to invent it.
+Any sufficiently advanced technology is indistinguishable from magic.
+Never fire a laser at a mirror.
+Ethics change with technology.
+There exist minds that think as well as you do, but differently.
+A writer's worst sin is to waste the reader's time.
+If what you have to say is important, use the simplest language possible.
+Whatever it is that hits the fan will not be evenly distributed.
+A rolling stone gathers no moss.
+No battle was ever won according to plan, but no battle was ever won without one.
+Don't keep doing what doesn't work.
+Chaos is order yet undeciphered.
+The isms go, the ist dies, art remains.
+The future ain't what it used to be.
+Early adopters never switch.
+You miss 100% of the shots you don't take.
+There are no civilized people yet.
+When debugging, novices insert corrective code; experts remove defective code.
+First they ignore you, then they laugh at you, then they fight you, then you win.
+Insanity is doing the same thing over and over and expecting different results.
+I visualize a time when we will be to robots what dogs are to humans.
+Old man yells at cloud.
+Whenever possible, steal code.
+Plan to throw one away, you will anyhow.
+If you plan to throw one away, you will throw away two.
+Omit needless words.
+Spell create with an "e".
+Keep it simple to make it faster.
+TANSTAAFL
+Great artists ship.
+Fancy algorithms are slow when n is small, and n is usually small.
+Data structures, not algorithms, are central to programming.
+The artist is not the transcriber of the world, but its rival.
+If the code and the comments disagree, then both are wrong.
+A language is a dialect with an army and a navy.
+The truth is like poetry, and most people hate poetry.
+There is nothing worse than a sharp image of a fuzzy concept.
+The only true wisdom is in knowing you know nothing.
+It is more complicated than you think.
+For all resources, whatever it is, you need more.
+One size never fits all.
+Object-oriented design is the roman numerals of computing.
+We deliver things in little brown boxes.
+Your margin is my opportunity.
+All overnight successes take about 10 years.
+Failure is an option here.
+If things are not failing, you are not innovating enough.
+Any product that needs a manual to work is broken.
+Price is what you pay, value is what you get.
+They've been here for a long, long time.
+I just think it's a good idea not to antagonize local law enforcement.
+I'm going to suggest that we sleep with the lights on.
+The last remnants of the Old Republic have been swept away.
+I'm Luke Skywalker. I'm here to rescue you.
+Help me, Obi-wan Kenobi. You're my only hope.
+You will never find a more wretched hive of scum and villainy.
+I find your lack of faith disturbing.
+You must learn the ways of the Force.
+We're doomed!
+Who's the more foolish, the fool, or the fool who follows him?
+Aren't you a little short for a stormtrooper?
+I suggest a new strategy, R2: let the Wookiee win.
+The Force will be with you, always.
+Use the Force, Luke!
+The possibility of successfully navigating an asteroid field is approximately 3,720 to 1!
+Never tell me the odds!
+Try not. Do or do not. There is no try.
+No. I am your father.
+I'll be back.
+I WILL NOT WASTE CHALK
+I WILL NOT SKATEBOARD IN THE HALLS
+I WILL NOT BURP IN CLASS
+I WILL NOT INSTIGATE REVOLUTION
+I DID NOT SEE ELVIS
+I WILL NOT CALL MY TEACHER "HOT CAKES"
+GARLIC GUM IS NOT FUNNY
+THEY ARE LAUGHING AT ME, NOT WITH ME
+I WILL NOT ENCOURAGE OTHERS TO FLY
+I WILL NOT FAKE MY WAY THROUGH LIFE
+TAR IS NOT A PLAYTHING
+IT'S POTATO, NOT POTATOE
+I AM NOT A 32 YEAR OLD WOMAN
+I WILL NOT DO THAT THING WITH MY TONGUE
+I WILL NOT PLEDGE ALLEGIANCE TO BART
+I WILL NOT SELL SCHOOL PROPERTY
+I WILL NOT BELCH THE NATIONAL ANTHEM
+I WILL NOT SELL LAND IN FLORIDA
+I WILL NOT GREASE THE MONKEY BARS
+I WILL NOT HIDE BEHIND THE FIFTH AMENDMENT
+I AM NOT A DENTIST
+SPITWADS ARE NOT FREE SPEECH
+I WILL NOT BRIBE PRINCIPAL SKINNER
+I WILL NOT SQUEAK CHALK
+I WILL FINISH WHAT I STA
+UNDERWEAR SHOULD BE WORN ON THE INSIDE
+I WILL NOT CARVE GODS
+I WILL NOT BARF UNLESS I'M SICK
+I SAW NOTHING UNUSUAL IN THE TEACHER'S LOUNGE
+I WILL NOT CONDUCT MY OWN FIRE DRILLS
+FUNNY NOISES ARE NOT FUNNY
+I WILL NOT SPIN THE TURTLE
+I WILL NOT DEFAME NEW ORLEANS
+I WILL NOT TEACH OTHERS TO FLY
+I WILL NOT BRING SHEEP TO CLASS
+A BURP IS NOT AN ANSWER
+COFFEE IS NOT FOR KIDS
+I WILL NOT EAT THINGS FOR MONEY
+THE PRINCIPAL'S TOUPEE IS NOT A FRISBEE
+GOLDFISH DON'T BOUNCE
+MUD IS NOT ONE OF THE 4 FOOD GROUPS
+I WILL NOT SELL MIRACLE CURES
+I WILL RETURN THE SEEING-EYE DOG
+I DO NOT HAVE DIPLOMATIC IMMUNITY
+I WILL NEVER WIN AN EMMY
+THE CAFETERIA DEEP FRYER IS NOT A TOY
+I AM NOT AUTHORIZED TO FIRE SUBSTITUTE TEACHERS
+MY HOMEWORK WAS NOT STOLEN BY A ONE-ARMED MAN
+I WILL NOT GO NEAR THE KINDERGARTEN TURTLE
+ORGAN TRANSPLANTS ARE BEST LEFT TO THE PROFESSIONALS
+I WILL NOT CELEBRATE MEANINGLESS MILESTONES
+BEANS ARE NEITHER FRUIT NOR MUSICAL
+I WILL NOT USE ABBREV.
+I WILL NOT SEND LARD THROUGH THE MAIL
+I WILL NOT WHITTLE HALL PASSES OUT OF SOAP
+CURSIVE WRITING DOES NOT MEAN WHAT I THINK IT DOES
+I WILL REMEMBER TO TAKE MY MEDICATION
+THE GOOD HUMOR MAN CAN ONLY BE PUSHED SO FAR
+THE FIRST AMENDMENT DOES NOT COVER BURPING
+NO ONE WANTS TO HEAR FROM MY ARMPITS
+I AM NOT CERTIFIED TO REMOVE ASBESTOS
+THE TRUTH IS NOT OUT THERE
+I WILL NOT HIDE THE TEACHER'S PROZAC
+I NO LONGER WANT MY MTV
+I DID NOT INVENT IRISH DANCING
+THERE WAS NO ROMAN GOD NAMED "FARTICUS"
+SILLY STRING IS NOT A NASAL SPRAY
+I AM NOT THE NEW DALAI LAMA
+I WAS NOT THE INSPIRATION FOR "KRAMER"
+NO ONE CARES WHAT MY DEFINITION OF "IS" IS
+"THE PRESIDENT DID IT" IS NOT AN EXCUSE
+I CANNOT ABSOLVE SINS
+LOOSE TEETH DON'T NEED MY HELP
+I HAVE NEITHER BEEN THERE NOR DONE THAT
+PORK IS NOT A VERB
+I WON'T NOT USE NO DOUBLE NEGATIVES
+I WILL NOT SELL MY KIDNEY ON eBAY
+A BELCH IS NOT AN ORAL REPORT
+NON-FLAMMABLE IS NOT A CHALLENGE
+Beware of The Leopard.
+Time is an illusion. Lunchtime doubly so.
+I never could get the hang of Thursdays.
+You're turning into a penguin. Stop it.
+I think you ought to know that I'm feeling very depressed.
+I've got this terrible pain in all the diodes down my left side.
+Someone down there is trying to kill us!
+Oh no, not again.
+Is no one going to say, "No you can't possibly, let me go instead"?
+I am so hip I have difficulty seeing over my pelvis.
+Eat at Milliways.
+The first ten million years were the worst.
+Mostly harmless
+Six pints of bitter. And quickly please, the world's about to end.
+Consciousness approached his body as from a great distance, and reluctantly.
+Go to it, and good luck.
+There was a point to this story, but it has temporarily escaped the chronicler's mind.
+I refuse to prove that I exist, for proof denies faith, and without faith I am nothing.
+Rome wasn't burned in a day.
+One's never alone with a rubber duck.
+Does it worry you that you don't talk any kind of sense?
+Right planet, wrong universe.
+Stupid is as stupid does.
+That's all I have to say about that.
+You ever been on a real SHRIMP boat?
+I/O, I/O, it's off to disk I go!
+Beware of bugs in the above code; I have only proved it correct, not tried it.
+Democracy is two wolves and a lamb voting on what to have for lunch.
+I have abandoned my search for truth, and am now looking for a good fantasy.
+The surest sign that intelligent life exists is that none of it has tried to contact us.
+Do not meddle in the affairs of Dragons, for you are crunchy and taste good with ketchup.
+I simply hate, detest, loathe, despise, and abhor redundancy.
+Sesquipedallianism: Making excessive use of long words.
+All your base are belong to us.
+A mouse is a device used to point at the xterm you want to type in.
+Under capitalism man exploits man, but under communism it's the opposite.
+If at first you don't succeed, destroy all evidence that you tried.
+I'm worser at superlatives.
+It was a dark and stormy night.
+Comedy is simply a funny way of being serious.
+It's harder to read code than to write it.
+The mome rath hasn't been born that could outgrabe me.
+O frabjous day! Callooh! Callay!
+I'm going back to ones and zeros.
+We have engaged the Borg.
+Java lets us write once and debug everywhere.
+One for you, nineteen for me.
+Contrariwise, if it was so, it might be; and if it were so, it would be; but as it isn't, it ain't. That's logic!
+Do I dare eat a peach?
+The pearl the squirrel the girl hit bit split.
+The shortest distance between two points is under construction.
+There is a fly on your nose.
+There is a fly in my soup.
+There's no place like home.
+I'll be back.
+What goes up must come down.
+They laughed at Copernicus and Galileo, but also at Bozo the Clown.
+This space available. Call 867-5309.
+Those who can't write, write manuals.
+To be or not to be, those are the parameters.
+Two Wrights make an airplane.
+This message will self-destruct in 10 seconds.
+You can observe a lot just by watching.
+People never go there anymore; it's too crowded.
+Prediction is hard, especially about the future.
+There is no spoon.
+Remember that "almost" means "not".
+Render unto Caesar if line 54 is larger than line 62.
+Error 404: Message not found
+A little suffering is good for the soul.
+Ahead warp factor one, Mr. Sulu.
+Warp speed, Mr. Sulu.
+Another dream that failed; there's nothing sadder.
+Beam me up, Scotty!
+Dammit Jim, I'm an actor, not a doctor.
+Tea, Earl Grey, hot.
+Today I will be brilliant.
+Hailing frequencies open.
+I'm a doctor, not a mechanic.
+I'm a doctor, not an escalator.
+I'm a doctor, not a bricklayer.
+I'm a doctor, not an engineer.
+I'm a doctor, not a coalminer.
+I'm a surgeon, not a psychiatrist.
+Immortality consists largely of boredom.
+Insufficient facts always invite danger.
+Intuition, however illogical, is recognized as a command prerogative.
+Is truth not truth for all?
+Phaser attack from the front! 100% damage to life support!
+Live long and prosper.
+One does not thank logic.
+Only a fool fights in a burning house.
+Phasers locked on target, Captain.
+Space: the final frontier
+Superior ability breeds superior ambition.
+There is a multi-legged creature crawling on your shoulder.
+Time is fluid, like a river with currents, eddies, backwash.
+Vulcans never bluff.
+Without facts, the decision cannot be made logically.
+You canna change the laws of physics!
+You! What planet is this?
+There's coffee in that nebula!
+Dismissed. That's a Star Fleet expression for "Get out."
+Helm, warp one, engage.
+If it ain't broke, don't fix it.
+A horse! A horse! My kingdom for a horse!
+A is for Apple.
+1, 2, 3, 4, can I have a little more?
+A, B, C, D, can I bring my friends to tea?
+All generalizations are false, including this one.
+Always do right. This will gratify some people and astonish the rest.
+An honest tale speeds best being plainly told.
+As to the adjective: when in doubt, strike it out.
+AWAKE! FEAR! FIRE! FOES! AWAKE!
+Cabbages and potatoes are better for you and me.
+Go not to the elves for counsel, for they will say both yes and no.
+He that breaks a thing to find out what it is has left the path of wisdom.
+I don't know half of you half as well as I should like; and I like less than half of you half as well as you deserve.
+I am eleventy-one today!
+Never laugh at live dragons.
+Perilous to all of us are the devices of an art deeper than we ourselves possess.
+question = to ? be : !be;
+Repartee is something we think of twenty-four hours too late.
+Be careful of reading health books, you might die of a misprint.
+Clothes make the man.
+Hello, world!
+Call me Ishmael.
+Up, up, and away!
+The world owes you nothing. It was here first.
+Familiarity breeds contempt and children.
+Never let schooling interfere with your education.
+If you tell the truth you don't have to remember anything.
+Kindness is a language which the deaf can hear and the blind can read.
+Man is the only animal that blushes, or needs to.
+Nothing so needs reforming as other people's habits.
+What I tell you three times is true.
+A dwarf is passing out somewhere in Detroit!
+Actually, what I'd like is a little toy spaceship!!
+Am I in GRADUATE SCHOOL yet?
+Did I do an INCORRECT THING??
+FUN is never having to say you're SUSHI!!
+HELLO, everybody, I'm a HUMAN!!
+Hold the MAYO and pass the COSMIC AWARENESS.
+I am a jelly donut.
+I feel partially hydrogenated!
+My life is a patio of fun!
+Now, let's SEND OUT for QUICHE!!
+PIZZA!!
+Burma-Shave
+A thing is not necessarily true because a man dies for it.
+The truth is rarely pure, and never simple.
+Nothing succeeds like excess.
+Nothing succeeds like success.
+Nothing recedes like success.
+Nothing succeeds like the appearance of success.
+Nothing will dispel enthusiasm like a small admission fee.
+Of course there's no reason for it, it's just our policy.
+One good suit is worth a thousand resumes.
+Only through hard work and perseverance can one truly suffer.
+People are always available for work in the past tense.
+People will buy anything that's one to a customer.
+Promising costs nothing, it's the delivering that kills you.
+Only 10% of anything can be in the top 10%.
+Serving coffee on aircraft causes turbulence.
+With proper assistance, you might have left off at seven.
+Surprise due today. Also the rent.
+The absent ones are always at fault.
+The answer to the question of Life, the Universe, and Everything is...
+It invariably delivered a cupful of liquid that was almost, but not quite, entirely unlike tea.
+The cost of living hasn't affected its popularity.
+The decision doesn't have to be logical; it was unanimous.
+The faster I go, the behinder I get.
+The meek don't want it.
+The optimum committee has no members.
+The reward for working hard is more hard work.
+The trouble with money is it costs too much.
+There's no such thing as a free lunch.
+To do two things at once is to do neither.
+Weekend, where are you?
+Wishing without work is like fishing without bait.
+The only way to get rid of a temptation is to yield to it.
+We are all in the gutter, but some of us are looking at the stars.
+Whenever people agree with me I always feel I must be wrong.
+Daniel was here.
+David was here.
