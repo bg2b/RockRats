@@ -34,6 +34,8 @@ class SettingsScene: BasicScene {
   var resetAchievementsButton: Button!
   /// The current fortune being shown, `nil` if none
   var fortuneNode: SKNode?
+  /// The most recent fortunes
+  var recentFortunes = Set<String>()
 
   static func stackedLabels(_ lines: [String], fontColor: UIColor) -> SKNode {
     let stack = SKNode()
@@ -346,7 +348,15 @@ class SettingsScene: BasicScene {
   ///
   /// This method reschedules itself indirectly through `nextFortune`
   func skywriteFortune() {
-    let fortune = fortunes.randomElement() ?? "This space unintentionally left blank."
+    // Try to pick something new.
+    var candidateFortune = fortunes.randomElement()
+    var tries = 0
+    while let fortune = candidateFortune, recentFortunes.contains(fortune), tries < 10 {
+      candidateFortune = fortunes.randomElement()
+      tries += 1
+    }
+    let fortune = candidateFortune ?? "This space unintentionally left blank."
+    recentFortunes.insert(fortune)
     let (fortuneNode, delay) = skywriting(message: fortune, frame: gameFrame)
     self.fortuneNode = fortuneNode
     fortuneNode.run(.wait(for: delay, then: nextFortune), withKey: "skywriting")
