@@ -729,6 +729,128 @@ let skywritingFont: [Character: [[Character]]] = {
   return font
 }()
 
+// MARK: - Caches for columns of pixels
+
+/// A cache with columns of sprites
+///
+/// A column in the skywriting display is specified by an integer whose bits
+/// correspond to the set pixels.  The lowest bit represents the topmost pixel.
+class ColumnCache {
+  /// The texture for a pixel
+  let texture: SKTexture
+  /// The spacing from pixel center to pixel center
+  let gridSpacing: CGFloat
+  /// The action that the pixels execute
+  let rotate: SKAction
+  /// All the columns of pixels that have been made
+  var allColumns = [Int: [SKNode]]()
+  /// The columns that are available for use
+  var availableColumns = [Int: [SKNode]]()
+
+  /// Create a cache
+  /// - Parameter texture: The texture for the pixel
+  init(_ texture: SKTexture) {
+    self.texture = texture
+    gridSpacing = 1.2 * texture.size().width
+    rotate = .repeatForever(.rotate(byAngle: .pi, duration: 1))
+  }
+
+  /// Return a column for the specified pixels
+  /// - Parameter bits: `(bits & (1 << k)) != 0` means pixel `k` (from the top) is set
+  /// - Returns: A node with appropriately-positioned pixel sprites as children
+  func getColumn(_ bits: Int) -> SKNode {
+    if allColumns[bits] == nil {
+      allColumns[bits] = []
+      availableColumns[bits] = []
+    }
+    if let column = availableColumns[bits]?.popLast() {
+      column.position = .zero
+      return column
+    } else {
+      let column = SKNode()
+      column.name = "skywritingColumn"
+      var y = CGFloat(0)
+      var remainingBits = bits
+      while remainingBits != 0 {
+        if (remainingBits & 1) != 0 {
+          let sprite = SKSpriteNode(texture: texture)
+          sprite.anchorPoint = CGPoint(x: 0.5, y: .random(in: 0.35 ... 0.65))
+          sprite.name = "skywritingPixel"
+          sprite.position = CGPoint(x: 0, y: y)
+          sprite.speed = .random(in: 1 ... 3)
+          sprite.run(rotate)
+          column.addChild(sprite)
+        }
+        remainingBits >>= 1
+        y -= gridSpacing
+      }
+      allColumns[bits]!.append(column)
+      return column
+    }
+  }
+
+  /// Return the columns to make up a character
+  /// - Parameter char: The character to represent
+  /// - Returns: An array of columns that together make a picture of the character
+  func columnsForCharacter(_ char: Character) -> [SKNode] {
+    var result = [SKNode]()
+    if let pixels = skywritingFont[char] {
+      for col in 0 ..< pixels[0].count {
+        var bits = 0
+        for row in 0 ..< pixels.count where pixels[row][col] != "." {
+          bits |= 1 << row
+        }
+        result.append(getColumn(bits))
+      }
+    }
+    return result
+  }
+
+  /// Make all columns available for reuse
+  func recycle() {
+    availableColumns = allColumns
+  }
+
+  /// Display some meaningless statistics for debugging
+  func stats() {
+    var totalColumns = 0
+    var totalPixels = 0
+    for (_, columns) in allColumns {
+      for column in columns {
+        totalColumns += 1
+        totalPixels += column.children.count
+      }
+    }
+    os_log("Column cache has %d sprites in %d columns", log: .app, type: .debug, totalPixels, totalColumns)
+  }
+}
+
+/// Column caches for the different colors
+let columnCaches: [ColumnCache] = {
+  var result = [ColumnCache]()
+  for color in ["red", "green", "blue"] {
+    let texture = Globals.textureCache.findTexture(imageNamed: "pixel_\(color)")
+    result.append(ColumnCache(texture))
+  }
+  return result
+}()
+
+/// Load skywriting column caches with most of what will be needed
+func preloadColumnCaches() {
+  for cache in columnCaches {
+    for (char, _) in skywritingFont {
+      _ = cache.columnsForCharacter(char)
+    }
+    let longFortune = """
+    It seems that perfection is reached not when there is nothing left to add, but when there is nothing left to take away.
+    """
+    for char in longFortune {
+      _ = cache.columnsForCharacter(char)
+    }
+    cache.stats()
+  }
+}
+
 // MARK: - Skywriting
 
 /// Make some skywriting (or spacewriting) UFOs
@@ -744,11 +866,9 @@ let skywritingFont: [Character: [[Character]]] = {
 func skywriting(message: String, frame: CGRect) -> (SKNode, Double) {
   let writing = SKNode()
   writing.name = "skywriting"
-  let color = ["green", "blue", "red"].randomElement()!
-  let texture = Globals.textureCache.findTexture(imageNamed: "pixel_\(color)")
-  let spriteSize = texture.size()
-  let pixelSize = spriteSize.width
-  let gridSpacing = 1.2 * pixelSize
+  let cache = columnCaches.randomElement()!
+  cache.recycle()
+  let gridSpacing = cache.gridSpacing
   let path = CGMutablePath()
   path.move(to: .zero)
   let deltaY = 5 * gridSpacing
@@ -763,27 +883,15 @@ func skywriting(message: String, frame: CGRect) -> (SKNode, Double) {
   let maxY = max(abs(endPoint.y), abs(control1.y), abs(control2.y))
   writing.position = CGPoint(x: frame.maxX + 0.5 * gridSpacing,
                              y: .random(in: 0.7 * frame.minY + maxY ... 0.7 * frame.maxY - maxY) + CGFloat(numPixelsHigh / 2) * gridSpacing)
-  let rotate = SKAction.repeatForever(.rotate(byAngle: .pi, duration: 1))
   let delayPerColumn = crossingDuration * Double(gridSpacing / abs(endPoint.x))
   var totalDelay = 0.5 * delayPerColumn
   for char in message {
-    guard let pixels = skywritingFont[char] else { continue }
-    for col in 0 ..< pixels[0].count {
-      let column = SKNode()
-      column.name = "skywritingColumn"
-      for row in 0 ..< pixels.count where pixels[row][col] != "." {
-        let sprite = SKSpriteNode(texture: texture, size: spriteSize)
-        sprite.anchorPoint = CGPoint(x: 0.5, y: .random(in: 0.35 ... 0.65))
-        sprite.name = "skywritingPixel"
-        sprite.position = CGPoint(x: 0, y: -CGFloat(row) * gridSpacing)
-        sprite.speed = .random(in: 1 ... 3)
-        sprite.run(rotate)
-        column.addChild(sprite)
-      }
+    for column in cache.columnsForCharacter(char) {
       column.run(.wait(for: totalDelay, then: follow))
       writing.addChild(column)
       totalDelay += delayPerColumn
     }
+    // One extra column for the spacing between characters
     totalDelay += delayPerColumn
   }
   return (writing, totalDelay + crossingDuration)
