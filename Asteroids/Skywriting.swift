@@ -763,19 +763,7 @@ func skywriting(message: String, frame: CGRect) -> (SKNode, Double) {
   let maxY = max(abs(endPoint.y), abs(control1.y), abs(control2.y))
   writing.position = CGPoint(x: frame.maxX + 0.5 * gridSpacing,
                              y: .random(in: 0.7 * frame.minY + maxY ... 0.7 * frame.maxY - maxY) + CGFloat(numPixelsHigh / 2) * gridSpacing)
-  var wigglesX = [SKAction]()
-  var wigglesY = [SKAction]()
-  for _ in 0 ..< 4 {
-    let wiggle = 0.2 * gridSpacing
-    let durationX = Double.random(in: 0.3 ... 1)
-    let wiggleX = SKAction.move(by: CGVector(dx: .random(in: -wiggle ... wiggle), dy: 0), duration: durationX)
-    wiggleX.timingMode = .easeInEaseOut
-    let durationY = Double.random(in: 0.3 ... 1)
-    wigglesX.append(.repeatForever(.sequence([wiggleX, wiggleX.reversed()])))
-    let wiggleY = SKAction.move(by: CGVector(dx: 0, dy: .random(in: -wiggle ... wiggle)), duration: durationY)
-    wiggleY.timingMode = .easeInEaseOut
-    wigglesY.append(.repeatForever(.sequence([wiggleY, wiggleY.reversed()])))
-  }
+  let rotate = SKAction.repeatForever(.rotate(byAngle: .pi, duration: 1))
   let delayPerColumn = crossingDuration * Double(gridSpacing / abs(endPoint.x))
   var totalDelay = 0.5 * delayPerColumn
   for char in message {
@@ -785,10 +773,11 @@ func skywriting(message: String, frame: CGRect) -> (SKNode, Double) {
       column.name = "skywritingColumn"
       for row in 0 ..< pixels.count where pixels[row][col] != "." {
         let sprite = SKSpriteNode(texture: texture, size: spriteSize)
+        sprite.anchorPoint = CGPoint(x: 0.5, y: .random(in: 0.35 ... 0.65))
         sprite.name = "skywritingPixel"
         sprite.position = CGPoint(x: 0, y: -CGFloat(row) * gridSpacing)
-        sprite.zRotation = .random(in: 0 ... 2 * .pi)
-        sprite.run(.group([wigglesX.randomElement()!, wigglesY.randomElement()!]))
+        sprite.speed = .random(in: 1 ... 3)
+        sprite.run(rotate)
         column.addChild(sprite)
       }
       column.run(.wait(for: totalDelay, then: follow))
