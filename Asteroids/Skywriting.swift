@@ -61,7 +61,7 @@ let skywritingFont: [Character: [[Character]]] = {
   xxxxx
   x....
   x....
-  xxx..
+  xxxx.
   x....
   x....
   xxxxx
@@ -70,7 +70,7 @@ let skywritingFont: [Character: [[Character]]] = {
   xxxxx
   x....
   x....
-  xxx..
+  xxxx.
   x....
   x....
   x....
@@ -745,11 +745,10 @@ func skywriting(message: String, frame: CGRect) -> (SKNode, Double) {
   let writing = SKNode()
   writing.name = "skywriting"
   let color = ["green", "blue", "red"].randomElement()!
-  let texture = Globals.textureCache.findTexture(imageNamed: "ufo_\(color)")
-  let pixelSize = CGFloat(5) // CGFloat.random(in: 5 ... 10)
+  let texture = Globals.textureCache.findTexture(imageNamed: "pixel_\(color)")
+  let spriteSize = texture.size()
+  let pixelSize = spriteSize.width
   let gridSpacing = 1.2 * pixelSize
-  let scaling = pixelSize / texture.size().width
-  let spriteSize = texture.size().scale(by: scaling)
   let path = CGMutablePath()
   path.move(to: .zero)
   let deltaY = 5 * gridSpacing
