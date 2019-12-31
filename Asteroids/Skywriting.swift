@@ -755,6 +755,16 @@ class ColumnCache {
     rotate = .repeatForever(.rotate(byAngle: .pi, duration: 1))
   }
 
+  /// Reset a column that may have been previously used
+  /// - Parameter column: The potentially-used column
+  /// - Returns: The same column but cleaned up and ready for use
+  func reset(_ column: SKNode) -> SKNode {
+    column.position = .zero
+    column.zRotation = -3 * .pi / 2
+    column.removeAllActions()
+    return column
+  }
+
   /// Return a column for the specified pixels
   /// - Parameter bits: `(bits & (1 << k)) != 0` means pixel `k` (from the top) is set
   /// - Returns: A node with appropriately-positioned pixel sprites as children
@@ -764,8 +774,7 @@ class ColumnCache {
       availableColumns[bits] = []
     }
     if let column = availableColumns[bits]?.popLast() {
-      column.position = .zero
-      return column
+      return reset(column)
     } else {
       let column = SKNode()
       column.name = "skywritingColumn"
@@ -776,7 +785,13 @@ class ColumnCache {
           let sprite = SKSpriteNode(texture: texture)
           sprite.anchorPoint = CGPoint(x: 0.5, y: .random(in: 0.35 ... 0.65))
           sprite.name = "skywritingPixel"
-          sprite.position = CGPoint(x: 0, y: y)
+          // The column will run an action to follow a path from right to
+          // left. Because I'm using the orient-to-path functionality, the columns
+          // zRotation will be set, and it seems to be -3 pi / 2 for whatever
+          // reason. Anyway, given that orientation, I have to set the position of
+          // the pixel so that when the column gets flipped, the pixel is in the
+          // right spot.
+          sprite.position = CGPoint(x: y, y: 0)
           sprite.speed = .random(in: 1 ... 3)
           sprite.run(rotate)
           column.addChild(sprite)
@@ -785,7 +800,7 @@ class ColumnCache {
         y -= gridSpacing
       }
       allColumns[bits]!.append(column)
-      return column
+      return reset(column)
     }
   }
 
@@ -877,7 +892,7 @@ func skywriting(message: String, frame: CGRect) -> (SKNode, Double) {
   let control2 = CGPoint(x: -2 * frame.width / 3, y: endPoint.y + .random(in: -deltaY ... deltaY))
   path.addCurve(to: endPoint, control1: control1, control2: control2)
   let crossingDuration = Double.random(in: 2.5 ... 4)
-  let follow = SKAction.sequence([.follow(path, asOffset: true, orientToPath: false, duration: crossingDuration),
+  let follow = SKAction.sequence([.follow(path, duration: crossingDuration),
                                   .removeFromParent()])
   let numPixelsHigh = skywritingFont["A"]!.count
   let maxY = max(abs(endPoint.y), abs(control1.y), abs(control2.y))
