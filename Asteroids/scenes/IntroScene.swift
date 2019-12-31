@@ -189,6 +189,7 @@ class IntroScene: BasicScene {
 
   override func update(_ currentTime: TimeInterval) {
     super.update(currentTime)
+    endOfUpdate()
   }
 
   // MARK: - End of scene

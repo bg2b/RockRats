@@ -661,5 +661,6 @@ class TutorialScene: GameTutorialScene {
     player.fly()
     playfield.wrapCoordinates()
     audio.update()
+    endOfUpdate()
   }
 }

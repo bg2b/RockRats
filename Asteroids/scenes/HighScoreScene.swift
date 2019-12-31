@@ -531,5 +531,6 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
       ufo.fly(smashies)
     }
     playfield.wrapCoordinates()
+    endOfUpdate()
   }
 }

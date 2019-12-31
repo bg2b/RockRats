@@ -359,5 +359,6 @@ class MenuScene: BasicScene {
     }
     playfield.wrapCoordinates()
     gameCenterAuth()
+    endOfUpdate()
   }
 }

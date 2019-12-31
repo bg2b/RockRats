@@ -335,5 +335,6 @@ class SettingsScene: BasicScene {
 
   override func update(_ currentTime: TimeInterval) {
     super.update(currentTime)
+    endOfUpdate()
   }
 }

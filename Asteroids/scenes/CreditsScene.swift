@@ -269,5 +269,6 @@ class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
 
   override func update(_ currentTime: TimeInterval) {
     super.update(currentTime)
+    endOfUpdate()
   }
 }

@@ -817,22 +817,10 @@ class GameScene: GameTutorialScene {
     }
   }
 
-  /// Mark the end of action execution and start of physics simulation
-  override func didEvaluateActions() {
-    os_signpost(.end, log: .poi, name: "2_actions", signpostID: signpostID)
-    os_signpost(.begin, log: .poi, name: "3_physics", signpostID: signpostID)
-  }
-
-  /// Mark the end of the render loop
-  override func didFinishUpdate() {
-    os_signpost(.end, log: .poi, name: "3_physics", signpostID: signpostID)
-  }
-
   /// Main update loop
   /// - Parameter currentTime: The game time
   override func update(_ currentTime: TimeInterval) {
     // Mark the start of the render loop
-    os_signpost(.begin, log: .poi, name: "1_update", signpostID: signpostID)
     super.update(currentTime)
     if player.parent == nil {
       lastWarpInTime = currentTime
@@ -846,8 +834,6 @@ class GameScene: GameTutorialScene {
     player.fly()
     playfield.wrapCoordinates()
     audio.update()
-    // Mark the end of the update phase and the start of actions
-    os_signpost(.end, log: .poi, name: "1_update", signpostID: signpostID)
-    os_signpost(.begin, log: .poi, name: "2_actions", signpostID: signpostID)
+    endOfUpdate()
   }
 }

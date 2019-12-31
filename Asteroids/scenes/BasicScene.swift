@@ -1021,11 +1021,15 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   ///    }
   ///    playfield.wrapCoordinates()
   ///    ...
+  ///    endOfUpdate()
   ///  }
   /// ```
   ///
-  /// Be sure to call `super.update` in the subclasses method.
+  /// Be sure to call `super.update` at the start of the subclass's method, and to
+  /// call `endOfUpdate` at the end of it so that the point of interest marking for
+  /// the render loop will be handled.
   override func update(_ currentTime: TimeInterval) {
+    os_signpost(.begin, log: .poi, name: "1_update", signpostID: signpostID)
     super.update(currentTime)
     Globals.lastUpdateTime = currentTime
     // Mostly getUtimeOffset just returns immediately, but when a scene first start
@@ -1033,5 +1037,22 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     // shaders.  Most of the effect shaders need to have an effective time that
     // always starts at zero, and I use the offset plus currentTime to provide it.
     _ = getUtimeOffset(view: view)
+  }
+
+  /// Mark the end of the update phase and the start of actions
+  func endOfUpdate() {
+    os_signpost(.end, log: .poi, name: "1_update", signpostID: signpostID)
+    os_signpost(.begin, log: .poi, name: "2_actions", signpostID: signpostID)
+  }
+
+  /// Mark the end of actions and the start of physics computations
+  override func didEvaluateActions() {
+    os_signpost(.end, log: .poi, name: "2_actions", signpostID: signpostID)
+    os_signpost(.begin, log: .poi, name: "3_physics", signpostID: signpostID)
+  }
+
+  /// Mark the end of the render loop
+  override func didFinishUpdate() {
+    os_signpost(.end, log: .poi, name: "3_physics", signpostID: signpostID)
   }
 }
