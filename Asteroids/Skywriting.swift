@@ -726,6 +726,15 @@ let skywritingFont: [Character: [[Character]]] = {
   x....
   .....
   """.skywritingCharacter()
+  font["^"] = """
+  ..x..
+  .x.x.
+  x...x
+  .....
+  .....
+  .....
+  .....
+  """.skywritingCharacter()
   return font
 }()
 
@@ -891,7 +900,7 @@ func skywriting(message: String, frame: CGRect) -> (SKNode, Double) {
   let control1 = CGPoint(x: -frame.width / 3, y: .random(in: -deltaY ... deltaY))
   let control2 = CGPoint(x: -2 * frame.width / 3, y: endPoint.y + .random(in: -deltaY ... deltaY))
   path.addCurve(to: endPoint, control1: control1, control2: control2)
-  let crossingDuration = Double.random(in: 2.5 ... 4)
+  let crossingDuration = Double.random(in: 3.5 ... 5)
   let follow = SKAction.sequence([.follow(path, duration: crossingDuration),
                                   .removeFromParent()])
   let numPixelsHigh = skywritingFont["A"]!.count

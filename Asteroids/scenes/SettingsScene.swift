@@ -59,7 +59,7 @@ class SettingsScene: BasicScene {
 
   /// Create the stuff the for the settings scene
   func initSettings() {
-    let settings = SKNode()
+    let settings = SKEffectNode()
     settings.name = "settings"
     settings.setZ(.info)
     addChild(settings)
@@ -176,6 +176,7 @@ class SettingsScene: BasicScene {
     let vstackY = round(wantedMidY - vstack.calculateAccumulatedFrame().midY)
     vstack.position = CGPoint(x: fullFrame.midX, y: vstackY)
     settings.addChild(vstack)
+    settings.shouldRasterize = true
   }
 
   /// Create the settings scene
@@ -336,6 +337,7 @@ class SettingsScene: BasicScene {
 
   /// Remove the currently displayed fortune, if any
   func removeFortune() {
+    fortuneNode?.removeAllActions()
     fortuneNode?.removeFromParent()
     fortuneNode = nil
   }
@@ -344,11 +346,11 @@ class SettingsScene: BasicScene {
   ///
   /// This method reschedules itself indirectly through `nextFortune`
   func skywriteFortune() {
-    guard let fortune = fortunes.randomElement() else { return }
+    let fortune = fortunes.randomElement() ?? "This space unintentionally left blank."
     let (fortuneNode, delay) = skywriting(message: fortune, frame: gameFrame)
     self.fortuneNode = fortuneNode
-    playfield.addWithScaling(fortuneNode)
     fortuneNode.run(.wait(for: delay, then: nextFortune), withKey: "skywriting")
+    playfield.addWithScaling(fortuneNode)
   }
 
   /// Wait a bit, then skywrite a random fortune
@@ -365,6 +367,7 @@ class SettingsScene: BasicScene {
     guard self.beginSceneSwitch() else { return false }
     removeAction(forKey: "skywriting")
     if let fortuneNode = fortuneNode {
+      fortuneNode.removeAction(forKey: "skywriting")
       fortuneNode.run(.sequence([.fadeOut(withDuration: 0.5), .wait(forDuration: 0.1), .removeFromParent()]))
       self.fortuneNode = nil
     }
