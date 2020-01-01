@@ -138,11 +138,10 @@ struct SkywritingCharacter {
   let width: Int
   /// The appropriate value for the `a_bits` attribute in the shader
   let bits: SKAttributeValue
-}
 
-extension String {
-  func skywritingCharacter() -> SkywritingCharacter {
-    var rows = self.split(separator: "\n").map { String($0) }
+  /// Create the character data from a string picture
+  init(_ str: String) {
+    var rows = str.split(separator: "\n").map { String($0) }
     assert(rows.count <= skywritingGridHeight && rows[0].count <= skywritingGridWidth)
     // Rows don't have to be the same length for the encoding below.  This is just a
     // sanity check to make sure that I typed out the bit pattern as intended.
@@ -165,7 +164,8 @@ extension String {
       return Float(result)
     }
     assert(rowBits.count == 3)
-    return SkywritingCharacter(width: rows[0].count, bits: SKAttributeValue(vectorFloat3: vector_float3(rowBits)))
+    width = rows[0].count
+    bits = SKAttributeValue(vectorFloat3: vector_float3(rowBits))
   }
 }
 
@@ -177,7 +177,7 @@ extension String {
 /// `skywritingGridHeight` grid.
 let skywritingFont: [Character: SkywritingCharacter] = {
   var font = [Character: SkywritingCharacter]()
-  font["A"] = """
+  font["A"] = SkywritingCharacter("""
   ..x..
   .x.x.
   x...x
@@ -185,8 +185,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x...x
   x...x
   x...x
-  """.skywritingCharacter()
-  font["B"] = """
+  """)
+  font["B"] = SkywritingCharacter("""
   xxxx.
   x...x
   x...x
@@ -194,8 +194,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x...x
   x...x
   xxxx.
-  """.skywritingCharacter()
-  font["C"] = """
+  """)
+  font["C"] = SkywritingCharacter("""
   .xxx.
   x...x
   x....
@@ -203,8 +203,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x....
   x...x
   .xxx.
-  """.skywritingCharacter()
-  font["D"] = """
+  """)
+  font["D"] = SkywritingCharacter("""
   xxxx.
   x...x
   x...x
@@ -212,8 +212,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x...x
   x...x
   xxxx.
-  """.skywritingCharacter()
-  font["E"] = """
+  """)
+  font["E"] = SkywritingCharacter("""
   xxxxx
   x....
   x....
@@ -221,8 +221,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x....
   x....
   xxxxx
-  """.skywritingCharacter()
-  font["F"] = """
+  """)
+  font["F"] = SkywritingCharacter("""
   xxxxx
   x....
   x....
@@ -230,8 +230,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x....
   x....
   x....
-  """.skywritingCharacter()
-  font["G"] = """
+  """)
+  font["G"] = SkywritingCharacter("""
   .xxx.
   x...x
   x....
@@ -239,8 +239,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x..xx
   x...x
   .xxx.
-  """.skywritingCharacter()
-  font["H"] = """
+  """)
+  font["H"] = SkywritingCharacter("""
   x...x
   x...x
   x...x
@@ -248,8 +248,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x...x
   x...x
   x...x
-  """.skywritingCharacter()
-  font["I"] = """
+  """)
+  font["I"] = SkywritingCharacter("""
   x
   x
   x
@@ -257,8 +257,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x
   x
   x
-  """.skywritingCharacter()
-  font["J"] = """
+  """)
+  font["J"] = SkywritingCharacter("""
   ....x
   ....x
   ....x
@@ -266,8 +266,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   ....x
   x...x
   .xxx.
-  """.skywritingCharacter()
-  font["K"] = """
+  """)
+  font["K"] = SkywritingCharacter("""
   x...x
   x...x
   x..x.
@@ -275,8 +275,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x..x.
   x...x
   x...x
-  """.skywritingCharacter()
-  font["L"] = """
+  """)
+  font["L"] = SkywritingCharacter("""
   x....
   x....
   x....
@@ -284,8 +284,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x....
   x....
   xxxxx
-  """.skywritingCharacter()
-  font["M"] = """
+  """)
+  font["M"] = SkywritingCharacter("""
   x.....x
   xx...xx
   x.x.x.x
@@ -293,8 +293,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x.....x
   x.....x
   x.....x
-  """.skywritingCharacter()
-  font["N"] = """
+  """)
+  font["N"] = SkywritingCharacter("""
   x...x
   xx..x
   x.x.x
@@ -302,8 +302,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x...x
   x...x
   x...x
-  """.skywritingCharacter()
-  font["O"] = """
+  """)
+  font["O"] = SkywritingCharacter("""
   .xxx.
   x...x
   x...x
@@ -311,8 +311,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x...x
   x...x
   .xxx.
-  """.skywritingCharacter()
-  font["P"] = """
+  """)
+  font["P"] = SkywritingCharacter("""
   xxxx.
   x...x
   x...x
@@ -320,8 +320,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x....
   x....
   x....
-  """.skywritingCharacter()
-  font["Q"] = """
+  """)
+  font["Q"] = SkywritingCharacter("""
   .xxx.
   x...x
   x...x
@@ -329,8 +329,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x.x.x
   x..xx
   .xxxx
-  """.skywritingCharacter()
-  font["R"] = """
+  """)
+  font["R"] = SkywritingCharacter("""
   xxxx.
   x...x
   x...x
@@ -338,8 +338,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x...x
   x...x
   x...x
-  """.skywritingCharacter()
-  font["S"] = """
+  """)
+  font["S"] = SkywritingCharacter("""
   .xxx.
   x...x
   x....
@@ -347,8 +347,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   ....x
   x...x
   .xxx.
-  """.skywritingCharacter()
-  font["T"] = """
+  """)
+  font["T"] = SkywritingCharacter("""
   xxxxx
   ..x..
   ..x..
@@ -356,8 +356,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   ..x..
   ..x..
   ..x..
-  """.skywritingCharacter()
-  font["U"] = """
+  """)
+  font["U"] = SkywritingCharacter("""
   x...x
   x...x
   x...x
@@ -365,8 +365,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x...x
   x...x
   .xxx.
-  """.skywritingCharacter()
-  font["V"] = """
+  """)
+  font["V"] = SkywritingCharacter("""
   x...x
   x...x
   x...x
@@ -374,8 +374,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x...x
   .x.x.
   ..x..
-  """.skywritingCharacter()
-  font["W"] = """
+  """)
+  font["W"] = SkywritingCharacter("""
   x.....x
   x.....x
   x.....x
@@ -383,8 +383,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x.x.x.x
   xx...xx
   x.....x
-  """.skywritingCharacter()
-  font["X"] = """
+  """)
+  font["X"] = SkywritingCharacter("""
   x...x
   x...x
   .x.x.
@@ -392,8 +392,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   .x.x.
   x...x
   x...x
-  """.skywritingCharacter()
-  font["Y"] = """
+  """)
+  font["Y"] = SkywritingCharacter("""
   x...x
   x...x
   .x.x.
@@ -401,8 +401,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   ..x..
   ..x..
   ..x..
-  """.skywritingCharacter()
-  font["Z"] = """
+  """)
+  font["Z"] = SkywritingCharacter("""
   xxxxx
   ....x
   ...x.
@@ -410,8 +410,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   .x...
   x....
   xxxxx
-  """.skywritingCharacter()
-  font[" "] = """
+  """)
+  font[" "] = SkywritingCharacter("""
   ...
   ...
   ...
@@ -419,8 +419,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   ...
   ...
   ...
-  """.skywritingCharacter()
-  font["."] = """
+  """)
+  font["."] = SkywritingCharacter("""
   ..
   ..
   ..
@@ -428,8 +428,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   ..
   ..
   x.
-  """.skywritingCharacter()
-  font["!"] = """
+  """)
+  font["!"] = SkywritingCharacter("""
   x.
   x.
   x.
@@ -437,8 +437,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x.
   ..
   x.
-  """.skywritingCharacter()
-  font["?"] = """
+  """)
+  font["?"] = SkywritingCharacter("""
   .xxx..
   x...x.
   ....x.
@@ -446,8 +446,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   ..x...
   ......
   ..x...
-  """.skywritingCharacter()
-  font[","] = """
+  """)
+  font[","] = SkywritingCharacter("""
   ..
   ..
   ..
@@ -456,8 +456,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   .x
   .x
   x.
-  """.skywritingCharacter()
-  font[";"] = """
+  """)
+  font[";"] = SkywritingCharacter("""
   ..
   ..
   ..
@@ -466,8 +466,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   .x
   .x
   x.
-  """.skywritingCharacter()
-  font[":"] = """
+  """)
+  font[":"] = SkywritingCharacter("""
   .
   .
   .
@@ -475,8 +475,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   .
   .
   x
-  """.skywritingCharacter()
-  font["'"] = """
+  """)
+  font["'"] = SkywritingCharacter("""
   x
   x
   .
@@ -484,8 +484,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   .
   .
   .
-  """.skywritingCharacter()
-  font["\""] = """
+  """)
+  font["\""] = SkywritingCharacter("""
   x.x
   x.x
   ...
@@ -493,8 +493,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   ...
   ...
   ...
-  """.skywritingCharacter()
-  font["0"] = """
+  """)
+  font["0"] = SkywritingCharacter("""
   .xxx.
   x...x
   x..xx
@@ -502,8 +502,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   xx..x
   x...x
   .xxx.
-  """.skywritingCharacter()
-  font["1"] = """
+  """)
+  font["1"] = SkywritingCharacter("""
   xx.
   .x.
   .x.
@@ -511,8 +511,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   .x.
   .x.
   xxx
-  """.skywritingCharacter()
-  font["2"] = """
+  """)
+  font["2"] = SkywritingCharacter("""
   .xxx.
   x...x
   ....x
@@ -520,8 +520,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x....
   x....
   xxxxx
-  """.skywritingCharacter()
-  font["3"] = """
+  """)
+  font["3"] = SkywritingCharacter("""
   .xxx.
   x...x
   ....x
@@ -529,8 +529,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   ....x
   x...x
   .xxx.
-  """.skywritingCharacter()
-  font["4"] = """
+  """)
+  font["4"] = SkywritingCharacter("""
   x...x
   x...x
   x...x
@@ -538,8 +538,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   ....x
   ....x
   ....x
-  """.skywritingCharacter()
-  font["5"] = """
+  """)
+  font["5"] = SkywritingCharacter("""
   xxxxx
   x....
   x....
@@ -547,8 +547,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   ....x
   ....x
   xxxx.
-  """.skywritingCharacter()
-  font["6"] = """
+  """)
+  font["6"] = SkywritingCharacter("""
   .xxx.
   x...x
   x....
@@ -556,8 +556,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x...x
   x...x
   .xxx.
-  """.skywritingCharacter()
-  font["7"] = """
+  """)
+  font["7"] = SkywritingCharacter("""
   xxxxx
   ....x
   ...x.
@@ -565,8 +565,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   ..x..
   ..x..
   ..x..
-  """.skywritingCharacter()
-  font["8"] = """
+  """)
+  font["8"] = SkywritingCharacter("""
   .xxx.
   x...x
   x...x
@@ -574,8 +574,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x...x
   x...x
   .xxx.
-  """.skywritingCharacter()
-  font["9"] = """
+  """)
+  font["9"] = SkywritingCharacter("""
   .xxx.
   x...x
   x...x
@@ -583,8 +583,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   ....x
   x...x
   .xxx.
-  """.skywritingCharacter()
-  font["a"] = """
+  """)
+  font["a"] = SkywritingCharacter("""
   .....
   .....
   .xxx.
@@ -592,8 +592,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   .xxxx
   x...x
   .xxxx
-  """.skywritingCharacter()
-  font["b"] = """
+  """)
+  font["b"] = SkywritingCharacter("""
   x....
   x....
   xxxx.
@@ -601,8 +601,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x...x
   x...x
   xxxx.
-  """.skywritingCharacter()
-  font["c"] = """
+  """)
+  font["c"] = SkywritingCharacter("""
   .....
   .....
   .xxxx
@@ -610,8 +610,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x....
   x....
   .xxxx
-  """.skywritingCharacter()
-  font["d"] = """
+  """)
+  font["d"] = SkywritingCharacter("""
   ....x
   ....x
   .xxxx
@@ -619,8 +619,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x...x
   x...x
   .xxxx
-  """.skywritingCharacter()
-  font["e"] = """
+  """)
+  font["e"] = SkywritingCharacter("""
   .....
   .....
   .xxx.
@@ -628,8 +628,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   xxxxx
   x....
   .xxxx
-  """.skywritingCharacter()
-  font["f"] = """
+  """)
+  font["f"] = SkywritingCharacter("""
   ..xxx
   .x...
   .x...
@@ -637,8 +637,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   .x...
   .x...
   .x...
-  """.skywritingCharacter()
-  font["g"] = """
+  """)
+  font["g"] = SkywritingCharacter("""
   .....
   .....
   .xxxx
@@ -648,8 +648,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   .xxxx
   ....x
   .xxx.
-  """.skywritingCharacter()
-  font["h"] = """
+  """)
+  font["h"] = SkywritingCharacter("""
   x....
   x....
   xxxx.
@@ -657,8 +657,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x...x
   x...x
   x...x
-  """.skywritingCharacter()
-  font["i"] = """
+  """)
+  font["i"] = SkywritingCharacter("""
   .
   x
   .
@@ -666,8 +666,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x
   x
   x
-  """.skywritingCharacter()
-  font["j"] = """
+  """)
+  font["j"] = SkywritingCharacter("""
   ....
   ...x
   ....
@@ -677,8 +677,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   ...x
   ...x
   xxx.
-  """.skywritingCharacter()
-  font["k"] = """
+  """)
+  font["k"] = SkywritingCharacter("""
   x....
   x....
   x...x
@@ -686,8 +686,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   xxx..
   x..x.
   x...x
-  """.skywritingCharacter()
-  font["l"] = """
+  """)
+  font["l"] = SkywritingCharacter("""
   xx
   .x
   .x
@@ -695,8 +695,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   .x
   .x
   .x
-  """.skywritingCharacter()
-  font["m"] = """
+  """)
+  font["m"] = SkywritingCharacter("""
   .......
   .......
   xxx.xx.
@@ -704,8 +704,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x..x..x
   x..x..x
   x..x..x
-  """.skywritingCharacter()
-  font["n"] = """
+  """)
+  font["n"] = SkywritingCharacter("""
   .....
   .....
   xxxx.
@@ -713,8 +713,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x...x
   x...x
   x...x
-  """.skywritingCharacter()
-  font["o"] = """
+  """)
+  font["o"] = SkywritingCharacter("""
   .....
   .....
   .xxx.
@@ -722,8 +722,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x...x
   x...x
   .xxx.
-  """.skywritingCharacter()
-  font["p"] = """
+  """)
+  font["p"] = SkywritingCharacter("""
   .....
   .....
   xxxx.
@@ -733,8 +733,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   xxxx.
   x....
   x....
-  """.skywritingCharacter()
-  font["q"] = """
+  """)
+  font["q"] = SkywritingCharacter("""
   .....
   .....
   .xxxx
@@ -744,8 +744,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   .xxxx
   ....x
   ....x
-  """.skywritingCharacter()
-  font["r"] = """
+  """)
+  font["r"] = SkywritingCharacter("""
   .....
   .....
   xxxx.
@@ -753,8 +753,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x....
   x....
   x....
-  """.skywritingCharacter()
-  font["s"] = """
+  """)
+  font["s"] = SkywritingCharacter("""
   .....
   .....
   .xxxx
@@ -762,8 +762,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   .xxx.
   ....x
   xxxx.
-  """.skywritingCharacter()
-  font["t"] = """
+  """)
+  font["t"] = SkywritingCharacter("""
   .x...
   .x...
   xxxxx
@@ -771,8 +771,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   .x...
   .x...
   ..xxx
-  """.skywritingCharacter()
-  font["u"] = """
+  """)
+  font["u"] = SkywritingCharacter("""
   .....
   .....
   x...x
@@ -780,8 +780,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x...x
   x...x
   .xxxx
-  """.skywritingCharacter()
-  font["v"] = """
+  """)
+  font["v"] = SkywritingCharacter("""
   .....
   .....
   x...x
@@ -789,8 +789,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x...x
   .x.x.
   ..x..
-  """.skywritingCharacter()
-  font["w"] = """
+  """)
+  font["w"] = SkywritingCharacter("""
   .......
   .......
   x.....x
@@ -798,8 +798,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   x..x..x
   x..x..x
   .xx.xx.
-  """.skywritingCharacter()
-  font["x"] = """
+  """)
+  font["x"] = SkywritingCharacter("""
   .....
   .....
   x...x
@@ -807,8 +807,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   ..x..
   .x.x.
   x...x
-  """.skywritingCharacter()
-  font["y"] = """
+  """)
+  font["y"] = SkywritingCharacter("""
   .....
   .....
   x...x
@@ -818,8 +818,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   .xxxx
   ....x
   .xxx.
-  """.skywritingCharacter()
-  font["z"] = """
+  """)
+  font["z"] = SkywritingCharacter("""
   .....
   .....
   xxxxx
@@ -827,8 +827,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   ..x..
   .x...
   xxxxx
-  """.skywritingCharacter()
-  font["+"] = """
+  """)
+  font["+"] = SkywritingCharacter("""
   .....
   ..x..
   ..x..
@@ -836,8 +836,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   ..x..
   ..x..
   .....
-  """.skywritingCharacter()
-  font["-"] = """
+  """)
+  font["-"] = SkywritingCharacter("""
   .....
   .....
   .....
@@ -845,8 +845,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   .....
   .....
   .....
-  """.skywritingCharacter()
-  font["="] = """
+  """)
+  font["="] = SkywritingCharacter("""
   .....
   .....
   xxxxx
@@ -854,8 +854,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   xxxxx
   .....
   .....
-  """.skywritingCharacter()
-  font[">"] = """
+  """)
+  font[">"] = SkywritingCharacter("""
   .....
   xx...
   ..xx.
@@ -863,8 +863,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   ..xx.
   xx...
   .....
-  """.skywritingCharacter()
-  font["%"] = """
+  """)
+  font["%"] = SkywritingCharacter("""
   xx...
   xx..x
   ...x.
@@ -872,8 +872,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   .x...
   x..xx
   ...xx
-  """.skywritingCharacter()
-  font["/"] = """
+  """)
+  font["/"] = SkywritingCharacter("""
   .....
   ....x
   ...x.
@@ -881,8 +881,8 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   .x...
   x....
   .....
-  """.skywritingCharacter()
-  font["^"] = """
+  """)
+  font["^"] = SkywritingCharacter("""
   ..x..
   .x.x.
   x...x
@@ -890,7 +890,7 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   .....
   .....
   .....
-  """.skywritingCharacter()
+  """)
   return font
 }()
 
