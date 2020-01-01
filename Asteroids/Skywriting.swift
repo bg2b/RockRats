@@ -862,13 +862,16 @@ let columnCaches: [ColumnCache] = {
 /// Load skywriting column caches with most of what will be needed
 func preloadColumnCaches() {
   for cache in columnCaches {
+    // One of everything
     for (char, _) in skywritingFont {
       _ = cache.columnsForCharacter(char)
     }
-    let longFortune = """
-    It seems that perfection is reached not when there is nothing left to add, but when there is nothing left to take away.
-    """
-    for char in longFortune {
+    // Extra letters, plus common ones more than once
+    let letters = "AAABCCDDEEEEFGHIIJKLLMMNNOOPPQRRRSSSTTTTUUVWXYZ"
+    for char in letters {
+      _ = cache.columnsForCharacter(char)
+    }
+    for char in letters.lowercased() {
       _ = cache.columnsForCharacter(char)
     }
     cache.stats()
