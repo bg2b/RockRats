@@ -119,7 +119,7 @@ func skywritingShader(texture: SKTexture) -> SKShader {
         v_tex_coord *= vec2(\(rect.size.width), \(rect.size.height));
         v_tex_coord += vec2(\(rect.origin.x), \(rect.origin.y));
         // Elementary, my dear Watson, elementary...
-        gl_FragColor = texture2D(u_texture, v_tex_coord);
+        gl_FragColor = texture2D(u_texture, v_tex_coord) * v_color_mix.a;
       }
     }
   }
