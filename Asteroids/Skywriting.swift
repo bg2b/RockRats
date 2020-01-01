@@ -169,6 +169,12 @@ extension String {
   }
 }
 
+/// The skywriting font
+///
+/// Each character should start from the top left.  The characters don't have to be
+/// the same width or same height though.  Each row within a character should be the
+/// same length.  And the character must fit within the `skywritingGridWidth` by
+/// `skywritingGridHeight` grid.
 let skywritingFont: [Character: SkywritingCharacter] = {
   var font = [Character: SkywritingCharacter]()
   font["A"] = """
