@@ -32,7 +32,7 @@ class GameViewController: UIViewController {
       // Build custom shaders for special effects
       precompileShaders()
       // Load column caches for settings scene
-      preloadColumnCaches()
+      preloadSkywritingCaches()
       let size = CGSize(width: 768 * aspect, height: 768)
       // Create the main menu then trigger the Game Center authentication
       Globals.menuScene = MenuScene(size: size)

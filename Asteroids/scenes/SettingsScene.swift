@@ -339,6 +339,7 @@ class SettingsScene: BasicScene {
 
   /// Remove the currently displayed fortune, if any
   func removeFortune() {
+    os_signpost(.event, log: .poi, name: "Skywriting finished", signpostID: signpostID)
     fortuneNode?.removeAllActions()
     fortuneNode?.removeFromParent()
     fortuneNode = nil
@@ -349,6 +350,7 @@ class SettingsScene: BasicScene {
   /// This method reschedules itself indirectly through `nextFortune`
   func skywriteFortune() {
     // Try to pick something new.
+    os_signpost(.event, log: .poi, name: "Composing skywriting", signpostID: signpostID)
     var candidateFortune = fortunes.randomElement()
     var tries = 0
     while let fortune = candidateFortune, recentFortunes.contains(fortune), tries < 10 {
@@ -360,6 +362,7 @@ class SettingsScene: BasicScene {
     let (fortuneNode, delay) = skywriting(message: fortune, frame: gameFrame)
     self.fortuneNode = fortuneNode
     fortuneNode.run(.wait(for: delay, then: nextFortune), withKey: "skywriting")
+    os_signpost(.event, log: .poi, name: "Running skywriting", signpostID: signpostID)
     playfield.addWithScaling(fortuneNode)
   }
 
