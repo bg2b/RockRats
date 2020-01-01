@@ -132,27 +132,39 @@ class GameScene: GameTutorialScene {
   /// SpriteKit ever allows native Metal shaders.
   func initFutureShader() {
     let shaderSource = """
+    // Convert a pixel in a texture to grayscale
     float grayscale(vec2 coord, texture2d<float> texture) {
       vec4 color = texture2D(texture, coord);
       return 0.2 * color.r + 0.7 * color.g + 0.1 * color.b;
     }
+    // Look for an edge in grayscale values at the given coordinate.
+    // Delta determines the direction, and is oriented perpendicular
+    // to the desired edge.
     float edge_detect(vec2 coord, vec2 delta, texture2d<float> texture) {
       return abs(grayscale(coord + delta, texture) - grayscale(coord - delta, texture));
     }
     void main() {
+      // The 0.35 is a number of order 1 (= 1 pixel) that's been
+      // chosen to make the effect look good for the game's particular
+      // graphics.
       vec2 radius = 0.35 / a_size;
       float dx = radius.x;
       float dy = radius.y;
-      float const invr2 = 0.707;
+      float const invr2 = 0.707;  // 1/sqrt(2)
+      // Look for edges horizontally, vertically, and diagonally
       float vedge = edge_detect(v_tex_coord, vec2(dx, 0.0), u_texture);
       float hedge = edge_detect(v_tex_coord, vec2(0.0, dy), u_texture);
       float d1edge = edge_detect(v_tex_coord, invr2 * vec2(dx, dy), u_texture);
       float d2edge = edge_detect(v_tex_coord, invr2 * vec2(dx, -dy), u_texture);
+      // What's the overall edginess of the current pixel?
       float gray = hedge + vedge + d1edge + d2edge;
+      // Amplifiy the edginess and clamp to 0-1 (high contrast B&W)
       gray = max(gray - 0.05, 0.0);
       gray *= 5.0;
       gray = min(gray, 1.0);
-      gl_FragColor = vec4(gray, gray, gray, 0.0);
+      // Don't be quite so harsh in the blacks
+      gray = max(gray, 0.125);
+      gl_FragColor = vec4(gray, gray, gray, 1.0);
     }
     """
     let shader = SKShader(source: shaderSource)

@@ -173,24 +173,36 @@ func swirlShader(forTexture texture: SKTexture, inward: Bool) -> SKShader {
   let rect = texture.textureRect()
   let shaderSource = """
   void main() {
+    // Time goes 0-1
     float dt = min((u_time - a_start_time) / \(warpTime), 1.0);
+    // Size goes 0-1 for expanding, and 1-0 for shrinking
     float size = \(inward ? "1.0 - " : "")dt;
+    // The maximum rotation is about a full angular turn, and
+    // the direction is reversed.  Rotation is at a maximum when the
+    // sprite is smallest and is 0 when the sprite is full size.
     float max_rot = \(inward ? 6.0 : -6.0) * (1.0 - size);
+    // Normalize coordinates to (0,0)-(1,1)
     v_tex_coord -= vec2(\(rect.origin.x), \(rect.origin.y));
     v_tex_coord *= vec2(\(1 / rect.size.width), \(1 / rect.size.height));
+    // Compute distance from (0.5,0.5)
     float p = min(distance(v_tex_coord, vec2(0.5, 0.5)) * 2.0, 1.0);
     if (p > size) {
-      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
+      // Outside the current size, clear
+      gl_FragColor = vec4(0.0);
     } else {
+      // Renormalize coordinates to (-1,-1)-(1,1)
       v_tex_coord -= 0.5;
       v_tex_coord *= 2.0;
       v_tex_coord /= size + 0.001;
+      // Rotate
       float rot = max_rot * (1.0 - p);
       float c = cos(rot);
       float s = sin(rot);
       v_tex_coord = vec2(c * v_tex_coord.x + s * v_tex_coord.y, -s * v_tex_coord.x + c * v_tex_coord.y);
+      // Switch back to (0,0)-(1,1)
       v_tex_coord /= 2.0;
       v_tex_coord += 0.5;
+      // And then back to the actual coordinates for the real texture
       v_tex_coord *= vec2(\(rect.size.width), \(rect.size.height));
       v_tex_coord += vec2(\(rect.origin.x), \(rect.origin.y));
       gl_FragColor = texture2D(u_texture, v_tex_coord);
@@ -215,27 +227,40 @@ func fanFoldShader(forTexture texture: SKTexture) -> SKShader {
   let rect = texture.textureRect()
   let shaderSource = """
   void main() {
+    // Time goes 0-1
     float dt = min((u_time - a_start_time) / \(warpTime), 1.0);
+    // The sprite shrinks to size 0 at time 1
     float size = 1.0 - dt;
+    // Normalize coordinates to (0,0)-(1,1)
     v_tex_coord -= vec2(\(rect.origin.x), \(rect.origin.y));
     v_tex_coord *= vec2(\(1 / rect.size.width), \(1 / rect.size.height));
+    // Compute distance from (0.5,0.5)
     float p = min(distance(v_tex_coord, vec2(0.5, 0.5)) * 2.0, 1.0);
     if (p > size) {
-      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
+      // Outside the current size, clear
+      gl_FragColor = vec4(0.0);
     } else {
+      // Normalize to (-1,-1)-(1,1)
       v_tex_coord -= 0.5;
       v_tex_coord *= 2.0;
       v_tex_coord /= size + 0.001;
+      // Rotate by pi at full shrinkage and by 0 at full size,
+      // so that the sprite looks normal when full size.
       float rot = 3.14159 * dt;
       float c = cos(rot);
       float s = sin(rot);
       v_tex_coord = vec2(c * v_tex_coord.x + s * v_tex_coord.y, -s * v_tex_coord.x + c * v_tex_coord.y);
+      // See what angle is after rotation
       float angle = atan2(v_tex_coord.y, v_tex_coord.x);
+      // The sprite gets cut by expanding "wedges" as it shrinks
       if (fract(3.0 * angle / 3.14159) < dt) {
-        gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
+        // Inside a wedge, clear
+        gl_FragColor = vec4(0.0);
       } else {
+        // Outside a wedge, normalize back to (0,0)-(1,1)
         v_tex_coord /= 2.0;
         v_tex_coord += 0.5;
+        // And then to the actual texture coordinates
         v_tex_coord *= vec2(\(rect.size.width), \(rect.size.height));
         v_tex_coord += vec2(\(rect.origin.x), \(rect.origin.y));
         gl_FragColor = texture2D(u_texture, v_tex_coord);
