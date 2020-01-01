@@ -383,7 +383,7 @@ Brevity is the soul of wit.
 Yada, yada, yada...
 Here's looking at you, kid.
 I have a feeling we're not in Kansas anymore.
-Fortune favors the brave.
+Fortune favors the bold.
 One if by land, two if by sea.
 There is no cure for curiosity.
 There's a sucker born every minute.
@@ -420,3 +420,15 @@ I KNEW it should have been n - 1!
 Train station: where a train stops. Workstation: ...
 !false: it's funny because it's true.
 If at first you don't succeed, there's always ^Z.
+Explicit is better than implicit.
+Flat is better than nested.
+Errors should never pass silently.
+Never is often better than *right* now.
+Absence of evidence is not evidence of absence.
+Happiness is in the little things.
+There should be one and only one way to do it.
+The obvious way may not be obvious unless you're Dutch.
+Special cases aren't special enough to break the rules.
+A long time ago in a galaxy far, far away....
+There's a frood who really knows where his towel is.
+We apologize for the inconvenience.

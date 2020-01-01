@@ -846,6 +846,15 @@ let skywritingFont: [Character: SkywritingCharacter] = {
   .....
   .....
   """)
+  font["*"] = SkywritingCharacter("""
+  .....
+  ..x..
+  x.x.x
+  .xxx.
+  x.x.x
+  ..x..
+  .....
+  """)
   font["="] = SkywritingCharacter("""
   .....
   .....
@@ -1034,7 +1043,7 @@ func skywriting(message: String, frame: CGRect) -> (SKNode, Double) {
   let gridSpacing = cache.gridSpacing
   let path = CGMutablePath()
   path.move(to: .zero)
-  let deltaY = 5 * gridSpacing
+  let deltaY = 15 * gridSpacing
   // The endpoint x for the path needs to be far enough off the screen that the
   // entirety of the widest characters will be completely hidden when they reach the
   // end of the path.
@@ -1042,7 +1051,7 @@ func skywriting(message: String, frame: CGRect) -> (SKNode, Double) {
   let control1 = CGPoint(x: -frame.width / 3, y: .random(in: -deltaY ... deltaY))
   let control2 = CGPoint(x: -2 * frame.width / 3, y: endPoint.y + .random(in: -deltaY ... deltaY))
   path.addCurve(to: endPoint, control1: control1, control2: control2)
-  let crossingDuration = Double.random(in: 3.5 ... 5)
+  let crossingDuration = Double.random(in: 5 ... 15)
   let delayPerColumn = crossingDuration * Double(gridSpacing / abs(endPoint.x))
   let follow = SKAction.sequence([.follow(path, duration: crossingDuration),
                                   .removeFromParent()])
