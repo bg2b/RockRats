@@ -336,7 +336,7 @@ func precompileShaders() {
     _ = Globals.swirlInShaders.getShader(texture: texture)
     _ = Globals.swirlOutShaders.getShader(texture: texture)
   }
-  for imageName in ["ufo_green", "ufo_blue", "ufo_red"] {
+  for imageName in ["ufo_green", "ufo_blue", "ufo_red", "developers"] {
     let texture = Globals.textureCache.findTexture(imageNamed: imageName)
     _ = Globals.fanFoldShaders.getShader(texture: texture)
   }

@@ -188,8 +188,8 @@ class ExplosionCache {
   /// created dynamically if required so whatevs.
   func preload() {
     for cuts in 5 ... 6 {
-      for imageName in ["ufo_green", "ufo_blue", "ufo_red", "retroship",
-                        "ship_blue", "ship_green", "ship_red", "ship_orange"] {
+      for imageName in ["ufo_green", "ufo_blue", "ufo_red", "developers",
+                        "retroship", "ship_blue", "ship_green", "ship_red", "ship_orange"] {
         let texture = Globals.textureCache.findTexture(imageNamed: imageName)
         let explosions = (0 ..< 2).map { _ in self.findOrMakeExplosion(texture: texture, cuts: cuts) }
         explosions.forEach { doneWithExplosion($0, texture: texture, cuts: cuts) }

@@ -144,6 +144,8 @@ class UFO: SKNode {
   var kamikazeAcceleration = CGFloat(0)
   /// The texture for the UFO
   let ufoTexture: SKTexture
+  /// The sprite for the UFO's appearance
+  let ufo: SKSpriteNode
   /// The UFO's physical size
   var size: CGSize { ufoTexture.size() }
 
@@ -156,8 +158,20 @@ class UFO: SKNode {
     // Choose an initial speed
     let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[typeIndex]
     currentSpeed = .random(in: 0.5 * maxSpeed ... maxSpeed)
+    var revengeBoost = 0
+    if type == .big {
+      // Maybe randomly show the developers' names
+      if brothersKilled > 2, Int.random(in: 0 ..< 20) == 0 {
+        ufo.texture = Globals.textureCache.findTexture(imageNamed: "developers")
+        // Developers are good at the game ;-)
+        revengeBoost = 2
+      } else {
+        // Be sure to reset the texture in case this UFO was previously showing a name
+        ufo.texture = ufoTexture
+      }
+    }
     // The player can destroy a few UFOs per wave without repurcussions, but after that...
-    let revengeFactor = max(brothersKilled - 3, 0)
+    let revengeFactor = max(brothersKilled - 3 + revengeBoost, 0)
     // When delayOfFirstShot is nonnegative, it means that the UFO hasn't gotten on
     // to the screen yet.  When it appears, I schedule an action after that delay to
     // enable attacking.  When revenge factor starts increasing, the UFOs start
@@ -192,10 +206,10 @@ class UFO: SKNode {
     // Texture and warp shader
     let textures = ["green", "blue", "red"]
     ufoTexture = Globals.textureCache.findTexture(imageNamed: "ufo_\(textures[typeIndex])")
+    ufo = SKSpriteNode(texture: ufoTexture)
+    ufo.name = "ufoImage"
     super.init()
     name = "ufo"
-    let ufo = SKSpriteNode(texture: ufoTexture)
-    ufo.name = "ufoImage"
     addChild(ufo)
     // Make noise if requested.  UFOs in non-game scenes are currently silent, since
     // otherwise the constant whirring gets annoying
@@ -413,7 +427,9 @@ class UFO: SKNode {
   ///   animate the warping
   func warpOut() -> [SKNode] {
     cleanup()
-    return warpOutEffect(texture: ufoTexture, position: position, rotation: zRotation)
+    // Don't use ufoTexture because ufo.texture may not equal ufoTexture.  Developers
+    // are always mucking things up...
+    return warpOutEffect(texture: ufo.requiredTexture(), position: position, rotation: zRotation)
   }
 
   /// Make the UFO explode
@@ -421,13 +437,15 @@ class UFO: SKNode {
   func explode(collision: Bool) -> [SKNode] {
     let velocity = requiredPhysicsBody().velocity
     cleanup()
+    // Not ufoTexture, since that may not be what's being shown in the sprite
+    let texture = ufo.requiredTexture()
     if collision {
       // Two ships/UFOs collided.  Some older devices lag when using full resolution
       // explosions in this case, but since the UFO debris is mixed up with the
       // fragments of the other ship, lower resolution explosions look OK.
-      return makeExplosion(texture: ufoTexture, angle: zRotation, velocity: velocity, at: position, duration: 2, cuts: 5)
+      return makeExplosion(texture: texture, angle: zRotation, velocity: velocity, at: position, duration: 2, cuts: 5)
     } else {
-      return makeExplosion(texture: ufoTexture, angle: zRotation, velocity: velocity, at: position, duration: 2)
+      return makeExplosion(texture: texture, angle: zRotation, velocity: velocity, at: position, duration: 2)
     }
   }
 }
