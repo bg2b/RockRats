@@ -161,12 +161,12 @@ class UFO: SKNode {
     var revengeBoost = 0
     if type == .big {
       // Maybe randomly show the developers' names
-      if brothersKilled > 2, Int.random(in: 0 ..< 20) == 0 {
+      if brothersKilled > 2 && Int.random(in: 0 ..< 20) == 0 && achievementIsCompleted(.hideAndSeek) {
         ufo.texture = Globals.textureCache.findTexture(imageNamed: "developers")
         // Developers are good at the game ;-)
         revengeBoost = 2
       } else {
-        // Be sure to reset the texture in case this UFO was previously showing a name
+        // Be sure to reset the texture in case this was previously a developer UFO
         ufo.texture = ufoTexture
       }
     }

@@ -24,6 +24,13 @@ class Touchable: SKNode {
     addChild(child)
   }
 
+  convenience init(_ child: SKNode, minSize: CGFloat, _ action: @escaping () -> Void) {
+    self.init(child, action)
+    let box = SKSpriteNode()
+    box.size = CGSize(width: minSize, height: minSize)
+    addChild(box)
+  }
+
   required init(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented by Touchable")
   }

@@ -14,6 +14,8 @@ import os.log
 class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
   /// This is `true` when displaying a hyperlink via Safari
   var showingLink = false
+  /// The mysterious developers, who knows where they might hide?
+  var developers: SKSpriteNode!
 
   // MARK: - Initialization
 
@@ -61,6 +63,7 @@ class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
        "www.hackingwithswift.com")
     ]
     var nextLabelY = CGFloat(0)
+    var creditsFrames = [CGRect]()
     for (text, link) in creditsText {
       let creditsLabel = SKLabelNode(attributedText: makeAttributed(text: text, until: text.endIndex, attributes: attributes))
       creditsLabel.name = "creditsLabel"
@@ -71,6 +74,7 @@ class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
       creditsLabel.verticalAlignmentMode = .top
       creditsLabel.position = CGPoint(x: 0, y: nextLabelY)
       creditsLabels.addChild(creditsLabel)
+      creditsFrames.append(creditsLabel.frame)
       nextLabelY -= creditsLabel.frame.height + 0.25 * attributes.fontSize
       // Putting links in a button doesn't match the rest of the credits, but I want
       // to indicate that they're activatable in some way.  I settled on using the
@@ -84,6 +88,22 @@ class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
       linkLabel.position = CGPoint(x: 0, y: nextLabelY)
       creditsLabels.addChild(Touchable(linkLabel) { [unowned self] in self.showLink(link) })
       nextLabelY -= linkLabel.frame.height + 0.75 * attributes.fontSize
+    }
+    if let gc = Globals.gcInterface, gc.enabled, !achievementIsCompleted(.hideAndSeek) {
+      // Add a period after the first credits label
+      developers = SKSpriteNode(texture: Globals.textureCache.findTexture(imageNamed: "developers"),
+                                size: CGSize(width: 5, height: 5))
+      // Blend in
+      developers.color = AppAppearance.highlightTextColor
+      developers.colorBlendFactor = 1
+      let frame1 = creditsFrames[0]
+      // The amount to add to the bottom of a label's frame to align to the baseline.  I
+      // don't know of a nice way to get this automatically.
+      let baselineAdjust = 0.25 * attributes.fontSize
+      let developerY = frame1.minY + baselineAdjust + 0.5 * developers.size.height
+      let touchable = Touchable(developers, minSize: 15) { [unowned self] in self.revealDevelopers() }
+      touchable.position = CGPoint(x: frame1.maxX, y: developerY)
+      creditsLabels.addChild(touchable)
     }
     let wantedMidY = 0.5 * (title.frame.minY + bottomHstack.calculateAccumulatedFrame().maxY)
     // Center credits vertically at wantedMidY
@@ -164,6 +184,35 @@ class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
     os_log("CreditsScene finished showing link", log: .app, type: .debug)
     showingLink = false
     isPaused = false
+  }
+
+  // MARK: - Meet the developers
+
+  /// Make the developers show themselves
+  func revealDevelopers() {
+    guard let touchable = developers.parent else { return }
+    let positionInPlayfield = developers.convert(.zero, to: playfield)
+    developers.removeFromParent()
+    touchable.removeFromParent()
+    developers.position = positionInPlayfield
+    playfield.addWithScaling(developers)
+    let uncolorize = SKAction.colorize(withColorBlendFactor: 0, duration: 0.2)
+    let texture = developers.requiredTexture()
+    let grow = SKAction.scale(to: texture.size(), duration: 1)
+    let totalTime = 4.0
+    let rotate = SKAction.rotate(byAngle: 7 * .pi, duration: totalTime)
+    let path = CGMutablePath()
+    path.move(to: .zero)
+    path.addCurve(to: CGPoint(x: 100, y: -300), control1: CGPoint(x: -900, y: -900), control2: CGPoint(x: -800, y: 650))
+    let fly = SKAction.follow(path, asOffset: true, orientToPath: false, duration: totalTime)
+    developers.run(.group([uncolorize, grow, rotate, fly])) {
+      let position = self.developers.position
+      let rotation = self.developers.zRotation
+      self.addToPlayfield(warpOutEffect(texture: texture, position: position, rotation: rotation))
+      self.developers.removeFromParent()
+      self.audio.soundEffect(.ufoWarpOut, at: position)
+      reportAchievement(achievement: .hideAndSeek)
+    }
   }
 
   // MARK: - Fireworks display

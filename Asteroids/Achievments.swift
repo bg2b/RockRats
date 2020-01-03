@@ -32,6 +32,7 @@ enum Achievement: String, CaseIterable {
   case whatAreTheOdds = "whatAreTheOdds"
   case keepOnTrekking = "keepOnTrekking"
   case bestServedCold = "bestServedCold"
+  case hideAndSeek = "hideAndSeek"
   case tooMuchTime = "tooMuchTime"
   case promoted = "promoted"
   // Normal
