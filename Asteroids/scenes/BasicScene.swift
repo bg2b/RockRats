@@ -32,14 +32,34 @@ extension SKNode {
 /// Different types of objects, plus flags to indicate when something is off-screen
 /// and when its coordinates have been wrapped by the playfield
 enum ObjectCategories: UInt32 {
-  case player = 1
-  case playerShot = 2
-  case asteroid = 4
-  case ufo = 8
-  case ufoShot = 16
-  case fragment = 32
-  case offScreen = 32768
-  case hasWrapped = 65536
+  // Basic categories
+  case player =       0b0000_0000_00000001
+  case playerShot =   0b0000_0000_00000010
+  case ufo =          0b0000_0000_00000100
+  case ufoShot =      0b0000_0000_00001000
+  case fragment =     0b0000_0000_00010000
+  case asteroid =     0b0000_0000_00100000
+  // Specialized asteroids by size
+  case hugeAsteroid = 0b0000_1000_00100000
+  case bigAsteroid =  0b0000_0100_00100000
+  case medAsteroid =  0b0000_0010_00100000
+  case smAsteroid =   0b0000_0001_00100000
+  // Additional flags
+  case offScreen  =   0b0001_0000_00000000
+  case hasWrapped =   0b0010_0000_00000000
+
+  /// Is the category a basic type?
+  var isBasic: Bool {
+    let v = self.rawValue
+    return v <= ObjectCategories.asteroid.rawValue && (v & (v - 1)) == 0
+  }
+
+  /// Is a category also some specified category?
+  ///
+  /// Note the asymmetry: `.asteroid.isA(.hugeAsteroid)`, but not vice versa
+  func isA(_ category: ObjectCategories) -> Bool {
+    return (rawValue & (category.rawValue)) == category.rawValue
+  }
 }
 
 extension SKPhysicsBody {
@@ -47,10 +67,12 @@ extension SKPhysicsBody {
   /// - Parameter category: The category
   /// - Returns: `true` if the body is of the type
   func isA(_ category: ObjectCategories) -> Bool {
-    return (categoryBitMask & category.rawValue) != 0
+    // Check equality rather than != 0 so that it works with types that have more
+    // than one bit set.
+    return (categoryBitMask & category.rawValue) == category.rawValue
   }
 
-  /// Is a physics body one of some number of types?
+  /// Is a physics body one of some number of basic types?
   /// - Parameter categories: The types (use `setOf` to construct this from a list of categories)
   /// - Returns: `true` if the body is one of the types
   func isOneOf(_ categories: UInt32) -> Bool {
@@ -87,6 +109,37 @@ func setOf(_ categories: [ObjectCategories]) -> UInt32 {
   return categories.reduce(0) { $0 | $1.rawValue }
 }
 
+// MARK: - Asteroid sizes
+
+/// A convenience representation for asteroid sizes
+enum AsteroidSize: Int {
+  case small = 0
+  case med = 1
+  case big = 2
+  case huge = 3
+
+  var category: ObjectCategories { ObjectCategories(rawValue: ObjectCategories.asteroid.rawValue | UInt32(1 << (sizeIndex + 8)))! }
+
+  init?(forMask mask: UInt32) {
+    let asteroidsMask = setOf([ObjectCategories.hugeAsteroid, .bigAsteroid, .medAsteroid, .smAsteroid])
+    switch mask & asteroidsMask {
+    case ObjectCategories.hugeAsteroid.rawValue: self = .huge
+    case ObjectCategories.bigAsteroid.rawValue: self = .big
+    case ObjectCategories.medAsteroid.rawValue: self = .med
+    case ObjectCategories.smAsteroid.rawValue: self = .small
+    default: return nil
+    }
+  }
+
+  var sizeIndex: Int { rawValue }
+
+  var sizeString: String {
+    ["small", "med", "big", "huge"][sizeIndex]
+  }
+
+  var smaller: AsteroidSize { AsteroidSize(rawValue: sizeIndex - 1)! }
+}
+
 // MARK: - Random global stuff
 
 extension Globals {
@@ -94,7 +147,7 @@ extension Globals {
   static var lastUpdateTime = 0.0
   /// Cache of emitter nodes for splitting asteroids of various sizes; recycled
   /// repeatedly
-  static var asteroidSplitEffectsCache = CyclicCache<Int, SKEmitterNode>(cacheId: "Asteroid split effects cache")
+  static var asteroidSplitEffectsCache = CyclicCache<AsteroidSize, SKEmitterNode>(cacheId: "Asteroid split effects cache")
 }
 
 // MARK: - Base class for all scenes
@@ -414,12 +467,11 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   ///
   /// - Parameters:
   ///   - pos: The starting position of the asteroid
-  ///   - size: A string "small", "med", "big", or "huge" giving the size
+  ///   - size: The size of the asteroid
   ///   - velocity: The velocity of the asteroid
   ///   - onScreen: `false` if the asteroid is not on screen
-  func makeAsteroid(position pos: CGPoint, size: String, velocity: CGVector, onScreen: Bool) {
-    let typesForSize = ["small": 2, "med": 2, "big": 4, "huge": 3]
-    guard let numTypes = typesForSize[size] else { fatalError("Incorrect asteroid size") }
+  func makeAsteroid(position pos: CGPoint, size: AsteroidSize, velocity: CGVector, onScreen: Bool) {
+    let numTypes = [2, 2, 4, 3][size.sizeIndex]
     var type = Int.random(in: 1 ... numTypes)
     if Int.random(in: 1 ... 4) != 1 {
       // Prefer the last type for each size (where I can use a circular physics
@@ -429,7 +481,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     var name = "meteor\(size)\(type)"
     // For amusement, if the player has gotten the Little Prince achievement, then on
     // rare occasions spawn an asteroid with the Prince and his friends on it.
-    if littlePrinceAllowed && size == "huge" && type == numTypes &&
+    if littlePrinceAllowed && size == .huge && type == numTypes &&
       Int.random(in: 0 ..< 100) == 0 && achievementIsCompleted(.littlePrince) {
       name = "meteorhugeprince"
       // Don't allow another until liitlePrinceAllowed is reset
@@ -448,12 +500,12 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
       // Huge and big asteroids of all types except the default have irregular shape,
       // so I use a pixel-perfect physics body for those.  Everything else gets a
       // circle.
-      let body = (type == numTypes || size == "med" || size == "small" ?
+      let body = (type == numTypes || size == .med || size == .small ?
         SKPhysicsBody(circleOfRadius: 0.5 * texture.size().width) :
         Globals.conformingPhysicsCache.makeBody(texture: texture))
       body.angularDamping = 0
       body.linearDamping = 0
-      body.categoryBitMask = ObjectCategories.asteroid.rawValue
+      body.categoryBitMask = size.category.rawValue
       body.collisionBitMask = 0
       body.contactTestBitMask = setOf([.player, .playerShot, .ufo, .ufoShot])
       body.restitution = 0.9
@@ -490,7 +542,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// The asteroid will have velocity that brings it onto the screen in a few seconds.
   ///
   /// - Parameter size: The size of the asteroid to spawn
-  func spawnAsteroid(size: String) {
+  func spawnAsteroid(size: AsteroidSize) {
     // Initial direction of the asteroid from the center of the screen
     let dir = CGVector(angle: .random(in: -.pi ... .pi))
     // Traveling towards the center at a random speed
@@ -537,9 +589,8 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// bigger asteroids).
   ///
   /// - Parameter size: The size of the asteroid
-  func getAsteroidSplitEffect(size: Int) -> SKEmitterNode {
-    let textureNames = ["meteormed1", "meteorbig1", "meteorhuge1"]
-    let texture = Globals.textureCache.findTexture(imageNamed: textureNames[size - 1])
+  func getAsteroidSplitEffect(size: AsteroidSize) -> SKEmitterNode {
+    let texture = Globals.textureCache.findTexture(imageNamed: "meteor\(size.sizeString)1")
     let emitter = SKEmitterNode()
     emitter.particleTexture = Globals.textureCache.findTexture(imageNamed: "meteorsmall1")
     let effectDuration = CGFloat(0.25)
@@ -547,7 +598,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     emitter.particleLifetimeRange = 0.15 * effectDuration
     emitter.particleScale = 0.75
     emitter.particleScaleRange = 0.25
-    emitter.numParticlesToEmit = 4 * size
+    emitter.numParticlesToEmit = 4 * size.sizeIndex
     emitter.particleBirthRate = CGFloat(emitter.numParticlesToEmit) / (0.25 * effectDuration)
     let radius = 0.75 * texture.size().width
     emitter.particleSpeed = radius / effectDuration
@@ -569,7 +620,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   ///
   /// These get recycled repeatedly during a game as asteroids are destroyed.
   func preloadAsteroidSplitEffects() {
-    for size in 1 ... 3 {
+    for size in [AsteroidSize.huge, .big, .med] {
       Globals.asteroidSplitEffectsCache.load(count: 10, forKey: size) { getAsteroidSplitEffect(size: size) }
     }
   }
@@ -578,7 +629,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// - Parameters:
   ///   - asteroid: The asteroid that was hit
   ///   - size: The size of the asteroid
-  func makeAsteroidSplitEffect(_ asteroid: SKSpriteNode, ofSize size: Int) {
+  func makeAsteroidSplitEffect(_ asteroid: SKSpriteNode, size: AsteroidSize) {
     let emitter = Globals.asteroidSplitEffectsCache.next(forKey: size)
     if emitter.parent != nil {
       emitter.removeFromParent()
@@ -595,18 +646,16 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// Destroy an asteroid and maybe spawn child asteroids
   /// - Parameter asteroid: The asteroid that was hit by something
   func splitAsteroid(_ asteroid: SKSpriteNode) {
-    let sizes = ["small", "med", "big", "huge"]
-    let hitEffect: [SoundEffect] = [.asteroidSmallHit, .asteroidMedHit, .asteroidBigHit, .asteroidHugeHit]
-    guard let size = (sizes.firstIndex { asteroid.name!.contains($0) }) else {
-      fatalError("Asteroid not of recognized size")
-    }
-    let velocity = asteroid.requiredPhysicsBody().velocity
+    let body = asteroid.requiredPhysicsBody()
+    guard let size = AsteroidSize(forMask: body.categoryBitMask) else { fatalError("Could not get asteroid size for sprite") }
+    let sizeIndex = size.sizeIndex
+    let velocity = body.velocity
     let pos = asteroid.position
-    makeAsteroidSplitEffect(asteroid, ofSize: size)
-    audio.soundEffect(hitEffect[size], at: pos)
+    makeAsteroidSplitEffect(asteroid, size: size)
+    audio.soundEffect([.asteroidSmallHit, .asteroidMedHit, .asteroidBigHit, .asteroidHugeHit][sizeIndex], at: pos)
     // Don't split med or small asteroids.  Size progression should go huge -> big -> med,
     // but I include small just for completeness in case I change my mind later.
-    if size >= 2 {
+    if size == .big || size == .huge {
       // Choose a random direction for the first child and project to get that child's velocity
       let velocity1Angle = CGVector(angle: velocity.angle() + .random(in: -0.4 * .pi ... 0.4 * .pi))
       // Throw in a random scaling just to keep it from being too uniform
@@ -615,8 +664,9 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
       let velocity2 = velocity.scale(by: 2) - velocity1
       // Add a bit of extra spice just to keep the player on their toes
       let oomph = Globals.gameConfig.value(for: \.asteroidSpeedBoost)
-      makeAsteroid(position: pos, size: sizes[size - 1], velocity: velocity1.scale(by: oomph), onScreen: true)
-      makeAsteroid(position: pos, size: sizes[size - 1], velocity: velocity2.scale(by: oomph), onScreen: true)
+      let smaller = size.smaller
+      makeAsteroid(position: pos, size: smaller, velocity: velocity1.scale(by: oomph), onScreen: true)
+      makeAsteroid(position: pos, size: smaller, velocity: velocity2.scale(by: oomph), onScreen: true)
     }
     removeAsteroid(asteroid)
   }

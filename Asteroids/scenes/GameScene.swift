@@ -375,7 +375,7 @@ class GameScene: GameTutorialScene {
     littlePrinceAllowed = true
     let numAsteroids = Globals.gameConfig.numAsteroids()
     for _ in 1...numAsteroids {
-      spawnAsteroid(size: "huge")
+      spawnAsteroid(size: .huge)
     }
     // UFOs will start appearing after a full duration period
     ufoSpawningRate = 1

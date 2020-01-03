@@ -274,7 +274,7 @@ class MenuScene: BasicScene {
   /// Reschedules itself so that this runs repeatedly.
   func spawnAsteroids() {
     if asteroids.count < 15 {
-      spawnAsteroid(size: ["big", "huge"].randomElement()!)
+      spawnAsteroid(size: [.big, .huge].randomElement()!)
     }
     wait(for: 1, then: spawnAsteroids)
   }

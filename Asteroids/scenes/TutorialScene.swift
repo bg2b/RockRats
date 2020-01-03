@@ -577,7 +577,7 @@ class TutorialScene: GameTutorialScene {
 
   func training7() {
     showInstructions("@Shoot@ lasers to", toDo: "@destroy the asteroid@", delay: instructionDelay) {
-      self.spawnAsteroid(size: "huge")
+      self.spawnAsteroid(size: .huge)
       self.observeAsteroid(then: self.trainingComplete)
     }
   }
