@@ -118,8 +118,11 @@ enum AsteroidSize: Int {
   case big = 2
   case huge = 3
 
+  /// Object category for asteroids of this size
   var category: ObjectCategories { ObjectCategories(rawValue: ObjectCategories.asteroid.rawValue | UInt32(1 << (sizeIndex + 8)))! }
 
+  /// What size asteroid does a physic body's category mask represent?
+  /// - Parameter mask: The category mask
   init?(forMask mask: UInt32) {
     let asteroidsMask = setOf([ObjectCategories.hugeAsteroid, .bigAsteroid, .medAsteroid, .smAsteroid])
     switch mask & asteroidsMask {
@@ -131,12 +134,15 @@ enum AsteroidSize: Int {
     }
   }
 
+  /// An alias for the size's raw value, 0 ... 3
   var sizeIndex: Int { rawValue }
 
+  /// The string name for the size
   var sizeString: String {
     ["small", "med", "big", "huge"][sizeIndex]
   }
 
+  /// The next smaller size
   var smaller: AsteroidSize { AsteroidSize(rawValue: sizeIndex - 1)! }
 }
 
