@@ -430,6 +430,7 @@ class GameTutorialScene: BasicScene {
   func setRetroMode(enabled: Bool) {
     setRetroFilter(enabled: enabled)
     player.setAppearance(to: enabled ? .retro : .modern)
+    reservesDisplay.retroMode = enabled
   }
 
   /// Handle the player's jump request

@@ -17,8 +17,8 @@ import SpriteKit
 class ReservesDisplay: SKNode {
   /// Maximum number of icons to show
   let maxIcons = 5
-  /// A row of icons
-  var shipIcons = [SKSpriteNode]()
+  /// Two rows of icons, first modern, second retro
+  var shipIcons = [[SKSpriteNode](), [SKSpriteNode]()]
   /// A numeric display at the end of the icons for extras
   let numericDisplay: SKLabelNode
   /// Possible messages to show when there are no more reserves
@@ -36,8 +36,12 @@ class ReservesDisplay: SKNode {
   ]
   /// A label that's shown when there are no more reserves
   let dontDie: SKLabelNode
+  /// `true` for retro mode
+  var retroMode = false {
+    willSet { if newValue != retroMode { toggleRetro() } }
+  }
 
-  /// Make a reserve ships display display
+  /// Make a reserve ships display
   init(shipColor: String) {
     // The numeric display
     numericDisplay = SKLabelNode(fontNamed: AppAppearance.font)
@@ -58,17 +62,22 @@ class ReservesDisplay: SKNode {
     name = "reservesDisplay"
     // A line of sprites for the icons
     let texture = Globals.textureCache.findTexture(imageNamed: "life_\(shipColor)")
+    let retroTexture = Globals.textureCache.findTexture(imageNamed: "retro_life")
     let spacing = texture.size().width * 11 / 10
     numericDisplay.fontSize = texture.size().height
     dontDie.fontSize = numericDisplay.fontSize
+    let textures = [texture, retroTexture]
     var nextX = texture.size().width / 2
     for _ in 0 ..< maxIcons {
-      let shipIcon = SKSpriteNode(texture: texture)
-      shipIcon.position = CGPoint(x: nextX, y: 0)
+      for i in 0 ..< 2 {
+        // One for modern appearance, one for retro mode
+        let shipIcon = SKSpriteNode(texture: textures[i])
+        shipIcon.position = CGPoint(x: nextX, y: 0)
+        shipIcon.isHidden = true
+        addChild(shipIcon)
+        shipIcons[i].append(shipIcon)
+      }
       nextX += spacing
-      shipIcon.isHidden = true
-      addChild(shipIcon)
-      shipIcons.append(shipIcon)
     }
     // Put the numeric display after the last icon
     numericDisplay.position = CGPoint(x: nextX - spacing / 2, y: 0)
@@ -85,8 +94,9 @@ class ReservesDisplay: SKNode {
   /// Update the display of reserves
   /// - Parameter numReserves: The number of reserves to show
   func showReserves(_ numReserves: Int) {
-    // Hide icons beyond numReserves
-    shipIcons.enumerated().forEach { $1.isHidden = ($0 >= numReserves) }
+    // Hide icons beyond numReserves, hide unused style of icon
+    shipIcons[retroMode ? 1 : 0].enumerated().forEach { $1.isHidden = ($0 >= numReserves) }
+    shipIcons[retroMode ? 0 : 1].forEach { $0.isHidden = true }
     if numReserves > maxIcons {
       // If too many ships, show the numeric display for extras
       numericDisplay.text = "+\(numReserves - maxIcons)"
@@ -98,5 +108,16 @@ class ReservesDisplay: SKNode {
     // reserves
     dontDie.text = dontDieMessages.randomElement()!
     dontDie.isHidden = (numReserves != 0)
+  }
+
+  /// Switch between modern and retro mode (does not affect the don't die message)
+  func toggleRetro() {
+    // Swap isHidden status between icon sets
+    for i in 0 ..< shipIcons[0].count {
+      let hidden0 = shipIcons[0][i].isHidden
+      let hidden1 = shipIcons[1][i].isHidden
+      shipIcons[0][i].isHidden = hidden1
+      shipIcons[1][i].isHidden = hidden0
+    }
   }
 }
