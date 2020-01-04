@@ -743,6 +743,34 @@ class GameScene: GameTutorialScene {
     destroyPlayer()
   }
 
+  /// A UFO collided with an asteroid
+  ///
+  /// No special handling, but I do want to log the event for debugging purposes
+  ///
+  /// - Parameters:
+  ///   - ufo: The UFO
+  ///   - asteroid: The asteroid
+  override func ufoCollided(ufo: SKNode, asteroid: SKNode) {
+    os_log("UFO collided with asteroid at %f", log: .app, type: .debug, Globals.lastUpdateTime)
+    os_signpost(.event, log: .poi, name: "UFO collided with asteroid", signpostID: signpostID)
+    super.ufoCollided(ufo: ufo, asteroid: asteroid)
+  }
+
+  /// Two UFOs collided
+  ///
+  /// No special handling, though this is very rare (I think I saw it once, and
+  /// wasn't logging then so can't say 100% for sure).  Maybe there should be a
+  /// special achievement for witnessing this?
+  ///
+  /// - Parameters:
+  ///   - ufo1: The first UFO
+  ///   - ufo2: The second UFO
+  override func ufosCollided(ufo1: SKNode, ufo2: SKNode) {
+    os_log("UFOs collided at %f", log: .app, type: .debug, Globals.lastUpdateTime)
+    os_signpost(.event, log: .poi, name: "UFOs collided", signpostID: signpostID)
+    super.ufosCollided(ufo1: ufo1, ufo2: ufo2)
+  }
+
   /// Handles all the possible physics engine contact notifications
   /// - Parameter contact: What contacted what
   func didBegin(_ contact: SKPhysicsContact) {
