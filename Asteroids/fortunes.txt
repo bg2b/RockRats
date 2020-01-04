@@ -424,7 +424,7 @@ Computers have lots of memory but little imagination.
 Life is a cheezy game with good graphics.
 Can computers solve the problems that they created?
 Nothing is foolproof because fools are so clever.
-I KNEW it should have been n - 1!
+I KNEW it should have been n-1!
 Train station: where a train stops. Workstation: ...
 !false: it's funny because it's true.
 If at first you don't succeed, there's always ^Z.
