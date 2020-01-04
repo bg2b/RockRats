@@ -11,6 +11,7 @@
   "safeTime": 5,
   "asteroidMinSpeed": 25,
   "asteroidMaxSpeed": 250,
+  "ufoBigTargetPriority": false,
   "numAsteroidCoeffs": [4, 0.7],
   "waveConfigs": [
     {

@@ -289,8 +289,9 @@ class UFO: SKNode {
     // though, shoot that instead.  In addition to the revenge factor increase in UFO
     // danger, that helps ensure that the player can't sit around and farm UFOs for
     // points forever.
-    var potentialTarget: SKNode? = (player?.parent != nil ? player : nil)
-    var targetDistance = CGFloat.infinity
+    var potentialTarget: SKNode?
+    var targetAsteroidDistance = CGFloat.infinity
+    var targetAsteroidSizeIndex = 0
     var playerDistance = CGFloat.infinity
     let interestingDistance = 0.5 * min(bounds.width, bounds.height)
     for node in playfield.children {
@@ -322,15 +323,26 @@ class UFO: SKNode {
         var objectRadius = CGFloat(0)
         if body.isA(.asteroid) {
           objectRadius = 0.5 * (node as! SKSpriteNode).size.width
+          guard let sizeIndex = AsteroidSize(ofBody: body)?.sizeIndex else { fatalError("Could not get asteroid size") }
+          let desirableTarget: Bool
+          if Globals.gameConfig.ufoBigTargetPriority {
+            // Shoot bigger asteroids in preference to smaller ones, then closer ones
+            // in preference to farther
+            desirableTarget = sizeIndex > targetAsteroidSizeIndex || (sizeIndex == targetAsteroidSizeIndex && d < targetAsteroidDistance)
+          } else {
+            // Just shoot closer asteroids
+            desirableTarget = d < targetAsteroidDistance
+          }
+          if desirableTarget {
+            potentialTarget = node
+            targetAsteroidDistance = d
+            targetAsteroidSizeIndex = sizeIndex
+          }
         } else if body.isA(.ufo) {
           objectRadius = 0.5 * (node as! UFO).size.width
         } else if body.isA(.player) {
           objectRadius = 0.5 * (node as! Ship).size.diagonal()
           playerDistance = d
-        }
-        if d < targetDistance && !body.isA(.ufo) {
-          potentialTarget = node
-          targetDistance = d
         }
         d -= ourRadius + objectRadius
         // Limit the force so as not to poke the UFO by an enormous amount
@@ -356,9 +368,9 @@ class UFO: SKNode {
       body.velocity = body.velocity.scale(by: maxSpeed / body.velocity.length())
     }
     guard type != .kamikaze else { return }
-    if playerDistance < 1.5 * targetDistance || (player?.parent != nil && Int.random(in: 0 ..< 100) >= 25) {
-      // Override closest-object targetting if the player is about at the same
-      // distance.  Also bias towards randomly shooting at the player even if they're
+    if playerDistance < 1.5 * targetAsteroidDistance || (player?.parent != nil && Int.random(in: 0 ..< 4) != 0) {
+      // Shoot the player if they're at about the same distance as an asteroid
+      // target.  Also bias towards randomly shooting at the player even if they're
       // pretty far.
       potentialTarget = player
     }

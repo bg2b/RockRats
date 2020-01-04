@@ -122,10 +122,10 @@ enum AsteroidSize: Int {
   var category: ObjectCategories { ObjectCategories(rawValue: ObjectCategories.asteroid.rawValue | UInt32(1 << (sizeIndex + 8)))! }
 
   /// What size asteroid does a physic body's category mask represent?
-  /// - Parameter mask: The category mask
-  init?(forMask mask: UInt32) {
+  /// - Parameter body: The physics body
+  init?(ofBody body: SKPhysicsBody) {
     let asteroidsMask = setOf([ObjectCategories.hugeAsteroid, .bigAsteroid, .medAsteroid, .smAsteroid])
-    switch mask & asteroidsMask {
+    switch body.categoryBitMask & asteroidsMask {
     case ObjectCategories.hugeAsteroid.rawValue: self = .huge
     case ObjectCategories.bigAsteroid.rawValue: self = .big
     case ObjectCategories.medAsteroid.rawValue: self = .med
@@ -653,7 +653,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// - Parameter asteroid: The asteroid that was hit by something
   func splitAsteroid(_ asteroid: SKSpriteNode) {
     let body = asteroid.requiredPhysicsBody()
-    guard let size = AsteroidSize(forMask: body.categoryBitMask) else { fatalError("Could not get asteroid size for sprite") }
+    guard let size = AsteroidSize(ofBody: body) else { fatalError("Could not get asteroid size for sprite") }
     let sizeIndex = size.sizeIndex
     let velocity = body.velocity
     let pos = asteroid.position
