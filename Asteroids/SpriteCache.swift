@@ -44,13 +44,14 @@ class SpriteCache {
       // First time asking for this particular type of sprite
       sprites[name] = [SKSpriteNode]()
     }
-    if sprites[name]!.isEmpty {
+    if let sprite = sprites[name]!.popLast() {
+      // Reuse an item from the bin
+      recycled -= 1
+      return sprite
+    } else {
       // The recycle bin is empty, make a new sprite
       return makeSprite(imageNamed: name, initializer: initializer)
     }
-    recycled -= 1
-    // Reuse an item from the bin
-    return sprites[name]!.popLast()!
   }
 
   /// Recycle a sprite that's no longer needed so that it can be reused later
