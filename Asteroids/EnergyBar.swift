@@ -62,7 +62,10 @@ class EnergyBar: SKNode {
   ///   - x: The x position to add the segment
   /// - Returns: The x position where the next segment should be placed
   func segment(_ type: String, at x: CGFloat) -> CGFloat {
-    let sprite = Globals.spriteCache.findSprite(imageNamed: "energy\(type)\(levelIndex)")
+    let sprite = Globals.spriteCache.findSprite(imageNamed: "energy\(type)") { sprite in
+      sprite.colorBlendFactor = 1
+    }
+    sprite.color = [AppAppearance.red, AppAppearance.yellow, AppAppearance.green][levelIndex]
     sprite.position = CGPoint(x: x - 0.5 * sprite.size.width, y: 0)
     bar.append(sprite)
     addChild(sprite)
