@@ -71,6 +71,8 @@ struct GameConfig: Decodable {
   let asteroidMinSpeed: CGFloat
   /// Maximum speed of asteroids
   let asteroidMaxSpeed: CGFloat
+  /// `true` if UFOs prefer bigger asteroid targets
+  let ufoBigTargetPriority: Bool
   /// Terms of a polynomial indicating how many asteroids there are
   ///
   /// Let `w` be the wave number.  Number of asteroids is
