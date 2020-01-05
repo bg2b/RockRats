@@ -153,3 +153,38 @@ func setStartTimeAttrib(_ effect: SKSpriteNode, view: SKView?) {
   let startUtime = Globals.lastUpdateTime + getUtimeOffset(view: view)
   effect.setValue(SKAttributeValue(float: Float(startUtime)), forAttribute: "a_start_time")
 }
+
+// MARK: - Shader caches
+
+/// A cache for various types of texture-dependent shaders
+class ShaderCache {
+  /// The function that makes the shader for a given texture
+  let builder: (_ texture: SKTexture) -> SKShader
+  /// A dictionary holding the constructed shaders
+  var shaders = [SKTexture: SKShader]()
+
+  /// Create a new shader cache
+  /// - Parameter builder: A closure that constructs the shader for a given texture
+  init(builder: @escaping (_ texture: SKTexture) -> SKShader) {
+    self.builder = builder
+  }
+
+  /// Get the shader for a texture if it exists
+  /// - Parameter texture: The texture
+  /// - Returns: The shader if it exists, else `nil`
+  func findShader(texture: SKTexture) -> SKShader? {
+    return shaders[texture]
+  }
+
+  /// Get the shader corresponding to a texture
+  /// - Parameter texture: The texture
+  /// - Returns: The shader for effect specialized to the texture
+  func getShader(texture: SKTexture) -> SKShader {
+    if let result = shaders[texture] {
+      return result
+    }
+    let result = builder(texture)
+    shaders[texture] = result
+    return result
+  }
+}
