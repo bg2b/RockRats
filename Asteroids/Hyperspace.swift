@@ -138,22 +138,6 @@ func fanFoldShader(forTexture texture: SKTexture) -> SKShader {
   return shader
 }
 
-/// A twinkle sort of effect with a growing-then-shrinking-while-twirling star
-/// - Parameters:
-///   - position: The position where the effect should happen
-///   - angle: Amount to twirl in radians
-/// - Returns: A sprite that animates the effect
-func starBlink(at position: CGPoint, throughAngle angle: CGFloat, duration: Double) -> SKSpriteNode {
-  let star = SKSpriteNode(imageNamed: "star1")
-  star.position = position
-  star.scale(to: CGSize(width: 0, height: 0))
-  star.run(.sequence([.group([.sequence([.scale(to: 2, duration: 0.5 * duration),
-                                         .scale(to: 0, duration: 0.5 * duration)]),
-                              .rotate(byAngle: angle, duration: duration)]),
-                      .removeFromParent()]))
-  return star
-}
-
 // MARK: - Hyperspace shader caches
 
 extension Globals {
@@ -176,6 +160,27 @@ func precompileShaders() {
 
 // MARK: - Create hyperspace effects
 
+/// A twinkle sort of effect with a growing-then-shrinking-while-twirling star
+/// - Parameters:
+///   - position: The position where the effect should happen
+///   - angle: Amount to twirl in radians
+/// - Returns: A sprite that animates the effect
+func starBlink(at position: CGPoint, throughAngle angle: CGFloat, duration: Double) -> SKSpriteNode {
+  let star = SKSpriteNode(imageNamed: "star1")
+  star.position = position
+  star.scale(to: CGSize(width: 0, height: 0))
+  star.run(.sequence([.group([.sequence([.scale(to: 2, duration: 0.5 * duration),
+                                         .scale(to: 0, duration: 0.5 * duration)]),
+                              .rotate(byAngle: angle, duration: duration)]),
+                      .removeFromParent()]))
+  return star
+}
+
+/// The warp-out effect for an object
+/// - Parameters:
+///   - texture: The texture of the thing that's warping
+///   - position: The position of the object
+///   - rotation: The zRotation of the object
 func warpOutEffect(texture: SKTexture, position: CGPoint, rotation: CGFloat) -> [SKNode] {
   let shader = Globals.swirlInShaders.findShader(texture: texture) ?? Globals.fanFoldShaders.getShader(texture: texture)
   let effect = SKSpriteNode(texture: texture)
@@ -189,6 +194,12 @@ func warpOutEffect(texture: SKTexture, position: CGPoint, rotation: CGFloat) -> 
   return [effect, star]
 }
 
+/// The warp-in effect for an object
+/// - Parameters:
+///   - texture: The texture of the warper
+///   - position: The position where the object will appear
+///   - rotation: The rotation of the object at the end
+///   - whenDone: A closure to call when the effect finishes
 func warpInEffect(texture: SKTexture, position: CGPoint, rotation: CGFloat, whenDone: @escaping () -> Void) -> SKNode {
   let shader = Globals.swirlOutShaders.getShader(texture: texture)
   let effect = SKSpriteNode(texture: texture)
