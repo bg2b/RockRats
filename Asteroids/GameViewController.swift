@@ -31,7 +31,7 @@ class GameViewController: UIViewController {
       Globals.explosionCache.preload()
       // Build custom shaders for warp-in and warp-out effects
       precompileHyperspaceShaders()
-      // Load column caches for settings scene
+      // Compile skywriting shaders and load skywriting caches for settings scene
       preloadSkywritingCaches()
       let size = CGSize(width: 768 * aspect, height: 768)
       // Create the main menu then trigger the Game Center authentication
