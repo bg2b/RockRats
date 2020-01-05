@@ -80,6 +80,7 @@
 		FDDCB1462364874D00FF9F1C /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDDCB1452364874D00FF9F1C /* CloudKit.framework */; };
 		FDDF488722D2A700006FB86F /* SpriteCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDDF488622D2A700006FB86F /* SpriteCache.swift */; };
 		FDE04B2D22D753240011A529 /* TextureCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE04B2C22D753240011A529 /* TextureCache.swift */; };
+		FDF763A623C2412F0027FA2E /* Shaders.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDF763A523C2412F0027FA2E /* Shaders.swift */; };
 		FDF92B422322456900CC4DFE /* Hyperspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDF92B412322456900CC4DFE /* Hyperspace.swift */; };
 		FDF92B442322666600CC4DFE /* ufo_warpout.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDF92B432322666600CC4DFE /* ufo_warpout.wav */; };
 /* End PBXBuildFile section */
@@ -161,6 +162,7 @@
 		FDDCB1452364874D00FF9F1C /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		FDDF488622D2A700006FB86F /* SpriteCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteCache.swift; sourceTree = "<group>"; };
 		FDE04B2C22D753240011A529 /* TextureCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureCache.swift; sourceTree = "<group>"; };
+		FDF763A523C2412F0027FA2E /* Shaders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shaders.swift; sourceTree = "<group>"; };
 		FDF92B412322456900CC4DFE /* Hyperspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hyperspace.swift; sourceTree = "<group>"; };
 		FDF92B432322666600CC4DFE /* ufo_warpout.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo_warpout.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -263,6 +265,7 @@
 				FD3E02072333B1C20057A766 /* Logging.swift */,
 				FD46BD71231415B7008C1F99 /* Playfield.swift */,
 				FD4D53BF2306B47900718938 /* ReservesDisplay.swift */,
+				FDF763A523C2412F0027FA2E /* Shaders.swift */,
 				FD53167422DB24EC00F09E57 /* Ship.swift */,
 				FD2518ED239A66F400029466 /* SKHelpers.swift */,
 				FD51580523BA0FF300B94C30 /* Skywriting.swift */,
@@ -453,6 +456,7 @@
 				FD79323622D20FE600E7D336 /* AppDelegate.swift in Sources */,
 				FD2518EE239A66F400029466 /* SKHelpers.swift in Sources */,
 				FD7635B02354A410000543E7 /* GameCenter.swift in Sources */,
+				FDF763A623C2412F0027FA2E /* Shaders.swift in Sources */,
 				FD158A25238FF9EA00180EC9 /* Touchable.swift in Sources */,
 				FD51580623BA0FF300B94C30 /* Skywriting.swift in Sources */,
 				FDDF488722D2A700006FB86F /* SpriteCache.swift in Sources */,
