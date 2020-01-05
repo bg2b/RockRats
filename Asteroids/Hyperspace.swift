@@ -146,7 +146,7 @@ extension Globals {
   static let fanFoldShaders = ShaderCache { fanFoldShader(forTexture: $0) }
 }
 
-func precompileShaders() {
+func precompileHyperspaceShaders() {
   for imageName in ["ship_blue", "ship_green", "ship_red", "ship_orange", "retroship"] {
     let texture = Globals.textureCache.findTexture(imageNamed: imageName)
     _ = Globals.swirlInShaders.getShader(texture: texture)

@@ -29,8 +29,8 @@ class GameViewController: UIViewController {
       Globals.conformingPhysicsCache.preload()
       // Make explosions
       Globals.explosionCache.preload()
-      // Build custom shaders for special effects
-      precompileShaders()
+      // Build custom shaders for warp-in and warp-out effects
+      precompileHyperspaceShaders()
       // Load column caches for settings scene
       preloadSkywritingCaches()
       let size = CGSize(width: 768 * aspect, height: 768)
