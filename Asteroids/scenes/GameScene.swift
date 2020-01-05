@@ -43,6 +43,10 @@ class GameScene: GameTutorialScene {
   /// The currentTime in update when the player warped in (technically the last time
   /// before the ship appeared on the playfield, but whatevs)
   var lastWarpInTime = 0.0
+  /// `true` in the time between when a wave ends (last asteroid removed) and the
+  /// next starts; used to inhibit player spawning from starting UFO spawning too
+  /// early
+  var betweenWaves = false
   /// The number of UFOs that have been spawned in the current wave
   var numberOfUFOsThisWave = 0
   /// When the player kills a bunch of UFOs, they start getting more dangerous.  This
@@ -353,6 +357,7 @@ class GameScene: GameTutorialScene {
       os_signpost(.event, log: .poi, name: "Last asteroid removed", signpostID: signpostID)
       normalHeartbeatRate()
       stopSpawningUFOs()
+      betweenWaves = true
       // If the player dies from colliding with the last asteroid, then I have to
       // wait long enough for any of the player's remaining lasers to possibly hit a
       // UFO and score enough points for an extra life.  That wait is currently 4
@@ -365,7 +370,7 @@ class GameScene: GameTutorialScene {
 
   /// Spawn a wave of asteroids
   func spawnWave() {
-    os_log("Spawn next wave at %f", log: .app, type: .debug, Globals.lastUpdateTime)
+    os_log("Spawn next wave asteroids at %f", log: .app, type: .debug, Globals.lastUpdateTime)
     os_signpost(.event, log: .poi, name: "Spawn wave", signpostID: signpostID)
     if Globals.gameConfig.waveNumber() == 11 {
       reportAchievement(achievement: .spinalTap)
@@ -384,10 +389,12 @@ class GameScene: GameTutorialScene {
 
   /// Display the WAVE ## message, wait a bit, and then spawn asteroids
   func nextWave() {
+    os_log("Next wave begins at %f", log: .app, type: .debug, Globals.lastUpdateTime)
     Globals.gameConfig.nextWave()
     ufosToAvenge = 0
     ufosKilledWithoutDying = 0
     numberOfUFOsThisWave = 0
+    betweenWaves = false
     displayMessage("WAVE \(Globals.gameConfig.waveNumber())", forTime: 1.5) {
       self.spawnWave()
     }
@@ -511,19 +518,25 @@ class GameScene: GameTutorialScene {
       player.reset()
       player.warpIn(to: spawnPosition, atAngle: player.zRotation, addTo: playfield)
       audio.soundEffect(.warpIn, at: spawnPosition)
-      switch numberOfUFOsThisWave {
-      case 0:
-        // At the start of a wave, or if they got killed before the first UFO appeared,
-        // then give them a full duration period.
-        ufoSpawningRate = 1
-      case 1 ... 3:
-        // For a normal number of UFOs, they get half a period
-        ufoSpawningRate = 0.5
-      default:
-        // They've perhaps been hunting UFOs, so don't given them a break
-        ufoSpawningRate = 0.25
+      // If spawning between waves, don't start with UFOs yet; the beginning of the
+      // wave will start the them instead
+      if betweenWaves {
+        os_log("Player spawned between waves, so delay start of UFO spawning", log: .app, type: .debug)
+      } else {
+        switch numberOfUFOsThisWave {
+        case 0:
+          // At the start of a wave, or if they got killed before the first UFO appeared,
+          // then give them a full duration period.
+          ufoSpawningRate = 1
+        case 1 ... 3:
+          // For a normal number of UFOs, they get half a period
+          ufoSpawningRate = 0.5
+        default:
+          // They've perhaps been hunting UFOs, so don't given them a break
+          ufoSpawningRate = 0.25
+        }
+        spawnUFOs()
       }
-      spawnUFOs()
       updateReserves(-1)
       consecutiveHits = 0
     }
