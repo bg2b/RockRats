@@ -203,23 +203,27 @@ class GameScene: GameTutorialScene {
 
   // MARK: - Central display
 
-  /// Display a message in the center of the screen for some time, then do something
+  /// Display a message in the center of the screen, then do something
   ///
   /// There's an animation to make the message expand in from a tiny size, then pause
-  /// and fade out.
+  /// and optionally fade out.
   ///
   /// - Parameters:
   ///   - message: The message to show
+  ///   - fade: `true` if the message should fade out, `false` if it stays
   ///   - duration: Number of seconds to show the message
   ///   - action: What to do after the message fades out
-  func displayMessage(_ message: String, forTime duration: Double, then action: (() -> Void)? = nil) {
+  func displayMessage(_ message: String, fade: Bool, forTime duration: Double, then action: (() -> Void)? = nil) {
     centralDisplay.text = message
     centralDisplay.setScale(0.0)
     centralDisplay.alpha = 1.0
     centralDisplay.isHidden = false
-    let growAndFade = SKAction.sequence([
+    let grow = SKAction.sequence([
       .scale(to: 1.0, duration: 0.25),
-      .wait(forDuration: duration),
+      .wait(forDuration: duration)
+    ])
+    let growAndFade = SKAction.sequence([
+      grow,
       .fadeOut(withDuration: 0.5),
       .hide(),
       // This slight extra delay makes sure that the WAVE # is gone from the screen
@@ -228,10 +232,11 @@ class GameScene: GameTutorialScene {
       // message still displayed.
       .wait(forDuration: 0.25)
       ])
+    let displayAction = fade ? growAndFade : grow
     if let action = action {
-      centralDisplay.run(growAndFade, completion: action)
+      centralDisplay.run(displayAction, completion: action)
     } else {
-      centralDisplay.run(growAndFade)
+      centralDisplay.run(displayAction)
     }
   }
 
@@ -395,7 +400,7 @@ class GameScene: GameTutorialScene {
     ufosKilledWithoutDying = 0
     numberOfUFOsThisWave = 0
     betweenWaves = false
-    displayMessage("WAVE \(Globals.gameConfig.waveNumber())", forTime: 1.5) {
+    displayMessage("WAVE \(Globals.gameConfig.waveNumber())", fade: true, forTime: 1.5) {
       self.spawnWave()
     }
   }
@@ -569,11 +574,10 @@ class GameScene: GameTutorialScene {
         self.audio.soundEffect(.gameOver)
         self.endGameSaveProgress()
         // Start building the high scores scene in the background
-        self.saveScoreAndPrepareHighScores()
-        self.displayMessage("Game Over", forTime: 4)
-        // After Game Over has been displayed for a while, transition whenever the
-        // high scores scene is ready.
-        self.wait(for: 6, then: self.switchWhenReady)
+        let gameScore = self.saveScoreAndPrepareHighScores()
+        self.displayMessage("Game Over", fade: false, forTime: 5) {
+          self.switchWhenQuiescent { HighScoreScene(size: self.fullFrame.size, score: gameScore) }
+        }
       }
     }
   }
@@ -819,19 +823,9 @@ class GameScene: GameTutorialScene {
     }
   }
 
-  /// Start creation of the high scores scene
-  ///
-  /// After the scene construction finishes and the GAME OVER message has been
-  /// displayed for a while, this is the scene that will be shown.
-  ///
-  /// - Parameter gameScore: The score earned in the game
-  func prepareHighScoreScene(gameScore: GameScore) {
-    makeSceneInBackground { HighScoreScene(size: self.fullFrame.size, score: gameScore) }
-  }
-
   /// End of game, report the score to Game Center (if active) and get ready to
   /// transition to the high scores scene
-  func saveScoreAndPrepareHighScores() {
+  func saveScoreAndPrepareHighScores() -> GameScore {
     // When Game Center is active, I need to report the score and refresh
     // leaderboards.  When game over calls this method, I have 6 seconds before the
     // earliest possible transition to the high scores screen.  It doesn't take long
@@ -846,7 +840,7 @@ class GameScene: GameTutorialScene {
     if gc.enabled {
       wait(for: 2) { gc.loadLeaderboards() }
     }
-    wait(for: 4) { self.prepareHighScoreScene(gameScore: gameScore) }
+    return gameScore
   }
 
   // MARK: - Playing a game

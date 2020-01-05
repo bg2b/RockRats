@@ -17,6 +17,7 @@ enum LevelZs: CGFloat {
   case stars = -100
   case playfield = 0
   case info = 100
+  case transition = 200
 }
 
 extension SKNode {
@@ -156,6 +157,93 @@ extension Globals {
   static var asteroidSplitEffectsCache = CyclicCache<AsteroidSize, SKEmitterNode>(cacheId: "Asteroid split effects cache")
 }
 
+// MARK: - Tiling shader
+
+/// Create shader that will repeat a texture
+///
+/// The basic idea of the shader is to just take the texture coordinate, multiply
+/// by the number of repetitions needed to cover the desired area both horizontally
+/// and vertically, and then take the fractional parts as the coordinates to
+/// actually look up in the texture.  Additional complications are because the
+/// texture could be in an atlas and because I want to flip the repetitions around
+/// a bit so that the tiling does not appear so uniform.
+///
+/// Using the shader to tile a node requires setting the `a_repetitions` attribute
+/// to the desired repetition factor.  For example, if the screen is 1024x768 and
+/// the texture is 256x256, `a_repetitons` would be (1024/256, 768/256) = (4, 3).
+///
+/// - Parameter texture: The texture to repeat
+func tilingShader(forTexture texture: SKTexture) -> SKShader {
+  // Do not to assume that the texture has v_tex_coord ranging in (0, 0) to (1, 1)!
+  // If the texture is part of a texture atlas, this is not true.  Since I only use
+  // this for a particular texture, I just pass in the texture and hard-code the
+  // required v_tex_coord transformations.  For this case, the INPUT v_tex_coord is
+  // from (0,0) to (1,1), since it corresponds to the coordinates in the shape node
+  // that I'm tiling.  The OUTPUT v_tex_coord has to be in the space of the
+  // texture, so it needs a scale and shift.
+  //
+  // (Actually I moved the background texture out of the texture atlas because
+  // there seemed to be some weirdness that gave a slight green tinge to a border
+  // in the latest Xcode for an iOS 12 device.  Since I'm tiling the whole
+  // background anyway, having it not in the atlas won't affect the draw count.)
+  let rect = texture.textureRect()
+  let shaderSource = """
+  void main() {
+    vec2 scaled = v_tex_coord * a_repetitions;
+    // rot is 0...3 and a repetion is rotated 90*rot degrees.  That
+    // helps avoid any obvious patterning in this case.
+    int rot = (int(scaled.x) + int(scaled.y)) & 0x3;
+    v_tex_coord = fract(scaled);
+    if (rot == 1) v_tex_coord = vec2(1.0 - v_tex_coord.y, v_tex_coord.x);
+    else if (rot == 2) v_tex_coord = vec2(1.0) - v_tex_coord;
+    else if (rot == 3) v_tex_coord = vec2(v_tex_coord.y, 1.0 - v_tex_coord.x);
+    // Transform from (0,0)-(1,1)
+    v_tex_coord *= vec2(\(rect.size.width), \(rect.size.height));
+    v_tex_coord += vec2(\(rect.origin.x), \(rect.origin.y));
+    gl_FragColor = SKDefaultShading();
+  }
+  """
+  let shader = SKShader(source: shaderSource)
+  shader.attributes = [SKAttribute(name: "a_repetitions", type: .vectorFloat2)]
+  return shader
+}
+
+extension Globals {
+  static let tilingShaders = ShaderCache { tilingShader(forTexture: $0) }
+}
+
+// MARK: - Transition shader
+
+/// Make a shader for scene transitions
+///
+/// This is a circular mask that shrinks/grows to hide or reveal the scene.
+///
+/// - Parameters:
+///   - isEntering: `true` for the new (incoming) scene, `false` for the old (outgoing) one
+///   - duration: The time for the effect
+func enterExitShader(isEntering: Bool, duration: Double) -> SKShader {
+  let rgba = AppAppearance.transitionColor.cgColor.components!
+  let shaderSource = """
+  void main() {
+    // Time goes 0-1
+    float dt = min((u_time - a_start_time) / \(duration), 1.0);
+    // Size goes 0-1 for entering, and 1-0 for exiting
+    float size = \(isEntering ? "" : "1.0 - ")dt;
+    // Compute normalized distance from center
+    float p = distance(v_tex_coord, vec2(0.5, 0.5)) / 0.708;  // 1/sqrt(2)+eps
+    if (p > size) {
+      // Outside gets clipped
+      gl_FragColor = vec4(\(rgba[0]), \(rgba[1]), \(rgba[2]), 1.0);
+    } else {
+      gl_FragColor = vec4(0.0);
+    }
+  }
+  """
+  let shader = SKShader(source: shaderSource)
+  shader.attributes = [SKAttribute(name: "a_start_time", type: .float)]
+  return shader
+}
+
 // MARK: - Base class for all scenes
 
 /// The root class of all the scenes in the game
@@ -189,9 +277,8 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// Becomes `true` when getting ready to switch scenes; see `beginSceneSwitch`
   /// discussion.
   var switchingScenes = false
-  /// The next scene to transition to.  To avoid lag, this is typically created on a
-  /// background thread; after the variable becomes non-`nil` the transition occurs.
-  var nextScene: SKScene?
+  /// A transition node that masks the scene until it starts running
+  var entryTransition: SKSpriteNode?
   /// Signpost ID for this instance
   let signpostID = OSSignpostID(log: .poi)
 
@@ -230,59 +317,10 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
 
   // MARK: - Initialization
 
-  /// Create shader that will repeat a texture
-  ///
-  /// The basic idea of the shader is to just take the texture coordinate, multiply
-  /// by the number of repetitions needed to cover the desired area both horizontally
-  /// and vertically, and then take the fractional parts as the coordinates to
-  /// actually look up in the texture.  Additional complications are because the
-  /// texture could be in an atlas and because I want to flip the repetitions around
-  /// a bit so that the tiling does not appear so uniform.
-  ///
-  /// Using the shader to tile a node requires setting the `a_repetitions` attribute
-  /// to the desired repetition factor.  For example, if the screen is 1024x768 and
-  /// the texture is 256x256, `a_repetitons` would be (1024/256, 768/256) = (4, 3).
-  ///
-  /// - Parameter texture: The texture to repeat
-  func tilingShader(forTexture texture: SKTexture) -> SKShader {
-    // Do not to assume that the texture has v_tex_coord ranging in (0, 0) to (1, 1)!
-    // If the texture is part of a texture atlas, this is not true.  Since I only use
-    // this for a particular texture, I just pass in the texture and hard-code the
-    // required v_tex_coord transformations.  For this case, the INPUT v_tex_coord is
-    // from (0,0) to (1,1), since it corresponds to the coordinates in the shape node
-    // that I'm tiling.  The OUTPUT v_tex_coord has to be in the space of the
-    // texture, so it needs a scale and shift.
-    //
-    // (Actually I moved the background texture out of the texture atlas because
-    // there seemed to be some weirdness that gave a slight green tinge to a border
-    // in the latest Xcode for an iOS 12 device.  Since I'm tiling the whole
-    // background anyway, having it not in the atlas won't affect the draw count.)
-    let rect = texture.textureRect()
-    let shaderSource = """
-    void main() {
-      vec2 scaled = v_tex_coord * a_repetitions;
-      // rot is 0...3 and a repetion is rotated 90*rot degrees.  That
-      // helps avoid any obvious patterning in this case.
-      int rot = (int(scaled.x) + int(scaled.y)) & 0x3;
-      v_tex_coord = fract(scaled);
-      if (rot == 1) v_tex_coord = vec2(1.0 - v_tex_coord.y, v_tex_coord.x);
-      else if (rot == 2) v_tex_coord = vec2(1.0) - v_tex_coord;
-      else if (rot == 3) v_tex_coord = vec2(v_tex_coord.y, 1.0 - v_tex_coord.x);
-      // Transform from (0,0)-(1,1)
-      v_tex_coord *= vec2(\(rect.size.width), \(rect.size.height));
-      v_tex_coord += vec2(\(rect.origin.x), \(rect.origin.y));
-      gl_FragColor = SKDefaultShading();
-    }
-    """
-    let shader = SKShader(source: shaderSource)
-    shader.attributes = [SKAttribute(name: "a_repetitions", type: .vectorFloat2)]
-    return shader
-  }
-
   /// Make the background of the entire game
   ///
-  /// I use a single background tile (256x256 pixels I think) and repeat that over
-  /// the whole screen with various flips so that it looks not very uniform.
+  /// I use a single background tile and repeat that over the whole screen with
+  /// various flips so that it looks not very uniform.
   func initBackground() {
     let background = SKShapeNode(rect: gameFrame)
     background.name = "background"
@@ -293,7 +331,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     let tsize = stars.size()
     background.fillTexture = stars
     background.fillColor = .white
-    background.fillShader = tilingShader(forTexture: stars)
+    background.fillShader = Globals.tilingShaders.getShader(texture: stars)
     let reps = vector_float2([Float(gameFrame.width / tsize.width), Float(gameFrame.height / tsize.height)])
     background.setValue(SKAttributeValue(vectorFloat2: reps), forAttribute: "a_repetitions")
     gameArea.addChild(background)
@@ -965,6 +1003,27 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     }
   }
 
+  // MARK: - Scene transition shaders
+
+  /// A shader that just makes the app's background/transition color
+  static let maskingShader: SKShader = {
+    let rgba = AppAppearance.transitionColor.cgColor.components!
+    let shaderSource = """
+    void main() {
+      gl_FragColor = vec4(\(rgba[0]), \(rgba[1]), \(rgba[2]), 1.0);
+    }
+    """
+    return SKShader(source: shaderSource)
+  }()
+
+  /// Time for in and out transitions (total transition time is twice this, plus
+  /// whatever overhead)
+  static let transitionDuration = 1.0
+  /// Shader for scenes that are starting to be shown
+  static let entryShader = enterExitShader(isEntering: true, duration: transitionDuration)
+  /// Shader for scenes that are finished being shown
+  static let exitShader = enterExitShader(isEntering: false, duration: transitionDuration)
+
   // MARK: - Scene switching
 
   /// Use `guard beginSceneSwitch` before starting scene transitions
@@ -987,67 +1046,141 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     }
   }
 
-  /// Transition to a new scene.  Call this instead of presentScene directly to
-  /// ensure uniformity of transitions throughout the app.
-  /// - Parameters:
-  ///   - newScene: The scene to switch to
-  ///   - duration: Optional amount of time for the transition
-  func switchScene(to newScene: SKScene, withDuration duration: Double = 1) {
-    os_log("switchScene %{public}s -> %{public}s", log: .app, type: .debug, name!, newScene.name!)
-    let transition = SKTransition.fade(with: AppAppearance.transitionColor, duration: duration)
-    newScene.removeAllActions()
-    os_log("%{public}s calls presentScene", log: .app, type: .debug, name!)
-    view?.presentScene(newScene, transition: transition)
-  }
+  // Scene transitions are a bit subtle, but here's the idea.
+  //
+  // The basic problem is that when the app needs to transition to a new scene, it
+  // usually has to create one (the exception is the case of going back to the main
+  // menu).  That creation process tends to cause frame lag, even when I run it on a
+  // background thread with low priority.  But the transitions I was using initially
+  // were just a simple fade-out-then-fade-in.  Then I realized that if I could
+  // somehow do the scene construction in the middle of the transition, any lag would
+  // be irrelevant since the app would be displaying a static (blank) graphic anyway.
+  // That idea led to the current mechanism.
+  //
+  // Transitions now consist of three parts:
+  // 1. Outgoing transition of the current scene
+  // 2. Scene creation
+  // 3. Incoming transition of the new scene
+  //
+  // Each phase of a transitions is managed via a sprite node with zPosition at
+  // LevelZs.transition.  That's above everything else.  The sprite has a trivial
+  // texture which isn't really used for anything, and it has a size and position
+  // that covers the whole frame.  The sprite is basically a mask.  In some places it
+  // shows the underlying scene, and in others it shows the app's background color.
+  // The masking behavior is controlled by the sprite's shader, which determines what
+  // to hide and what to show as a function of time.
+  //
+  // When a scene wants to make a transition, it calls `switchScene` or
+  // `switchWhenQuiescent` as appropriate.  The argument is a closure that returns
+  // the new scene (typically after creating it).  The scene switch starts by
+  // installing a masking transition sprite in the current scene and setting it's
+  // shader to `BasicScene.exitShader`.  The sprite runs an action that waits for
+  // whatever animation the shader does to complete.  At that point, the display
+  // should be completely static.  Then the completion handler for the action invokes
+  // the closure to get the new scene.
+  //
+  // The final stage is conceptually just to add a masking transition sprite in the
+  // new scene and set it's shader to run and reveal the scene.  Unfortunately things
+  // aren't quite so simple.  The issue is that the new scene seems to take a few
+  // frames to get going and start updating at a reasonable rate.  Meanwhile the
+  // transition `u_time` is advancing and the whole thing seems to get clipped or
+  // rushed.  I work around this as follows.  First I go ahead and add a transition
+  // sprite to the new scene.  I set the shader to `maskingShader`, which is just a
+  // static shader that hides the scene.  I also set the masking sprite as the value
+  // for `entryTransition` in the new scene.  When the new scene starts invoking
+  // `update`, one of the steps there is to call `doEntryTransition`.  When that
+  // function finds a non-nil `entryTransition`, it starts an action to wait for
+  // another few frames and sets `entryTransition` back to nil.  When the action
+  // triggers, it sets the shader to `BasicScene.entryShader`, which does the entry
+  // transition to reveal the scene, and once the shader finishes, the sprite is
+  // removed.
 
-  /// Transition to a new scene when all transient stuff that might be happening in
-  /// the playfield (shots, explosions, effects) has finished.
-  /// - Parameter newScene: The scene to switch to
-  func showWhenQuiescent(_ newScene: SKScene) {
-    if playfield.isQuiescent(transient: setOf([.playerShot, .ufo, .ufoShot, .fragment])) {
-      wait(for: 0.25) { self.switchScene(to: newScene) }
-    } else {
-      wait(for: 0.25) { self.showWhenQuiescent(newScene) }
-    }
-  }
-
-  /// Wait for nextScene (being constructed asynchronously) to become valid, then
-  /// transition when quiescenet.
+  /// Make a transition sprite
   ///
-  /// This is used by `switchToScene(sceneCreation:)` and typically not called
-  /// directly, but you can use `makeSceneInBackground(sceneCreation:)` if you want
-  /// to kick off the scene creation separately from the wait-and-transition.
-  func switchWhenReady() {
-    if let nextScene = nextScene {
-      wait(for: 0.25) {
-        self.nextScene = nil
-        self.showWhenQuiescent(nextScene)
-      }
-    } else {
-      wait(for: 0.25, then: switchWhenReady)
+  /// The sprite covers the whole view, and the sprite's shader will determine which
+  /// parts of scene are hidden and which are shown.
+  ///
+  /// - Returns: A new mask sprite
+  func makeTransitionMask() -> SKSpriteNode {
+    let maxDimension = max(frame.width, frame.height)
+    let size = CGSize(width: maxDimension, height: maxDimension)
+    let sprite = SKSpriteNode(texture: Globals.textureCache.findTexture(imageNamed: "dot"), size: size)
+    sprite.position = CGPoint(x: frame.midX, y: frame.midY)
+    sprite.zPosition = LevelZs.transition.rawValue
+    return sprite
+  }
+
+  /// Switch to a new scene (with no quiescene requirement)
+  ///
+  /// Most scene transitions should call `switchWhenQuiescent` instead of
+  /// `switchScene`.  This function is only used directly when the state of the
+  /// current scene cannot be easily characterized (like when aborting a game in the
+  /// middle).  When using this function, it will be the responsibility of the
+  /// current scene's `willMove(from:)` to get the scene into a garbage-collectable
+  /// state.
+  ///
+  /// The `getNextScene` closure is called between an outgoing transition for the
+  /// current scene and an incoming transition for the next one.  In the time between
+  /// the two transitions, the app will be displaying something static, so framerate
+  /// drops due to whatever the closure needs to do aren't an issue.
+  ///
+  /// - Parameter getNextScene: A closure returning the scene to switch to
+  func switchScene(_ getNextScene: @escaping () -> BasicScene) {
+    guard let view = view else { fatalError("Transitioning scene has no view") }
+    // Add an outgoing transition mask for the current scene
+    let outTransition = makeTransitionMask()
+    outTransition.shader = BasicScene.exitShader
+    setStartTimeAttrib(outTransition, view: view)
+    addChild(outTransition)
+    outTransition.run(.wait(forDuration: BasicScene.transitionDuration + 0.1)) {
+      // The outgoing transition has finished, and the scene is completely hidden.
+      // Any lag now won't be visible, so get the next scene.
+      os_signpost(.begin, log: .poi, name: "scene creation", signpostID: self.signpostID)
+      let nextScene = getNextScene()
+      os_signpost(.end, log: .poi, name: "scene creation", signpostID: self.signpostID)
+      os_log("switchScene %{public}s -> %{public}s", log: .app, type: .debug, self.name!, nextScene.name!)
+      // Add a transition mask to the new scene and make it static to just hide the
+      // new scene until it can get going.
+      let inTransition = nextScene.makeTransitionMask()
+      inTransition.shader = BasicScene.maskingShader
+      nextScene.addChild(inTransition)
+      // Save the mask to signal doEntryTransition that it has work to do
+      nextScene.entryTransition = inTransition
+      // As long as things are hidden, may as well make sure that the u_time offset
+      // is in sync
+      resetUtimeOffset(view: view)
+      os_signpost(.begin, log: .poi, name: "presentScene", signpostID: self.signpostID)
+      view.presentScene(nextScene)
+      os_signpost(.end, log: .poi, name: "presentScene", signpostID: self.signpostID)
+      // The outgoing scene is no longer visible, so remove the mask
+      outTransition.removeFromParent()
     }
   }
 
-  /// Create a new scene asynchronously (to avoid lag) and store the result in
-  /// `nextScene`.
-  /// - Parameter sceneCreation: A closure that builds the new scene
-  func makeSceneInBackground(_ sceneCreation: @escaping () -> SKScene) {
-    // Some scene creation can be a little time-consuming and might cause the update
-    // loop to lag, so run it in the background.  Still it's not great though; I'm
-    // not sure if there's any way to improve matters.
-    run(.run({
-      os_signpost(.begin, log: .poi, name: "Scene creation", signpostID: self.signpostID)
-      self.nextScene = sceneCreation()
-      os_signpost(.end, log: .poi, name: "Scene creation", signpostID: self.signpostID)
-    }, queue: DispatchQueue.global(qos: .utility)))
+  /// Wait for quiescence, then switch to a different scene
+  /// - Parameter getNextScene: A closure that returns the scene to switch to
+  func switchWhenQuiescent(_ getNextScene: @escaping () -> BasicScene) {
+    if playfield.isQuiescent(transient: setOf([.playerShot, .ufo, .ufoShot, .fragment])) {
+      switchScene(getNextScene)
+    } else {
+      wait(for: 0.1) { self.switchWhenQuiescent(getNextScene) }
+    }
   }
 
-  /// Create a new scene asynchronously (to avoid lag), then transition when it's
-  /// ready and when the playfield is quiescent.
-  /// - Parameter sceneCreation: A closure that builds the new scene
-  func switchToScene(_ sceneCreation: @escaping () -> SKScene) {
-    makeSceneInBackground(sceneCreation)
-    switchWhenReady()
+  /// When first calling `update` for a new scene, start its entry transition
+  func doEntryTransition() {
+    if let entryTransition = entryTransition {
+      os_log("%{public}s doEntryTransition", log: .app, type: .debug, name!)
+      // Make sure that the scene has a few frames to get going
+      wait(for: 0.1) {
+        // Switch from the static maskingShader to the entryShader
+        entryTransition.shader = BasicScene.entryShader
+        setStartTimeAttrib(entryTransition, view: self.view)
+        // Wait for the transition to finish, then remove the mask
+        entryTransition.run(.wait(for: BasicScene.transitionDuration + 0.1, then: .removeFromParent()))
+      }
+      self.entryTransition = nil
+    }
   }
 
   /// Subclasses should override this to do stuff like start a new game
@@ -1065,7 +1198,6 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   override func willMove(from view: SKView) {
     os_log("%s willMove from view", log: .app, type: .debug, name!)
     removeAllActions()
-    resetUtimeOffset()
   }
 
   // MARK: - Main update loop
@@ -1098,6 +1230,8 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     // shaders.  Most of the effect shaders need to have an effective time that
     // always starts at zero, and I use the offset plus currentTime to provide it.
     _ = getUtimeOffset(view: view)
+    // Start the entry transition if needed
+    doEntryTransition()
   }
 
   /// Mark the end of the update phase and the start of actions

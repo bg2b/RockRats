@@ -591,7 +591,8 @@ class TutorialScene: GameTutorialScene {
     hideInstructions {
       self.showMessage("Training complete", delay: 3) {
         // Switch back to the main menu
-        self.showWhenQuiescent(Globals.menuScene)
+        //self.showWhenQuiescent(Globals.menuScene)
+        self.switchWhenQuiescent { Globals.menuScene }
       }
     }
   }

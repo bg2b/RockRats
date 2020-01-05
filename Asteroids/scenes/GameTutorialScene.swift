@@ -247,7 +247,11 @@ class GameTutorialScene: BasicScene {
   func doQuit() {
     guard beginSceneSwitch() else { fatalError("doQuit in GameTutorialScene found scene switch in progress???") }
     audio.stop()
-    switchScene(to: Globals.menuScene)
+    //switchScene(to: Globals.menuScene)
+    gamePaused = false
+    isPaused = false
+    wait(for: 0.1) { self.switchScene { Globals.menuScene }
+    }
   }
 
   /// Disallow pausing

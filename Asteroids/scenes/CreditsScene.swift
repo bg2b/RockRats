@@ -139,21 +139,22 @@ class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
   func startGame() {
     guard beginSceneSwitch() else { return }
     stopFireworks()
-    switchToScene { return GameScene(size: self.fullFrame.size) }
+    switchWhenQuiescent { GameScene(size: self.fullFrame.size) }
   }
 
   /// Switch back to the main menu
   func mainMenu() {
     guard beginSceneSwitch() else { return }
     stopFireworks()
-    showWhenQuiescent(Globals.menuScene)
+    //showWhenQuiescent(Globals.menuScene)
+    switchWhenQuiescent { Globals.menuScene }
   }
 
   /// Show the game settings
   func showSettings() {
     guard beginSceneSwitch() else { return }
     stopFireworks()
-    switchToScene { SettingsScene(size: self.fullFrame.size) }
+    switchWhenQuiescent { SettingsScene(size: self.fullFrame.size) }
   }
 
   // MARK: - Safari

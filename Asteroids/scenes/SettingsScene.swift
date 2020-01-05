@@ -216,37 +216,38 @@ class SettingsScene: BasicScene {
       reportAchievement(achievement: .promoted)
       showConclusion = true
     }
-    switchToScene { IntroScene(size: self.fullFrame.size, conclusion: showConclusion) }
+    switchWhenQuiescent { IntroScene(size: self.fullFrame.size, conclusion: showConclusion) }
   }
 
   /// Replay the conclusion scene
   func replayConclusion() {
     guard prepareForSwitch() else { return }
-    switchToScene { IntroScene(size: self.fullFrame.size, conclusion: true) }
+    switchWhenQuiescent { IntroScene(size: self.fullFrame.size, conclusion: true) }
   }
 
   /// Replay the tutorial
   func replayTutorial() {
     guard prepareForSwitch() else { return }
-    switchToScene { TutorialScene(size: self.fullFrame.size) }
+    switchWhenQuiescent { TutorialScene(size: self.fullFrame.size) }
   }
 
   /// Go back to the main menu
   func mainMenu() {
     guard prepareForSwitch() else { return }
-    showWhenQuiescent(Globals.menuScene)
+    //showWhenQuiescent(Globals.menuScene)
+    switchWhenQuiescent { Globals.menuScene }
   }
 
   /// Start a new game
   func startGame() {
     guard prepareForSwitch() else { return }
-    switchToScene { GameScene(size: self.fullFrame.size) }
+    switchWhenQuiescent { GameScene(size: self.fullFrame.size) }
   }
 
   /// Display the credits scene
   func showCredits() {
     guard prepareForSwitch() else { return }
-    switchToScene { CreditsScene(size: self.fullFrame.size) }
+    switchWhenQuiescent { CreditsScene(size: self.fullFrame.size) }
   }
 
   /// Adjust the sound volume

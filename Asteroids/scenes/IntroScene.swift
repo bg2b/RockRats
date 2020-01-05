@@ -197,18 +197,19 @@ class IntroScene: BasicScene {
   /// Handles clicks of the done button
   func done() {
     guard beginSceneSwitch() else { fatalError("Done button in IntroScene found scene switch already in progress???") }
+    let getNextScene: () -> BasicScene
     if UserData.hasDoneIntro.value {
       // They're just replaying the intro (or conclusion) from the settings
       if conclusion {
-        makeSceneInBackground { CreditsScene(size: self.fullFrame.size) }
+        getNextScene = { CreditsScene(size: self.fullFrame.size) }
       } else {
-        nextScene = Globals.menuScene
+        getNextScene = { Globals.menuScene }
       }
     } else {
       // First time the game has launched, take them through the tutorial
-      makeSceneInBackground { TutorialScene(size: self.fullFrame.size) }
+      getNextScene = { TutorialScene(size: self.fullFrame.size) }
     }
     UserData.hasDoneIntro.value = true
-    switchWhenReady()
+    switchWhenQuiescent(getNextScene)
   }
 }

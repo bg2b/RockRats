@@ -123,21 +123,21 @@ class MenuScene: BasicScene {
   func showSettings() {
     guard beginSceneSwitch() else { return }
     prepareForSwitch()
-    switchToScene { SettingsScene(size: self.fullFrame.size) }
+    switchWhenQuiescent { SettingsScene(size: self.fullFrame.size) }
   }
 
   /// Start a new game
   func startGame() {
     guard beginSceneSwitch() else { return }
     prepareForSwitch()
-    switchToScene { GameScene(size: self.fullFrame.size) }
+    switchWhenQuiescent { GameScene(size: self.fullFrame.size) }
   }
 
   /// Show the high scores screen
   func showHighScores() {
     guard beginSceneSwitch() else { return }
     prepareForSwitch()
-    switchToScene { HighScoreScene(size: self.fullFrame.size, score: nil) }
+    switchWhenQuiescent { HighScoreScene(size: self.fullFrame.size, score: nil) }
   }
 
   // MARK: - Game Center authentication
