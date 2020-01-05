@@ -1033,7 +1033,8 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// - Parameter sceneCreation: A closure that builds the new scene
   func makeSceneInBackground(_ sceneCreation: @escaping () -> SKScene) {
     // Some scene creation can be a little time-consuming and might cause the update
-    // loop to lag, so run it in the background.
+    // loop to lag, so run it in the background.  Still it's not great though; I'm
+    // not sure if there's any way to improve matters.
     run(.run({
       os_signpost(.begin, log: .poi, name: "Scene creation", signpostID: self.signpostID)
       self.nextScene = sceneCreation()
