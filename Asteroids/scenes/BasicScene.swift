@@ -1034,7 +1034,11 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   func makeSceneInBackground(_ sceneCreation: @escaping () -> SKScene) {
     // Some scene creation can be a little time-consuming and might cause the update
     // loop to lag, so run it in the background.
-    run(.run({ self.nextScene = sceneCreation() }, queue: DispatchQueue.global(qos: .utility)))
+    run(.run({
+      os_signpost(.begin, log: .poi, name: "Scene creation", signpostID: self.signpostID)
+      self.nextScene = sceneCreation()
+      os_signpost(.end, log: .poi, name: "Scene creation", signpostID: self.signpostID)
+    }, queue: DispatchQueue.global(qos: .utility)))
   }
 
   /// Create a new scene asynchronously (to avoid lag), then transition when it's
