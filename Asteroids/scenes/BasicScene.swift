@@ -208,10 +208,6 @@ func tilingShader(forTexture texture: SKTexture) -> SKShader {
   return shader
 }
 
-extension Globals {
-  static let tilingShaders = ShaderCache { tilingShader(forTexture: $0) }
-}
-
 // MARK: - Transition shader
 
 /// Make a shader for scene transitions
@@ -317,21 +313,22 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
 
   // MARK: - Initialization
 
+  /// Background texture
+  static let backgroundTexture = Globals.textureCache.findTexture(imageNamed: "starfield_blue")
+  /// Background shader
+  static let backgroundShader = tilingShader(forTexture: backgroundTexture)
+
   /// Make the background of the entire game
   ///
   /// I use a single background tile and repeat that over the whole screen with
   /// various flips so that it looks not very uniform.
   func initBackground() {
-    let background = SKShapeNode(rect: gameFrame)
+    let stars = BasicScene.backgroundTexture
+    let background = SKSpriteNode(texture: stars, size: gameFrame.size)
     background.name = "background"
-    background.strokeColor = .clear
-    background.blendMode = .replace
     background.setZ(.background)
-    let stars = Globals.textureCache.findTexture(imageNamed: "starfield_blue")
     let tsize = stars.size()
-    background.fillTexture = stars
-    background.fillColor = .white
-    background.fillShader = Globals.tilingShaders.getShader(texture: stars)
+    background.shader = BasicScene.backgroundShader
     let reps = vector_float2([Float(gameFrame.width / tsize.width), Float(gameFrame.height / tsize.height)])
     background.setValue(SKAttributeValue(vectorFloat2: reps), forAttribute: "a_repetitions")
     gameArea.addChild(background)
@@ -1106,7 +1103,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     let size = CGSize(width: maxDimension, height: maxDimension)
     let sprite = SKSpriteNode(texture: Globals.textureCache.findTexture(imageNamed: "dot"), size: size)
     sprite.position = CGPoint(x: frame.midX, y: frame.midY)
-    sprite.zPosition = LevelZs.transition.rawValue
+    sprite.setZ(.transition)
     return sprite
   }
 
@@ -1152,13 +1149,6 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
       let nextScene = getNextScene()
       os_signpost(.end, log: .poi, name: "scene creation", signpostID: self.signpostID)
       os_log("switchScene %{public}s -> %{public}s", log: .app, type: .debug, self.name!, nextScene.name!)
-//      // Add a transition mask to the new scene and make it static to just hide the
-//      // new scene until it can get going.
-//      let inTransition = nextScene.makeTransitionMask()
-//      inTransition.shader = BasicScene.maskingShader
-//      nextScene.addChild(inTransition)
-//      // Save the mask to signal doEntryTransition that it has work to do
-//      nextScene.entryTransition = inTransition
       nextScene.makeEntryTransition()
       // As long as things are hidden, may as well make sure that the u_time offset
       // is in sync
