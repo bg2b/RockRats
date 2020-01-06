@@ -146,7 +146,6 @@ class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
   func mainMenu() {
     guard beginSceneSwitch() else { return }
     stopFireworks()
-    //showWhenQuiescent(Globals.menuScene)
     switchWhenQuiescent { Globals.menuScene }
   }
 

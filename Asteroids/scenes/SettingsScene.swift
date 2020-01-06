@@ -234,7 +234,6 @@ class SettingsScene: BasicScene {
   /// Go back to the main menu
   func mainMenu() {
     guard prepareForSwitch() else { return }
-    //showWhenQuiescent(Globals.menuScene)
     switchWhenQuiescent { Globals.menuScene }
   }
 

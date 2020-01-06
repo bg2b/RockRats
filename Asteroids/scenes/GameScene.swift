@@ -572,11 +572,13 @@ class GameScene: GameTutorialScene {
       removeAction(forKey: "spawnWave")
       wait(for: delay) {
         self.audio.soundEffect(.gameOver)
-        self.endGameSaveProgress()
         // Start building the high scores scene in the background
         let gameScore = self.saveScoreAndPrepareHighScores()
         self.displayMessage("Game Over", fade: false, forTime: 5) {
-          self.switchWhenQuiescent { HighScoreScene(size: self.fullFrame.size, score: gameScore) }
+          self.switchWhenQuiescent {
+            self.endGameSaveProgress()
+            return HighScoreScene(size: self.fullFrame.size, score: gameScore)
+          }
         }
       }
     }

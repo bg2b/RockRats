@@ -247,11 +247,13 @@ class GameTutorialScene: BasicScene {
   func doQuit() {
     guard beginSceneSwitch() else { fatalError("doQuit in GameTutorialScene found scene switch in progress???") }
     audio.stop()
-    //switchScene(to: Globals.menuScene)
     gamePaused = false
     isPaused = false
-    wait(for: 0.1) { self.switchScene { Globals.menuScene }
-    }
+    // I'm not sure why, but the immediate transition stuff here doesn't behave like
+    // I'd expect; the exit shader doesn't run right.  It works if I give it a frame
+    // to unpause though.
+    // switchScene { Globals.menuScene }
+    wait(for: 1.0 / 60) { self.switchScene { Globals.menuScene } }
   }
 
   /// Disallow pausing

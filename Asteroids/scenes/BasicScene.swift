@@ -1110,6 +1110,19 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     return sprite
   }
 
+  /// Add an entry transition to the scene
+  ///
+  /// The scene will be hidden until it moves to a view and starts running.
+  func makeEntryTransition() {
+    // Add a transition mask and make it static to just hide the scene until it can
+    // get going.
+    let inTransition = makeTransitionMask()
+    inTransition.shader = BasicScene.maskingShader
+    addChild(inTransition)
+    // Save the mask to signal doEntryTransition that it has work to do
+    entryTransition = inTransition
+  }
+
   /// Switch to a new scene (with no quiescene requirement)
   ///
   /// Most scene transitions should call `switchWhenQuiescent` instead of
@@ -1139,13 +1152,14 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
       let nextScene = getNextScene()
       os_signpost(.end, log: .poi, name: "scene creation", signpostID: self.signpostID)
       os_log("switchScene %{public}s -> %{public}s", log: .app, type: .debug, self.name!, nextScene.name!)
-      // Add a transition mask to the new scene and make it static to just hide the
-      // new scene until it can get going.
-      let inTransition = nextScene.makeTransitionMask()
-      inTransition.shader = BasicScene.maskingShader
-      nextScene.addChild(inTransition)
-      // Save the mask to signal doEntryTransition that it has work to do
-      nextScene.entryTransition = inTransition
+//      // Add a transition mask to the new scene and make it static to just hide the
+//      // new scene until it can get going.
+//      let inTransition = nextScene.makeTransitionMask()
+//      inTransition.shader = BasicScene.maskingShader
+//      nextScene.addChild(inTransition)
+//      // Save the mask to signal doEntryTransition that it has work to do
+//      nextScene.entryTransition = inTransition
+      nextScene.makeEntryTransition()
       // As long as things are hidden, may as well make sure that the u_time offset
       // is in sync
       resetUtimeOffset(view: view)

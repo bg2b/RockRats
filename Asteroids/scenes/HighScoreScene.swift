@@ -386,7 +386,6 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
   func mainMenu() {
     guard beginSceneSwitch() else { return }
     warpOutSmashies()
-    //showWhenQuiescent(Globals.menuScene)
     switchWhenQuiescent { Globals.menuScene }
   }
 

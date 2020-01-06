@@ -41,6 +41,7 @@ class GameViewController: UIViewController {
       // Show the intro on first launch, otherwise the main menu
       let toPresent = UserData.hasDoneIntro.value ? Globals.menuScene! : IntroScene(size: size, conclusion: false)
       os_log("viewDidLoad will present %{public}s", log: .app, type: .debug, toPresent.name!)
+      toPresent.makeEntryTransition()
       view.presentScene(toPresent)
       // Drawing preferences
       view.preferredFramesPerSecond = 120
