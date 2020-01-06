@@ -22,7 +22,7 @@ class GameViewController: UIViewController {
       let aspect = view.frame.width / view.frame.height
       // Save the scaling for use with control motions.  I want to specify motions in
       // terms of pts, since those correspond approximately to physical distances
-      // that the players's fingers should move.
+      // that the player's fingers should move.
       Globals.ptsToGameUnits = 768 / view.frame.height
       os_log("%{public}g game units per pt", log: .app, type: .debug, Globals.ptsToGameUnits)
       // Make physics bodies for irregular shapes
