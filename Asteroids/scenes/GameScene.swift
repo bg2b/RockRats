@@ -135,6 +135,7 @@ class GameScene: GameTutorialScene {
   /// updated.  Or better, it should be just rewritten entirely in Metal syntax if
   /// SpriteKit ever allows native Metal shaders.
   func initFutureShader() {
+    let rgba = AppAppearance.transitionColor.cgColor.components!
     let shaderSource = """
     // Convert a pixel in a texture to grayscale
     float grayscale(vec2 coord, texture2d<float> texture) {
@@ -166,9 +167,8 @@ class GameScene: GameTutorialScene {
       gray = max(gray - 0.05, 0.0);
       gray *= 5.0;
       gray = min(gray, 1.0);
-      // Don't be quite so harsh in the blacks
-      gray = max(gray, 0.125);
-      gl_FragColor = vec4(gray, gray, gray, 1.0);
+      // Match transition color for the blacks
+      gl_FragColor = vec4(max(gray, \(rgba[0])), max(gray, \(rgba[1])), max(gray, \(rgba[2])), 1.0);
     }
     """
     let shader = SKShader(source: shaderSource)

@@ -41,7 +41,10 @@ class GameViewController: UIViewController {
       // Show the intro on first launch, otherwise the main menu
       let toPresent = UserData.hasDoneIntro.value ? Globals.menuScene! : IntroScene(size: size, conclusion: false)
       os_log("viewDidLoad will present %{public}s", log: .app, type: .debug, toPresent.name!)
-      toPresent.makeEntryTransition()
+      // For the first scene, I think it's best to just let it show normally.  Adding
+      // an entry transition looks odd because the solid-color loading screen doesn't
+      // have a transition out.
+      // toPresent.makeEntryTransition()
       view.presentScene(toPresent)
       // Drawing preferences
       view.preferredFramesPerSecond = 120

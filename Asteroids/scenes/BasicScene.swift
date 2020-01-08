@@ -17,7 +17,9 @@ enum LevelZs: CGFloat {
   case stars = -100
   case playfield = 0
   case info = 100
-  case transition = 200
+  case pauseEffect = 200
+  case pauseControls = 300
+  case transition = 400
 }
 
 extension SKNode {
@@ -257,8 +259,11 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   var gameAreaCrop = SKCropNode()
   /// Home for all the game elements (asteroids, UFOs, ships, info, etc.).  This is
   /// an effect node so that a filter can be applied to all of those elements (e.g.,
-  /// blurring them when the game is paused).
+  /// blurring them when the game is paused).  But see discussion under
+  /// `setGameAreaBlur`.
   var gameArea = SKEffectNode()
+  /// When the game is paused, this is set to a blurred image
+  var pausedEffect: SKSpriteNode?
   /// The playfield holds the non-info stuff (asteroid, ships, etc.), i.e., things
   /// that move around and undergo coordinate wrapping.
   var playfield: Playfield!
@@ -301,14 +306,54 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// SpriteKit's best efforts to mess them up.
   var forcePause: Bool { false }
 
-  /// Turn the game area's filter on or off
+  /// (Conceptually) turn the game area's filter on or off; see full discussion below
   ///
   /// The filter is used when a game is paused to blur the game area (except for the
   /// resume/cancel buttons).
   ///
+  /// `gameArea` is an `SKEffectNode`.  Originally its `filter` property was set and
+  /// this routine was basically just `gameArea.shouldEnableEffects = enable`.
+  /// However, repeated pausing and unpausing would cause a memory leak.  How is not
+  /// clear; something internal to the way the effect node and CI filters interact I
+  /// think, but why beats me.  I could pump the memory up from ~150-200MB normally
+  /// to 500-600MB by pausing/unpausing/aborting, and undoubtedly could have gotten
+  /// it higher if I were patient.  Also, leak checking showed that the scene was
+  /// being collected fine upon end-of-game or aborting a game, so it didn't seem to
+  /// have anything to do with something that I was retaining.
+  ///
+  /// Anway, there are two possibilities for fixing the leak.  Probably the cleanest
+  /// one would be to use a shader instead of a CI filter for the effect.  (The fact
+  /// that this avoided the leak also supports the idea that the problem is not
+  /// something in the app's code but something in the internal use of CI filters by
+  /// the effect node.)  The issue though is the retro effect.  Getting a shader that
+  /// looks good with retro is a little awkward, and I haven't been clever enough so
+  /// far to come up with anything.
+  ///
+  /// The second possibility is to render `gameArea` to a texture, run that
+  /// explicitly through a `CGImage`, `CIFilter`, `CGImage` `SKTexture` sequence, and
+  /// make a sprite with that effect texture above the game area.  That's kind of
+  /// ugly and awkward, though it does offer one benefit, in that if I want to use
+  /// the regular transition stuff (which requires the scene to be unpaused) during
+  /// an abort, then this approach lets it appear as if the game is paused throughout
+  /// the transition.  Anyway, this is the approach I've currently gone with.
+  ///
   /// - Parameter enable: `true` if the filter should be turned on
   func setGameAreaBlur(_ enable: Bool) {
-    gameArea.shouldEnableEffects = enable && gameArea.filter != nil
+    // This triggers memory leaks:
+    // gameArea.shouldEnableEffects = enable && gameArea.filter != nil
+    // If I ever switch to a shader instead of running the filter explicitly, then
+    // this routine should become just the above (minus the filter != nil).
+    if enable, let filter = gameArea.filter, let texture = view?.texture(from: gameArea, crop: gameFrame) {
+      let pausedTexture = filteredTexture(texture: texture, filter: filter)
+      let pausedEffect = SKSpriteNode(texture: pausedTexture, size: gameFrame.size)
+      pausedEffect.setZ(.pauseEffect)
+      pausedEffect.name = "blurred"
+      addChild(pausedEffect)
+      self.pausedEffect = pausedEffect
+    } else if !enable, let pausedEffect = pausedEffect {
+      pausedEffect.removeFromParent()
+      self.pausedEffect = nil
+    }
   }
 
   // MARK: - Initialization
@@ -437,6 +482,16 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
       mask.fillColor = .white
       mask.strokeColor = .clear
       gameAreaCrop.maskNode = mask
+      // Add a background for the background ;-).  This is set to match the
+      // transition color so that it doesn't stand out if the transition is a bit
+      // fancier than a simple fade.
+      let bgColor = SKSpriteNode()
+      bgColor.color = AppAppearance.transitionColor
+      bgColor.size = fullFrame.size
+      bgColor.position = CGPoint(x: fullFrame.midX, y: fullFrame.midY)
+      bgColor.setZ(.background)
+      bgColor.blendMode = .replace
+      addChild(bgColor)
     }
     addChild(gameAreaCrop)
     gameArea.name = "gameArea"

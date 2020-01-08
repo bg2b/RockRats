@@ -75,7 +75,6 @@ class GameTutorialScene: BasicScene {
     // and _not_ under gameArea, so they don't get blurred when the game pauses
     addChild(pauseControls)
     pauseControls.name = "pauseControls"
-    pauseControls.setZ(.info)
     let pauseTexture = Globals.textureCache.findTexture(imageNamed: "pause")
     pauseButton = Touchable(SKSpriteNode(texture: pauseTexture, size: pauseTexture.size())) {
       [unowned self] in self.doPause()
@@ -85,6 +84,7 @@ class GameTutorialScene: BasicScene {
     pauseButton.alpha = 0.1
     pauseButton.position = CGPoint(x: gameFrame.minX + pauseTexture.size().width / 2 + 10,
                                    y: reservesDisplay.position.y - pauseTexture.size().height / 2 - 20)
+    pauseButton.setZ(.info)
     pauseControls.addChild(pauseButton)
     // Two nice big buttons in the center of the screen for continue and quit.
     // They're only unhidden when the game pauses.
@@ -93,11 +93,13 @@ class GameTutorialScene: BasicScene {
     continueButton.action = { [unowned self] in self.doContinue() }
     continueButton.position = CGPoint(x: gameFrame.midX - 0.5 * buttonSize.width - 50, y: gameFrame.midY)
     continueButton.isHidden = true
+    continueButton.setZ(.pauseControls)
     pauseControls.addChild(continueButton)
     quitButton = Button(imageNamed: "bigcancelbutton", imageColor: AppAppearance.dangerButtonColor, size: buttonSize)
     quitButton.action = { [unowned self] in self.doQuit() }
     quitButton.position = CGPoint(x: 2 * gameFrame.midX - continueButton.position.x, y: continueButton.position.y)
     quitButton.isHidden = true
+    quitButton.setZ(.pauseControls)
     pauseControls.addChild(quitButton)
   }
 
@@ -247,6 +249,10 @@ class GameTutorialScene: BasicScene {
   func doQuit() {
     guard beginSceneSwitch() else { fatalError("doQuit in GameTutorialScene found scene switch in progress???") }
     audio.stop()
+    // If using a shader for the blurring, then the transition below (which requires
+    // the game be unpaused) might look better if the blur is cancelled.  See the whole
+    // discussion in setGameAreaBlur about shader vs filter though.
+    // setGameAreaBlur(false)
     gamePaused = false
     isPaused = false
     // I'm not sure why, but the immediate transition stuff here doesn't behave like
@@ -405,7 +411,7 @@ class GameTutorialScene: BasicScene {
   func setRetroFilter(enabled: Bool) {
     if enabled {
       if let filter = CIFilter(name: "CICrystallize") {
-        filter.setValue(10, forKey: kCIInputRadiusKey)
+        filter.setValue(5, forKey: kCIInputRadiusKey)
         gameArea.filter = filter
         gameArea.shouldCenterFilter = true
       } else {

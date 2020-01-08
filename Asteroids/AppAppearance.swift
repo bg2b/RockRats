@@ -45,8 +45,14 @@ class AppAppearance {
   static let borderColor = AppAppearance.green
   /// Dangerous button outlines that require confirmation use this color
   static let dangerBorderColor = AppAppearance.red
-  /// This color is used in the transition between scenes
-  static let transitionColor = AppAppearance.darkBlue
+  /// This color is used in the transition between scenes.
+  ///
+  /// Originally I had this set to AppAppearance.darkBlue, but I think it's better
+  /// with more contrast between scene and transition.  This also is used for the
+  /// background in the display's safe area during games, and matching the dark blue
+  /// just looked a bit too low-contrast.  It's also used for the black in the retro
+  /// shader.  Basically this can't just be set arbitrarily with no consequences.
+  static let transitionColor = RGB(0, 0, 0)
   /// The color for normal button icons
   static let buttonColor = AppAppearance.blue
   /// The color for play/continue button icons
