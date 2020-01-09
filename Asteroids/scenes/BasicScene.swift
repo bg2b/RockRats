@@ -17,9 +17,8 @@ enum LevelZs: CGFloat {
   case stars = -100
   case playfield = 0
   case info = 100
-  case pauseEffect = 200
-  case pauseControls = 300
-  case transition = 400
+  case pauseControls = 200
+  case transition = 300
 }
 
 extension SKNode {
@@ -283,79 +282,6 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// Signpost ID for this instance
   let signpostID = OSSignpostID(log: .poi)
 
-  // MARK: - Pausing
-
-  /// Pauses the scene when set.  This is an override of SKScene's property of the
-  /// same name because SpriteKit's automatic pausing/unpausing for stuff like the
-  /// app going into the background/foreground can screw things up if the scene is
-  /// paused because it's doing something like presenting another view controller or
-  /// waiting to resume a paused game.  The subclass should override the forcePause
-  /// property to return true when it's in a state where the scene should not unpause
-  /// as a result of SpriteKit's behind-the-scenes mucking.
-  override var isPaused: Bool {
-    get { super.isPaused }
-    set {
-      if forcePause && !newValue {
-        os_log("holding isPaused at true because forcePause is true", log: .app, type: .debug)
-      }
-      super.isPaused = newValue || forcePause
-    }
-  }
-
-  /// Subclasses override this to indicate when they should remain paused despite
-  /// SpriteKit's best efforts to mess them up.
-  var forcePause: Bool { false }
-
-  /// (Conceptually) turn the game area's filter on or off; see full discussion below
-  ///
-  /// The filter is used when a game is paused to blur the game area (except for the
-  /// resume/cancel buttons).
-  ///
-  /// `gameArea` is an `SKEffectNode`.  Originally its `filter` property was set and
-  /// this routine was basically just `gameArea.shouldEnableEffects = enable`.
-  /// However, repeated pausing and unpausing would cause a memory leak.  How is not
-  /// clear; something internal to the way the effect node and CI filters interact I
-  /// think, but why beats me.  I could pump the memory up from ~150-200MB normally
-  /// to 500-600MB by pausing/unpausing/aborting, and undoubtedly could have gotten
-  /// it higher if I were patient.  Also, leak checking showed that the scene was
-  /// being collected fine upon end-of-game or aborting a game, so it didn't seem to
-  /// have anything to do with something that I was retaining.
-  ///
-  /// Anway, there are two possibilities for fixing the leak.  Probably the cleanest
-  /// one would be to use a shader instead of a CI filter for the effect.  (The fact
-  /// that this avoided the leak also supports the idea that the problem is not
-  /// something in the app's code but something in the internal use of CI filters by
-  /// the effect node.)  The issue though is the retro effect.  Getting a shader that
-  /// looks good with retro is a little awkward, and I haven't been clever enough so
-  /// far to come up with anything.
-  ///
-  /// The second possibility is to render `gameArea` to a texture, run that
-  /// explicitly through a `CGImage`, `CIFilter`, `CGImage` `SKTexture` sequence, and
-  /// make a sprite with that effect texture above the game area.  That's kind of
-  /// ugly and awkward, though it does offer one benefit, in that if I want to use
-  /// the regular transition stuff (which requires the scene to be unpaused) during
-  /// an abort, then this approach lets it appear as if the game is paused throughout
-  /// the transition.  Anyway, this is the approach I've currently gone with.
-  ///
-  /// - Parameter enable: `true` if the filter should be turned on
-  func setGameAreaBlur(_ enable: Bool) {
-    // This triggers memory leaks:
-    // gameArea.shouldEnableEffects = enable && gameArea.filter != nil
-    // If I ever switch to a shader instead of running the filter explicitly, then
-    // this routine should become just the above (minus the filter != nil).
-    if enable, let filter = gameArea.filter, let texture = view?.texture(from: gameArea, crop: gameFrame) {
-      let pausedTexture = filteredTexture(texture: texture, filter: filter)
-      let pausedEffect = SKSpriteNode(texture: pausedTexture, size: gameFrame.size)
-      pausedEffect.setZ(.pauseEffect)
-      pausedEffect.name = "blurred"
-      addChild(pausedEffect)
-      self.pausedEffect = pausedEffect
-    } else if !enable, let pausedEffect = pausedEffect {
-      pausedEffect.removeFromParent()
-      self.pausedEffect = nil
-    }
-  }
-
   // MARK: - Initialization
 
   /// Background texture
@@ -495,7 +421,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     }
     addChild(gameAreaCrop)
     gameArea.name = "gameArea"
-    gameArea.filter = nil
+    gameArea.shader = nil
     gameArea.shouldEnableEffects = false
     gameAreaCrop.addChild(gameArea)
     initBackground()
@@ -552,6 +478,169 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     playfield.recycle()
     removeActionsForEverything(node: self)
   }
+
+  // MARK: - Pausing
+
+  /// Pauses the scene when set.  This is an override of SKScene's property of the
+  /// same name because SpriteKit's automatic pausing/unpausing for stuff like the
+  /// app going into the background/foreground can screw things up if the scene is
+  /// paused because it's doing something like presenting another view controller or
+  /// waiting to resume a paused game.  The subclass should override the forcePause
+  /// property to return true when it's in a state where the scene should not unpause
+  /// as a result of SpriteKit's behind-the-scenes mucking.
+  override var isPaused: Bool {
+    get { super.isPaused }
+    set {
+      if forcePause && !newValue {
+        os_log("holding isPaused at true because forcePause is true", log: .app, type: .debug)
+      }
+      super.isPaused = newValue || forcePause
+    }
+  }
+
+  /// Subclasses override this to indicate when they should remain paused despite
+  /// SpriteKit's best efforts to mess them up.
+  var forcePause: Bool { false }
+
+  /// (Conceptually) turn the game area's filter on or off; see full discussion below
+  ///
+  /// The filter is used when a game is paused to blur the game area (except for the
+  /// resume/cancel buttons).
+  ///
+  /// `gameArea` is an `SKEffectNode`.  Originally its `filter` property was set and
+  /// this routine was basically just `gameArea.shouldEnableEffects = enable`.
+  /// However, repeated pausing and unpausing would cause a memory leak.  How is not
+  /// clear; something internal to the way the effect node and CI filters interact I
+  /// think, but why beats me.  I could pump the memory up from ~150-200MB normally
+  /// to 500-600MB by pausing/unpausing/aborting, and undoubtedly could have gotten
+  /// it higher if I were patient.  Also, leak checking showed that the scene was
+  /// being collected fine upon end-of-game or aborting a game, so it didn't seem to
+  /// have anything to do with something that I was retaining.
+  ///
+  /// The one I did originally was to render `gameArea` to a texture, run that
+  /// explicitly through a `CGImage`, `CIFilter`, `CGImage` `SKTexture` sequence, and
+  /// make a sprite with that effect texture above the game area.  It's kind of ugly
+  /// and awkward, though it does offer one benefit, in that I could use the regular
+  /// scene transition stuff (which requires the scene to be unpaused) during an
+  /// abort, and this approach would let it appear as if the game was paused
+  /// throughout the transition.  The main drawback of this approach (aside from the
+  /// hackish nature) was that there would be a slight lag when pressing the pause
+  /// button before the paused texture could be constructed and shown.  (In the case
+  /// of the non-retro Gaussian blur filter that I was using, it was possible to
+  /// avoid this by rendering `gameArea` at a smaller scale and blurring that.  But
+  /// that didn't help the retro case.)
+  ///
+  /// The second option seems cleaner and is what I've switched to.  That's to use a
+  /// shader instead of a CI filter for the effect.  The fact that this avoids the
+  /// leak without explicit off-screen rendering and filtering also supports the idea
+  /// that the problem is not something in the app's code but something in the
+  /// internal use of CI filters by the effect node.  The main issue was getting a
+  /// shader that looks reasonable with retro mode, and I've had to split into
+  /// separate pause shaders to get something that passes muster.  The other thing to
+  /// consider with a shader is that the texture it works on is varying in size, so
+  /// whatever it is needs to be something that works nicely for varying sizes and
+  /// aspect ratios and offsets.  I had to assume Metal under the hood so that I
+  /// could use the `get_width()` and `get_height()` methods on the texture.  I've
+  /// left an alternative Gaussian shader in the code that could probably be adapted
+  /// to work without that assumption, though it would suck with retro.
+  ///
+  /// - Parameter enable: `true` if the filter should be turned on
+  func setGameAreaBlur(_ enable: Bool) {
+    gameArea.shouldEnableEffects = enable && shader != nil
+  }
+
+  // MARK: - Pause shaders
+
+  /// The pause shader for non-retro mode
+  static let pauseShaderModern: SKShader = {
+    // This is a sort of pixellated checkerboard
+    let rgba = AppAppearance.transitionColor.cgColor.components!
+    let shaderSource = """
+    void main() {
+      // Get texture size (assumes Metal)
+      int width = u_texture.get_width();
+      int height = u_texture.get_height();
+      // Compute pixel size
+      vec2 pixel(1.0 / width, 1.0 / height);
+      // View the texture as 10x10 pixel squares; compute the x and y indicies of the square
+      // for the current pixel
+      vec2 center = floor(v_tex_coord / pixel / 10.0);
+      if ((int(center.x) + int(center.y)) % 2 == 0) {
+        // Half the squares are the transition color
+        gl_FragColor = vec4(\(rgba[0]), \(rgba[1]), \(rgba[2]), 1.0);
+      } else {
+        // For the other half, sample one color from the center of the square
+        center += 0.5;
+        center *= 10.0 * pixel;
+        gl_FragColor = texture2D(u_texture, center);
+      }
+    }
+    """
+    return SKShader(source: shaderSource)
+  }()
+
+  /// An alternate pause shader for non-retro mode based on a Gaussian blur
+  ///
+  /// This isn't currently used, but I'm not 100% decided about the shader, so I've left it.
+  static let pauseShaderModernGaussian: SKShader = {
+    let rgba = AppAppearance.darkBlue.cgColor.components!
+    let shaderSource = """
+    void main() {
+      // Get texture size (assumes Metal)
+      int width = u_texture.get_width();
+      int height = u_texture.get_height();
+      // Compute pixel size
+      vec2 pixel(1.0 / width, 1.0 / height);
+      // Size of steps between blur samples (determines the radius)
+      vec2 d = 4 * pixel;
+      // 1D discrete Gaussian weights
+      float wts[5] = {0.06136, 0.24477, 0.38774, 0.24477, 0.06136};
+      vec4 result(0.0);
+      // Sample textures in a 5x5 grid and accumulate with appropriate weights
+      for (int i = -2; i <= 2; ++i) {
+        for (int j = -2; j <= 2; ++j) {
+          result += wts[i + 2] * wts[j + 2] * texture2D(u_texture, v_tex_coord + vec2(i * d.x, j * d.y));
+        }
+      }
+      gl_FragColor = result;
+    }
+    """
+    return SKShader(source: shaderSource)
+  }()
+
+  /// The pause shader for retro mode
+  static let pauseShaderRetro: SKShader = {
+    // This is an analog of the standard pause shader, but adapted a bit because the
+    // retro shader is going to run on top of it.  This isn't 100% perfect; it'll
+    // occasionally cause some effects at the very edge of the screen because of the
+    // way the square alignment falls compared to what the retro shader is looking
+    // at. But it's not ridiculous, and for whatever reason it seems to happen mostly
+    // on my phone.  Maybe something to do with the display resolution?  Anyway...
+    let rgba = AppAppearance.darkBlue.cgColor.components!
+    let shaderSource = """
+    void main() {
+      // Get texture size (assumes Metal)
+      int width = u_texture.get_width();
+      int height = u_texture.get_height();
+      // Compute pixel size
+      vec2 pixel(1.0 / width, 1.0 / height);
+      // Use a 7x7 grid instead of 10x10 due to retro shader
+      vec2 center = floor(v_tex_coord / pixel / 7.0);
+      if ((int(center.x) + int(center.y)) % 2 == 0) {
+        // The most important change: use the regular background color when sampling even squares,
+        // otherwise most of the display will be filled with lines because of the retro shader
+        // detecting edges everywhere
+        gl_FragColor = vec4(\(rgba[0]), \(rgba[1]), \(rgba[2]), 1.0);
+      } else {
+        // Otherwise sample a color from the center of the square
+        center += 0.5;
+        center *= 7.0 * pixel;
+        gl_FragColor = texture2D(u_texture, center);
+      }
+    }
+    """
+    return SKShader(source: shaderSource)
+  }()
 
   // MARK: - Asteroids
 
@@ -1057,7 +1146,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
 
   // MARK: - Scene transition shaders
 
-  /// A shader that just makes the app's background/transition color
+  /// A shader that just makes the app's transition color
   static let maskingShader: SKShader = {
     let rgba = AppAppearance.transitionColor.cgColor.components!
     let shaderSource = """
@@ -1122,17 +1211,19 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   // The masking behavior is controlled by the sprite's shader, which determines what
   // to hide and what to show as a function of time.
   //
-  // When a scene wants to make a transition, it calls `switchScene` or
-  // `switchWhenQuiescent` as appropriate.  The argument is a closure that returns
-  // the new scene (typically after creating it).  The scene switch starts by
-  // installing a masking transition sprite in the current scene and setting it's
-  // shader to `BasicScene.exitShader`.  The sprite runs an action that waits for
-  // whatever animation the shader does to complete.  At that point, the display
-  // should be completely static.  Then the completion handler for the action invokes
-  // the closure to get the new scene.
+  // When a scene wants to make a transition, it calls `switchScene(withFade:)`,
+  // `switchScene`, or `switchWhenQuiescent` as appropriate.  The main argument is a
+  // closure that returns the new scene (typically after creating it).  The first
+  // function is used only on paused scenes (when aborting a game).  Because the
+  // scene is paused, the display is already static.  The latter two functions make
+  // an outgoing transition that installs a masking transition sprite in the current
+  // scene and sets its shader to `BasicScene.exitShader`.  The sprite runs an action
+  // that waits for whatever animation the shader does to complete.  At that point,
+  // the display is again completely static.  Once the display is frozen, the closure
+  // to get the new scene is invoked.
   //
   // The final stage is conceptually just to add a masking transition sprite in the
-  // new scene and set it's shader to run and reveal the scene.  Unfortunately things
+  // new scene and set its shader to run and reveal the scene.  Unfortunately things
   // aren't quite so simple.  The issue is that the new scene seems to take a few
   // frames to get going and start updating at a reasonable rate.  Meanwhile the
   // transition `u_time` is advancing and the whole thing seems to get clipped or
@@ -1142,10 +1233,10 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   // for `entryTransition` in the new scene.  When the new scene starts invoking
   // `update`, one of the steps there is to call `doEntryTransition`.  When that
   // function finds a non-nil `entryTransition`, it starts an action to wait for
-  // another few frames and sets `entryTransition` back to nil.  When the action
-  // triggers, it sets the shader to `BasicScene.entryShader`, which does the entry
-  // transition to reveal the scene, and once the shader finishes, the sprite is
-  // removed.
+  // another few frames and sets `entryTransition` back to `nil`.  When the action
+  // triggers, it resets and recomputes `utimeOffset` and sets the shader to
+  // `BasicScene.entryShader`, which does the entry transition to reveal the scene.
+  // Once the shader finishes, the sprite is removed.
 
   /// Make a transition sprite
   ///
@@ -1175,14 +1266,56 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     entryTransition = inTransition
   }
 
+  /// Switch to a new incoming scene
+  ///
+  /// This function doesn't require the outgoing scene to be in any specific state,
+  /// and it may be paused.  I use this directly when aborting a game in the middle;
+  /// `withFade` is `true` in that case.  It's also called internally by the normal
+  /// scene transitions after the outgoing transition has finished.  `withFade` is
+  /// `false` then since the outgoing scene is already hidden.
+  ///
+  /// - Parameters:
+  ///   - withFade: `true` means do a fade out/in, else just switch immediately
+  ///   - getNextScene: A closure to return the incoming scene
+  func switchScene(withFade: Bool, _ getNextScene: @escaping () -> BasicScene) {
+    guard let view = view else { fatalError("Transitioning scene has no view") }
+    // The outgoing scene is either completely hidden by the outgoing transition or
+    // is paused.  Any lag now won't be visible, so get the next scene.
+    os_signpost(.begin, log: .poi, name: "scene creation", signpostID: self.signpostID)
+    let nextScene = getNextScene()
+    os_signpost(.end, log: .poi, name: "scene creation", signpostID: self.signpostID)
+    os_log("switchScene %{public}s -> %{public}s", log: .app, type: .debug, self.name!, nextScene.name!)
+    // Give the new scene an incoming transition
+    nextScene.makeEntryTransition()
+    // Do not recompute u_time offset here because it won't work in the case of a
+    // paused outgoing scene (like when aborting a game).  Why?  I have no earthly
+    // idea.  The symptom is that the incoming scene's entry transition seems to get
+    // a bogus time sync and as a result it doesn't show correctly.  Resetting it and
+    // having the new scene recompute it does work, but I've decided to move the
+    // reset (and recomputation) to doEntryTransition when the new scene is about to
+    // switch to the entry shader from the static shader.  That seems a bit cleaner.
+    os_signpost(.begin, log: .poi, name: "presentScene", signpostID: self.signpostID)
+    if withFade {
+      // The duration doesn't really mean the same thing as the normal transition
+      // duration, but whatevs
+      let transition = SKTransition.fade(with: AppAppearance.transitionColor,
+                                         duration: BasicScene.transitionDuration)
+      view.presentScene(nextScene, transition: transition)
+    } else {
+      view.presentScene(nextScene)
+    }
+    os_signpost(.end, log: .poi, name: "presentScene", signpostID: self.signpostID)
+  }
+
   /// Switch to a new scene (with no quiescene requirement)
   ///
-  /// Most scene transitions should call `switchWhenQuiescent` instead of
-  /// `switchScene`.  This function is only used directly when the state of the
+  /// Most scene transitions would call `switchWhenQuiescent` instead of
+  /// `switchScene`.  This function would only be used directly when the state of the
   /// current scene cannot be easily characterized (like when aborting a game in the
   /// middle).  When using this function, it will be the responsibility of the
   /// current scene's `willMove(from:)` to get the scene into a garbage-collectable
-  /// state.
+  /// state.  The current scene cannot be paused when calling this function because
+  /// it relies on an action to do the switch after the outgoing transition runs.
   ///
   /// The `getNextScene` closure is called between an outgoing transition for the
   /// current scene and an incoming transition for the next one.  In the time between
@@ -1198,20 +1331,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     setStartTimeAttrib(outTransition, view: view)
     addChild(outTransition)
     outTransition.run(.wait(forDuration: BasicScene.transitionDuration + 0.1)) {
-      // The outgoing transition has finished, and the scene is completely hidden.
-      // Any lag now won't be visible, so get the next scene.
-      os_signpost(.begin, log: .poi, name: "scene creation", signpostID: self.signpostID)
-      let nextScene = getNextScene()
-      os_signpost(.end, log: .poi, name: "scene creation", signpostID: self.signpostID)
-      os_log("switchScene %{public}s -> %{public}s", log: .app, type: .debug, self.name!, nextScene.name!)
-      nextScene.makeEntryTransition()
-      // As long as things are hidden, may as well make sure that the u_time offset
-      // is in sync
-      resetUtimeOffset(view: view)
-      os_signpost(.begin, log: .poi, name: "presentScene", signpostID: self.signpostID)
-      view.presentScene(nextScene)
-      os_signpost(.end, log: .poi, name: "presentScene", signpostID: self.signpostID)
-      // The outgoing scene is no longer visible, so remove the mask
+      self.switchScene(withFade: false, getNextScene)
       outTransition.removeFromParent()
     }
   }
@@ -1232,6 +1352,9 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
       os_log("%{public}s doEntryTransition", log: .app, type: .debug, name!)
       // Make sure that the scene has a few frames to get going
       wait(for: 0.1) {
+        // I originally had the reset (and a recomputation) in scene between the
+        // outgoing and incoming transitions; see switchScene(withFade:)
+        resetUtimeOffset()
         // Switch from the static maskingShader to the entryShader
         entryTransition.shader = BasicScene.entryShader
         setStartTimeAttrib(entryTransition, view: self.view)

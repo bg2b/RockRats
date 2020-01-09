@@ -249,17 +249,11 @@ class GameTutorialScene: BasicScene {
   func doQuit() {
     guard beginSceneSwitch() else { fatalError("doQuit in GameTutorialScene found scene switch in progress???") }
     audio.stop()
-    // If using a shader for the blurring, then the transition below (which requires
-    // the game be unpaused) might look better if the blur is cancelled.  See the whole
-    // discussion in setGameAreaBlur about shader vs filter though.
-    // setGameAreaBlur(false)
-    gamePaused = false
-    isPaused = false
-    // I'm not sure why, but the immediate transition stuff here doesn't behave like
-    // I'd expect; the exit shader doesn't run right.  It works if I give it a frame
-    // to unpause though.
-    // switchScene { Globals.menuScene }
-    wait(for: 1.0 / 60) { self.switchScene { Globals.menuScene } }
+    continueButton.isHidden = true
+    quitButton.isHidden = true
+    // Don't call the normal switchScene or switchWhenQuiescent.  Those make an
+    // outgoing transition and won't work with paused outgoing scenes.
+    switchScene(withFade: true) { Globals.menuScene }
   }
 
   /// Disallow pausing
@@ -410,21 +404,9 @@ class GameTutorialScene: BasicScene {
   /// - Parameter enabled: `true` to enable retro mode
   func setRetroFilter(enabled: Bool) {
     if enabled {
-      if let filter = CIFilter(name: "CICrystallize") {
-        filter.setValue(5, forKey: kCIInputRadiusKey)
-        gameArea.filter = filter
-        gameArea.shouldCenterFilter = true
-      } else {
-        gameArea.filter = nil
-      }
+      gameArea.shader = BasicScene.pauseShaderRetro
     } else {
-      if let filter = CIFilter(name: "CIGaussianBlur") {
-        filter.setValue(10, forKey: kCIInputRadiusKey)
-        gameArea.filter = filter
-        gameArea.shouldCenterFilter = true
-      } else {
-        gameArea.filter = nil
-      }
+      gameArea.shader = BasicScene.pauseShaderModern
     }
     shouldEnableEffects = enabled
   }
