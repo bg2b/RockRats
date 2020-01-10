@@ -1159,7 +1159,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
 
   /// Time for in and out transitions (total transition time is twice this, plus
   /// whatever overhead)
-  static let transitionDuration = 1.0
+  static let transitionDuration = 0.5
   /// Shader for scenes that are starting to be shown
   static let entryShader = enterExitShader(isEntering: true, duration: transitionDuration)
   /// Shader for scenes that are finished being shown
