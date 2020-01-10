@@ -57,11 +57,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   func applicationDidBecomeActive(_ application: UIApplication) {
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
     os_log("applicationDidBecomeActive", log: .app, type: .debug)
-    // I once seemed to find the u_time computation for shaders messed up after
-    // resuming from an app suspend.  So to be safe, clear the u_time offset and
-    // it'll get recomputed once a scene starts running.  See the discussion in
-    // Hyperspace.swift
-    resetUtimeOffset()
   }
 
   func applicationWillTerminate(_ application: UIApplication) {

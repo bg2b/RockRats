@@ -39,7 +39,7 @@ func swirlShader(forTexture texture: SKTexture, inward: Bool) -> SKShader {
   let shaderSource = """
   void main() {
     // Time goes 0-1
-    float dt = min((u_time - a_start_time) / \(warpTime), 1.0);
+    float dt = min(a_time / \(warpTime), 1.0);
     // Size goes 0-1 for expanding, and 1-0 for shrinking
     float size = \(inward ? "1.0 - " : "")dt;
     // The maximum rotation is about a full angular turn, and
@@ -75,7 +75,7 @@ func swirlShader(forTexture texture: SKTexture, inward: Bool) -> SKShader {
   }
   """
   let shader = SKShader(source: shaderSource)
-  shader.attributes = [SKAttribute(name: "a_start_time", type: .float)]
+  shader.attributes = [SKAttribute(name: "a_time", type: .float)]
   return shader
 }
 
@@ -93,7 +93,7 @@ func fanFoldShader(forTexture texture: SKTexture) -> SKShader {
   let shaderSource = """
   void main() {
     // Time goes 0-1
-    float dt = min((u_time - a_start_time) / \(warpTime), 1.0);
+    float dt = min(a_time / \(warpTime), 1.0);
     // The sprite shrinks to size 0 at time 1
     float size = 1.0 - dt;
     // Normalize coordinates to (0,0)-(1,1)
@@ -134,7 +134,7 @@ func fanFoldShader(forTexture texture: SKTexture) -> SKShader {
   }
   """
   let shader = SKShader(source: shaderSource)
-  shader.attributes = [SKAttribute(name: "a_start_time", type: .float)]
+  shader.attributes = [SKAttribute(name: "a_time", type: .float)]
   return shader
 }
 
@@ -188,8 +188,8 @@ func warpOutEffect(texture: SKTexture, position: CGPoint, rotation: CGFloat) -> 
   effect.position = position
   effect.zRotation = rotation
   effect.shader = shader
-  setStartTimeAttrib(effect, view: nil)
-  effect.run(.wait(for: warpTime, then: .removeFromParent()))
+  //setStartTimeAttrib(effect, view: nil)
+  effect.run(.setTime(effectTime: warpTime, then: .removeFromParent()))
   let star = starBlink(at: position, throughAngle: .pi, duration: 2 * warpTime)
   return [effect, star]
 }
@@ -207,7 +207,7 @@ func warpInEffect(texture: SKTexture, position: CGPoint, rotation: CGFloat, when
   effect.position = position
   effect.zRotation = rotation
   effect.shader = shader
-  setStartTimeAttrib(effect, view: nil)
-  effect.run(.wait(for: warpTime, then: .removeFromParent()), completion: whenDone)
+  //setStartTimeAttrib(effect, view: nil)
+  effect.run(.setTime(effectTime: warpTime, then: .removeFromParent()), completion: whenDone)
   return effect
 }

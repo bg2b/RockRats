@@ -223,7 +223,7 @@ func enterExitShader(isEntering: Bool, duration: Double) -> SKShader {
   let shaderSource = """
   void main() {
     // Time goes 0-1
-    float dt = min((u_time - a_start_time) / \(duration), 1.0);
+    float dt = min(a_time / \(duration), 1.0);
     // Size goes 0-1 for entering, and 1-0 for exiting
     float size = \(isEntering ? "" : "1.0 - ")dt;
     // Compute normalized distance from center
@@ -237,7 +237,7 @@ func enterExitShader(isEntering: Bool, duration: Double) -> SKShader {
   }
   """
   let shader = SKShader(source: shaderSource)
-  shader.attributes = [SKAttribute(name: "a_start_time", type: .float)]
+  shader.attributes = [SKAttribute(name: "a_time", type: .float)]
   return shader
 }
 
@@ -1218,25 +1218,22 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   // scene is paused, the display is already static.  The latter two functions make
   // an outgoing transition that installs a masking transition sprite in the current
   // scene and sets its shader to `BasicScene.exitShader`.  The sprite runs an action
-  // that waits for whatever animation the shader does to complete.  At that point,
-  // the display is again completely static.  Once the display is frozen, the closure
-  // to get the new scene is invoked.
+  // to animate the shader.  After the animation finishes, the display is again
+  // completely static.  Once the display is frozen, the closure to get the new scene
+  // is invoked.
   //
   // The final stage is conceptually just to add a masking transition sprite in the
-  // new scene and set its shader to run and reveal the scene.  Unfortunately things
-  // aren't quite so simple.  The issue is that the new scene seems to take a few
-  // frames to get going and start updating at a reasonable rate.  Meanwhile the
-  // transition `u_time` is advancing and the whole thing seems to get clipped or
-  // rushed.  I work around this as follows.  First I go ahead and add a transition
-  // sprite to the new scene.  I set the shader to `maskingShader`, which is just a
-  // static shader that hides the scene.  I also set the masking sprite as the value
-  // for `entryTransition` in the new scene.  When the new scene starts invoking
-  // `update`, one of the steps there is to call `doEntryTransition`.  When that
-  // function finds a non-nil `entryTransition`, it starts an action to wait for
-  // another few frames and sets `entryTransition` back to `nil`.  When the action
-  // triggers, it resets and recomputes `utimeOffset` and sets the shader to
-  // `BasicScene.entryShader`, which does the entry transition to reveal the scene.
-  // Once the shader finishes, the sprite is removed.
+  // new scene and set its shader to run and reveal the scene.  Since the new scene
+  // seems to take a few frames to get going and start updating at a reasonable rate,
+  // I first go ahead and add a transition sprite to the new scene.  I set the shader
+  // to `maskingShader`, which is just a static shader that hides the scene.  I also
+  // set the masking sprite as the value for `entryTransition` in the new scene.
+  // When the new scene starts invoking `update`, one of the steps there is to call
+  // `doEntryTransition`.  When that function finds a non-nil `entryTransition`, it
+  // starts an action to wait for another few frames and sets `entryTransition` back
+  // to `nil`.  That action sets the shader to `BasicScene.entryShader`, which does
+  // the entry transition to reveal the scene.  Once the shader finishes, the sprite
+  // is removed.
 
   /// Make a transition sprite
   ///
@@ -1287,13 +1284,6 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     os_log("switchScene %{public}s -> %{public}s", log: .app, type: .debug, self.name!, nextScene.name!)
     // Give the new scene an incoming transition
     nextScene.makeEntryTransition()
-    // Do not recompute u_time offset here because it won't work in the case of a
-    // paused outgoing scene (like when aborting a game).  Why?  I have no earthly
-    // idea.  The symptom is that the incoming scene's entry transition seems to get
-    // a bogus time sync and as a result it doesn't show correctly.  Resetting it and
-    // having the new scene recompute it does work, but I've decided to move the
-    // reset (and recomputation) to doEntryTransition when the new scene is about to
-    // switch to the entry shader from the static shader.  That seems a bit cleaner.
     os_signpost(.begin, log: .poi, name: "presentScene", signpostID: self.signpostID)
     if withFade {
       // The duration doesn't really mean the same thing as the normal transition
@@ -1324,16 +1314,14 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   ///
   /// - Parameter getNextScene: A closure returning the scene to switch to
   func switchScene(_ getNextScene: @escaping () -> BasicScene) {
-    guard let view = view else { fatalError("Transitioning scene has no view") }
     // Add an outgoing transition mask for the current scene
     let outTransition = makeTransitionMask()
     outTransition.shader = BasicScene.exitShader
-    setStartTimeAttrib(outTransition, view: view)
     addChild(outTransition)
-    outTransition.run(.wait(forDuration: BasicScene.transitionDuration + 0.1)) {
+    outTransition.run(.setTime(effectTime: BasicScene.transitionDuration + 0.1) {
       self.switchScene(withFade: false, getNextScene)
       outTransition.removeFromParent()
-    }
+    })
   }
 
   /// Wait for quiescence, then switch to a different scene
@@ -1352,14 +1340,10 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
       os_log("%{public}s doEntryTransition", log: .app, type: .debug, name!)
       // Make sure that the scene has a few frames to get going
       wait(for: 0.1) {
-        // I originally had the reset (and a recomputation) in scene between the
-        // outgoing and incoming transitions; see switchScene(withFade:)
-        resetUtimeOffset()
         // Switch from the static maskingShader to the entryShader
         entryTransition.shader = BasicScene.entryShader
-        setStartTimeAttrib(entryTransition, view: self.view)
-        // Wait for the transition to finish, then remove the mask
-        entryTransition.run(.wait(for: BasicScene.transitionDuration + 0.1, then: .removeFromParent()))
+        // Run the transition, then remove the mask
+        entryTransition.run(.setTime(effectTime: BasicScene.transitionDuration, then: .removeFromParent()))
       }
       self.entryTransition = nil
     }
@@ -1407,11 +1391,6 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     os_signpost(.begin, log: .poi, name: "1_update", signpostID: signpostID)
     super.update(currentTime)
     Globals.lastUpdateTime = currentTime
-    // Mostly getUtimeOffset just returns immediately, but when a scene first start
-    // running, it will compute the offset between currentTime and the u_time seen by
-    // shaders.  Most of the effect shaders need to have an effective time that
-    // always starts at zero, and I use the offset plus currentTime to provide it.
-    _ = getUtimeOffset(view: view)
     // Start the entry transition if needed
     doEntryTransition()
   }

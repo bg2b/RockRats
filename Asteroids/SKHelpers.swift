@@ -9,8 +9,9 @@
 import SpriteKit
 
 // MARK: - SKAction helpers
+
 extension SKAction {
-  /// Construction an action to wait for a given time, then run an action
+  /// Construct an action to wait for a given time, then run another action
   /// - Parameters:
   ///   - duration: Number of seconds to wait
   ///   - action: `SKAction` to run
@@ -30,6 +31,7 @@ extension SKAction {
 }
 
 // MARK: - SKNode helpers
+
 extension SKNode {
   /// Wait for a given time, then run an action
   /// - Parameters:
@@ -56,6 +58,7 @@ extension SKNode {
 }
 
 // MARK: - SKSpriteNode helpers
+
 extension SKSpriteNode {
   /// Get the texture of a sprite node that must have one
   /// - Returns: The texture
