@@ -78,12 +78,12 @@ class GameScene: GameTutorialScene {
   /// number that should have been awarded based on score is what triggers the
   /// awarding of an extra.
   var extraLivesAwarded = 0
-  /// Becomes true when the game is over, used to supress wave spawning
+  /// Becomes `true` when the game is over, used to supress wave spawning
   var gameOver = false
   /// The number of player lasers that have hit something without a miss, used for
   /// the `archer`, `sniper`, `sharpshooter`, and `hawkeye` achievements
   var consecutiveHits = 0
-  /// True when the heartbeat sound is running, set to false at the end of a game
+  /// `true` when the heartbeat sound is running, set to `false` at the end of a game
   var heartbeatOn = false
   /// Starting heartbeat rate (period in seconds)
   let heartbeatRateInitial = 2.0
@@ -189,6 +189,9 @@ class GameScene: GameTutorialScene {
     super.init(size: size, shipColor: shipColor)
     name = "gameScene"
     initFutureShader()
+    onlyRetro = true
+    // onlyRetro is set to false if the retro shader is ever disabled, including by
+    // the next line
     setRetroMode(enabled: achievementIsCompleted(.blastFromThePast) && UserData.retroMode.value)
     ufoCache = UFOCache(audio: audio)
   }
@@ -570,6 +573,10 @@ class GameScene: GameTutorialScene {
       gameOver = true
       stopHeartbeat()
       removeAction(forKey: "spawnWave")
+      if onlyRetro, let gc = Globals.gcInterface, gc.enabled {
+        // If the whole game was played in retro mode, they get a cookie
+        reportAchievement(achievement: .auldLangSyne)
+      }
       wait(for: delay) {
         self.audio.soundEffect(.gameOver)
         // Start building the high scores scene in the background

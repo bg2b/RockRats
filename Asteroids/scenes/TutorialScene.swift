@@ -144,7 +144,7 @@ class TutorialScene: GameTutorialScene {
     super.init(size: size, shipColor: nil)
     name = "tutorialScene"
     initTutorial()
-    // This is needed to set the pausing blur filter
+    // This is needed to set the pausing blur shader
     setRetroMode(enabled: false)
   }
 

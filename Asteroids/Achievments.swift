@@ -21,6 +21,7 @@ enum Achievement: String, CaseIterable {
   case rockSplat = "rockSplat"
   case blastFromThePast = "blastFromThePast"
   case backToTheFuture = "backToTheFuture"
+  case auldLangSyne = "auldLangSyne"
   case hanShotFirst = "hanShotFirst"
   case rightPlaceWrongTime = "rightPlaceWrongTime"
   case itsATrap = "itsATrap"

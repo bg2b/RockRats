@@ -49,6 +49,8 @@ class GameTutorialScene: BasicScene {
   /// A dictionary mapping possible fire and hyperspace jump touches to their staring
   /// locations.
   var fireOrWarpTouches = [UITouch: CGPoint]()
+  /// `true` if the scene has been only retro mode
+  var onlyRetro = false
 
   // MARK: - Initialization
 
@@ -420,11 +422,18 @@ class GameTutorialScene: BasicScene {
   /// 2. The scene's shader is turned on, which switches to a black-and-white edge
   /// detect filter that tries to mimic the look of the original game.
   ///
+  /// Once retro mode has been discovered, it can be enabled by default in the
+  /// settings.  Playing a whole game in retro mode earns the auldLangSyne
+  /// achievement.
+  ///
   /// - Parameter enabled: `true` to enable retro mode
   func setRetroMode(enabled: Bool) {
     setRetroFilter(enabled: enabled)
     player.setAppearance(to: enabled ? .retro : .modern)
     reservesDisplay.retroMode = enabled
+    if !enabled {
+      onlyRetro = false
+    }
   }
 
   /// Handle the player's jump request
