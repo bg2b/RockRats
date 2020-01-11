@@ -35,24 +35,25 @@ extension SKNode {
 /// and when its coordinates have been wrapped by the playfield
 enum ObjectCategories: UInt32 {
   // Basic categories
-  case player =       0b0000_0000_00000001
-  case playerShot =   0b0000_0000_00000010
-  case ufo =          0b0000_0000_00000100
-  case ufoShot =      0b0000_0000_00001000
-  case fragment =     0b0000_0000_00010000
-  case asteroid =     0b0000_0000_00100000
-  // Specialized asteroids by size
-  case hugeAsteroid = 0b0000_1000_00100000
-  case bigAsteroid =  0b0000_0100_00100000
-  case medAsteroid =  0b0000_0010_00100000
-  case smAsteroid =   0b0000_0001_00100000
+  case player =       0b00_00_00000001
+  case playerShot =   0b00_00_00000010
+  case ufo =          0b00_00_00000100
+  case ufoShot =      0b00_00_00001000
+  case fragment =     0b00_00_00010000
+  case asteroid =     0b00_00_00100000
+  // Two bits for asteroid size
+  case hugeAsteroid = 0b00_11_00100000
+  case bigAsteroid =  0b00_10_00100000
+  case medAsteroid =  0b00_01_00100000
+  // implicit case smAsteroid =   0b00_00_00100000
   // Additional flags
-  case offScreen  =   0b0001_0000_00000000
-  case hasWrapped =   0b0010_0000_00000000
+  case offScreen  =   0b01_00_00000000
+  case hasWrapped =   0b10_00_00000000
 
   /// Is the category a basic type?
   var isBasic: Bool {
     let v = self.rawValue
+    // Powers of two up through the asteroid type
     return v <= ObjectCategories.asteroid.rawValue && (v & (v - 1)) == 0
   }
 
@@ -121,17 +122,19 @@ enum AsteroidSize: Int {
   case huge = 3
 
   /// Object category for asteroids of this size
-  var category: ObjectCategories { ObjectCategories(rawValue: ObjectCategories.asteroid.rawValue | UInt32(1 << (sizeIndex + 8)))! }
+  var category: ObjectCategories { ObjectCategories(rawValue: ObjectCategories.asteroid.rawValue | UInt32(sizeIndex << 8))! }
 
   /// What size asteroid does a physic body's category mask represent?
   /// - Parameter body: The physics body
   init?(ofBody body: SKPhysicsBody) {
-    let asteroidsMask = setOf([ObjectCategories.hugeAsteroid, .bigAsteroid, .medAsteroid, .smAsteroid])
+    let asteroidsMask = setOf([ObjectCategories.hugeAsteroid, .bigAsteroid, .medAsteroid])
     switch body.categoryBitMask & asteroidsMask {
     case ObjectCategories.hugeAsteroid.rawValue: self = .huge
     case ObjectCategories.bigAsteroid.rawValue: self = .big
     case ObjectCategories.medAsteroid.rawValue: self = .med
-    case ObjectCategories.smAsteroid.rawValue: self = .small
+    // Every other asteroid is small
+    case ObjectCategories.asteroid.rawValue: self = .small
+    // Nothing else is an asteroid
     default: return nil
     }
   }
