@@ -554,24 +554,26 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   /// The pause shader for non-retro mode
   static let pauseShaderModern: SKShader = {
     // This is a sort of pixellated checkerboard
-    let rgba = AppAppearance.transitionColor.cgColor.components!
+    let rgba = AppAppearance.darkBlue.cgColor.components!
     let shaderSource = """
     void main() {
+      float const sq = 10.0;
       // Get texture size (assumes Metal)
       int width = u_texture.get_width();
       int height = u_texture.get_height();
       // Compute pixel size
       vec2 pixel(1.0 / width, 1.0 / height);
-      // View the texture as 10x10 pixel squares; compute the x and y indicies of the square
+      // View the texture as sqxsq pixel squares; compute the x and y indicies of the square
       // for the current pixel
-      vec2 center = floor(v_tex_coord / pixel / 10.0);
+      vec2 center = floor(v_tex_coord / pixel / sq);
       if ((int(center.x) + int(center.y)) % 2 == 0) {
-        // Half the squares are the transition color
+        // Half the squares are the background color; could also consider the
+        // transition color
         gl_FragColor = vec4(\(rgba[0]), \(rgba[1]), \(rgba[2]), 1.0);
       } else {
         // For the other half, sample one color from the center of the square
         center += 0.5;
-        center *= 10.0 * pixel;
+        center *= sq * pixel;
         gl_FragColor = texture2D(u_texture, center);
       }
     }
@@ -592,14 +594,18 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
       // Compute pixel size
       vec2 pixel(1.0 / width, 1.0 / height);
       // Size of steps between blur samples (determines the radius)
-      vec2 d = 4 * pixel;
+      vec2 d = 3 * pixel;
       // 1D discrete Gaussian weights
-      float wts[5] = {0.06136, 0.24477, 0.38774, 0.24477, 0.06136};
+      int const np = 5;
+      float wts[np] = { 0.06136, 0.24477, 0.38774, 0.24477, 0.06136 };
+      // int const np = 7;
+      // float wts[np] = { 0.00598, 0.060626, 0.241843, 0.383103, 0.241843, 0.060626, 0.00598 };
+      int const halfnp = (np - 1) / 2;
       vec4 result(0.0);
-      // Sample textures in a 5x5 grid and accumulate with appropriate weights
-      for (int i = -2; i <= 2; ++i) {
-        for (int j = -2; j <= 2; ++j) {
-          result += wts[i + 2] * wts[j + 2] * texture2D(u_texture, v_tex_coord + vec2(i * d.x, j * d.y));
+      // Sample textures in a npxnp grid and accumulate with appropriate weights
+      for (int i = -halfnp; i <= halfnp; ++i) {
+        for (int j = -halfnp; j <= halfnp; ++j) {
+          result += wts[i + halfnp] * wts[j + halfnp] * texture2D(u_texture, v_tex_coord + vec2(i * d.x, j * d.y));
         }
       }
       gl_FragColor = result;
@@ -619,24 +625,20 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     let rgba = AppAppearance.darkBlue.cgColor.components!
     let shaderSource = """
     void main() {
+      float const sq = 7.0;
       // Get texture size (assumes Metal)
       int width = u_texture.get_width();
       int height = u_texture.get_height();
       // Compute pixel size
       vec2 pixel(1.0 / width, 1.0 / height);
-      // Use a 7x7 grid instead of 10x10 due to retro shader
-      vec2 center = floor(v_tex_coord / pixel / 7.0);
-      if ((int(center.x) + int(center.y)) % 2 == 0) {
-        // The most important change: use the regular background color when sampling even squares,
-        // otherwise most of the display will be filled with lines because of the retro shader
-        // detecting edges everywhere
-        gl_FragColor = vec4(\(rgba[0]), \(rgba[1]), \(rgba[2]), 1.0);
-      } else {
-        // Otherwise sample a color from the center of the square
-        center += 0.5;
-        center *= 7.0 * pixel;
-        gl_FragColor = texture2D(u_texture, center);
-      }
+      vec2 center = floor(v_tex_coord / pixel / sq);
+      // The most important change is not to use a checkerboard but just pixelate
+      // everything.
+      // Sample a color from the center of the square, so solid areas disappear
+      // under the retro shader.
+      center += 0.5;
+      center *= sq * pixel;
+      gl_FragColor = texture2D(u_texture, center);
     }
     """
     return SKShader(source: shaderSource)
