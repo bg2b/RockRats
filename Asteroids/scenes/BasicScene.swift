@@ -407,16 +407,13 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     if gameFrame.width == fullFrame.width {
       gameAreaCrop.maskNode = nil
     } else {
-      let mask = SKShapeNode(rect: gameFrame)
-      mask.fillColor = .white
-      mask.strokeColor = .clear
+      let mask = SKSpriteNode(color: .white, size: gameFrame.size)
+      mask.position = CGPoint(x: gameFrame.midX, y: gameFrame.midY)
       gameAreaCrop.maskNode = mask
       // Add a background for the background ;-).  This is set to match the
       // transition color so that it doesn't stand out if the transition is a bit
       // fancier than a simple fade.
-      let bgColor = SKSpriteNode()
-      bgColor.color = AppAppearance.transitionColor
-      bgColor.size = fullFrame.size
+      let bgColor = SKSpriteNode(color: AppAppearance.transitionColor, size: fullFrame.size)
       bgColor.position = CGPoint(x: fullFrame.midX, y: fullFrame.midY)
       bgColor.setZ(.background)
       bgColor.blendMode = .replace
