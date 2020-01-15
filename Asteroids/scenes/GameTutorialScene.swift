@@ -78,7 +78,8 @@ class GameTutorialScene: BasicScene {
     addChild(pauseControls)
     pauseControls.name = "pauseControls"
     let pauseTexture = Globals.textureCache.findTexture(imageNamed: "pause")
-    pauseButton = Touchable(SKSpriteNode(texture: pauseTexture, size: pauseTexture.size())) {
+    pauseButton = Touchable(SKSpriteNode(texture: pauseTexture, size: pauseTexture.size()),
+                            minSize: 50 * Globals.ptsToGameUnits) {
       [unowned self] in self.doPause()
     }
     // The pause icon sits just below the remaining ships and is mostly transparent.

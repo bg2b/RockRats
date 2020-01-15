@@ -17,7 +17,9 @@ import os.log
 /// asteroid.  Awards the `rockSplat` achievement if they manage to fail...
 class TutorialScene: GameTutorialScene {
   /// Amount that indicates a full-scale slide for the joystick
-  let slideAmount = CGFloat(100)
+  ///
+  /// This is a little bigger on phones
+  let slideAmount = 50 + 50 * Globals.ptsToGameUnits
   /// Text attributes
   var attributes: AttrStyles!
   /// A label node in the center of the screen for various messages
