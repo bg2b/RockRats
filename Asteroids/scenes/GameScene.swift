@@ -134,7 +134,7 @@ class GameScene: GameTutorialScene {
   /// appropriately.  If the translator ever changes, this should probably be
   /// updated.  Or better, it should be just rewritten entirely in Metal syntax if
   /// SpriteKit ever allows native Metal shaders.
-  func initFutureShader() {
+  func initRetroShader() {
     let rgba = AppAppearance.transitionColor.cgColor.components!
     let shaderSource = """
     // Convert a pixel in a texture to grayscale
@@ -188,7 +188,7 @@ class GameScene: GameTutorialScene {
     }
     super.init(size: size, shipColor: shipColor)
     name = "gameScene"
-    initFutureShader()
+    initRetroShader()
     onlyRetro = true
     // onlyRetro is set to false if the retro shader is ever disabled, including by
     // the next line
