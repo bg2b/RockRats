@@ -129,6 +129,8 @@ class UFO: SKNode {
   var currentSpeed = CGFloat(0)
   /// Makes UFO noises if desired
   var engineSounds: ContinuousPositionalAudio?
+  /// Action to fade audio (optional user preference)
+  var fadeAudioAction: SKAction?
   /// Average time between shots
   var meanShotTime = 0.0
   /// Time before attacking; negative means hostilities have commenced and the UFO is
@@ -148,6 +150,8 @@ class UFO: SKNode {
   let ufo: SKSpriteNode
   /// The UFO's physical size
   var size: CGSize { ufoTexture.size() }
+  /// Volume for UFO engine sounds; scaled down since they're a bit annoying
+  static let ufoVolume = Float(0.5)
 
   // MARK: - Initialization
 
@@ -186,7 +190,7 @@ class UFO: SKNode {
     attackEnabled = false
     courseChangeAllowed = false
     // Gentle people, start your engines!
-    engineSounds?.playerNode.volume = 0.5
+    engineSounds?.playerNode.volume = UFO.ufoVolume
     // When the UFO is first created, it'll start off the screen either to the left
     // or right and will not be moving.  The scene is responsible for starting the
     // UFO.  See the discussion of spawnUFO and launchUFO in BasicScene.
@@ -218,6 +222,21 @@ class UFO: SKNode {
       engineSounds.playerNode.volume = 0
       engineSounds.playerNode.play()
       self.engineSounds = engineSounds
+      if UserData.fadeUFOAudio.value {
+        // This optional action is run after the UFO launches to fade out the engine
+        // audio since some people find it grating.
+        fadeAudioAction = .customAction(withDuration: 1) { node, time in
+          if let engineSounds = (node as? UFO)?.engineSounds {
+            // The 0.95 is to make sure that the volume really gets to 0.  Not that
+            // it really would matter, but I'm not sure if the action would always be
+            // called for the final time at exactly time = 1.  Maybe depending on
+            // frame rates and possible stutters or whatnot perhaps the last call
+            // would be at time slightly less than 1.  Or maybe it could be with time
+            // slightly greater than 1, hence the max.
+            engineSounds.playerNode.volume = UFO.ufoVolume * max(Float(1 - time / 0.95), 0)
+          }
+        }
+      }
     }
     // Physics
     let body = SKPhysicsBody(circleOfRadius: 0.5 * ufoTexture.size().width)
@@ -266,6 +285,9 @@ class UFO: SKNode {
       delayOfFirstShot = -1
       // Change course/speed at some point
       scheduleCourseChange()
+      if let fade = fadeAudioAction {
+        run(fade)
+      }
     }
     let maxSpeed = Globals.gameConfig.value(for: \.ufoMaxSpeed)[typeIndex]
     if courseChangeAllowed {

@@ -245,6 +245,8 @@ class UserData {
   static var hasDoneIntro = DefaultsValue<Bool>(name: "hasDoneIntro", defaultValue: false)
   /// Audio volume preference
   static var audioLevel = DefaultsValue<Int>(name: "audioLevel", defaultValue: 2)
+  /// UFO engine sound fade after launch preference
+  static var fadeUFOAudio = DefaultsValue<Bool>(name: "fadeUFOAudio", defaultValue: false)
   /// Heartbeat on/off preference
   static var heartbeatMuted = DefaultsValue<Bool>(name: "heartbeatMuted", defaultValue: false)
   /// `true` if the joystick is on the left

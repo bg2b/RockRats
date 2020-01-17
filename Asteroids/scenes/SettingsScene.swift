@@ -24,6 +24,8 @@ class SettingsScene: BasicScene {
   var volumeButton: Button!
   /// The heartbeat on/off button
   var heartbeatButton: Button!
+  /// The UFO sound continous/fading button
+  var ufoFadeButton: Button!
   /// The controls left/right button
   var controlsButton: Button!
   /// Unlocked ship styles
@@ -141,6 +143,14 @@ class SettingsScene: BasicScene {
       heartbeatButton.disable()
     }
     optionButtons.append(heartbeatButton)
+    ufoFadeButton = Button(imagesNamed: ["ufosoundcontinuous", "ufosoundchopped"],
+                             imageColor: AppAppearance.buttonColor, size: buttonSize)
+    ufoFadeButton.selectedValue = UserData.fadeUFOAudio.value ? 1 : 0
+    ufoFadeButton.action = { [unowned self] in self.toggleUFOFade() }
+    if volumeButton.selectedValue == 0 {
+      ufoFadeButton.disable()
+    }
+    optionButtons.append(ufoFadeButton)
     controlsButton = Button(imagesNamed: ["controlsleft", "controlsright"],
                             imageColor: AppAppearance.buttonColor, size: buttonSize)
     controlsButton.selectedValue = UserData.joystickOnLeft.value ? 0 : 1
@@ -260,8 +270,10 @@ class SettingsScene: BasicScene {
     audio.soundEffect(.playerShot)
     if volumeButton.selectedValue == 0 {
       heartbeatButton.disable()
+      ufoFadeButton.disable()
     } else {
       heartbeatButton.enable()
+      ufoFadeButton.enable()
     }
   }
 
@@ -273,6 +285,28 @@ class SettingsScene: BasicScene {
       wait(for: 0.25) {
         self.audio.soundEffect(.heartbeatLow)
       }
+    }
+  }
+
+  /// Toggle UFO sound continuous/fading
+  func toggleUFOFade() {
+    UserData.fadeUFOAudio.value = (ufoFadeButton.selectedValue == 1)
+    let node = SKNode()
+    let ufoSound = audio.continuousAudio(.ufoEnginesBig, at: node)
+    ufoSound.playerNode.volume = UFO.ufoVolume
+    ufoSound.playerNode.play()
+    addChild(node)
+    let exampleTime = 1.5
+    if UserData.fadeUFOAudio.value {
+      let fadeTime = 0.67 * exampleTime
+      run(.customAction(withDuration: fadeTime) { _, time in
+        ufoSound.playerNode.volume = UFO.ufoVolume * max(Float(1 - Double(time) / fadeTime), 0)
+      })
+    }
+    wait(for: exampleTime) {
+      ufoSound.playerNode.volume = 0
+      ufoSound.playerNode.stop()
+      node.removeFromParent()
     }
   }
 
