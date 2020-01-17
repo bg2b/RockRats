@@ -182,7 +182,7 @@ class UFO: SKNode {
     // shooting faster, getting much quicker on the draw initially, and being much
     // more accurate in their shooting.
     let smaller = pow(0.75, Double(revengeFactor))
-    meanShotTime = max(Globals.gameConfig.value(for: \.ufoMeanShotTime)[typeIndex] * smaller, 0.5)
+    meanShotTime = max(Globals.gameConfig.value(for: \.ufoMeanShotTime)[typeIndex] * smaller, 0.75)
     delayOfFirstShot = Double.random(in: 0 ... meanShotTime * smaller)
     shotAccuracy = Globals.gameConfig.value(for: \.ufoAccuracy)[typeIndex] * CGFloat(smaller)
     kamikazeAcceleration = Globals.gameConfig.value(for: \.kamikazeAcceleration) / CGFloat(smaller)
