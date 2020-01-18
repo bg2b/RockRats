@@ -49,20 +49,6 @@ enum ObjectCategories: UInt32 {
   // Additional flags
   case offScreen  =   0b01_00_00000000
   case hasWrapped =   0b10_00_00000000
-
-  /// Is the category a basic type?
-  var isBasic: Bool {
-    let v = self.rawValue
-    // Powers of two up through the asteroid type
-    return v <= ObjectCategories.asteroid.rawValue && (v & (v - 1)) == 0
-  }
-
-  /// Is a category also some specified category?
-  ///
-  /// Note the asymmetry: `.asteroid.isA(.hugeAsteroid)`, but not vice versa
-  func isA(_ category: ObjectCategories) -> Bool {
-    return (rawValue & (category.rawValue)) == category.rawValue
-  }
 }
 
 extension SKPhysicsBody {
