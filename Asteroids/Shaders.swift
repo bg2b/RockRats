@@ -2,8 +2,11 @@
 //  Shaders.swift
 //  Asteroids
 //
-//  Created by David Long on 1/5/20.
-//  Copyright © 2020 David Long. All rights reserved.
+//  Copyright © 2020 Daniel Long and David Long
+//
+//  License: MIT
+//
+//  See LICENSE.md in the top-level directory for full terms and discussion.
 //
 
 import SpriteKit

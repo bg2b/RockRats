@@ -2,8 +2,11 @@
 //  Globals.swift
 //  Asteroids
 //
-//  Created by David Long on 7/13/19.
-//  Copyright © 2019 David Long. All rights reserved.
+//  Copyright © 2020 Daniel Long and David Long
+//
+//  License: MIT
+//
+//  See LICENSE.md in the top-level directory for full terms and discussion.
 //
 
 import Foundation
