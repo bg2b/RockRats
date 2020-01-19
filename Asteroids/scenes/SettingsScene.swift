@@ -280,13 +280,31 @@ class SettingsScene: BasicScene {
     }
   }
 
+  /// Temporarily disable sound control buttons while a sound effect demo is running
+  func beginSoundEffectDemo() {
+    // Don't change the alpha since this is only a temporary thing
+    volumeButton.disable(1)
+    heartbeatButton.disable(1)
+    ufoFadeButton.disable(1)
+  }
+
+  /// Re-enable sound control buttons
+  func endSoundEffectDemo() {
+    volumeButton.enable()
+    heartbeatButton.enable()
+    ufoFadeButton.enable()
+  }
+
   /// Toggle heartbeat on/off
   func toggleHeartbeat() {
     UserData.heartbeatMuted.value = (heartbeatButton.selectedValue == 0)
     if !UserData.heartbeatMuted.value {
+      // Silently disable volume and heartbeat buttons until the sound effect demo is done
+      beginSoundEffectDemo()
       audio.soundEffect(.heartbeatHigh)
       wait(for: 0.25) {
         self.audio.soundEffect(.heartbeatLow)
+        self.endSoundEffectDemo()
       }
     }
   }
@@ -294,6 +312,8 @@ class SettingsScene: BasicScene {
   /// Toggle UFO sound continuous/fading
   func toggleUFOFade() {
     UserData.fadeUFOAudio.value = (ufoFadeButton.selectedValue == 1)
+    // Silently disable volume and UFO sound buttons until the sound effect demo is done
+    beginSoundEffectDemo()
     let node = SKNode()
     let ufoSound = audio.continuousAudio(.ufoEnginesBig, at: node)
     ufoSound.playerNode.volume = UFO.ufoVolume
@@ -310,6 +330,7 @@ class SettingsScene: BasicScene {
       ufoSound.playerNode.volume = 0
       ufoSound.playerNode.stop()
       node.removeFromParent()
+      self.endSoundEffectDemo()
     }
   }
 

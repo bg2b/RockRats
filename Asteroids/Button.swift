@@ -174,9 +174,13 @@ class Button: SKNode {
   }
 
   /// Disable the button
-  func disable() {
+  func disable(_ alpha: CGFloat = 0.5) {
     isUserInteractionEnabled = false
-    alpha = 0.5
+    // The alpha can be passed in as 1 to disable the button without a visual
+    // indication.  That should be a temporary condition, like if an action triggered
+    // by a button press is running and another press shouldn't register until the
+    // action completes.
+    self.alpha = alpha
     resetTouch()
   }
 
