@@ -1,29 +1,29 @@
 Licensing
 =========
 
-Rock Rats is built of many parts, and different parts have different
+Different parts of Rock Rats are made available with different
 permissions.
 
 Source Code
 -----------
 
-The actual game source code (that's all the `.swift` files in the
-repository) was written by Daniel and David Long and can be used and
-redistributed under the MIT license. This license gives you permission
-to make copies of those files, alter them, use them in your own
-projects, and even make money from those projects, but if there are
-problems that result from your use of the code, then it's not our
-fault. See below for the legal terms.
+The actual game source code files (all the `.swift` files in the
+repository) were written by Daniel Long and David Long and are
+licensed under the MIT license. You have permission to make copies of
+the files, alter them, use them in your own projects, and even make
+money from those projects. But you have to reproduce the copyright
+notice below, and if there are problems that result from your use of
+the code, then it's not our fault.
 
 Game Assets
 -----------
 
 Almost all of the game assets in the repository (basically the
-graphics and sound files) were developed by
+graphics, sound, and font files) were developed by
 [Kenney](https://www.kenney.nl) and are in the public domain. A few
 assets are from other public domain sources, and a few were created by
 or altered by us; these are also in the public domain. Public domain
-assets can be used with no restrictions.  However, we have donated to
+assets can be used with no restrictions. However, we have donated to
 support Kenney and the work he does for independent game
 developers. If you find his assets useful for your projects, we
 encourage you to do the same.
