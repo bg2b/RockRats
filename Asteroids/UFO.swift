@@ -414,7 +414,7 @@ class UFO: SKNode {
     let shotPosition = position + shotDirection.scale(by: 0.5 * size.width)
     addLaser(angle, shotPosition, shotSpeed)
     attackEnabled = false
-    wait(for: .random(in: 0.5 * meanShotTime ... 1.5 * meanShotTime)) { [unowned self] in self.attackEnabled = true }
+    wait(for: .random(in: 0.67 * meanShotTime ... 1.5 * meanShotTime)) { [unowned self] in self.attackEnabled = true }
   }
 
   /// Schedule a future change in coure and/or speed
