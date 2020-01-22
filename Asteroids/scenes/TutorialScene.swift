@@ -34,7 +34,7 @@ class TutorialScene: GameTutorialScene {
   /// Amount of time to delay between showing instructions and showing a gesture
   let instructionDelay = 1.0
   /// Touch tutor shapes
-  var touchShapes: [SKNode]!
+  var touchShapes = [SKNode]()
   /// Label for the gesture that the tutor is showing
   var touchLabel: SKLabelNode!
   /// Set to `true` after observing a hyperspace jump
@@ -83,61 +83,18 @@ class TutorialScene: GameTutorialScene {
     touchLabel.fontColor = AppAppearance.textColor
     touchLabel.isHidden = true
     tutorialStuff.addChild(touchLabel)
-  }
-
-  /// Make shapes for the touch tutor
-  ///
-  /// The reason this stuff isn't directly in `initTutorial` is because shape nodes
-  /// with stroke shaders don't seem to antialias.  As a result, the dashed shape
-  /// node that indicates where a touch started is somewhat ugly.  This routine does
-  /// a poor man's antialiasing by rendering an enlarged dashed shape node into a
-  /// texture, then adding a scaled down sprite node based on that texture instead.
-  /// Doing the rendering requires a view however, so this has to be called from
-  /// `didMove(to:)` instead of from the scene's constructor.
-  func initGestureShapes() {
-    guard let parent = centralLabel.parent, touchShapes == nil else { return }
-    touchShapes = [SKNode]()
-    let touchRadius = 0.5 * slideAmount
-    let touchWidth = touchRadius / 10
-    for dashed in [false, true] {
-      let antialiasFactor = dashed ? CGFloat(4) : 1
-      let shape = SKShapeNode(circleOfRadius: antialiasFactor * touchRadius)
-      shape.fillColor = .clear
-      shape.strokeColor = AppAppearance.yellow
-      shape.lineWidth = (dashed ? 0.5 : 1) * antialiasFactor * touchWidth
-      shape.isAntialiased = true
-      let shader: SKShader?
-      if dashed {
-        let rgba = shape.strokeColor.cgColor.components!
-        shader = SKShader(source: """
-          void main() {
-            int h = int((v_path_distance / u_path_length + 0.5) * 20) % 2;
-            if (h == 0) {
-              gl_FragColor = float4(0);
-            } else {
-              gl_FragColor = float4(\(rgba[0]), \(rgba[1]), \(rgba[2]), 1);
-            }
-          }
-          """)
-      } else {
-        shader = nil
-      }
-      shape.strokeShader = shader
-      shape.name = "touchShape\(dashed ? "Dashed" : "")"
-      if dashed, let texture = view?.texture(from: shape) {
-        let sprite = SKSpriteNode(texture: texture, size: texture.size().scale(by: 1 / antialiasFactor))
-        sprite.name = shape.name
-        touchShapes.append(sprite)
-      } else {
-        // If for some reason, it wasn't possible to render the node into a texture
-        // just save the scaled shape node
-        shape.setScale(1 / antialiasFactor)
-        touchShapes.append(shape)
-      }
-    }
+    // Touch tutor shapes
+    // I'll grab a pair from TouchDisplay which gets the right ones from the sprite
+    // cache.  These will be modified but are just thrown away and not placed back in
+    // the cache, so it's ok.
+    let shapes = TouchDisplay(location: .zero)
+    touchShapes.append(shapes.currentSprite)
+    touchShapes.append(shapes.startSprite)
     for shape in touchShapes {
       shape.isHidden = true
-      parent.addChild(shape)
+      shape.alpha = 0.5
+      shape.zPosition = 0
+      tutorialStuff.addChild(shape)
     }
   }
 
@@ -648,7 +605,6 @@ class TutorialScene: GameTutorialScene {
   /// - Parameter view: The view that will present the scene
   override func didMove(to view: SKView) {
     super.didMove(to: view)
-    initGestureShapes()
     Globals.gameConfig = loadGameConfig(forMode: "normal")
     Globals.gameConfig.currentWaveNumber = 1
     reservesRemaining = Globals.gameConfig.initialLives

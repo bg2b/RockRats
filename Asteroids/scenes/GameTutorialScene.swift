@@ -10,6 +10,7 @@
 //
 
 import SpriteKit
+import os.log
 
 // MARK: Game/tutorial base class
 
@@ -52,6 +53,10 @@ class GameTutorialScene: BasicScene {
   /// A dictionary mapping possible fire and hyperspace jump touches to their staring
   /// locations.
   var fireOrWarpTouches = [UITouch: CGPoint]()
+  /// `true` if touch display is enabled
+  var displayingTouches = true
+  /// Touches being shown (if `displayingTouches` is `true`)
+  var displayedTouches = [UITouch: TouchDisplay]()
   /// `true` if the scene has been only retro mode
   var onlyRetro = false
 
@@ -127,6 +132,77 @@ class GameTutorialScene: BasicScene {
     super.init(coder: aDecoder)
   }
 
+  // MARK: - Touch display
+
+  /// Markers for start of touch and current location of touch
+  struct TouchDisplay {
+    let startSprite: SKSpriteNode
+    let currentSprite: SKSpriteNode
+
+    init(location: CGPoint) {
+      let touchSize = Globals.ptsToGameUnits > 1.5 ? "big" : "sm"
+      startSprite = Globals.spriteCache.findSprite(imageNamed: "touchdashed\(touchSize)") {
+        $0.color = AppAppearance.yellow
+        $0.colorBlendFactor = 1
+        $0.setZ(.info)
+      }
+      currentSprite = Globals.spriteCache.findSprite(imageNamed: "touchsolid\(touchSize)") {
+        $0.color = AppAppearance.yellow
+        $0.colorBlendFactor = 1
+        $0.setZ(.info)
+      }
+      startSprite.position = location
+      startSprite.isHidden = true
+      currentSprite.position = location
+    }
+  }
+
+  /// Show the start of a touch
+  /// - Parameters:
+  ///   - touch: The touch, used as a key for storing the `TouchDisplay`
+  ///   - location: The location of the touch
+  func displayTouchBegan(touch: UITouch, location: CGPoint) {
+    guard displayingTouches else { return }
+    let display = TouchDisplay(location: location)
+    addChild(display.startSprite)
+    addChild(display.currentSprite)
+    displayedTouches[touch] = display
+  }
+
+  /// Show a touch that's moved
+  /// - Parameters:
+  ///   - touch: The touch
+  ///   - location: Where the touch has moved to
+  func displayTouchMoved(touch: UITouch, location: CGPoint) {
+    guard displayingTouches else { return }
+    guard let display = displayedTouches[touch] else {
+      os_log("Display not found for moved touch", log: .app, type: .error)
+      return
+    }
+    let displacement = location - display.startSprite.position
+    if displacement.length() > 15 {
+      // If the touch has moved a lot, show both initial and current position
+      display.currentSprite.position = location
+      display.startSprite.isHidden = false
+    } else {
+      // If not much movement, snap to the initial position
+      display.currentSprite.position = display.startSprite.position
+      display.startSprite.isHidden = true
+    }
+  }
+
+  /// Display an ending (or canceled) touch
+  /// - Parameter touch: The touch
+  func displayTouchEnded(touch: UITouch) {
+    guard displayingTouches else { return }
+    guard let display = displayedTouches.removeValue(forKey: touch) else {
+      os_log("Display not found for ended touch", log: .app, type: .error)
+      return
+    }
+    Globals.spriteCache.recycleSprite(display.startSprite)
+    Globals.spriteCache.recycleSprite(display.currentSprite)
+  }
+
   // MARK: - Touch handling
 
   /// Handle the start of touches to control the ship
@@ -141,23 +217,25 @@ class GameTutorialScene: BasicScene {
       if location.x * (UserData.joystickOnLeft.value ? 1 : -1) > fullFrame.midX {
         // Touches on this side are for firing or warping
         fireOrWarpTouches[touch] = location
+        displayTouchBegan(touch: touch, location: location)
       } else if joystickTouch == nil {
         // Touches on this side are for the (virtual) joystick
         joystickLocation = location
         joystickTouch = touch
+        displayTouchBegan(touch: touch, location: location)
       } // Else the joystick is already active, so ignore the touch
     }
   }
 
   /// Returns `true` if a touch has moved enough to indicate a hyperspace jump request
   /// - Parameters:
-  ///   - touch: The touch that moved
+  ///   - location: The current location of the touch
   ///   - startLocation: The location where the touch started
-  func isJumpRequest(_ touch: UITouch, startLocation: CGPoint) -> Bool {
+  func isJumpRequest(_ location: CGPoint, startLocation: CGPoint) -> Bool {
     // Normal coordinates are scaled to give 768 units vertically on the screen, but
     // for this I want to require a move of a certain physical distance on the
     // screen, so I need to convert to points.
-    return (touch.location(in: self) - startLocation).length() > Globals.ptsToGameUnits * 100
+    return (location - startLocation).length() > Globals.ptsToGameUnits * 100
   }
 
   /// Handle moving touches for the ship controls
@@ -173,15 +251,21 @@ class GameTutorialScene: BasicScene {
         let location = touch.location(in: self)
         let delta = (location - joystickLocation).rotate(by: -.pi / 2)
         let offset = delta.length()
-        // Measure the movement in terms of a certain physical distance, so convert to points
-        joystickDirection = delta.scale(by: min(offset / (Globals.ptsToGameUnits * 0.5 * 100), 1.0) / offset)
+        // Measure the movement in terms of a certain physical distance, so convert
+        // to points, then scale to 0 - 1
+        joystickDirection = delta.scale(by: min(offset / (Globals.ptsToGameUnits * 75), 1.0) / offset)
+        displayTouchMoved(touch: touch, location: location)
       } else {
         guard let startLocation = fireOrWarpTouches[touch] else { continue }
+        let location = touch.location(in: self)
         // Jump without waiting for a touchesEnded(), since the situation is likely a
         // bit urgent ;-)
-        if isJumpRequest(touch, startLocation: startLocation) {
+        if isJumpRequest(location, startLocation: startLocation) {
           fireOrWarpTouches.removeValue(forKey: touch)
+          displayTouchEnded(touch: touch)
           hyperspaceJump()
+        } else {
+          displayTouchMoved(touch: touch, location: location)
         }
       }
     }
@@ -192,20 +276,20 @@ class GameTutorialScene: BasicScene {
   ///   - touches: The touches that finished
   ///   - event: The event the touches belong to
   override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-    // Don't guard at the beginning with gamePaused!  A touch that started while the
-    // game was active should still be removed from what I'm tracking if the player
-    // pauses the game and then ends the touch.
     for touch in touches {
       if touch == joystickTouch {
         // Reset the joystick as soon as they lift their finger
         joystickDirection = .zero
         joystickTouch = nil
+        displayTouchEnded(touch: touch)
       } else {
         guard let startLocation = fireOrWarpTouches.removeValue(forKey: touch) else { continue }
-        // Now that I've removed the touch from tracking, ignore the action requests
-        // if the game is paused.
+        displayTouchEnded(touch: touch)
+        // gamePaused should never be true here now that cancelAllTouches is called
+        // upon pause, but I'll leave this just for safety in case I ever change
+        // things back
         guard !gamePaused else { continue }
-        if isJumpRequest(touch, startLocation: startLocation) {
+        if isJumpRequest(touch.location(in: self), startLocation: startLocation) {
           hyperspaceJump()
         } else {
           _ = fireLaser()
@@ -219,7 +303,29 @@ class GameTutorialScene: BasicScene {
   ///   - touches: The touches to be cancelled
   ///   - event: The event the touches belong to
   override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-    touchesEnded(touches, with: event)
+    os_log("Touches cancelled", log: .app, type: .debug)
+    for touch in touches {
+      if touch == joystickTouch {
+        joystickDirection = .zero
+        joystickTouch = nil
+        displayTouchEnded(touch: touch)
+      } else if fireOrWarpTouches.removeValue(forKey: touch) != nil {
+        displayTouchEnded(touch: touch)
+      }
+    }
+  }
+
+  /// Drop all active touches (used when pausing the game)
+  func cancelAllTouches() {
+    if let touch = joystickTouch {
+      joystickTouch = nil
+      joystickDirection = .zero
+      displayTouchEnded(touch: touch)
+    }
+    for (touch, _) in fireOrWarpTouches {
+      displayTouchEnded(touch: touch)
+    }
+    fireOrWarpTouches.removeAll()
   }
 
   // MARK: - Pause, continue, and quit
@@ -238,6 +344,7 @@ class GameTutorialScene: BasicScene {
     gamePaused = true
     isPaused = true
     audio.pause()
+    cancelAllTouches()
   }
 
   /// Undo the effects of doPause and resume play

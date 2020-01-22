@@ -94,7 +94,6 @@ class SettingsScene: BasicScene {
     bottomHstack.position = CGPoint(x: bottomHstack.position.x,
                                     y: fullFrame.minY + buttonSize.height + buttonSpacing - bottomHstack.position.y)
     settings.addChild(bottomHstack)
-
     // Replaying intro, tutorial, etc.
     var replayTypes = ["Intro", "Help"]
     if achievementIsCompleted(.promoted) {
@@ -154,9 +153,9 @@ class SettingsScene: BasicScene {
       ufoFadeButton.disable()
     }
     optionButtons.append(ufoFadeButton)
-    controlsButton = Button(imagesNamed: ["controlsleft", "controlsright"],
+    controlsButton = Button(imagesNamed: ["showtouchesoff", "showtoucheson"],
                             imageColor: AppAppearance.buttonColor, size: buttonSize)
-    controlsButton.selectedValue = UserData.joystickOnLeft.value ? 0 : 1
+    controlsButton.selectedValue = UserData.showTouches.value ? 1 : 0
     controlsButton.action = { [unowned self] in self.toggleControls() }
     optionButtons.append(controlsButton)
     // Get the unlocked ship colors
@@ -181,10 +180,7 @@ class SettingsScene: BasicScene {
       optionButtons.append(shipStyleButton)
     }
     let optionsHstack = horizontalStack(nodes: optionButtons, minSpacing: buttonSpacing)
-
     let vstack = verticalStack(nodes: [replayHstack, resetHstack, optionsHstack], minSpacing: buttonSpacing)
-
-    //vstack.addChild(resetAchievementsButton)
     let wantedMidY = 0.5 * (title.frame.minY + bottomHstack.calculateAccumulatedFrame().maxY)
     // Center verticalStack vertically at wantedMidY
     vstack.position = .zero
@@ -334,9 +330,9 @@ class SettingsScene: BasicScene {
     }
   }
 
-  /// Toggle controls left/right
+  /// Toggle showing touches on/off
   func toggleControls() {
-    UserData.joystickOnLeft.value = (controlsButton.selectedValue == 0)
+    UserData.showTouches.value = (controlsButton.selectedValue == 1)
   }
 
   /// Choose the ship style

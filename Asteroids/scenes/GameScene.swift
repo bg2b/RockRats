@@ -196,6 +196,8 @@ class GameScene: GameTutorialScene {
     // onlyRetro is set to false if the retro shader is ever disabled, including by
     // the next line
     setRetroMode(enabled: achievementIsCompleted(.blastFromThePast) && UserData.retroMode.value)
+    // Show touches according to preference
+    displayingTouches = UserData.showTouches.value
     ufoCache = UFOCache(audio: audio)
   }
 
