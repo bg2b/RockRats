@@ -145,12 +145,12 @@ class GameTutorialScene: BasicScene {
     init(location: CGPoint) {
       let touchSize = Globals.ptsToGameUnits > 1.5 ? "big" : "sm"
       startSprite = Globals.spriteCache.findSprite(imageNamed: "touchdashed\(touchSize)") {
-        $0.color = AppAppearance.yellow
+        $0.color = AppAppearance.blue
         $0.colorBlendFactor = 1
         $0.setZ(.info)
       }
       currentSprite = Globals.spriteCache.findSprite(imageNamed: "touchsolid\(touchSize)") {
-        $0.color = AppAppearance.yellow
+        $0.color = AppAppearance.blue
         $0.colorBlendFactor = 1
         $0.setZ(.info)
       }

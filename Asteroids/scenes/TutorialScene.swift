@@ -79,8 +79,6 @@ class TutorialScene: GameTutorialScene {
     // A label for the touch tutor's gesture name (repositioned by the tutor)
     touchLabel = SKLabelNode(fontNamed: attributes.fontName)
     touchLabel.name = "touchShapeLabel"
-    touchLabel.fontSize = attributes.fontSize
-    touchLabel.fontColor = AppAppearance.textColor
     touchLabel.isHidden = true
     tutorialStuff.addChild(touchLabel)
     // Touch tutor shapes
@@ -120,13 +118,17 @@ class TutorialScene: GameTutorialScene {
 
   // MARK: - Messages
 
+  func attributedText(_ text: String) -> NSAttributedString {
+    return makeAttributed(text: text, until: text.endIndex, attributes: attributes)
+  }
+
   /// Display a message in the central label, then perform an action
   /// - Parameters:
   ///   - message: What to show
   ///   - delay: Amount of time to wait
   ///   - action: What to do afterwards
   func showMessage(_ message: String, delay: Double, then action: @escaping () -> Void) {
-    centralLabel.attributedText = makeAttributed(text: message, until: message.endIndex, attributes: attributes)
+    centralLabel.attributedText = attributedText(message)
     centralLabel.alpha = 0
     centralLabel.run(.sequence([
       .wait(forDuration: 0.25),
@@ -167,14 +169,14 @@ class TutorialScene: GameTutorialScene {
       let duration = 0.25
       if let toDo = toDo {
         instructionLabel.alpha = 0
-        toDoLabel.attributedText = makeAttributed(text: toDo, until: toDo.endIndex, attributes: attributes)
+        toDoLabel.attributedText = attributedText(toDo)
         toDoLabel.isHidden = false
         toDoLabel.run(.fadeIn(withDuration: duration))
       } else {
         toDoLabel.isHidden = true
       }
       toDoLabel.alpha = 0
-      instructionLabel.attributedText = makeAttributed(text: instructions, until: instructions.endIndex, attributes: attributes)
+      instructionLabel.attributedText = attributedText(instructions)
       instructionLabel.isHidden = false
       instructionLabel.run(.sequence([.fadeIn(withDuration: duration), .wait(forDuration: delay)]), completion: action)
     }
@@ -275,19 +277,19 @@ class TutorialScene: GameTutorialScene {
       touchLabel.horizontalAlignmentMode = .center
       touchLabel.verticalAlignmentMode = .bottom
       // Poor man's centering...
-      touchLabel.text = "    Slide\nand hold"
+      touchLabel.attributedText = attributedText("    @Slide@\nand @hold@")
     } else {
       if UserData.joystickOnLeft.value {
         // Put the label to the right
         touchLabel.position = position + CGVector(dx: 0.75 * shapeSize, dy: 0)
         touchLabel.horizontalAlignmentMode = .left
-        touchLabel.text = "Slide\nand hold"
+        touchLabel.attributedText = attributedText("@Slide@\nand @hold@")
       } else {
         // Put the label to the left
         touchLabel.position = position + CGVector(dx: -0.75 * shapeSize, dy: 0)
         touchLabel.horizontalAlignmentMode = .right
         // Poor man's right justification
-        touchLabel.text = "        Slide\nand hold"
+        touchLabel.attributedText = attributedText("        @Slide@\nand @hold@")
       }
       touchLabel.verticalAlignmentMode = .center
     }
@@ -336,7 +338,7 @@ class TutorialScene: GameTutorialScene {
     touchLabel.position = position + CGVector(dx: 0, dy: 0.75 * shapeSize)
     touchLabel.horizontalAlignmentMode = .center
     touchLabel.verticalAlignmentMode = .bottom
-    touchLabel.text = "Tap"
+    touchLabel.attributedText = attributedText("@Tap@")
     let tapTime = 0.15
     let betweenTapTime = 0.15
     let betweenDelay = 1.0
@@ -374,7 +376,7 @@ class TutorialScene: GameTutorialScene {
       touchLabel.horizontalAlignmentMode = .left
     }
     touchLabel.verticalAlignmentMode = .center
-    touchLabel.text = "Swipe"
+    touchLabel.attributedText = attributedText("@Swipe@")
     let initialDelay = 0.1
     let moveTime = 0.25
     let holdTime = 0.1
