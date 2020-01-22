@@ -927,8 +927,10 @@ class SkywritingCharacterCache {
   /// - Parameter texture: The texture for the pixel
   init(_ texture: SKTexture) {
     self.texture = texture
-    // I'm assume a square texture
-    assert(texture.size().width == texture.size().height)
+    // I'm assume a square texture, but don't compare for equality since packing into
+    // an atlas and having a nontrivial textureRect can result in "sizes" like
+    // 5.0000001 and such nonsense.
+    assert(abs(texture.size().width - texture.size().height) < 0.01)
     shader = skywritingShader(texture: texture)
     gridSpacing = skywritingGridSpacing * texture.size().width
   }
