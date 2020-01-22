@@ -35,6 +35,8 @@ class Button: SKNode {
   var confirmDecoration: SKNode?
   /// The touch that the button is currently processing
   var clickTouch: UITouch?
+  /// `true` to enable a blip upon click
+  var makeSound = true
   /// A closure that will be called when the button activates
   var action: (() -> Void)?
 
@@ -184,6 +186,12 @@ class Button: SKNode {
     resetTouch()
   }
 
+  func clickSound() {
+    if let audio = (scene as? BasicScene)?.audio {
+      audio.soundEffect(.click)
+    }
+  }
+
   /// Reset the button's touch processing
   func resetTouch() {
     clickTouch = nil
@@ -299,6 +307,9 @@ class Button: SKNode {
     for touch in touches {
       guard touch == clickTouch else { continue }
       if border.frame.contains(touch.location(in: self)), enabled {
+        if makeSound {
+          clickSound()
+        }
         if wasConfirmed() {
           // Call nextDecoration first so that the action can reference selectedValue
           // to get the button's state.

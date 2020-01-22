@@ -263,6 +263,9 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     menuButton.action = { [unowned self] in self.mainMenu() }
     // Go the the Game Center interface
     gcButton = Button(imageNamed: "gamecenter", imageColor: AppAppearance.yellow, size: buttonSize)
+    // Popping up the Game Center view controller pauses the scene, so the sound
+    // would get cut off
+    gcButton.makeSound = false
     gcButton.action = { [unowned self] in self.showGameCenter() }
     // The Game Center button might need to be disabled
     if !Globals.gcInterface.enabled {

@@ -27,6 +27,7 @@
 		FD1F047B239BEB6F001BD4DC /* firework4.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD1F0477239BEB6F001BD4DC /* firework4.wav */; };
 		FD1F047C239BEB6F001BD4DC /* firework1.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD1F0478239BEB6F001BD4DC /* firework1.wav */; };
 		FD2518EE239A66F400029466 /* SKHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD2518ED239A66F400029466 /* SKHelpers.swift */; };
+		FD37889E23D85B6000146C4A /* click.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD37889D23D85B6000146C4A /* click.wav */; };
 		FD3B8485236ADE3C008F642B /* HighScoreScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD3B8484236ADE3C008F642B /* HighScoreScene.swift */; };
 		FD3E02082333B1C20057A766 /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD3E02072333B1C20057A766 /* Logging.swift */; };
 		FD40DE7E236C538B00544034 /* GameScore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD40DE7D236C538B00544034 /* GameScore.swift */; };
@@ -106,6 +107,7 @@
 		FD1F0477239BEB6F001BD4DC /* firework4.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = firework4.wav; sourceTree = "<group>"; };
 		FD1F0478239BEB6F001BD4DC /* firework1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = firework1.wav; sourceTree = "<group>"; };
 		FD2518ED239A66F400029466 /* SKHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SKHelpers.swift; sourceTree = "<group>"; };
+		FD37889D23D85B6000146C4A /* click.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = click.wav; sourceTree = "<group>"; };
 		FD3B8484236ADE3C008F642B /* HighScoreScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighScoreScene.swift; sourceTree = "<group>"; };
 		FD3E02072333B1C20057A766 /* Logging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
 		FD40DE7D236C538B00544034 /* GameScore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScore.swift; sourceTree = "<group>"; };
@@ -184,6 +186,7 @@
 		FD4D53C323080BFD00718938 /* sounds */ = {
 			isa = PBXGroup;
 			children = (
+				FD37889D23D85B6000146C4A /* click.wav */,
 				FD1F0478239BEB6F001BD4DC /* firework1.wav */,
 				FD1F0475239BEB6F001BD4DC /* firework2.wav */,
 				FD1F0476239BEB6F001BD4DC /* firework3.wav */,
@@ -408,6 +411,7 @@
 				FD0E046F23A71FE500376E76 /* warpfail.wav in Resources */,
 				FD7AE4AD237C48CC00CAF082 /* asteroids.ttf in Resources */,
 				FDA43B28230C1DC600A29347 /* warpout.wav in Resources */,
+				FD37889E23D85B6000146C4A /* click.wav in Resources */,
 				FDA43B1E2308A1A600A29347 /* extra_life.wav in Resources */,
 				FD79324622D20FE700E7D336 /* LaunchScreen.storyboard in Resources */,
 				FD4D53D523085AF800718938 /* player_engines.wav in Resources */,

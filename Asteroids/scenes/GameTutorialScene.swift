@@ -98,15 +98,18 @@ class GameTutorialScene: BasicScene {
     pauseButton.setZ(.info)
     pauseControls.addChild(pauseButton)
     // Two nice big buttons in the center of the screen for continue and quit.
-    // They're only unhidden when the game pauses.
+    // They're only unhidden when the game pauses.  Audio is disabled when these are
+    // clicked, so to make a noise on continue requires re-enabling it first.
     let buttonSize = CGSize(width: 250, height: 200)
     continueButton = Button(imageNamed: "bigplaybutton", imageColor: AppAppearance.playButtonColor, size: buttonSize)
+    continueButton.makeSound = false
     continueButton.action = { [unowned self] in self.doContinue() }
     continueButton.position = CGPoint(x: gameFrame.midX - 0.5 * buttonSize.width - 50, y: gameFrame.midY)
     continueButton.isHidden = true
     continueButton.setZ(.pauseControls)
     pauseControls.addChild(continueButton)
     quitButton = Button(imageNamed: "bigcancelbutton", imageColor: AppAppearance.dangerButtonColor, size: buttonSize)
+    quitButton.makeSound = false
     quitButton.action = { [unowned self] in self.doQuit() }
     quitButton.position = CGPoint(x: 2 * gameFrame.midX - continueButton.position.x, y: continueButton.position.y)
     quitButton.isHidden = true
@@ -356,6 +359,9 @@ class GameTutorialScene: BasicScene {
     gamePaused = false
     isPaused = false
     audio.resume()
+    // The continue button didn't make a noise because audio was disabled when it was
+    // clicked
+    continueButton.clickSound()
   }
 
   /// Abort the game/tutorial immediately and go back to the main menu

@@ -171,6 +171,8 @@ class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
       os_log("No view controller to show %{public}s", log: .app, type: .error, link)
       return
     }
+    // There's no point in a sound effect here since the scene is about to pause and
+    // the effect won't have time to play
     os_log("CreditsScene will show link", log: .app, type: .debug)
     guard let url = URL(string: "https://" + link) else { fatalError("Invalid link \(link)") }
     let config = SFSafariViewController.Configuration()

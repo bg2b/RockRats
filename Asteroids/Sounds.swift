@@ -43,6 +43,7 @@ enum SoundEffect: String, CaseIterable {
   case firework2 = "firework2"
   case firework3 = "firework3"
   case firework4 = "firework4"
+  case click = "click"
 
   /// The URL for a sound effect file in the main bundle
   var url: URL {

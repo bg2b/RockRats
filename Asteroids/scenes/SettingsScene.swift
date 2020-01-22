@@ -135,11 +135,13 @@ class SettingsScene: BasicScene {
     volumeButton = Button(imagesNamed: ["soundnone", "soundsmall", "soundmed", "soundbig"],
                           imageColor: AppAppearance.buttonColor, size: buttonSize)
     volumeButton.selectedValue = UserData.audioLevel.value
+    volumeButton.makeSound = false
     volumeButton.action = { [unowned self] in self.setVolume() }
     optionButtons.append(volumeButton)
     heartbeatButton = Button(imagesNamed: ["heartbeatoff", "heartbeaton"],
                              imageColor: AppAppearance.buttonColor, size: buttonSize)
     heartbeatButton.selectedValue = UserData.heartbeatMuted.value ? 0 : 1
+    heartbeatButton.makeSound = false
     heartbeatButton.action = { [unowned self] in self.toggleHeartbeat() }
     if volumeButton.selectedValue == 0 {
       heartbeatButton.disable()
@@ -148,6 +150,7 @@ class SettingsScene: BasicScene {
     ufoFadeButton = Button(imagesNamed: ["ufosoundcontinuous", "ufosoundchopped"],
                              imageColor: AppAppearance.buttonColor, size: buttonSize)
     ufoFadeButton.selectedValue = UserData.fadeUFOAudio.value ? 1 : 0
+    ufoFadeButton.makeSound = false
     ufoFadeButton.action = { [unowned self] in self.toggleUFOFade() }
     if volumeButton.selectedValue == 0 {
       ufoFadeButton.disable()
@@ -302,6 +305,8 @@ class SettingsScene: BasicScene {
         self.audio.soundEffect(.heartbeatLow)
         self.endSoundEffectDemo()
       }
+    } else {
+      heartbeatButton.clickSound()
     }
   }
 
