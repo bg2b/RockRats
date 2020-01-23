@@ -176,21 +176,24 @@ class GameTutorialScene: BasicScene {
   /// - Parameters:
   ///   - touch: The touch
   ///   - location: Where the touch has moved to
-  func displayTouchMoved(touch: UITouch, location: CGPoint) {
-    guard displayingTouches else { return }
+  /// - Returns: `true` if the touch has moved significantly
+  func displayTouchMoved(touch: UITouch, location: CGPoint) -> Bool {
+    guard displayingTouches else { return true }
     guard let display = displayedTouches[touch] else {
       os_log("Display not found for moved touch", log: .app, type: .error)
-      return
+      return true
     }
     let displacement = location - display.startSprite.position
     if displacement.length() > 15 {
       // If the touch has moved a lot, show both initial and current position
       display.currentSprite.position = location
       display.startSprite.isHidden = false
+      return true
     } else {
       // If not much movement, snap to the initial position
       display.currentSprite.position = display.startSprite.position
       display.startSprite.isHidden = true
+      return false
     }
   }
 
@@ -257,7 +260,10 @@ class GameTutorialScene: BasicScene {
         // Measure the movement in terms of a certain physical distance, so convert
         // to points, then scale to 0 - 1
         joystickDirection = delta.scale(by: min(offset / (Globals.ptsToGameUnits * 75), 1.0) / offset)
-        displayTouchMoved(touch: touch, location: location)
+        if !displayTouchMoved(touch: touch, location: location) {
+          // Touch hasn't moved significantly
+          joystickDirection = .zero
+        }
       } else {
         guard let startLocation = fireOrWarpTouches[touch] else { continue }
         let location = touch.location(in: self)
@@ -268,7 +274,7 @@ class GameTutorialScene: BasicScene {
           displayTouchEnded(touch: touch)
           hyperspaceJump()
         } else {
-          displayTouchMoved(touch: touch, location: location)
+          _ = displayTouchMoved(touch: touch, location: location)
         }
       }
     }
