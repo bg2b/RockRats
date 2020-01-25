@@ -1,7 +1,7 @@
 # Rock Rats #
 
 This is a joint project with [Footkick72](https://github.com/Footkick72), our first iOS
-game, released on Apple's app store as Rock Rats.
+game, released on the App Store as [Rock Rats](https://apps.apple.com/app/id1481795281).
 
 If you're as old as I am, you might remember when this first appeared:  
 ![Asteroids arcade game](https://upload.wikimedia.org/wikipedia/en/8/81/Asteroids-arcadegame.jpg)
