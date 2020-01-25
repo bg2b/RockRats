@@ -32,8 +32,7 @@ class ShipAppearanceAlternative {
   /// Make an alternative appearance
   /// - Parameters:
   ///   - imageName: The name of the texture for the ship
-  ///   - warpTime: The amount of time the hyperspace effects should take
-  init(imageName: String, warpTime: Double) {
+  init(imageName: String) {
     texture = Globals.textureCache.findTexture(imageNamed: imageName)
     sprite = SKSpriteNode(texture: texture)
     sprite.name = "shipImage"
@@ -126,8 +125,8 @@ class Ship: SKNode {
   required init(getJoystickDirection: @escaping () -> CGVector, color: String, audio: SceneAudio) {
     self.getJoystickDirection = getJoystickDirection
     shipAppearances = []
-    shipAppearances.append(ShipAppearanceAlternative(imageName: "ship_\(color)", warpTime: warpTime))
-    shipAppearances.append(ShipAppearanceAlternative(imageName: "retroship", warpTime: warpTime))
+    shipAppearances.append(ShipAppearanceAlternative(imageName: "ship_\(color)"))
+    shipAppearances.append(ShipAppearanceAlternative(imageName: "retroship"))
     super.init()
     // The engine sounds play continually and the stereo balance is adjusted
     // according to the ship's position.  The ship just adjusts the volume according
