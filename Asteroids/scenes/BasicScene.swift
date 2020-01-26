@@ -1309,6 +1309,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     let outTransition = makeTransitionMask()
     outTransition.shader = BasicScene.exitShader
     addChild(outTransition)
+    outTransition.setValue(SKAttributeValue(float: 0), forAttribute: "a_time")
     outTransition.run(.setTime(effectTime: BasicScene.transitionDuration + 0.1) {
       self.switchScene(withFade: false, getNextScene)
       outTransition.removeFromParent()
@@ -1334,6 +1335,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
         // Switch from the static maskingShader to the entryShader
         entryTransition.shader = BasicScene.entryShader
         // Run the transition, then remove the mask
+        entryTransition.setValue(SKAttributeValue(float: 0), forAttribute: "a_time")
         entryTransition.run(.setTime(effectTime: BasicScene.transitionDuration, then: .removeFromParent()))
       }
       self.entryTransition = nil

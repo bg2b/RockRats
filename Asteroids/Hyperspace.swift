@@ -191,7 +191,7 @@ func warpOutEffect(texture: SKTexture, position: CGPoint, rotation: CGFloat) -> 
   effect.position = position
   effect.zRotation = rotation
   effect.shader = shader
-  //setStartTimeAttrib(effect, view: nil)
+  effect.setValue(SKAttributeValue(float: 0), forAttribute: "a_time")
   effect.run(.setTime(effectTime: warpTime, then: .removeFromParent()))
   let star = starBlink(at: position, throughAngle: .pi, duration: 2 * warpTime)
   return [effect, star]
@@ -210,7 +210,7 @@ func warpInEffect(texture: SKTexture, position: CGPoint, rotation: CGFloat, when
   effect.position = position
   effect.zRotation = rotation
   effect.shader = shader
-  //setStartTimeAttrib(effect, view: nil)
+  effect.setValue(SKAttributeValue(float: 0), forAttribute: "a_time")
   effect.run(.setTime(effectTime: warpTime, then: .removeFromParent()), completion: whenDone)
   return effect
 }
