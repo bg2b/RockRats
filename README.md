@@ -2,6 +2,9 @@
 
 This is a joint project with [Footkick72](https://github.com/Footkick72), our first iOS
 game, released on the App Store as [Rock Rats](https://apps.apple.com/app/id1481795281).
+Here's some game footage on YouTube:
+
+[![Rock Rats game play](http://img.youtube.com/vi/D4f3wUiifyA/0.jpg)](http://www.youtube.com/watch?v=D4f3wUiifyA "Rock Rats game play")
 
 If you're as old as I am, you might remember when this first appeared:  
 ![Asteroids arcade game](https://upload.wikimedia.org/wikipedia/en/8/81/Asteroids-arcadegame.jpg)
