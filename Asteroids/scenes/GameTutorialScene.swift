@@ -255,7 +255,7 @@ class GameTutorialScene: BasicScene {
       if touch == joystickTouch {
         // This is a movement of the joystick
         let location = touch.location(in: self)
-        let delta = (location - joystickLocation).rotate(by: -.pi / 2)
+        let delta = location - joystickLocation
         let offset = delta.length()
         // Measure the movement in terms of a certain physical distance, so convert
         // to points, then scale to 0 - 1

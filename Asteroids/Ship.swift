@@ -244,21 +244,21 @@ class Ship: SKNode {
     // overlap.  I.e., with the stick pointing 45 degrees left, the ship will both
     // rotate counterclockwise and thrust forward
     let halfSectorSize = (120 * CGFloat.pi / 180) / 2
-    if abs(angle) >= .pi - 0.5 * halfSectorSize {
+    if abs(angle + .pi / 2) <= 0.5 * halfSectorSize {
       // Joystick is pointing backwards, apply reverse thrusters.  (Despite the
       // overlapping sectors mumbo jumbo above, I find that reverse thrust tends to
       // be confusing while turning, so I've reduced the region where reverse thrust
       // is active.)
-      thrustAmount = min(-stick.dx, 0.7) / 0.7
+      thrustAmount = min(-stick.dy, 0.7) / 0.7
       thrustForce = -0.5 * thrustAmount
-    } else if abs(angle) <= halfSectorSize {
+    } else if abs(angle - .pi / 2) <= halfSectorSize {
       // Pointing forwards, thrusters active
-      thrustAmount = min(stick.dx, 0.7) / 0.7
+      thrustAmount = min(stick.dy, 0.7) / 0.7
       thrustForce = thrustAmount
     }
-    if abs(abs(angle) - .pi / 2) <= halfSectorSize {
-      // Left or right rotation, set an absolute angular speed
-      body.angularVelocity = copysign(maxOmega * min(abs(stick.dy), 0.7) / 0.7, angle)
+    if abs(angle - .pi) <= halfSectorSize || abs(angle + .pi) <= halfSectorSize || abs(angle) <= halfSectorSize {
+      // Rotation, set an absolute angular speed
+      body.angularVelocity = maxOmega * min(-stick.dx, 0.7) / 0.7
     }
     thrustForce *= maxThrust
     // thrustAmount is always positive and in 0 ... 1
