@@ -25,7 +25,7 @@ class Controller {
   var extendedGamepad: GCExtendedGamepad?
   /// Desired bindings of buttons to actions (closures) for the current scene
   var buttonActions = [KeyPath<Controller, GCControllerButtonInput?>: () -> Void]()
-  /// If the controller has a home button, this has it
+  /// If the controller has a home button, this holds it
   var homeButton: GCControllerButtonInput?
 
   // MARK: - Initialization
@@ -64,6 +64,7 @@ class Controller {
         chosenController = chosenController ?? controller
       }
     }
+    extendedGamepad = chosenController?.extendedGamepad
     if chosenController != oldController {
       if let controller = chosenController {
         os_log("Found %{public}s", log: .app, type: .debug, controller.vendorName ?? "unknown game controller")
@@ -75,10 +76,11 @@ class Controller {
       // the controller events and grabbing the home button if the player presses it.
       homeButton = nil
       // I can only test this home button hack for controllers that I have.  Right
-      // now Playstation and Xbox controllers, and probably those will be the only
-      // common controllers anyway.
-      if chosenController?.vendorName?.hasPrefix("DUALSHOCK 4") ?? false {
-        // Playstation controllers have a home button, so watch for it
+      // now that's Playstation and Xbox controllers, but probably those will be the
+      // only common controllers anyway.
+      let vendor = chosenController?.vendorName ?? "unknown"
+      if vendor.hasPrefix("DUALSHOCK 4") || vendor.hasPrefix("Xbox") {
+        // Playstation and Xbox controllers have a home button, so watch for it
         chosenController?.extendedGamepad?.valueChangedHandler = { [weak self] gamepad, controllerElement in
           self?.findHomeButton(controllerElement)
         }
@@ -89,13 +91,11 @@ class Controller {
     // If the controller supports the active LED mechanism, indicate the selected one
     for controller in controllers {
       if controller == chosenController {
-        print("selecting controller")
         controller.playerIndex = .index1
       } else {
         controller.playerIndex = .indexUnset
       }
     }
-    extendedGamepad = chosenController?.extendedGamepad
   }
 
   /// A hack to find the controller's home button, if any
