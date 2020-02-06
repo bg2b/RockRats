@@ -14,6 +14,7 @@
 		6565DA11232E6818008EA85B /* Achievements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6565DA10232E6818008EA85B /* Achievements.swift */; };
 		659CC03A230EC9FE00AA087C /* UFO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 659CC039230EC9FE00AA087C /* UFO.swift */; };
 		659CC040230EDA3500AA087C /* ufo_explosion.wav in Resources */ = {isa = PBXBuildFile; fileRef = 659CC03F230EDA3500AA087C /* ufo_explosion.wav */; };
+		FD00742023E2E12F00DCBAC8 /* GameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD00741F23E2E12F00DCBAC8 /* GameController.swift */; };
 		FD0E046B23A3B9E600376E76 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FD0E046A23A3B9E600376E76 /* StoreKit.framework */; };
 		FD0E046D23A560F000376E76 /* Alignment.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD0E046C23A560F000376E76 /* Alignment.swift */; };
 		FD0E046F23A71FE500376E76 /* warpfail.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD0E046E23A71FE500376E76 /* warpfail.wav */; };
@@ -44,6 +45,7 @@
 		FD51580A23BAC9E100B94C30 /* fortunes.txt in Resources */ = {isa = PBXBuildFile; fileRef = FD51580923BAC9E100B94C30 /* fortunes.txt */; };
 		FD53167522DB24EC00F09E57 /* Ship.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD53167422DB24EC00F09E57 /* Ship.swift */; };
 		FD537DD6231BE385003312B3 /* ufo_laser.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD537DD5231BE384003312B3 /* ufo_laser.wav */; };
+		FD61599B23E2751A00520243 /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FD61599A23E2751A00520243 /* GameController.framework */; };
 		FD6F23DE234357710083A913 /* ConformingCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD6F23DD234357710083A913 /* ConformingCache.swift */; };
 		FD7635B02354A410000543E7 /* GameCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD7635AF2354A410000543E7 /* GameCenter.swift */; };
 		FD7635B32354AE1A000543E7 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FD7635B22354AE1A000543E7 /* GameKit.framework */; };
@@ -94,6 +96,7 @@
 		6565DA10232E6818008EA85B /* Achievements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Achievements.swift; sourceTree = "<group>"; };
 		659CC039230EC9FE00AA087C /* UFO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UFO.swift; sourceTree = "<group>"; };
 		659CC03F230EDA3500AA087C /* ufo_explosion.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo_explosion.wav; sourceTree = "<group>"; };
+		FD00741F23E2E12F00DCBAC8 /* GameController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameController.swift; sourceTree = "<group>"; };
 		FD0E046A23A3B9E600376E76 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		FD0E046C23A560F000376E76 /* Alignment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alignment.swift; sourceTree = "<group>"; };
 		FD0E046E23A71FE500376E76 /* warpfail.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = warpfail.wav; sourceTree = "<group>"; };
@@ -124,6 +127,7 @@
 		FD51580923BAC9E100B94C30 /* fortunes.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = fortunes.txt; sourceTree = "<group>"; };
 		FD53167422DB24EC00F09E57 /* Ship.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ship.swift; sourceTree = "<group>"; };
 		FD537DD5231BE384003312B3 /* ufo_laser.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo_laser.wav; sourceTree = "<group>"; };
+		FD61599A23E2751A00520243 /* GameController.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameController.framework; path = System/Library/Frameworks/GameController.framework; sourceTree = SDKROOT; };
 		FD6F23DD234357710083A913 /* ConformingCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConformingCache.swift; sourceTree = "<group>"; };
 		FD7635AF2354A410000543E7 /* GameCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCenter.swift; sourceTree = "<group>"; };
 		FD7635B22354AE1A000543E7 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
@@ -176,6 +180,7 @@
 			files = (
 				FD0E046B23A3B9E600376E76 /* StoreKit.framework in Frameworks */,
 				FD7635B32354AE1A000543E7 /* GameKit.framework in Frameworks */,
+				FD61599B23E2751A00520243 /* GameController.framework in Frameworks */,
 				FDDCB1462364874D00FF9F1C /* CloudKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -219,6 +224,7 @@
 		FD7635B12354AE19000543E7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FD61599A23E2751A00520243 /* GameController.framework */,
 				FD0E046A23A3B9E600376E76 /* StoreKit.framework */,
 				FDDCB1452364874D00FF9F1C /* CloudKit.framework */,
 				FD7635B22354AE1A000543E7 /* GameKit.framework */,
@@ -261,6 +267,7 @@
 				FDD831F122EDB50200CA4EC6 /* Explosions.swift */,
 				FD7635AF2354A410000543E7 /* GameCenter.swift */,
 				FDD831F522F187D200CA4EC6 /* GameConfig.swift */,
+				FD00741F23E2E12F00DCBAC8 /* GameController.swift */,
 				FD40DE7D236C538B00544034 /* GameScore.swift */,
 				FD79323D22D20FE600E7D336 /* GameViewController.swift */,
 				FDCF8CA422DA7296008EDFD1 /* Globals.swift */,
@@ -460,6 +467,7 @@
 				FD79323622D20FE600E7D336 /* AppDelegate.swift in Sources */,
 				FD2518EE239A66F400029466 /* SKHelpers.swift in Sources */,
 				FD7635B02354A410000543E7 /* GameCenter.swift in Sources */,
+				FD00742023E2E12F00DCBAC8 /* GameController.swift in Sources */,
 				FDF763A623C2412F0027FA2E /* Shaders.swift in Sources */,
 				FD158A25238FF9EA00180EC9 /* Touchable.swift in Sources */,
 				FD51580623BA0FF300B94C30 /* Skywriting.swift in Sources */,
@@ -636,14 +644,14 @@
 				CODE_SIGN_ENTITLEMENTS = Asteroids/Asteroids.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1.0.6;
+				CURRENT_PROJECT_VERSION = 1.1.0;
 				DEVELOPMENT_TEAM = 4NCA37UMUQ;
 				INFOPLIST_FILE = Asteroids/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.davidlong.Asteroids;
 				PRODUCT_NAME = "Rock Rats";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -659,14 +667,14 @@
 				CODE_SIGN_ENTITLEMENTS = Asteroids/Asteroids.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1.0.6;
+				CURRENT_PROJECT_VERSION = 1.1.0;
 				DEVELOPMENT_TEAM = 4NCA37UMUQ;
 				INFOPLIST_FILE = Asteroids/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.davidlong.Asteroids;
 				PRODUCT_NAME = "Rock Rats";
 				PROVISIONING_PROFILE_SPECIFIER = "";

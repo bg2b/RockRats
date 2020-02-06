@@ -10,6 +10,7 @@
 //
 
 import SpriteKit
+import GameController
 import os.log
 
 // MARK: Game/tutorial base class
@@ -127,7 +128,7 @@ class GameTutorialScene: BasicScene {
     initInfo()
     isUserInteractionEnabled = true
     physicsWorld.contactDelegate = self
-    player = Ship(getJoystickDirection: { [unowned self] in return self.joystickDirection }, color: self.shipColor, audio: audio)
+    player = Ship(getJoystickDirection: { [unowned self] in return self.joystick() }, color: self.shipColor, audio: audio)
   }
 
   required init(coder aDecoder: NSCoder) {
@@ -335,6 +336,83 @@ class GameTutorialScene: BasicScene {
       displayTouchEnded(touch: touch)
     }
     fireOrWarpTouches.removeAll()
+  }
+
+  // MARK: - Game controller handling
+
+  /// Action for the fire button
+  /// - Parameter canUnpause: `true` if the button can also act as continue when the game is paused
+  /// - Returns: `true` if a shot was fired
+  func fireButton(canUnpause: Bool = false) -> Bool {
+    if gamePaused {
+      if canUnpause {
+        doContinue()
+      }
+      return false
+    } else {
+      return fireLaser()
+    }
+  }
+
+  /// Action for the hyperspace button
+  /// - Parameter canQuit: `true` if the button can also act as quit when the game is paused
+  func hyperspaceButton(canQuit: Bool = false) {
+    if gamePaused {
+      if canQuit {
+        doQuit()
+      }
+    } else {
+      hyperspaceJump()
+    }
+  }
+
+  /// Action for a button to pause or continue the game
+  func pauseContinueButton() {
+    if gamePaused {
+      doContinue()
+    } else {
+      doPause()
+    }
+  }
+
+  /// Bind controller buttons to actions
+  ///
+  /// I account for player preferences by just assigning multiple buttons for each
+  /// action.  The player can press whatever button they find convenient.
+  func bindControllerButtons() {
+    Globals.controller.clearActions()
+    // Button A or right shoulder/trigger = fire.  Button A also continues after pause
+    Globals.controller.setAction(\Controller.extendedGamepad?.buttonA) { [weak self] in _ = self?.fireButton(canUnpause: true) }
+    Globals.controller.setAction(\Controller.extendedGamepad?.rightTrigger) { [weak self] in _ = self?.fireButton() }
+    Globals.controller.setAction(\Controller.extendedGamepad?.rightShoulder) { [weak self] in _ = self?.fireButton() }
+    // Button B or left shoulder/trigger = hyperspace.  Button B also quits after pause
+    Globals.controller.setAction(\Controller.extendedGamepad?.buttonB) { [weak self] in self?.hyperspaceButton(canQuit: true) }
+    Globals.controller.setAction(\Controller.extendedGamepad?.leftTrigger) { [weak self] in self?.hyperspaceButton() }
+    Globals.controller.setAction(\Controller.extendedGamepad?.leftShoulder) { [weak self] in self?.hyperspaceButton() }
+    // Home/menu/option buttons pause and unpause.  I'll also throw in button X
+    // because I think that's easier to hit when in the middle of playing
+    Globals.controller.setAction(\Controller.extendedGamepad?.buttonX) { [weak self] in self?.pauseContinueButton() }
+    if #available(iOS 13, *) {
+      Globals.controller.setAction(\Controller.extendedGamepad?.buttonMenu) { [weak self] in self?.pauseContinueButton() }
+      Globals.controller.setAction(\Controller.extendedGamepad?.buttonOptions) { [weak self] in self?.pauseContinueButton() }
+    }
+    Globals.controller.setAction(\Controller.homeButton) { [weak self ] in self?.pauseContinueButton() }
+  }
+
+  /// Read the joystick direction
+  ///
+  /// This merges the results of on-screen touches with the joystick from the
+  /// controller by just taking whichever is active.
+  ///
+  /// - Returns: A vector representing the joystick, x-axis = rotation, y-axis = thrust
+  func joystick() -> CGVector {
+    let controllerDirection = Globals.controller.joystick()
+    let touchDirection = joystickDirection
+    if controllerDirection.length() > touchDirection.length() {
+      return controllerDirection
+    } else {
+      return touchDirection
+    }
   }
 
   // MARK: - Pause, continue, and quit
@@ -611,5 +689,11 @@ class GameTutorialScene: BasicScene {
       energyBar.addToLevel(5)
     }
     wait(for: 0.5, then: replenishEnergy)
+  }
+
+  /// Subclasses override this, but be sure to call super to set up button bindings
+  override func didMove(to view: SKView) {
+    super.didMove(to: view)
+    bindControllerButtons()
   }
 }
