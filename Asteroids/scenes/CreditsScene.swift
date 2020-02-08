@@ -49,7 +49,9 @@ class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
     // Settings screen
     let settingsButton = Button(imageNamed: "settingsbutton", imageColor: AppAppearance.buttonColor, size: buttonSize)
     settingsButton.action = { [unowned self] in self.showSettings() }
-    let bottomHstack = horizontalStack(nodes: [menuButton, playButton, settingsButton], minSpacing: buttonSpacing)
+    buttons = [menuButton, playButton, settingsButton]
+    defaultFocus = playButton
+    let bottomHstack = horizontalStack(nodes: buttons, minSpacing: buttonSpacing)
     bottomHstack.position = CGPoint(x: bottomHstack.position.x,
                                     y: fullFrame.minY + buttonSize.height + buttonSpacing - bottomHstack.position.y)
     credits.addChild(bottomHstack)
@@ -315,6 +317,7 @@ class CreditsScene: BasicScene, SFSafariViewControllerDelegate {
   /// - Parameter view: The view that will present the scene
   override func didMove(to view: SKView) {
     super.didMove(to: view)
+    bindControllerMenuButtons()
     // I think it's more effective to have this delay a bit longer than the normal
     // delay between bursts.  The first time that they see the credits, it gives them
     // a moment to think that it's a normal static scene before the show begins.

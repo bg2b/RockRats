@@ -274,7 +274,9 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     // If the Game Center state changes, I have to change the button's
     // enabled/disabled state too.
     NotificationCenter.default.addObserver(self, selector: #selector(gcStateChanged), name: .authenticationChanged, object: nil)
-    let bottomHstack = horizontalStack(nodes: [menuButton, playButton, gcButton], minSpacing: buttonSpacing)
+    buttons = [menuButton, playButton, gcButton]
+    defaultFocus = playButton
+    let bottomHstack = horizontalStack(nodes: buttons, minSpacing: buttonSpacing)
     bottomHstack.position = CGPoint(x: bottomHstack.position.x,
                                     y: fullFrame.minY + buttonSize.height + buttonSpacing - bottomHstack.position.y)
     scores.addChild(bottomHstack)
@@ -526,6 +528,7 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
   /// - Parameter view: The view that will present the scene
   override func didMove(to view: SKView) {
     super.didMove(to: view)
+    bindControllerMenuButtons()
     run(.wait(for: 2, then: spawnSmashies), withKey: spawnSmashiesKey)
   }
 

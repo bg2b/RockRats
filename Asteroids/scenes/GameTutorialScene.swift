@@ -375,11 +375,19 @@ class GameTutorialScene: BasicScene {
     }
   }
 
+  /// Handle controller connection and disconnection events by pausing
+  /// - Parameter connected: `true` if a controller has just connected
+  override func controllerChanged(connected: Bool) {
+    if !gamePaused {
+      doPause()
+    }
+  }
+
   /// Bind controller buttons to actions
   ///
   /// I account for player preferences by just assigning multiple buttons for each
   /// action.  The player can press whatever button they find convenient.
-  func bindControllerButtons() {
+  func bindControllerPlayButtons() {
     Globals.controller.clearActions()
     // Button A or right shoulder/trigger = fire.  Button A also continues after pause
     Globals.controller.setAction(\Controller.extendedGamepad?.buttonA) { [weak self] in _ = self?.fireButton(canUnpause: true) }
@@ -397,6 +405,7 @@ class GameTutorialScene: BasicScene {
       Globals.controller.setAction(\Controller.extendedGamepad?.buttonOptions) { [weak self] in self?.pauseContinueButton() }
     }
     Globals.controller.setAction(\Controller.homeButton) { [weak self ] in self?.pauseContinueButton() }
+    Globals.controller.changedDelegate = self
   }
 
   /// Read the joystick direction
@@ -694,6 +703,6 @@ class GameTutorialScene: BasicScene {
   /// Subclasses override this, but be sure to call super to set up button bindings
   override func didMove(to view: SKView) {
     super.didMove(to: view)
-    bindControllerButtons()
+    bindControllerPlayButtons()
   }
 }

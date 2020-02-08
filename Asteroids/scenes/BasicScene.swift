@@ -240,7 +240,7 @@ func enterExitShader(isEntering: Bool, duration: Double) -> SKShader {
 /// Provides a playing area, audio, a set of asteroids, and a set of UFOs.  The
 /// class's methods deal with those objects, plus common stuff like scene pauses,
 /// follow-on scene creation, and scene transitions.
-class BasicScene: SKScene, SKPhysicsContactDelegate {
+class BasicScene: SKScene, SKPhysicsContactDelegate, ControllerChangedDelegate {
   /// The full screen with (0, 0) at the center
   var fullFrame: CGRect!
   /// The frame for game action (may be less than `fullFrame` due to safe area
@@ -273,6 +273,12 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   var entryTransition: SKSpriteNode?
   /// Signpost ID for this instance
   let signpostID = OSSignpostID(log: .poi)
+  /// Buttons for focus handling when using a controller
+  var buttons = [Button]()
+  /// The currently focused button, if any
+  var focusedButton: Button?
+  /// The button that should be focused by default, if any
+  var defaultFocus: Button?
 
   // MARK: - Initialization
 
@@ -632,6 +638,99 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
     """
     return SKShader(source: shaderSource)
   }()
+
+  // MARK: - Focus handling
+
+  /// Move the focus to a new button
+  ///
+  /// The direction should be 1 to move right and buttons.count - 1 to move left, the
+  /// buttons.count part being because of the way the % operator choses the sign when
+  /// the divided number is negative.
+  ///
+  /// - Parameter direction: The direction to move
+  func moveFocus(direction: Int) {
+    print("movefocus")
+    guard !buttons.isEmpty else { return }
+    var index: Int
+    if let focusedButton = focusedButton {
+      focusedButton.unfocus()
+      index = (buttons.firstIndex(of: focusedButton) ?? -direction) + direction
+      index %= buttons.count
+    } else {
+      index = 0
+    }
+    while !buttons[index].enabled {
+      index = (index + direction) % buttons.count
+    }
+    buttons[index].focus()
+    focusedButton = buttons[index]
+  }
+
+  /// Focus on the next button in the list
+  func focusNext() {
+    moveFocus(direction: 1)
+  }
+
+  /// Focus on the previous button in the list
+  func focusPrevious() {
+    // Move by -1, but add count because of the way Swift's remainder operation works
+    moveFocus(direction: buttons.count - 1)
+  }
+
+  /// Set the focus on a specific button
+  /// - Parameter button: The button to focus on, or `nil` for none
+  func setFocus(_ button: Button?) {
+    if let focusedButton = focusedButton {
+      focusedButton.unfocus()
+    }
+    focusedButton = button
+    if let focusedButton = focusedButton {
+      focusedButton.focus()
+    }
+  }
+
+  /// Default method to handle a controller change
+  ///
+  /// This either removes the focus from all buttons when the controller disconnects,
+  /// or focuses on the default button when a controller connects.
+  ///
+  /// - Parameter connected: `true` if a controller has connected
+  func controllerChanged(connected: Bool) {
+    if connected {
+      if focusedButton == nil {
+        focusedButton = defaultFocus
+        if let focusedButton = focusedButton {
+          focusedButton.focus()
+        } else {
+          focusNext()
+        }
+      }
+    } else if let focusedButton = focusedButton {
+      focusedButton.unfocus()
+    }
+  }
+
+  /// Click on the focused button
+  func selectMenuItem() {
+    if let focusedButton = focusedButton {
+      focusedButton.activate()
+    }
+  }
+
+  /// Set controller bindings for menu selection scenes
+  func bindControllerMenuButtons() {
+    Globals.controller.clearActions()
+    // Button A or right shoulder/trigger = fire.  Button A also continues after pause
+    Globals.controller.setAction(\Controller.extendedGamepad?.buttonA) { [weak self] in _ = self?.selectMenuItem() }
+    Globals.controller.setAction(\Controller.extendedGamepad?.dpad.left) { [weak self] in self?.focusPrevious() }
+    Globals.controller.setAction(\Controller.extendedGamepad?.dpad.right) { [weak self] in self?.focusNext() }
+    if Globals.controller.connected {
+      setFocus(defaultFocus)
+    } else {
+      focusedButton?.unfocus()
+    }
+    Globals.controller.changedDelegate = self
+  }
 
   // MARK: - Asteroids
 
@@ -1357,6 +1456,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate {
   override func willMove(from view: SKView) {
     os_log("%s willMove from view", log: .app, type: .debug, name!)
     removeAllActions()
+    Globals.controller.clearActions()
   }
 
   // MARK: - Main update loop

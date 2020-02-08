@@ -12,13 +12,28 @@
 import GameController
 import os.log
 
-// MARK: Game controller interface
+// MARK: Controller changed delegate
+
+/// A scene that wants to be notified of controller connection and disconnection
+/// events should conform to this protocol and set itself as the `Controller`
+/// singleton's change delegate
+protocol ControllerChangedDelegate: class {
+
+  /// This is called when the controller is changed
+  func controllerChanged(connected: Bool)
+}
+
+// MARK: - Game controller interface
 
 /// This is a wrapper around the external game controller framework.  It handles
 /// connection and disconnection events from controllers, finds ones that support the
 /// extended gamepad profile, provides a way to bind closures to button presses, and
 /// reads joystick direction when requested.
 class Controller {
+  /// A button whose press handler I set
+  struct BoundButton {
+    weak var button: GCControllerButtonInput?
+  }
   /// The selected game controller, if any
   var chosenController: GCController?
   /// The extended gamepad profile for the selected controller
@@ -27,6 +42,10 @@ class Controller {
   var buttonActions = [KeyPath<Controller, GCControllerButtonInput?>: () -> Void]()
   /// If the controller has a home button, this holds it
   var homeButton: GCControllerButtonInput?
+  /// Buttons whose press handler was set
+  var boundButtons = [BoundButton]()
+  /// Who to inform if the controller changes
+  weak var changedDelegate: ControllerChangedDelegate?
 
   // MARK: - Initialization
 
@@ -44,6 +63,9 @@ class Controller {
   }
 
   // MARK: - Controller discovery
+
+  /// `true` when a controller is connected
+  var connected: Bool { chosenController != nil}
 
   /// Scan currently attached controllers, find one that's suitable, and bind to it
   @objc func findController() {
@@ -66,6 +88,7 @@ class Controller {
     }
     extendedGamepad = chosenController?.extendedGamepad
     if chosenController != oldController {
+      unbindActions()
       if let controller = chosenController {
         os_log("Found %{public}s", log: .app, type: .debug, controller.vendorName ?? "unknown game controller")
       } else {
@@ -87,6 +110,7 @@ class Controller {
       }
       // Bind button press events to actions for the current controller
       bindActions()
+      changedDelegate?.controllerChanged(connected: connected)
     }
     // If the controller supports the active LED mechanism, indicate the selected one
     for controller in controllers {
@@ -129,8 +153,8 @@ class Controller {
 
   /// Remove all button bindings
   func clearActions() {
+    unbindActions()
     buttonActions.removeAll()
-    bindActions()
   }
 
   /// Set the binding for a button
@@ -153,13 +177,22 @@ class Controller {
 
   /// Bind buttons on the current controller to the desired actions
   func bindActions() {
+    unbindActions()
     for (path, action) in buttonActions {
       if let buttonInput = self[keyPath: path] {
         // I only care about changes in the pressed state for this, and only do the
         // action on press, not on release
         buttonInput.pressedChangedHandler = { button, value, pressed in if pressed { action() } }
+        boundButtons.append(BoundButton(button: buttonInput))
       }
     }
+  }
+
+  func unbindActions() {
+    for boundButton in boundButtons {
+      boundButton.button?.pressedChangedHandler = nil
+    }
+    boundButtons.removeAll()
   }
 
   // MARK: - Joystick handling

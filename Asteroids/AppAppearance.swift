@@ -48,6 +48,8 @@ class AppAppearance {
   static let borderColor = AppAppearance.green
   /// Dangerous button outlines that require confirmation use this color
   static let dangerBorderColor = AppAppearance.red
+  /// Buttons have this color when focused
+  static let focusColor = AppAppearance.yellow
   /// This color is used in the transition between scenes.
   ///
   /// Originally I had this set to AppAppearance.darkBlue, but I think it's better

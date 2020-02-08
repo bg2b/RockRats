@@ -46,14 +46,6 @@ class MenuScene: BasicScene {
   weak var gameCenterAuthVC: UIViewController?
   /// `true` when `gameCenterAuthVC` is being shown
   var presentingGCAuth = false
-  /// All of the buttons used in the scene
-  ///
-  /// We need this because the menu is not reconstructed from scratch every time.
-  /// When a transition happens, it's possible for a button to be in an intermediate
-  /// state (e.g., the player might have touched two buttons at once, and only one
-  /// can activate).  So the buttons have to be reset to their starting states upon
-  /// coming back to the menu.
-  var buttons = [Button]()
 
   // MARK: - Initialization
 
@@ -90,7 +82,9 @@ class MenuScene: BasicScene {
     // Settings
     let settingsButton = Button(imageNamed: "settingsbutton", imageColor: AppAppearance.buttonColor, size: buttonSize)
     settingsButton.action = { [unowned self] in self.showSettings() }
-    let bottomHstack = horizontalStack(nodes: [settingsButton, playButton, highScoresButton], minSpacing: buttonSpacing)
+    buttons = [settingsButton, playButton, highScoresButton]
+    defaultFocus = playButton
+    let bottomHstack = horizontalStack(nodes: buttons, minSpacing: buttonSpacing)
     bottomHstack.position = CGPoint(x: bottomHstack.position.x,
                                     y: fullFrame.minY + buttonSize.height + buttonSpacing - bottomHstack.position.y)
     menu.addChild(bottomHstack)
@@ -226,6 +220,8 @@ class MenuScene: BasicScene {
     // half-touched state when we come back to the menu.  So be sure to clear the
     // state of all the buttons.
     buttons.forEach { $0.resetAndCancelConfirmation() }
+    // Set up controller
+    bindControllerMenuButtons()
     // The player may have adjusted the audio level in the settings
     audio.level = UserData.audioLevel.value
     // Reset the number of things the player has tapped; they have to do the full

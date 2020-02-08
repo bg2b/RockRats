@@ -25,6 +25,8 @@ import SpriteKit
 class Button: SKNode {
   /// The border of the button, highlighted during touch processing
   let border: SKShapeNode
+  /// The normal border color (unfocused)
+  var borderColor: UIColor
   /// The labels or pictures inside the button; the button cycles through these upon
   /// activation
   var decorations = [SKNode]()
@@ -62,6 +64,7 @@ class Button: SKNode {
     buttonBorder.isAntialiased = true
     buttonBorder.position = .zero
     self.border = buttonBorder
+    self.borderColor = borderColor
     super.init()
     addChild(buttonBorder)
     name = "button"
@@ -97,6 +100,14 @@ class Button: SKNode {
     self.init(imagesNamed: [imageName], imageColor: imageColor, size: size)
   }
 
+  /// Make a button around some other node
+  ///
+  /// This is used currently just for stacking up two labels when a single-line text
+  /// is too wide to fit the button.
+  ///
+  /// - Parameters:
+  ///   - node: The node to wrap
+  ///   - size: The desired (minimum) size of the button
   convenience init(forNode node: SKNode, size: CGSize) {
     self.init(around: node, minSize: size)
     addChild(node)
@@ -121,27 +132,6 @@ class Button: SKNode {
     decorations.append(label)
   }
 
-  /// Make a button displaying text that requires confirmation
-  /// - Parameters:
-  ///   - text: The text shown initially
-  ///   - confirmText: The text shown to prompt for confirmation
-  ///   - fontSize: The font size (font is the app's standard font)
-  ///   - size: The desired (minimum) size of the button
-  convenience init(forText text: String, confirmText: String, fontSize: CGFloat, size: CGSize) {
-    self.init(forText: text, fontSize: fontSize, size: size)
-    border.strokeColor = AppAppearance.dangerBorderColor
-    let confirmLabel = SKLabelNode(text: confirmText)
-    confirmLabel.name = "buttonConfirmText"
-    confirmLabel.fontName = AppAppearance.font
-    confirmLabel.fontSize = fontSize
-    confirmLabel.fontColor = AppAppearance.dangerButtonColor
-    confirmLabel.horizontalAlignmentMode = .center
-    confirmLabel.verticalAlignmentMode = .center
-    addChild(confirmLabel)
-    confirmLabel.isHidden = true
-    confirmDecoration = confirmLabel
-  }
-
   required init(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented by Button")
   }
@@ -149,6 +139,7 @@ class Button: SKNode {
   /// Add a confirmation requirement for the button
   /// - Parameter confirmDecoration: The decoration to show for confirmation
   func requiresConfirmation(_ confirmDecoration: SKNode) {
+    borderColor = AppAppearance.dangerBorderColor
     border.strokeColor = AppAppearance.dangerBorderColor
     self.confirmDecoration = confirmDecoration
     addChild(confirmDecoration)
@@ -186,6 +177,17 @@ class Button: SKNode {
     resetTouch()
   }
 
+  /// Indicate that the button has focus
+  func focus() {
+    border.strokeColor = AppAppearance.focusColor
+  }
+
+  /// Indicate that the button is not focused
+  func unfocus() {
+    border.strokeColor = borderColor
+  }
+
+  /// Beep to indicate that a button has been clicked
   func clickSound() {
     if let audio = (scene as? BasicScene)?.audio {
       audio.soundEffect(.click)
@@ -261,6 +263,22 @@ class Button: SKNode {
     decorations[currentDecoration].isHidden = false
   }
 
+  /// Handle a click
+  func activate() {
+    guard enabled else { return }
+    if makeSound {
+      clickSound()
+    }
+    if wasConfirmed() {
+      // Call nextDecoration first so that the action can reference selectedValue
+      // to get the button's state.
+      nextDecoration()
+      action?()
+    } else {
+      requireConfirmation()
+    }
+  }
+
   /// Start touch processing for a button
   ///
   /// If the button is enabled and not yet active, then the first touch gets
@@ -306,18 +324,8 @@ class Button: SKNode {
   override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
     for touch in touches {
       guard touch == clickTouch else { continue }
-      if border.frame.contains(touch.location(in: self)), enabled {
-        if makeSound {
-          clickSound()
-        }
-        if wasConfirmed() {
-          // Call nextDecoration first so that the action can reference selectedValue
-          // to get the button's state.
-          nextDecoration()
-          action?()
-        } else {
-          requireConfirmation()
-        }
+      if border.frame.contains(touch.location(in: self)) {
+        activate()
       }
       resetTouch()
     }

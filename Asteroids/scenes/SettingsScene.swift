@@ -90,7 +90,9 @@ class SettingsScene: BasicScene {
     // Game credits
     let creditsButton = Button(imageNamed: "infobutton", imageColor: AppAppearance.buttonColor, size: buttonSize)
     creditsButton.action = { [unowned self] in self.showCredits() }
-    let bottomHstack = horizontalStack(nodes: [menuButton, playButton, creditsButton], minSpacing: buttonSpacing)
+    buttons = [menuButton, playButton, creditsButton]
+    defaultFocus = playButton
+    let bottomHstack = horizontalStack(nodes: buttons, minSpacing: buttonSpacing)
     bottomHstack.position = CGPoint(x: bottomHstack.position.x,
                                     y: fullFrame.minY + buttonSize.height + buttonSpacing - bottomHstack.position.y)
     settings.addChild(bottomHstack)
@@ -112,6 +114,7 @@ class SettingsScene: BasicScene {
       replayButtons[2].action = { [unowned self] in self.replayConclusion() }
     }
     let replayHstack = horizontalStack(nodes: replayButtons, minSpacing: buttonSpacing)
+    buttons.append(contentsOf: replayButtons)
     // Resetting scores and achievements
     let resetButtonImages = ["resetscores", "resetgamecenter"]
     var resetButtons = [Button]()
@@ -130,6 +133,7 @@ class SettingsScene: BasicScene {
       resetAchievementsButton.disable()
     }
     let resetHstack = horizontalStack(nodes: resetButtons, minSpacing: buttonSpacing)
+    buttons.append(contentsOf: resetButtons)
     // Options like sound volume and control preferences
     var optionButtons = [Button]()
     volumeButton = Button(imagesNamed: ["soundnone", "soundsmall", "soundmed", "soundbig"],
@@ -183,6 +187,7 @@ class SettingsScene: BasicScene {
       optionButtons.append(shipStyleButton)
     }
     let optionsHstack = horizontalStack(nodes: optionButtons, minSpacing: buttonSpacing)
+    buttons.append(contentsOf: optionButtons)
     let vstack = verticalStack(nodes: [replayHstack, resetHstack, optionsHstack], minSpacing: buttonSpacing)
     let wantedMidY = 0.5 * (title.frame.minY + bottomHstack.calculateAccumulatedFrame().maxY)
     // Center verticalStack vertically at wantedMidY
@@ -450,6 +455,7 @@ class SettingsScene: BasicScene {
   /// - Parameter view: The view that will display the scene
   override func didMove(to view: SKView) {
     super.didMove(to: view)
+    bindControllerMenuButtons()
     if !fortunes.isEmpty {
       nextFortune()
     }
