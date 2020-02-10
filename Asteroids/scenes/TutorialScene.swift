@@ -437,7 +437,7 @@ class TutorialScene: GameTutorialScene {
       hasJumped = false
       wait(for: samplingTime) { self.observeStick(direction: direction, successes: 0, then: action) }
     } else {
-      if joystickDirection.dotProd(direction) > 0.75 {
+      if joystick().dotProd(direction) > 0.75 {
         // The stick is in the right direction
         wait(for: samplingTime) { self.observeStick(direction: direction, successes: successes + 1, then: action) }
       } else {
@@ -495,7 +495,7 @@ class TutorialScene: GameTutorialScene {
     showInstructions("@Slide@ and @hold@", toDo: "to @rotate left@", delay: instructionDelay) {
       let delta = CGVector(dx: -1.25 * self.slideAmount, dy: 0)
       self.showSlideAndHold(position: self.movementPosition(), moveBy: delta)
-      self.observeStick(direction: CGVector(dx: 0, dy: 1), successes: 0, then: self.training2)
+      self.observeStick(direction: CGVector(dx: -1, dy: 0), successes: 0, then: self.training2)
     }
   }
 
@@ -503,7 +503,7 @@ class TutorialScene: GameTutorialScene {
     showInstructions("@Slide@ and @hold@", toDo: "to @rotate right@", delay: instructionDelay) {
       let delta = CGVector(dx: 1.25 * self.slideAmount, dy: 0)
       self.showSlideAndHold(position: self.movementPosition(), moveBy: delta)
-      self.observeStick(direction: CGVector(dx: 0, dy: -1), successes: 0, then: self.training3)
+      self.observeStick(direction: CGVector(dx: 1, dy: 0), successes: 0, then: self.training3)
     }
   }
 
@@ -511,7 +511,7 @@ class TutorialScene: GameTutorialScene {
     showInstructions("@Slide@ and @hold@ to", toDo: "@thrust forwards@", delay: instructionDelay) {
       let delta = CGVector(dx: 0, dy: 1.25 * self.slideAmount)
       self.showSlideAndHold(position: self.movementPosition(), moveBy: delta)
-      self.observeStick(direction: CGVector(dx: 1, dy: 0), successes: 0, then: self.training4)
+      self.observeStick(direction: CGVector(dx: 0, dy: 1), successes: 0, then: self.training4)
     }
   }
 
@@ -519,7 +519,7 @@ class TutorialScene: GameTutorialScene {
     showInstructions("@Slide@ and @hold@ to", toDo: "@thrust backwards@", delay: instructionDelay) {
       let delta = CGVector(dx: 0, dy: -1.25 * self.slideAmount)
       self.showSlideAndHold(position: self.movementPosition(), moveBy: delta)
-      self.observeStick(direction: CGVector(dx: -1, dy: 0), successes: 0, then: self.training5)
+      self.observeStick(direction: CGVector(dx: 0, dy: -1), successes: 0, then: self.training5)
     }
   }
 
