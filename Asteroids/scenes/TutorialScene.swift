@@ -279,18 +279,10 @@ class TutorialScene: GameTutorialScene {
       // Poor man's centering...
       touchLabel.attributedText = attributedText("    @Slide@\nand @hold@")
     } else {
-      if UserData.joystickOnLeft.value {
-        // Put the label to the right
-        touchLabel.position = position + CGVector(dx: 0.75 * shapeSize, dy: 0)
-        touchLabel.horizontalAlignmentMode = .left
-        touchLabel.attributedText = attributedText("@Slide@\nand @hold@")
-      } else {
-        // Put the label to the left
-        touchLabel.position = position + CGVector(dx: -0.75 * shapeSize, dy: 0)
-        touchLabel.horizontalAlignmentMode = .right
-        // Poor man's right justification
-        touchLabel.attributedText = attributedText("        @Slide@\nand @hold@")
-      }
+      // Put the label to the right
+      touchLabel.position = position + CGVector(dx: 0.75 * shapeSize, dy: 0)
+      touchLabel.horizontalAlignmentMode = .left
+      touchLabel.attributedText = attributedText("@Slide@\nand @hold@")
       touchLabel.verticalAlignmentMode = .center
     }
     let initialDelay = 0.25
@@ -319,8 +311,7 @@ class TutorialScene: GameTutorialScene {
     // Add an amount for a slide
     cornerOffset += CGVector(dx: 0.5 * 1.25 * slideAmount, dy: 0.5 * 1.25 * slideAmount)
     // Final start point
-    let onLeft = CGPoint(x: gameFrame.minX, y: gameFrame.minY) + cornerOffset
-    return UserData.joystickOnLeft.value ? onLeft : CGPoint(x: -onLeft.x, y: onLeft.y)
+    return CGPoint(x: gameFrame.minX, y: gameFrame.minY) + cornerOffset
   }
 
   /// Make the touch tutor show a tap-tap-tap gesture
@@ -366,15 +357,9 @@ class TutorialScene: GameTutorialScene {
     touchLabel.isHidden = false
     touchLabel.numberOfLines = 1
     let shapeSize = touchShapes[0].frame.width
-    if UserData.joystickOnLeft.value {
-      // Label to the left
-      touchLabel.position = position + CGVector(dx: -0.75 * shapeSize, dy: 0)
-      touchLabel.horizontalAlignmentMode = .right
-    } else {
-      // Label to the right
-      touchLabel.position = position + CGVector(dx: 0.75 * shapeSize, dy: 0)
-      touchLabel.horizontalAlignmentMode = .left
-    }
+    // Label to the left
+    touchLabel.position = position + CGVector(dx: -0.75 * shapeSize, dy: 0)
+    touchLabel.horizontalAlignmentMode = .right
     touchLabel.verticalAlignmentMode = .center
     touchLabel.attributedText = attributedText("@Swipe@")
     let initialDelay = 0.1

@@ -254,8 +254,6 @@ class UserData {
   static var heartbeatMuted = DefaultsValue<Bool>(name: "heartbeatMuted", defaultValue: false)
   /// `true` if touches are shown during a game
   static var showTouches = DefaultsValue<Bool>(name: "showTouches", defaultValue: true)
-  /// `true` if the joystick is on the left
-  static var joystickOnLeft = DefaultsValue<Bool>(name: "controlsOnLeft", defaultValue: true)
   /// Retro mode preference (ignored if Game Center is disabled or the player does
   /// not have the blastFromThePast achievement)
   static var retroMode = DefaultsValue<Bool>(name: "retroMode", defaultValue: false)

@@ -221,7 +221,7 @@ class GameTutorialScene: BasicScene {
     guard !gamePaused else { return }
     for touch in touches {
       let location = touch.location(in: self)
-      if location.x * (UserData.joystickOnLeft.value ? 1 : -1) > fullFrame.midX {
+      if location.x > fullFrame.midX {
         // Touches on this side are for firing or warping
         fireOrWarpTouches[touch] = location
         displayTouchBegan(touch: touch, location: location)
