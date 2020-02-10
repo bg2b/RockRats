@@ -375,6 +375,20 @@ class GameTutorialScene: BasicScene {
     }
   }
 
+  /// Action for continuing when the game is paused
+  func continueIfPaused() {
+    if gamePaused {
+      doContinue()
+    }
+  }
+
+  /// Action for quitting when the game is paused
+  func quitIfPaused() {
+    if gamePaused {
+      doQuit()
+    }
+  }
+
   /// Handle controller connection and disconnection events by pausing
   /// - Parameter connected: `true` if a controller has just connected
   override func controllerChanged(connected: Bool) {
@@ -385,16 +399,28 @@ class GameTutorialScene: BasicScene {
 
   /// Bind controller buttons to actions
   ///
-  /// I account for player preferences by just assigning multiple buttons for each
-  /// action.  The player can press whatever button they find convenient.
+  /// I account for most player preferences by just assigning multiple buttons for
+  /// each action.  The player can press whatever button they find convenient.
+  /// Thrust is the exception; there are different installed bindings when A/B are
+  /// assigned to thrust vs to fire/hyperspace.
   func bindControllerPlayButtons() {
     Globals.controller.clearActions()
-    // Button A or right shoulder/trigger = fire.  Button A also continues after pause
-    Globals.controller.setAction(\Controller.extendedGamepad?.buttonA) { [weak self] in _ = self?.fireButton(canUnpause: true) }
+    if UserData.buttonThrust.value {
+      // The player wants to use A/B for thrust, but when the game is paused these
+      // still correspond to continue/quit
+      Globals.controller.setAction(\Controller.extendedGamepad?.buttonA) { [weak self] in self?.continueIfPaused() }
+      Globals.controller.setAction(\Controller.extendedGamepad?.buttonB) { [weak self] in self?.quitIfPaused() }
+    } else {
+      // When thrust is via the joystick...
+      // Button A = fire and continue after pause
+      Globals.controller.setAction(\Controller.extendedGamepad?.buttonA) { [weak self] in _ = self?.fireButton(canUnpause: true) }
+      // Button B = hyperspace and quit after pause
+      Globals.controller.setAction(\Controller.extendedGamepad?.buttonB) { [weak self] in self?.hyperspaceButton(canQuit: true) }
+    }
+    // Right shoulder/trigger = fire
     Globals.controller.setAction(\Controller.extendedGamepad?.rightTrigger) { [weak self] in _ = self?.fireButton() }
     Globals.controller.setAction(\Controller.extendedGamepad?.rightShoulder) { [weak self] in _ = self?.fireButton() }
-    // Button B or left shoulder/trigger = hyperspace.  Button B also quits after pause
-    Globals.controller.setAction(\Controller.extendedGamepad?.buttonB) { [weak self] in self?.hyperspaceButton(canQuit: true) }
+    // Left shoulder/trigger = hyperspace
     Globals.controller.setAction(\Controller.extendedGamepad?.leftTrigger) { [weak self] in self?.hyperspaceButton() }
     Globals.controller.setAction(\Controller.extendedGamepad?.leftShoulder) { [weak self] in self?.hyperspaceButton() }
     // Home/menu/option buttons pause and unpause.  I'll also throw in button X
@@ -416,11 +442,10 @@ class GameTutorialScene: BasicScene {
   /// - Returns: A vector representing the joystick, x-axis = rotation, y-axis = thrust
   func joystick() -> CGVector {
     let controllerDirection = Globals.controller.joystick()
-    let touchDirection = joystickDirection
-    if controllerDirection.length() > touchDirection.length() {
+    if controllerDirection.length() > joystickDirection.length() {
       return controllerDirection
     } else {
-      return touchDirection
+      return joystickDirection
     }
   }
 

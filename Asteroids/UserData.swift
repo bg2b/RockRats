@@ -254,6 +254,8 @@ class UserData {
   static var heartbeatMuted = DefaultsValue<Bool>(name: "heartbeatMuted", defaultValue: false)
   /// `true` if touches are shown during a game
   static var showTouches = DefaultsValue<Bool>(name: "showTouches", defaultValue: true)
+  /// `true` when thrust is using controller A/B buttons instead of joystick
+  static var buttonThrust = DefaultsValue<Bool>(name: "buttonThrust", defaultValue: false)
   /// Retro mode preference (ignored if Game Center is disabled or the player does
   /// not have the blastFromThePast achievement)
   static var retroMode = DefaultsValue<Bool>(name: "retroMode", defaultValue: false)

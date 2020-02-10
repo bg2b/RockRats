@@ -649,7 +649,6 @@ class BasicScene: SKScene, SKPhysicsContactDelegate, ControllerChangedDelegate {
   ///
   /// - Parameter direction: The direction to move
   func moveFocus(direction: Int) {
-    print("movefocus")
     guard !buttons.isEmpty else { return }
     var index: Int
     if let focusedButton = focusedButton {
@@ -1456,7 +1455,6 @@ class BasicScene: SKScene, SKPhysicsContactDelegate, ControllerChangedDelegate {
   override func willMove(from view: SKView) {
     os_log("%s willMove from view", log: .app, type: .debug, name!)
     removeAllActions()
-    Globals.controller.clearActions()
   }
 
   // MARK: - Main update loop

@@ -29,8 +29,10 @@ class SettingsScene: BasicScene {
   var heartbeatButton: Button!
   /// The UFO sound continous/fading button
   var ufoFadeButton: Button!
-  /// The controls left/right button
-  var controlsButton: Button!
+  /// The show touches button
+  var showTouchesButton: Button!
+  /// Selector for setting thrust via controller joystick vs A/B buttons
+  var joystickThrustButton: Button!
   /// Unlocked ship styles
   var shipStyles = [String]()
   /// Ship appearance button (chooses modern of various colors or retro)
@@ -160,11 +162,22 @@ class SettingsScene: BasicScene {
       ufoFadeButton.disable()
     }
     optionButtons.append(ufoFadeButton)
-    controlsButton = Button(imagesNamed: ["showtouchesoff", "showtoucheson"],
-                            imageColor: AppAppearance.buttonColor, size: buttonSize)
-    controlsButton.selectedValue = UserData.showTouches.value ? 1 : 0
-    controlsButton.action = { [unowned self] in self.toggleControls() }
-    optionButtons.append(controlsButton)
+    if Globals.controller.connected {
+      // If there's a controller, show a preference for thrust using the stick or
+      // dpad vs thrust on A/B buttons
+      joystickThrustButton = Button(imagesNamed: ["thruststick", "thrustbuttons"],
+                                    imageColor: AppAppearance.buttonColor, size: buttonSize)
+      joystickThrustButton.selectedValue = UserData.buttonThrust.value ? 1 : 0
+      joystickThrustButton.action = { [unowned self] in self.toggleJoystickThrust() }
+      optionButtons.append(joystickThrustButton)
+    } else {
+      // Show preference for touches displayed or not
+      showTouchesButton = Button(imagesNamed: ["showtouchesoff", "showtoucheson"],
+                                 imageColor: AppAppearance.buttonColor, size: buttonSize)
+      showTouchesButton.selectedValue = UserData.showTouches.value ? 1 : 0
+      showTouchesButton.action = { [unowned self] in self.toggleShowTouches() }
+      optionButtons.append(showTouchesButton)
+    }
     // Get the unlocked ship colors
     shipStyles = unlockedShipColors().map { "shipmodern_\($0)" }
     // This retro/modern selection is only available if the player has the
@@ -341,8 +354,13 @@ class SettingsScene: BasicScene {
   }
 
   /// Toggle showing touches on/off
-  func toggleControls() {
-    UserData.showTouches.value = (controlsButton.selectedValue == 1)
+  func toggleShowTouches() {
+    UserData.showTouches.value = (showTouchesButton.selectedValue == 1)
+  }
+
+  /// Toggle showing touches on/off
+  func toggleJoystickThrust() {
+    UserData.buttonThrust.value = (joystickThrustButton.selectedValue == 1)
   }
 
   /// Choose the ship style

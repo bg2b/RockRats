@@ -188,6 +188,7 @@ class Controller {
     }
   }
 
+  /// Remove bindings to the current controller and clear the desired bindings
   func unbindActions() {
     for boundButton in boundButtons {
       boundButton.button?.pressedChangedHandler = nil
@@ -198,8 +199,17 @@ class Controller {
   // MARK: - Joystick handling
 
   /// Convert a direction pad state into a `CGVector` as used by the game
-  func asJoystick(_ stick: GCControllerDirectionPad) -> CGVector {
-    return CGVector(dx: CGFloat(stick.xAxis.value), dy: CGFloat(stick.yAxis.value))
+  func asJoystick(_ extendedGamepad: GCExtendedGamepad,
+                  _ path: KeyPath<GCExtendedGamepad, GCControllerDirectionPad>) -> CGVector {
+    let stick = extendedGamepad[keyPath: path]
+    if UserData.buttonThrust.value {
+      // User preference for A/B buttons to thrust
+      let thrust = CGFloat(extendedGamepad.buttonA.value - extendedGamepad.buttonB.value)
+      return CGVector(dx: CGFloat(stick.xAxis.value), dy: thrust)
+    } else {
+      // User preference for y-axis of stick to thrust
+      return CGVector(dx: CGFloat(stick.xAxis.value), dy: CGFloat(stick.yAxis.value))
+    }
   }
 
   /// Read the current joystick state
@@ -208,8 +218,8 @@ class Controller {
     guard let extendedGamepad = extendedGamepad else { return .zero }
     // I read both thumbstick and dpad so that the player can use whichever is most
     // comfortable for them.  Whichever one is moved is the one that gets returned
-    let stick1 = asJoystick(extendedGamepad.dpad)
-    let stick2 = asJoystick(extendedGamepad.leftThumbstick)
+    let stick1 = asJoystick(extendedGamepad, \GCExtendedGamepad.dpad)
+    let stick2 = asJoystick(extendedGamepad, \GCExtendedGamepad.leftThumbstick)
     if stick2.length() > stick1.length() {
       return stick2
     } else {
