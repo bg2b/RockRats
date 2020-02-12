@@ -166,7 +166,7 @@ class SettingsScene: BasicScene {
       // If there's a controller, show a preference for thrust using the stick or
       // dpad vs thrust on A/B buttons
       joystickThrustButton = Button(imagesNamed: ["thruststick", "thrustbuttons"],
-                                    imageColor: AppAppearance.buttonColor, size: buttonSize)
+                                    imageColor: .white, size: buttonSize)
       joystickThrustButton.selectedValue = UserData.buttonThrust.value ? 1 : 0
       joystickThrustButton.action = { [unowned self] in self.toggleJoystickThrust() }
       optionButtons.append(joystickThrustButton)
