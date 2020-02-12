@@ -541,7 +541,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate, ControllerChangedDelegate {
   ///
   /// - Parameter enable: `true` if the filter should be turned on
   func setGameAreaBlur(_ enable: Bool) {
-    gameArea.shouldEnableEffects = enable && shader != nil
+    gameArea.shouldEnableEffects = enable && gameArea.shader != nil
   }
 
   // MARK: - Pause shaders
