@@ -27,16 +27,22 @@ class TutorialScene: GameTutorialScene {
   var attributes: AttrStyles!
   /// A label node in the center of the screen for various messages
   var centralLabel: SKLabelNode!
-  /// Instruction label at the top
-  var instructionLabel: SKLabelNode!
-  /// Label that tells what the gesture does, just below `instructionLabel`
+  /// Instruction labels at the top
+  var instructionLabels = [SKLabelNode]()
+  /// Label that tells what the gesture does, just below `instructionLabels`
   var toDoLabel: SKLabelNode!
   /// Amount of time to delay between showing instructions and showing a gesture
   let instructionDelay = 1.0
+  /// Tutors for touch and controller
+  var tutors = [SKNode]()
   /// Touch tutor shapes
   var touchShapes = [SKNode]()
-  /// Label for the gesture that the tutor is showing
+  /// Label for the gesture that the touch tutor is showing
   var touchLabel: SKLabelNode!
+  /// Controller sprite with nothing pressed
+  var inactiveController: SKSpriteNode!
+  /// Controller sprite with whatever buttons pressed
+  var activeController: SKSpriteNode!
   /// Set to `true` after observing a hyperspace jump
   var hasJumped = false
   /// Counter for shots fired
@@ -66,21 +72,28 @@ class TutorialScene: GameTutorialScene {
     centralLabel.isHidden = true
     tutorialStuff.addChild(centralLabel)
     // Instructions and subinstructions at the top
-    instructionLabel = SKLabelNode()
-    instructionLabel.name = "instructionLabel"
-    instructionLabel.position = CGPoint(x: gameFrame.midX, y: gameFrame.maxY - attributes.fontSize)
-    instructionLabel.isHidden = true
-    tutorialStuff.addChild(instructionLabel)
+    for _ in 0 ..< 2 {
+      let instructionLabel = SKLabelNode()
+      instructionLabel.name = "instructionLabel"
+      instructionLabel.position = CGPoint(x: gameFrame.midX, y: gameFrame.maxY - attributes.fontSize)
+      instructionLabel.isHidden = true
+      tutorialStuff.addChild(instructionLabel)
+      instructionLabels.append(instructionLabel)
+    }
     toDoLabel = SKLabelNode()
     toDoLabel.name = "toDoLabel"
-    toDoLabel.position = instructionLabel.position - CGVector(dx: 0, dy: attributes.fontSize)
+    toDoLabel.position = instructionLabels[0].position - CGVector(dx: 0, dy: attributes.fontSize)
     toDoLabel.isHidden = true
     tutorialStuff.addChild(toDoLabel)
+    // Touch tutor
+    let touchTutor = SKNode()
+    touchTutor.name = "touchTutor"
+    tutorialStuff.addChild(touchTutor)
     // A label for the touch tutor's gesture name (repositioned by the tutor)
     touchLabel = SKLabelNode(fontNamed: attributes.fontName)
     touchLabel.name = "touchShapeLabel"
     touchLabel.isHidden = true
-    tutorialStuff.addChild(touchLabel)
+    touchTutor.addChild(touchLabel)
     // Touch tutor shapes
     // I'll grab a pair from TouchDisplay which gets the right ones from the sprite
     // cache.  These will be modified but are just thrown away and not placed back in
@@ -92,8 +105,24 @@ class TutorialScene: GameTutorialScene {
       shape.isHidden = true
       shape.alpha = 0.5
       shape.zPosition = 0
-      tutorialStuff.addChild(shape)
+      touchTutor.addChild(shape)
     }
+    tutors.append(touchTutor)
+    // Controller tutor
+    let controllerTutor = SKNode()
+    controllerTutor.name = "controllerTutor"
+    tutorialStuff.addChild(controllerTutor)
+    inactiveController = SKSpriteNode(imageNamed: "controller")
+    inactiveController.name = "inactiveController"
+    inactiveController.position = CGPoint(x: gameFrame.minX + inactiveController.size.width / 2 + 50,
+                                          y: gameFrame.minY + inactiveController.size.height / 2 + 50)
+    inactiveController.alpha = 0.5
+    inactiveController.isHidden = true
+    controllerTutor.addChild(inactiveController)
+    tutors.append(controllerTutor)
+    // Initial visibility of tutors
+    touchTutor.isHidden = Globals.controller.connected
+    controllerTutor.isHidden = !touchTutor.isHidden
   }
 
   /// Create a tutorial scene
@@ -148,38 +177,69 @@ class TutorialScene: GameTutorialScene {
     if !toDoLabel.isHidden {
       toDoLabel.run(.sequence([.fadeOut(withDuration: duration), .hide()]))
     }
-    if !instructionLabel.isHidden {
+    var allWereHidden = true
+    for instructionLabel in instructionLabels where !instructionLabel.isHidden {
       instructionLabel.run(.sequence([.fadeOut(withDuration: duration), .hide()]), completion: action)
-    } else {
+      allWereHidden = false
+    }
+    if allWereHidden {
       action()
     }
   }
 
   /// Display something in the instructions field, then do an action
   /// - Parameters:
-  ///   - instructions: The message to show
+  ///   - instructions: The messages to show, first for touch, second for controller
   ///   - toDo: An optional message for the second line below
   ///   - delay: Amount to wait after the instructions appear
   ///   - action: What to do afterwards
-  func showInstructions(_ instructions: String, toDo: String?, delay: Double, then action: @escaping () -> Void) {
-    if !instructionLabel.isHidden {
+  func showInstructions(_ instructions: [String], toDo: String?, delay: Double, then action: @escaping () -> Void) {
+    if !instructionLabels.allSatisfy { $0.isHidden } {
       // If something is visible, fade it out first
       hideInstructions { self.showInstructions(instructions, toDo: toDo, delay: delay, then: action) }
     } else {
       let duration = 0.25
+      toDoLabel.alpha = 0
       if let toDo = toDo {
-        instructionLabel.alpha = 0
         toDoLabel.attributedText = attributedText(toDo)
         toDoLabel.isHidden = false
         toDoLabel.run(.fadeIn(withDuration: duration))
       } else {
         toDoLabel.isHidden = true
       }
-      toDoLabel.alpha = 0
-      instructionLabel.attributedText = attributedText(instructions)
-      instructionLabel.isHidden = false
-      instructionLabel.run(.sequence([.fadeIn(withDuration: duration), .wait(forDuration: delay)]), completion: action)
+      let fadeInAction = SKAction.sequence([.fadeIn(withDuration: duration), .wait(forDuration: delay)])
+      let visibleIndex = Globals.controller.connected ? 1 : 0
+      for index in 0 ..< 2 {
+        let instructionLabel = instructionLabels[index]
+        instructionLabel.alpha = 0
+        instructionLabel.attributedText = attributedText(instructions[index])
+        if index == visibleIndex {
+          instructionLabel.isHidden = false
+          instructionLabel.run(fadeInAction, completion: action)
+        } else {
+          instructionLabel.isHidden = true
+          instructionLabel.run(fadeInAction)
+        }
+      }
     }
+  }
+
+  // MARK: - Game controller handling
+
+  /// Handle controller connection and disconnection events by pausing and switching instructions
+  /// - Parameter connected: `true` if a controller has just connected
+  override func controllerChanged(connected: Bool) {
+    if !gamePaused {
+      doPause()
+    }
+    let newIndex = connected ? 1 : 0
+    let oldIndex = 1 - newIndex
+    if !instructionLabels[oldIndex].isHidden {
+      instructionLabels[newIndex].isHidden = false
+      instructionLabels[oldIndex].isHidden = true
+    }
+    tutors[oldIndex].isHidden = true
+    tutors[newIndex].isHidden = false
   }
 
   // MARK: - Player spawning and death
@@ -238,6 +298,9 @@ class TutorialScene: GameTutorialScene {
       shape.isHidden = true
     }
     touchLabel.isHidden = true
+    activeController?.removeFromParent()
+    activeController = nil
+    inactiveController.isHidden = true
   }
 
   /// Show a success message, then perform an action after a short delay
@@ -255,7 +318,7 @@ class TutorialScene: GameTutorialScene {
     // When this is being called from observeAsteroids after the last bit of asteroid has
     // been destroyed but they've lost some lives, don't be quite so effusive in the praise.
     let message = anyShipsDestroyed ? "Could have been better..." : "@Good!@"
-    showInstructions(message, toDo: nil, delay: 3, then: action)
+    showInstructions([message, message], toDo: nil, delay: 3, then: action)
   }
 
   /// Make the touch tutor show a slide-and-hold gesture
@@ -385,6 +448,34 @@ class TutorialScene: GameTutorialScene {
     return CGPoint(x: -pos.x, y: pos.y)
   }
 
+  // MARK: - Controller tutor
+
+  func flipControllerAction() {
+    inactiveController.isHidden = !inactiveController.isHidden
+    activeController.isHidden = !inactiveController.isHidden
+  }
+
+  /// Display an action on the game controller
+  /// - Parameters:
+  ///   - imageName: The name of the image for the active controller
+  ///   - durations: The lengths of time between inactive/active flips
+  func showControllerAction(imageName: String, durations: [Double]) {
+    activeController = SKSpriteNode(imageNamed: imageName)
+    activeController.name = "activeController"
+    activeController.alpha = inactiveController.alpha
+    activeController.position = inactiveController.position
+    activeController.isHidden = true
+    tutors[1].addChild(activeController)
+    inactiveController.isHidden = false
+    let doFlip = SKAction.run { self.flipControllerAction() }
+    var flips = [SKAction]()
+    for duration in durations {
+      flips.append(.wait(forDuration: duration))
+      flips.append(doFlip)
+    }
+    activeController.run(.repeatForever(.sequence(flips)))
+  }
+
   // MARK: - Observing actions
 
   /// Do a hyperspace jump, but set a flag when it happens
@@ -477,55 +568,70 @@ class TutorialScene: GameTutorialScene {
   // MARK: - Training steps
 
   func training1() {
-    showInstructions("@Slide@ and @hold@", toDo: "to @rotate left@", delay: instructionDelay) {
+    showInstructions(["@Slide@ and @hold@", "Dpad/stick @left@"], toDo: "to @rotate left@", delay: instructionDelay) {
       let delta = CGVector(dx: -1.25 * self.slideAmount, dy: 0)
       self.showSlideAndHold(position: self.movementPosition(), moveBy: delta)
+      self.showControllerAction(imageName: "controllerleft", durations: [0.5, 3])
       self.observeStick(direction: CGVector(dx: -1, dy: 0), successes: 0, then: self.training2)
     }
   }
 
   func training2() {
-    showInstructions("@Slide@ and @hold@", toDo: "to @rotate right@", delay: instructionDelay) {
+    showInstructions(["@Slide@ and @hold@", "Dpad/stick @right@"], toDo: "to @rotate right@", delay: instructionDelay) {
       let delta = CGVector(dx: 1.25 * self.slideAmount, dy: 0)
       self.showSlideAndHold(position: self.movementPosition(), moveBy: delta)
+      self.showControllerAction(imageName: "controllerright", durations: [0.5, 3])
       self.observeStick(direction: CGVector(dx: 1, dy: 0), successes: 0, then: self.training3)
     }
   }
 
   func training3() {
-    showInstructions("@Slide@ and @hold@ to", toDo: "@thrust forwards@", delay: instructionDelay) {
+    let controllerMsg = UserData.buttonThrust.value ? "Button @A@ to" : "Dpad/stick @up@ to"
+    showInstructions(["@Slide@ and @hold@ to", controllerMsg], toDo: "@thrust forwards@", delay: instructionDelay) {
       let delta = CGVector(dx: 0, dy: 1.25 * self.slideAmount)
       self.showSlideAndHold(position: self.movementPosition(), moveBy: delta)
+      let controllerAction = UserData.buttonThrust.value ? "controllera" : "controllerup"
+      self.showControllerAction(imageName: controllerAction, durations: [0.5, 3])
       self.observeStick(direction: CGVector(dx: 0, dy: 1), successes: 0, then: self.training4)
     }
   }
 
   func training4() {
-    showInstructions("@Slide@ and @hold@ to", toDo: "@thrust backwards@", delay: instructionDelay) {
+    let controllerMsg = UserData.buttonThrust.value ? "Button @B@ to" : "Dpad/stick @down@ to"
+    showInstructions(["@Slide@ and @hold@ to", controllerMsg], toDo: "@thrust backwards@", delay: instructionDelay) {
       let delta = CGVector(dx: 0, dy: -1.25 * self.slideAmount)
       self.showSlideAndHold(position: self.movementPosition(), moveBy: delta)
+      let controllerAction = UserData.buttonThrust.value ? "controllerb" : "controllerdown"
+      self.showControllerAction(imageName: controllerAction, durations: [0.5, 3])
       self.observeStick(direction: CGVector(dx: 0, dy: -1), successes: 0, then: self.training5)
     }
   }
 
   func training5() {
-    showInstructions("@Tap@ to", toDo: "@fire lasers@", delay: instructionDelay) {
+    let controllerMsg = UserData.buttonThrust.value ? "Button @R@ to" : "Buttons @A@ or @R@ to"
+    showInstructions(["@Tap@ to", controllerMsg], toDo: "@fire lasers@", delay: instructionDelay) {
       self.showTaps(position: self.shootAndJumpPosition())
+      let controllerAction = UserData.buttonThrust.value ? "controllerrtrig" : "controllerartrig"
+      self.showControllerAction(imageName: controllerAction, durations: [1, 0.1, 0.1, 0.1, 0.1, 0.1])
       self.shotsFired = 0
       self.observeShooting(then: self.training6)
     }
   }
 
   func training6() {
-    showInstructions("@Swipe@ to", toDo: "@jump to hyperspace@", delay: instructionDelay) {
+    let controllerMsg = UserData.buttonThrust.value ? "Button @L@ to" : "Buttons @B@ or @L@ to"
+    showInstructions(["@Swipe@ to", controllerMsg], toDo: "@jump to hyperspace@", delay: instructionDelay) {
       self.showSwipe(position: self.shootAndJumpPosition(), moveBy: CGVector(dx: 0, dy: 1.25 * self.slideAmount))
+      let controllerAction = UserData.buttonThrust.value ? "controllerltrig" : "controllerbltrig"
+      self.showControllerAction(imageName: controllerAction, durations: [1, 0.25])
       self.hasJumped = false
       self.observeHyperspace(then: self.training7)
     }
   }
 
   func training7() {
-    showInstructions("@Shoot@ lasers to", toDo: "@destroy the asteroid@", delay: instructionDelay) {
+    let msg = "@Shoot@ lasers to"
+    showInstructions([msg, msg], toDo: "@destroy the asteroid@", delay: instructionDelay) {
       self.spawnAsteroid(size: .huge)
       self.observeAsteroid(then: self.trainingComplete)
     }
