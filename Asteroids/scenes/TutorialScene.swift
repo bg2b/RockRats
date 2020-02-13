@@ -567,6 +567,7 @@ class TutorialScene: GameTutorialScene {
 
   // MARK: - Training steps
 
+  /// Rotate left training
   func training1() {
     showInstructions(["@Slide@ and @hold@", "Dpad/stick @left@"], toDo: "to @rotate left@", delay: instructionDelay) {
       let delta = CGVector(dx: -1.25 * self.slideAmount, dy: 0)
@@ -576,6 +577,7 @@ class TutorialScene: GameTutorialScene {
     }
   }
 
+  /// Rotate right training
   func training2() {
     showInstructions(["@Slide@ and @hold@", "Dpad/stick @right@"], toDo: "to @rotate right@", delay: instructionDelay) {
       let delta = CGVector(dx: 1.25 * self.slideAmount, dy: 0)
@@ -585,6 +587,7 @@ class TutorialScene: GameTutorialScene {
     }
   }
 
+  /// Thrust training
   func training3() {
     let controllerMsg = UserData.buttonThrust.value ? "Button @A@ to" : "Dpad/stick @up@ to"
     showInstructions(["@Slide@ and @hold@ to", controllerMsg], toDo: "@thrust forwards@", delay: instructionDelay) {
@@ -596,6 +599,7 @@ class TutorialScene: GameTutorialScene {
     }
   }
 
+  /// Reverse thrust training
   func training4() {
     let controllerMsg = UserData.buttonThrust.value ? "Button @B@ to" : "Dpad/stick @down@ to"
     showInstructions(["@Slide@ and @hold@ to", controllerMsg], toDo: "@thrust backwards@", delay: instructionDelay) {
@@ -607,6 +611,7 @@ class TutorialScene: GameTutorialScene {
     }
   }
 
+  /// Fire laser training
   func training5() {
     let controllerMsg = UserData.buttonThrust.value ? "Button @R@ to" : "Buttons @A@ or @R@ to"
     showInstructions(["@Tap@ to", controllerMsg], toDo: "@fire lasers@", delay: instructionDelay) {
@@ -618,6 +623,7 @@ class TutorialScene: GameTutorialScene {
     }
   }
 
+  /// Hyperspace jump training
   func training6() {
     let controllerMsg = UserData.buttonThrust.value ? "Button @L@ to" : "Buttons @B@ or @L@ to"
     showInstructions(["@Swipe@ to", controllerMsg], toDo: "@jump to hyperspace@", delay: instructionDelay) {
@@ -629,6 +635,7 @@ class TutorialScene: GameTutorialScene {
     }
   }
 
+  /// Destroy an asteroid training
   func training7() {
     let msg = "@Shoot@ lasers to"
     showInstructions([msg, msg], toDo: "@destroy the asteroid@", delay: instructionDelay) {
