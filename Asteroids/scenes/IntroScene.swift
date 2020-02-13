@@ -179,6 +179,10 @@ class IntroScene: BasicScene {
   func intro() {
     introLabel.isHidden = false
     introLabel.typeIn(text: introduction, attributes: attributes, sound: transmissionSounds) {
+      // Don't bind actions and focus on the button until the message has been displayed
+      self.buttons = [self.doneButton]
+      self.defaultFocus = self.doneButton
+      self.bindControllerMenuButtons()
       self.doneButton.run(.sequence([.unhide(), .fadeIn(withDuration: 0.5)]))
     }
   }
