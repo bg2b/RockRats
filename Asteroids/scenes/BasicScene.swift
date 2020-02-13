@@ -696,7 +696,9 @@ class BasicScene: SKScene, SKPhysicsContactDelegate, ControllerChangedDelegate {
   /// - Parameter connected: `true` if a controller has connected
   func controllerChanged(connected: Bool) {
     if connected {
-      if focusedButton == nil {
+      if let focusedButton = focusedButton {
+        focusedButton.focus()
+      } else {
         focusedButton = defaultFocus
         if let focusedButton = focusedButton {
           focusedButton.focus()
