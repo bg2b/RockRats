@@ -1226,8 +1226,8 @@ class BasicScene: SKScene, SKPhysicsContactDelegate, ControllerChangedDelegate {
             action: (_ node1: SKNode, _ node2: SKNode) -> Void) {
     let b1 = contact.bodyA
     let b2 = contact.bodyB
-    guard let node1 = contact.bodyA.node, node1.parent != nil else { return }
-    guard let node2 = contact.bodyB.node, node2.parent != nil else { return }
+    guard let node1 = b1.node, node1.parent != nil else { return }
+    guard let node2 = b2.node, node2.parent != nil else { return }
     if b1.isA(type1) && b2.isA(type2) {
       action(node1, node2)
     } else if b2.isA(type1) && b1.isA(type2) {
