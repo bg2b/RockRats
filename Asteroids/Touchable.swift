@@ -41,8 +41,6 @@ class Touchable: SKNode {
   /// Make the wrapper handle touches
   override var isUserInteractionEnabled: Bool {
     get { return true }
-    // The setter must be specified to have a legal override, but swiftlint doesn't like it
-    // swiftlint:disable:next unused_setter_value
     set {}
   }
 

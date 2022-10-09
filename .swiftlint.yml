@@ -1,11 +1,11 @@
 disabled_rules:
   - file_length
   - function_body_length
-  - body_length
   - type_body_length
   - line_length
   - cyclomatic_complexity
   - force_cast
+  - inclusive_language
 
 identifier_name:
   min_length: 1

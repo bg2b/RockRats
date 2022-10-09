@@ -194,7 +194,7 @@ class TutorialScene: GameTutorialScene {
   ///   - delay: Amount to wait after the instructions appear
   ///   - action: What to do afterwards
   func showInstructions(_ instructions: [String], toDo: String?, delay: Double, then action: @escaping () -> Void) {
-    if !instructionLabels.allSatisfy { $0.isHidden } {
+    if !instructionLabels.allSatisfy({ $0.isHidden }) {
       // If something is visible, fade it out first
       hideInstructions { self.showInstructions(instructions, toDo: toDo, delay: delay, then: action) }
     } else {

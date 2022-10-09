@@ -184,10 +184,8 @@ struct HighScores {
     } else {
       // iCloud and the local scores come from the same generation, so merge
       highScores = localScores
-      for score in globalScores {
-        if (highScores.firstIndex { sameScore(score, $0) }) == nil {
-          highScores.append(score)
-        }
+      for score in globalScores where (highScores.firstIndex { sameScore(score, $0) }) == nil {
+        highScores.append(score)
       }
     }
     highScores = sortedAndTrimmed(highScores)

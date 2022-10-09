@@ -44,10 +44,8 @@ extension ImageMask {
   /// - Returns: `true` for iterior pixels
   func isInterior(_ x: Int, _ y: Int) -> Bool {
     for dx in [-1, 0, 1] {
-      for dy in [-1, 0, 1] {
-        if !self[x + dx, y + dy] {
-          return false
-        }
+      for dy in [-1, 0, 1] where !self[x + dx, y + dy] {
+        return false
       }
     }
     return true
@@ -58,10 +56,8 @@ extension ImageMask {
   func boundary() -> [(Int, Int)] {
     var result = [(Int, Int)]()
     for x in 0 ..< width {
-      for y in 0 ..< height {
-        if self[x, y] && !isInterior(x, y) {
-          result.append((x, y))
-        }
+      for y in 0 ..< height where self[x, y] && !isInterior(x, y) {
+        result.append((x, y))
       }
     }
     return result

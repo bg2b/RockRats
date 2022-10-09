@@ -17,7 +17,7 @@ import os.log
 /// A scene that wants to be notified of controller connection and disconnection
 /// events should conform to this protocol and set itself as the `Controller`
 /// singleton's change delegate
-protocol ControllerChangedDelegate: class {
+protocol ControllerChangedDelegate: AnyObject {
 
   /// This is called when the controller is changed
   func controllerChanged(connected: Bool)
@@ -104,7 +104,7 @@ class Controller {
       let vendor = chosenController?.vendorName ?? "unknown"
       if vendor.hasPrefix("DUALSHOCK 4") || vendor.hasPrefix("Xbox") {
         // Playstation and Xbox controllers have a home button, so watch for it
-        chosenController?.extendedGamepad?.valueChangedHandler = { [weak self] gamepad, controllerElement in
+        chosenController?.extendedGamepad?.valueChangedHandler = { [weak self] _, controllerElement in
           self?.findHomeButton(controllerElement)
         }
       }
@@ -182,7 +182,7 @@ class Controller {
       if let buttonInput = self[keyPath: path] {
         // I only care about changes in the pressed state for this, and only do the
         // action on press, not on release
-        buttonInput.pressedChangedHandler = { button, value, pressed in if pressed { action() } }
+        buttonInput.pressedChangedHandler = { _, _, pressed in if pressed { action() } }
         boundButtons.append(BoundButton(button: buttonInput))
       }
     }
