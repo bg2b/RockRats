@@ -649,14 +649,14 @@
 				CODE_SIGN_ENTITLEMENTS = Asteroids/Asteroids.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1.1.0;
+				CURRENT_PROJECT_VERSION = 1.2.0;
 				DEVELOPMENT_TEAM = 4NCA37UMUQ;
 				INFOPLIST_FILE = Asteroids/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.davidlong.Asteroids;
 				PRODUCT_NAME = "Rock Rats";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -672,14 +672,14 @@
 				CODE_SIGN_ENTITLEMENTS = Asteroids/Asteroids.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1.1.0;
+				CURRENT_PROJECT_VERSION = 1.2.0;
 				DEVELOPMENT_TEAM = 4NCA37UMUQ;
 				INFOPLIST_FILE = Asteroids/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.davidlong.Asteroids;
 				PRODUCT_NAME = "Rock Rats";
 				PROVISIONING_PROFILE_SPECIFIER = "";
