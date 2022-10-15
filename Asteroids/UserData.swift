@@ -89,7 +89,7 @@ struct GameCounter {
     get {
       let merged = mergedDict()
       let playerID = UserData.currentPlayerID.value
-      let result = merged[playerID] ?? 0
+      let result = merged[playerID] ?? merged[oldPlayerID(playerID)] ?? 0
       os_log("%{public}s for %s is %d", log: .app, type: .debug, name, playerID, result)
       return result
     }
@@ -270,8 +270,13 @@ class UserData {
   static var highScores = HighScores()
   /// Whoever is logged into Game Center, or "anon" if no one
   static var currentPlayerID = DefaultsValue<String>(name: "currentPlayerID", defaultValue: "anon")
-  /// Mapping between current player IDs and new player IDs for whenever Game Center
-  /// switches over
+  /// Mapping between old player IDs and new player IDs.  Previous versions of the
+  /// program saved the GKPlayer.gamePlayerID for the now-deprecated
+  /// GKPlayer.playerID here.  When looking up the value of a counter like the number
+  /// of asteroids destroyed, I check the dictionary under currentPlayerID.  If
+  /// there's no entry, it may be that they have previously played under an older
+  /// version.  In that case, I'll also check if newPlayerIDs[oldID] ==
+  /// currentPlayerID for some oldID.  If so, look under oldID for the counter value.
   static var newPlayerIDs = DefaultsValue<[String: String]>(name: "newPlayerIDs", defaultValue: [String: String]())
   /// Mapping between player IDs and display names for high score boards.  I use this
   /// to just save names for the local players rather than relying on being able to
@@ -307,22 +312,28 @@ func savePlayerName(_ playerID: String, playerName: String) {
 /// - Parameters:
 ///   - playerID: ID for the player that just logged in
 ///   - playerName: The name that should be used for the player (their alias)
-///   - alternatePlayerID: An optional alternate ID that should be saved for
-///     transitioning persistent state when the deprecated `GKPlayer` `playerID` is
-///     no longer available
-func setCurrentPlayer(_ playerID: String, playerName: String, alternatePlayerID: String?) {
+func setCurrentPlayer(_ playerID: String, playerName: String) {
   // Someone logged in on Game Center; make sure we have the right counters for them.
   UserData.currentPlayerID.value = playerID
   savePlayerName(playerID, playerName: playerName)
-  if let alternatePlayerID = alternatePlayerID {
-    UserData.newPlayerIDs.value[playerID] = alternatePlayerID
-  }
-  os_log("Player is now %s (alternate %s), name %s", log: .app, type: .debug, playerID, alternatePlayerID ?? "<none>", playerName)
+  os_log("Player is now %s, name %{public}s", log: .app, type: .debug, playerID, playerName)
   UserData.ufosDestroyed.value = UserData.ufosDestroyedCounter.value
   UserData.asteroidsDestroyed.value = UserData.asteroidsDestroyedCounter.value
   os_log("UFO counter %d, asteroid counter %d", log: .app, type: .debug, UserData.ufosDestroyed.value, UserData.asteroidsDestroyed.value)
   // Synchronize in case either local or iCloud was out-of-date.
   updateGameCounters()
+}
+
+/// Find the old player ID corresponding to a new one.  The new one comes from
+/// gamePlayerID, whereas the old one came from the now-deprecated playerID.
+/// - Parameter playerID: the new-style ID
+/// - Returns: the corresponding old-style ID if any, else just playerID
+func oldPlayerID(_ playerID: String) -> String {
+  for (oldID, newID) in UserData.newPlayerIDs.value where newID == playerID {
+    os_log("Found old player ID %s for new ID %s", log: .app, type: .debug, oldID, playerID)
+    return oldID
+  }
+  return playerID
 }
 
 /// Synchronize local counters (for asteroids and UFOs destroyed) with the main

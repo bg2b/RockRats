@@ -12,30 +12,16 @@
 import GameKit
 import os.log
 
-// At some point, playerID will become gamePlayerID on iOS ?? devices since playerID
-// is deprecated.  The alternatePlayerID is to allow a smooth transition without
-// losing player progress.  I assume that they'll upgrade to iOS 13 sometime during
-// the transition period so that the alternate ID is available.
 extension GKPlayer {
-  /// primaryPlayerID is a wrapper around the playerID/gamePlayerID stuff.  Currently
-  /// it just returns playerID, but in some future release when playerID is no longer
-  /// available, it will become gamePlayerID.
-  var primaryPlayerID: String { playerID }
-  /// alternatePlayerID is either nil (unavailable / irrelevant) or will return
-  /// gamePlayerID when that is available and the app is currently using playerID as
-  /// the primaryPlayerID.  The alternatePlayerID should be saved in that case so
-  /// that persistent state associated with the player can be transitioned in newer
-  /// versions of the app.
-  var alternatePlayerID: String? {
-    if #available(iOS 13, *) {
-      // It would be nice if there was some documentation about the mysterious
-      // circumstances mentioned in scopedIDsArePersistent about when gamePlayerID
-      // can be trusted.
-      return scopedIDsArePersistent() ? gamePlayerID : nil
-    } else {
-      return nil
-    }
-  }
+  /// Data like counts of the number of asteroids destroyed is stored in a dictionary
+  /// indexed by primaryPlayerID.  Initially primaryPlayerID was the now-deprecated
+  /// playerID, and there was a secondaryPlayerID that returned the newly introduced
+  /// gamePlayerID (teamPlayerID would have been fine too).  Mappings between the
+  /// primary and secondary IDs were saved so that the counter values saved under the
+  /// old playerID can be found now that use of playerID has been removed and the
+  /// primary ID is gamePlayerID.  TLDR: when the user upgrades, they shouldn't lose
+  /// their progress.
+  var primaryPlayerID: String { gamePlayerID }
 }
 
 /// GameCenterInterface is a wrapper around the Game Center functionality.  It
@@ -71,9 +57,7 @@ class GameCenterInterface {
   /// Is Game Center enabled (i.e., there's an authenticated local player)?
   var enabled: Bool { GKLocalPlayer.local.isAuthenticated }
   /// The primary ID of the authenticated player (valid when `enabled`)
-  var primaryPlayerID: String { GKLocalPlayer.local.primaryPlayerID }
-  /// The alternate ID (if any) of the authenticated player (if any).
-  var alternatePlayerID: String? { GKLocalPlayer.local.alternatePlayerID }
+  var playerID: String { GKLocalPlayer.local.primaryPlayerID }
   /// This is the name to address the player by
   var playerName: String { enabled ? GKLocalPlayer.local.alias : "Anonymous" }
 
@@ -97,20 +81,20 @@ class GameCenterInterface {
             self?.setAchievementIdentifiers(allAchievements, error: error)
           }
         }
-        if self.primaryPlayerID != self.lastPlayerID {
+        if self.playerID != self.lastPlayerID {
           self.playerAchievements.removeAll()
           self.playerAchievementsProgress.removeAll()
-          self.lastPlayerID = self.primaryPlayerID
+          self.lastPlayerID = self.playerID
           self.localPlayerScore = nil
           self.leaderboardScores.removeAll()
         }
         // I use alias instead of displayName deliberately, since I don't like the
         // display name of "Me" from iOS 12.
-        setCurrentPlayer(self.primaryPlayerID, playerName: GKLocalPlayer.local.alias, alternatePlayerID: self.alternatePlayerID)
+        setCurrentPlayer(self.playerID, playerName: GKLocalPlayer.local.alias)
         self.loadPlayerAchievements()
         self.loadLeaderboards()
       } else {
-        setCurrentPlayer("anon", playerName: "Anonymous", alternatePlayerID: nil)
+        setCurrentPlayer("anon", playerName: "Anonymous")
         self.playerAchievements.removeAll()
         self.playerAchievementsProgress.removeAll()
         self.localPlayerScore = nil
@@ -310,7 +294,7 @@ class GameCenterInterface {
     // score gives us the updated name for the local player though, so I may as well
     // ensure that it's recorded here.  The high score list is built after saveScore,
     // so it'll get the new name.
-    savePlayerName(primaryPlayerID, playerName: GKLocalPlayer.local.alias)
+    savePlayerName(playerID, playerName: GKLocalPlayer.local.alias)
     return GameScore(score: gcScore)
   }
 
