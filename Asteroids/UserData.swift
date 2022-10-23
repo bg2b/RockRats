@@ -336,6 +336,13 @@ func oldPlayerID(_ playerID: String) -> String {
   return playerID
 }
 
+/// Find the new player ID corresponding to an old one
+/// - Parameter playerID: the old-style ID
+/// - Returns: the corresponding new-style ID if any, else just playerID
+func newPlayerID(_ playerID: String) -> String {
+  return UserData.newPlayerIDs.value[playerID] ?? playerID
+}
+
 /// Synchronize local counters (for asteroids and UFOs destroyed) with the main
 /// counters.  Typically this would just copy the local counters at the end of a game
 /// to the iCloud-backed main ones, but if the same player has been playing on

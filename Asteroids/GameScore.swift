@@ -46,7 +46,7 @@ struct GameScore: Equatable {
     date = Date().timeIntervalSinceReferenceDate
   }
 
-  /// Make a score from a Game Center `GKScore`
+  /// Make a score from a Game Center `GKLeaderboard.Entry`
   ///
   /// The display name can be specified explicitly if showing the Game Center alias
   /// of the player isn't desired.
@@ -54,17 +54,17 @@ struct GameScore: Equatable {
   /// - Todo:
   ///   Check what happens if displayName is `nil` and the alias in the score has
   ///   characters that aren't in our font.
-  init(score: GKScore, displayName: String? = nil) {
-    playerID = score.player.primaryPlayerID
+  init(entry: GKLeaderboard.Entry, displayName: String? = nil) {
+    playerID = entry.player.primaryPlayerID
     // I'm deliberately using alias instead of displayName because I don't like iOS
     // 12's "Me".
     // Originally I was using the displayName and filtering it like this
     //   String(score.player.displayName.filter { $0.isASCII })
     // with the filtering necessary to get rid of iOS 12's quote marks.  Should
     // filtering still be used?
-    playerName = displayName ?? score.player.alias
-    points = Int(score.value)
-    date = score.date.timeIntervalSinceReferenceDate
+    playerName = displayName ?? entry.player.alias
+    points = entry.score
+    date = entry.date.timeIntervalSinceReferenceDate
   }
 
   /// Make a score from a dictionary
@@ -77,7 +77,10 @@ struct GameScore: Equatable {
     let playerName = dict["playerName"] as? String ?? nil
     guard let points = dict["points"] as? Int else { return nil }
     guard let date = dict["date"] as? Double else { return nil }
-    self.playerID = playerID
+    // Now that I've switched to new-style player IDs, convert locally-saved scores
+    // during decoding.  After being converted, the updated IDs will be used when
+    // scores are saved.
+    self.playerID = newPlayerID(playerID)
     self.playerName = playerName
     self.points = points
     self.date = date

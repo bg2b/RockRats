@@ -303,66 +303,70 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     physicsWorld.contactDelegate = self
     // Start with the local high scores
     var highScores = UserData.highScores.value
+    // Add the just-earned score, if any
+    if let score, !highScores.contains(where: { sameScore(score, $0) }) {
+      highScores.append(score)
+    }
     // Merge in scores from Game Center, if those are available
-    if let gc = Globals.gcInterface, gc.enabled, !gc.leaderboardScores.isEmpty {
-      var ranks = Array(1 ... gc.leaderboardScores.count)
-      // The scores from the weekly leaderboard at positions indicated by ranks will
-      // be included in the display.  I'll show up to three scores from the
-      // leaderboard.
-      if gc.leaderboardScores.count >= 4 {
-        ranks = [1, 2, 4]
-        if gc.leaderboardScores.count >= 5 {
-          ranks = [1, 3, 5]
-          if gc.leaderboardScores.count >= 10 {
-            ranks = [1, 3, 10]
+    if let gc = Globals.gcInterface, gc.enabled {
+      for leaderboardName in ["weekly", "daily"] {
+        let leaderboard = gc.leaderboard(leaderboardName)
+        guard let scores = leaderboard.scores() else { continue }
+        if scores.isEmpty {
+          continue
+        }
+        var ranks = Array(1 ... scores.count)
+        // The scores from the leaderboard at positions indicated by ranks will be
+        // included in the display.  I'll show up to three scores from each
+        // leaderboard.
+        if scores.count >= 4 {
+          ranks = [1, 2, 4]
+          if scores.count >= 5 {
+            ranks = [1, 3, 5]
+            if scores.count >= 10 {
+              ranks = [1, 3, 10]
+            }
+          }
+        }
+        // Leaderboard scores are shown like Weekly #2 or Daily #5 to give a better
+        // picture of how the player compares globally
+        let format = leaderboardName.capitalized + " #%d"
+        for rank in ranks {
+          let globalScore = GameScore(entry: scores[rank - 1],
+                                      displayName: String(format: format, rank))
+          // The same score might be on multiple leaderboards, and might also be
+          // saved locally.  Be sure not to add the score more than once.
+          if !highScores.contains(where: { sameScore(globalScore, $0) }) {
+            highScores.append(globalScore)
+          }
+        }
+        var playerScore = score?.points ?? 0
+        if playerScore > 0 && leaderboardName == "weekly" {
+          // See if the player has achieved a high rank on the weekly leaderboards
+          // (either through the just-played game, or through a previous game)
+          if let previousWeeklyPlayerEntry = leaderboard.localPlayerEntry {
+            playerScore = max(playerScore, previousWeeklyPlayerEntry.score)
+          }
+          let weeklyRank = (scores.firstIndex { playerScore >= $0.score } ?? 100) + 1
+          if weeklyRank == 1 {
+            reportAchievement(achievement: .top10)
+            reportAchievement(achievement: .top3)
+            reportAchievement(achievement: .top1)
+          } else if weeklyRank <= 3 {
+            reportAchievement(achievement: .top10)
+            reportAchievement(achievement: .top3)
+          } else if weeklyRank <= 10 {
+            reportAchievement(achievement: .top10)
           }
         }
       }
-      var globalScores = [GameScore]()
-      for rank in 1 ... gc.leaderboardScores.count {
-        // This style keeps the Game Center names.
-        // let globalScore = GameScore(score: gc.leaderboardScores[rank - 1])
-        //
-        // This styles replaces the names with Weekly #1, Weekly #10, etc.  I think
-        // these are better for giving the player an idea of where they stand.  Note
-        // that the display name is not considered in the sameScore test for adding
-        // this score to highScores, so if the current player happens to be at one of
-        // those positions then their name will still be used.  (Actually if they get
-        // on to the global leaderboard at such a position but then reset their local
-        // device high scores and come look at the high score screen, they won't see
-        // their name, but it serves them right...)
-        let globalScore = GameScore(score: gc.leaderboardScores[rank - 1], displayName: "Weekly #\(rank)")
-        globalScores.append(globalScore)
-        if ranks.contains(rank) && (highScores.firstIndex { sameScore($0, globalScore) }) == nil {
-          highScores.append(globalScore)
-        }
-      }
-      // Sort everything by points
-      highScores = highScores.sorted { $0.points > $1.points || ($0.points == $1.points && $0.date > $1.date) }
-      for score in highScores {
-        let date = Date(timeIntervalSinceReferenceDate: score.date)
-        os_log("score %{public}s %d %f %{public}s", log: .app, type: .debug,
-               score.playerName ?? "unknown", score.points, score.date, "\(date)")
-      }
-      var playerScore = score?.points ?? 0
-      // See if the player has achieved a high rank on the weekly leaderboards
-      // (either through the just-played game, or through a previous game that they
-      // played sometime during the last week that is now a top score because some
-      // other scores dropped off by being too old).
-      if let previousWeeklyPlayerScore = gc.localPlayerScore {
-        playerScore = max(playerScore, GameScore(score: previousWeeklyPlayerScore).points)
-      }
-      let globalRank = (globalScores.firstIndex { playerScore >= $0.points } ?? 100) + 1
-      if globalRank == 1 {
-        reportAchievement(achievement: .top10)
-        reportAchievement(achievement: .top3)
-        reportAchievement(achievement: .top1)
-      } else if globalRank <= 3 {
-        reportAchievement(achievement: .top10)
-        reportAchievement(achievement: .top3)
-      } else if globalRank <= 10 {
-        reportAchievement(achievement: .top10)
-      }
+    }
+    // Sort everything by points
+    highScores = highScores.sorted { $0.points > $1.points || ($0.points == $1.points && $0.date > $1.date) }
+    for score in highScores {
+      let date = Date(timeIntervalSinceReferenceDate: score.date)
+      os_log("score %{public}s %d %f %{public}s", log: .app, type: .debug,
+             score.playerName ?? "unknown", score.points, score.date, "\(date)")
     }
     // Display the top ten combined scores
     initScores(score: score, highScores: Array(highScores.prefix(10)))
@@ -421,12 +425,8 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
       return
     }
     os_log("HighScoreScene will show Game Center", log: .app, type: .debug)
-    let gcvc = GKGameCenterViewController()
+    let gcvc = GKGameCenterViewController(state: .achievements)
     gcvc.gameCenterDelegate = self
-    // The high scores scene includes information from the Game Center leaderboards
-    // already, so default to showing the player's achievements.
-    gcvc.viewState = .achievements
-    gcvc.leaderboardTimeScope = .week
     isPaused = true
     showingGCVC = true
     rootVC.present(gcvc, animated: true)

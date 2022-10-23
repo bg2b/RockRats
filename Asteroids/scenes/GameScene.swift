@@ -840,18 +840,19 @@ class GameScene: GameTutorialScene {
   /// End of game, report the score to Game Center (if active) and get ready to
   /// transition to the high scores scene
   func saveScoreAndPrepareHighScores() -> GameScore {
-    // When Game Center is active, I need to report the score and refresh
-    // leaderboards.  When game over calls this method, I have 6 seconds before the
-    // earliest possible transition to the high scores screen.  It doesn't take long
-    // to create the high scores scene, so I'll report the score immediately, then
-    // wait a couple of seconds to refresh Game Center leaderboards, and then a
-    // couple more seconds for the leaderboard data to load.  If the leaderboard data
-    // doesn't load in time, I'll wind up creating the high scores scene with
-    // somewhat out-of-date Game Center scores, but whatevs.
-    let gc = Globals.gcInterface!
-    let gameScore = gc.enabled ? gc.saveScore(score) : GameScore(points: score)
+    let gameScore = GameScore(points: score)
     _ = UserData.highScores.addScore(gameScore)
-    if gc.enabled {
+    if let gc = Globals.gcInterface, gc.enabled {
+      // When Game Center is active, I need to report the score and refresh
+      // leaderboards.  When game over calls this method, I have about 6 seconds
+      // before the earliest possible transition to the high scores screen.  It
+      // doesn't take long to create the high scores scene, so I'll report the score
+      // immediately, then wait a couple of seconds to refresh Game Center
+      // leaderboards, and then a couple more seconds for the leaderboard data to
+      // load.  If the leaderboard data doesn't load in time, I'll wind up creating
+      // the high scores scene with somewhat out-of-date Game Center scores, but
+      // whatevs.
+      gc.saveScore(score)
       wait(for: 2) { gc.loadLeaderboards() }
     }
     return gameScore

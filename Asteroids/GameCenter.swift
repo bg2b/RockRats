@@ -15,23 +15,54 @@ import os.log
 extension GKPlayer {
   /// Data like counts of the number of asteroids destroyed is stored in a dictionary
   /// indexed by primaryPlayerID.  Initially primaryPlayerID was the now-deprecated
-  /// playerID, and there was a secondaryPlayerID that returned the newly introduced
-  /// gamePlayerID (teamPlayerID would have been fine too).  Mappings between the
-  /// primary and secondary IDs were saved so that the counter values saved under the
-  /// old playerID can be found now that use of playerID has been removed and the
-  /// primary ID is gamePlayerID.  TLDR: when the user upgrades, they shouldn't lose
-  /// their progress.
+  /// `playerID`, and there was a secondaryPlayerID that returned the newly
+  /// introduced `gamePlayerID` (`teamPlayerID` would have been fine too).  Mappings
+  /// between the primary and secondary IDs were saved so that the counter values
+  /// saved under the old playerID can be found now that use of `playerID` has been
+  /// removed and the primary ID is `gamePlayerID`.  TLDR: when the user upgrades,
+  /// they shouldn't lose their progress.
   var primaryPlayerID: String { gamePlayerID }
 }
 
-/// GameCenterInterface is a wrapper around the Game Center functionality.  It
-/// interfaces with the authentication mechanism, informs the app of who's playing,
-/// keeps track of what achievements are available and what progress the player has
-/// made in them, loads leaderboards, and passes scores back to Game Center.
+/// Convenience function for use in Game Center completion closures.  Shows a message
+/// and returns `false` if there was an error, else returns `true`.
+private func noError(_ error: Error?, in stage: String) -> Bool {
+  if let error = error {
+    os_log("Game Center interface %{public}s, %{public}s", log: .app, type: .error, stage, error.localizedDescription)
+    return false
+  } else {
+    return true
+  }
+}
+
+/// Convenience function that shows a message if there was an error
+private func logError(_ error: Error?, in stage: String) {
+  _ = noError(error, in: stage)
+}
+
+/// Compute a signature for a score
+/// - Parameter score: The number of points
+private func hashScore(_ score: Int) -> Int {
+  // Stupid hash function to compute a context that will be associated with a
+  // score.  When I load a leaderboard, I toss out any scores that don't have the
+  // right hash.  I don't have any control over what scores may show in Game
+  // Center, but if someone has managed to somehow hack things and get a bogus
+  // score accepted there, this is at least an extra little speedbump that may help
+  // prevent such bogus scores from being displayed on in-game leaderboards.
+  let prime64bit = UInt64(3_354_817_023_488_194_757)
+  // This will overflow and give a randomish 64-bit unsigned value, which is
+  // converted by truncating.  Game Center used to use 64-bit contexts, but now the
+  // prototype is a regular Int.
+  return Int(truncatingIfNeeded: prime64bit &* UInt64(score))
+}
+
+// MARK: - Game Center
+
+/// This is a wrapper around the Game Center functionality.  It interfaces with the
+/// authentication mechanism, informs the app of who's playing, keeps track of what
+/// achievements are available and what progress the player has made in them, loads
+/// leaderboards, and passes scores back to Game Center.
 class GameCenterInterface {
-  /// The Game Center leaderboard identifier (this interface only handles the
-  /// one-leaderboard case)
-  let leaderboardID: String
   /// A closure that will do something appropriate with the Game Center's
   /// authentication view controller if there's no logged-in player.  Typically the
   /// closure would squirrel the controller away so that it can be presented at some
@@ -49,10 +80,8 @@ class GameCenterInterface {
   /// when playing.  Flushed to Game Center if their progress reaches 100%, and also
   /// flushed at the end of a game.
   var playerAchievementsProgress = [String: Double]()
-  /// The local player's score and rank from a leaderboard fetch
-  var localPlayerScore: GKScore?
-  /// Scores retrieved from Game Center from a leaderboard fetch
-  var leaderboardScores = [GKScore]()
+  /// The leaderboards that the game uses
+  let leaderboards: [String: GameCenterLeaderboard]
 
   /// Is Game Center enabled (i.e., there's an authenticated local player)?
   var enabled: Bool { GKLocalPlayer.local.isAuthenticated }
@@ -63,17 +92,17 @@ class GameCenterInterface {
 
   /// Initialize the Game Center interface.  This should be a singleton
   /// - Parameters:
-  ///   - leaderboardID: The app's one-and-only leaderboard identifier
+  ///   - leaderboardNamesAndIDs: The names used to refer to leaderboards and the leaderboard IDs
   ///   - presenter: A closure that should receive Game Center's authentication view controller
   ///   - gcvc: Show this view controller to authenticate to Game Center, `nil` means don't show anything
-  init(leaderboardID: String, presenter: @escaping (_ gcvc: UIViewController?) -> Void) {
-    self.leaderboardID = leaderboardID
+  init(leaderboardNamesAndIDs: [(String, String)], presenter: @escaping (_ gcvc: UIViewController?) -> Void) {
+    self.leaderboards = Dictionary(uniqueKeysWithValues: leaderboardNamesAndIDs.map { ($0.0, GameCenterLeaderboard($0.1)) })
     self.presenter = presenter
     os_log("GameCenterInterface init", log: .app, type: .debug)
     GKLocalPlayer.local.authenticateHandler = { [unowned self] gcAuthorizationViewController, error in
       os_log("GKLocalPlayer authenticate handler called", log: .app, type: .debug)
       self.presenter(gcAuthorizationViewController)
-      self.logError(error, in: "authentication")
+      logError(error, in: "authentication")
       os_log("Game Center is %{public}s", log: .app, type: .info, self.enabled ? "enabled" : "not enabled")
       if self.enabled {
         if self.achievementIdentifiers == nil {
@@ -85,8 +114,9 @@ class GameCenterInterface {
           self.playerAchievements.removeAll()
           self.playerAchievementsProgress.removeAll()
           self.lastPlayerID = self.playerID
-          self.localPlayerScore = nil
-          self.leaderboardScores.removeAll()
+          for (_, leaderboard) in self.leaderboards {
+            leaderboard.clear()
+          }
         }
         // I use alias instead of displayName deliberately, since I don't like the
         // display name of "Me" from iOS 12.
@@ -97,8 +127,9 @@ class GameCenterInterface {
         setCurrentPlayer("anon", playerName: "Anonymous")
         self.playerAchievements.removeAll()
         self.playerAchievementsProgress.removeAll()
-        self.localPlayerScore = nil
-        self.leaderboardScores.removeAll()
+        for (_, leaderboard) in self.leaderboards {
+          leaderboard.clear()
+        }
       }
       NotificationCenter.default.post(name: .authenticationChanged, object: self.enabled)
     }
@@ -116,24 +147,11 @@ class GameCenterInterface {
     }
   }
 
-  func noError(_ error: Error?, in stage: String) -> Bool {
-    if let error = error {
-      os_log("Game Center interface %{public}s, %{public}s", log: .app, type: .error, stage, error.localizedDescription)
-      return false
-    } else {
-      return true
-    }
-  }
-
-  func logError(_ error: Error?, in stage: String) {
-    _ = noError(error, in: stage)
-  }
-
   /// Request the achievements of the local player from Game Center
   func loadPlayerAchievements() {
     GKAchievement.loadAchievements { [weak self] playerAchievements, error in
       guard let self = self else { return }
-      self.logError(error, in: "loading player achievements")
+      logError(error, in: "loading player achievements")
       playerAchievements?.forEach {
         self.playerAchievements[$0.identifier] = $0.percentComplete
         os_log("Achievement %{public}s is %.2f%% complete", log: .app, type: .info, $0.identifier, $0.percentComplete)
@@ -174,7 +192,7 @@ class GameCenterInterface {
     playerAchievements[identifier] = 100
     GKAchievement.report([achievement]) { [weak self] error in
       guard let self = self else { return }
-      if !self.noError(error, in: "reporting achivement \(identifier)") {
+      if !noError(error, in: "reporting achivement \(identifier)") {
         // I don't know how this could happen, but stick this in with the progress
         // achievements and hope that the flush after a game finishes manages to
         // succeed.
@@ -232,7 +250,7 @@ class GameCenterInterface {
       // for retry transparently to us in case of network issues.  But anyway, I'll
       // leave playerAchievementsProgress alone if there is some error.  Maybe the
       // player will try another game and I'll have another go at flushProgress.
-      if self.noError(error, in: "reporting progress achievements") {
+      if noError(error, in: "reporting progress achievements") {
         // Move the completion amounts to playerAchievements to record that they've
         // been successfully sent to Game Center.
         for (identifier, percent) in self.playerAchievementsProgress {
@@ -250,7 +268,7 @@ class GameCenterInterface {
   func resetAchievements() {
     GKAchievement.resetAchievements { [weak self] error in
       guard let self = self else { return }
-      if self.noError(error, in: "resetting achievements") {
+      if noError(error, in: "resetting achievements") {
         self.playerAchievements.removeAll()
         self.playerAchievementsProgress.removeAll()
         self.loadPlayerAchievements()
@@ -258,92 +276,147 @@ class GameCenterInterface {
     }
   }
 
-  /// Compute a signature for a score
-  /// - Parameter score: The number of points
-  func hashScore(_ score: Int) -> UInt64 {
-    // Stupid hash function to compute a context that will be associated with a
-    // score.  When I load a leaderboard, I toss out any scores that don't have the
-    // right hash.  I don't have any control over what scores may show in Game
-    // Center, but if someone has managed to somehow hack things and get a bogus
-    // score accepted there, this is at least an extra little speedbump that may help
-    // prevent such bogus scores from being displayed on in-game leaderboards.
-    let prime64bit = UInt64(3_354_817_023_488_194_757)
-    // This will overflow and give a randomish 64-bit unsigned value
-    return prime64bit &* UInt64(score)
-  }
-
-  /// Report a score to Game Center and return the corresponding `GameScore`
-  ///
-  /// The returned score will have the player's current display name and the date
-  /// that Game Center used for the score.
-  ///
-  /// - Parameter score: The number of points
-  /// - Returns: A `GameScore` built from the `GKScore` that Game Center created
-  func saveScore(_ score: Int) -> GameScore {
-    os_log("Reporting score %{public}d to Game Center", log: .app, type: .info, score)
-    let gcScore = GKScore(leaderboardIdentifier: leaderboardID)
-    gcScore.value = Int64(score)
-    gcScore.context = hashScore(score)
-    GKScore.report([gcScore]) { error in
-      self.logError(error, in: "reporting score")
+  /// Report a score to all the leaderboards at once
+  /// - Parameter score: the number of points
+  func saveScore(_ score: Int) {
+    let leaderboardIDs = leaderboards.map { _, leaderboard in
+      leaderboard.ID
     }
-    // If the app was running and the player logged in, but then they put it in the
-    // background, go off and change their Game Center name, and then come back and
-    // play a game, the name in the high score list (which is coming from the
-    // UserDefaults stuff) might not be updated with the changed name.  Reporting the
-    // score gives us the updated name for the local player though, so I may as well
-    // ensure that it's recorded here.  The high score list is built after saveScore,
-    // so it'll get the new name.
-    savePlayerName(playerID, playerName: GKLocalPlayer.local.alias)
-    return GameScore(score: gcScore)
+    // The hope is that this will turn into a single network call under the hood,
+    // whereas I'm not sure about calling `saveScore` on all the individual
+    // leaderboards.
+    GKLeaderboard.submitScore(score,
+                              context: hashScore(score),
+                              player: GKLocalPlayer.local,
+                              leaderboardIDs: leaderboardIDs) { error in
+      logError(error, in: "reporting score to leaderboards")
+    }
   }
 
-  /// Indicate whether a `GKScore` looks OK
+  /// Find the leaderboard with a given name (must exist)
+  /// - Parameter name: The name for the leaderboard
+  func leaderboard(_ name: String) -> GameCenterLeaderboard {
+    guard let leaderboard = leaderboards[name] else {
+      fatalError("no leaderboard named \(name)")
+    }
+    return leaderboard
+  }
+
+  /// Load all leaderboards
+  func loadLeaderboards() {
+    for (_, leaderboard) in leaderboards {
+      leaderboard.load()
+    }
+  }
+}
+
+// MARK: - Game Center leaderboards
+
+/// This is a wrapper around a single `GKLeaderboard`.  It handles reporting scores
+/// and loading entries.
+class GameCenterLeaderboard {
+  /// The leaderboard ID
+  let ID: String
+  /// The actual `GKLeaderboard` after loading
+  var leaderboard: GKLeaderboard?
+  /// The local player's score on the leaderboard, after scores have loaded
+  var localPlayerEntry: GKLeaderboard.Entry?
+  /// Entries on the leaderboard, after scores have loaded
+  var entries: [GKLeaderboard.Entry]?
+
+  /// Record the Game Center leaderboard ID and load the leaderboard
+  /// - Parameter ID: The leaderboard ID set up in App Store Connect
+  init(_ ID: String) {
+    self.ID = ID
+    self.load()
+  }
+
+  /// Report a score to Game Center
+  /// - Parameter score: The number of points
+  func saveScore(_ score: Int) {
+    os_log("Reporting score %d to %{public}s", log: .app, type: .info, score, ID)
+    leaderboard?.submitScore(score, context: hashScore(score), player: GKLocalPlayer.local) { [weak self] error in
+      guard let self else { return }
+      logError(error, in: "reporting score to \(self.ID)")
+    }
+  }
+
+  /// Indicate whether a score looks OK
   ///
   /// This is a pseudo-anti-cheating mechanism.  If someone managed to hack something
   /// and get Game Center to accept a bogus score, but one that doesn't have a
   /// correct hash value stored in the context, then at least we'll recognize that
   /// here.  The in-app leaderboard display can then ignore such scores.
   ///
-  /// - Parameter score: A score retrieved from Game Center
-  /// - Returns: `true` if the scores context matches the value from `hashScore`
-  func scoreIsValid(_ score: GKScore) -> Bool {
-    return score.context == hashScore(Int(score.value))
+  /// - Parameters:
+  ///   - score: A score supposedly retrieved from Game Center
+  ///   - context: The context from the Game Center entry
+  /// - Returns: `true` if the context matches the value from `hashScore`
+  func scoreIsValid(_ score: Int, context: Int) -> Bool {
+    return context == hashScore(score)
   }
 
   /// Print a score for debugging purposes
   /// - Parameter score: The score to display
-  func printScore(_ score: GKScore?) {
-    if let score = score {
-      let player = score.player
-      let valid = scoreIsValid(score) ? "valid" : "invalid"
-      os_log("player %{public}s, score %d, date %{public}s, rank %d, %{public}s", log: .app, type: .debug,
-             player.alias, score.value, "\(score.date)", score.rank, valid)
+  func printEntry(_ entry: GKLeaderboard.Entry?) {
+    if let entry {
+      let player = entry.player
+      let valid = scoreIsValid(entry.score, context: entry.context) ? "valid" : "invalid"
+      os_log("player %{public}s got %{public}s score %d, rank %d",
+             log: .app, type: .debug, player.alias, valid, entry.score, entry.rank)
     }
   }
 
-  /// Request the weekly leaderboard from Game Center
-  ///
-  /// The results will be stored in `localPlayerScore` and `leaderboardScores`.  If
-  /// an error occurs, those variables aren't changed (so hopefully the app will just
-  /// display slightly out-of-date high scores).
-  ///
-  /// The scores get filtered through `scoreIsValid`, so the request is for 15 scores
-  /// in order to try to have 10 in case a few get dropped.
-  func loadLeaderboards() {
-    let leaderboard = GKLeaderboard()
-    leaderboard.identifier = leaderboardID
-    leaderboard.playerScope = .global
-    leaderboard.range = NSRange(1 ... 15)
-    leaderboard.timeScope = .week
-    leaderboard.loadScores { [weak self] scores, error in
-      guard let self = self else { return }
-      if self.noError(error, in: "requesting scores"), let scores = scores {
-        self.printScore(leaderboard.localPlayerScore)
-        scores.forEach { self.printScore($0) }
-        self.localPlayerScore = leaderboard.localPlayerScore
-        self.leaderboardScores = scores.filter { self.scoreIsValid($0) }
+  /// If the leaderboard (the `GKLeaderboard`, not the actual entries) has not been
+  /// loaded, then load that.  Else load the top scores for the leaderboard.
+  func load() {
+    if let gc = Globals.gcInterface, gc.enabled {
+      if let leaderboard {
+        // The leaderboard has been loaded, so load the actual entries
+        let range = NSRange(1 ... 10)
+        leaderboard.loadEntries(for: .global, timeScope: .allTime, range: range) { [weak self] localPlayerEntry, entries, _, error in
+          guard let self else { return }
+          if noError(error, in: "loading \(self.ID) entries") {
+            os_log("leaderboard %{public}s entries loaded", log: .app, type: .debug, self.ID)
+            // localPlayerEntry for an empty leaderboard seems to come back with
+            // player Anonymous and a score of 0?  Force it to be nil in the player
+            // doesn't match the local player.
+            self.localPlayerEntry = localPlayerEntry?.player == GKLocalPlayer.local ? localPlayerEntry : nil
+            self.printEntry(self.localPlayerEntry)
+            entries?.forEach { self.printEntry($0) }
+            self.entries = entries
+          }
+        }
+      } else {
+        // Find the leaderboard for the ID
+        GKLeaderboard.loadLeaderboards(IDs: [ID]) { [weak self] leaderboards, error in
+          guard let self else { return }
+          logError(error, in: "loading \(self.ID)")
+          self.leaderboard = leaderboards?.first
+          if self.leaderboard != nil {
+            // Leaderboard is now valid, so load the top entries
+            self.load()
+          }
+        }
       }
+    } else {
+      // Game Center is disabled
+      clear()
+    }
+  }
+
+  /// Clear leaderboard info, used when Game Center is disabled
+  func clear() {
+    leaderboard = nil
+    localPlayerEntry = nil
+    entries = nil
+  }
+
+  /// Get the valid leaderboard entries, assuming they've been loaded.  This filters
+  /// out anything where the context doesn't match the number of points.
+  func scores() -> [GKLeaderboard.Entry]? {
+    return entries?.filter { entry in
+      scoreIsValid(entry.score, context: entry.context)
     }
   }
 }

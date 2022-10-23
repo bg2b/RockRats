@@ -39,7 +39,11 @@ class GameViewController: UIViewController {
       let size = CGSize(width: 768 * aspect, height: 768)
       // Create the main menu then trigger the Game Center authentication
       Globals.menuScene = MenuScene(size: size)
-      Globals.gcInterface = GameCenterInterface(leaderboardID: "org.davidlong.Asteroids.normalScores",
+      let leaderboardNames = ["daily", "weekly", "normal"]
+      let leaderboardNamesAndIDs = leaderboardNames.map { name in
+        (name, "org.davidlong.Asteroids." + name + "Scores")
+      }
+      Globals.gcInterface = GameCenterInterface(leaderboardNamesAndIDs: leaderboardNamesAndIDs,
                                                 presenter: { vc in Globals.menuScene.setGameCenterAuth(viewController: vc) })
       // Show the intro on first launch, otherwise the main menu
       let toPresent = UserData.hasDoneIntro.value ? Globals.menuScene! : IntroScene(size: size, conclusion: false)
