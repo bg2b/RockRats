@@ -178,9 +178,11 @@ class MenuScene: BasicScene {
 
   /// Ask for a review and save the number of games played
   func askForReview() {
-    SKStoreReviewController.requestReview()
-    UserData.reviewsRequested.value += 1
-    UserData.gamesPlayedWhenReviewRequested.value = UserData.gamesPlayed.value
+    if let windowScene = view?.window?.windowScene {
+      SKStoreReviewController.requestReview(in: windowScene)
+      UserData.reviewsRequested.value += 1
+      UserData.gamesPlayedWhenReviewRequested.value = UserData.gamesPlayed.value
+    }
   }
 
   /// If the user wants to move on, stop the action that would request a review
@@ -205,7 +207,7 @@ class MenuScene: BasicScene {
       // something.  See about asking for a review.
       let gamesSinceLastReview = UserData.gamesPlayed.value - UserData.gamesPlayedWhenReviewRequested.value
       let numRequests = UserData.reviewsRequested.value
-      let gamesBeforeAsking = [10, 20, 50]
+      let gamesBeforeAsking = [5, 10, 20]
       if gamesSinceLastReview >= gamesBeforeAsking[min(numRequests, gamesBeforeAsking.count - 1)] {
         // A reasonable number of games have been played since the last request.  If
         // they stick around long enough, then poke them to leave a review.
