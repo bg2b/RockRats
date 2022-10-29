@@ -18,7 +18,8 @@ import SpriteKit
 ///   - blue: Amount of blue
 /// - Returns: The corresponding `UIColor` (with alpha = 1)
 func RGB(_ red: Int, _ green: Int, _ blue: Int) -> UIColor {
-  return UIColor(red: CGFloat(red)/255.0, green: CGFloat(green)/255.0, blue: CGFloat(blue)/255.0, alpha: 1.0)
+  let toFrac = { (x: Int) in CGFloat(x)/255.0 }
+  return UIColor(cgColor: CGColor(srgbRed: toFrac(red), green: toFrac(green), blue: toFrac(blue), alpha: 1.0))
 }
 
 /// Colors and styles and fonts used throughout the app
@@ -27,15 +28,15 @@ func RGB(_ red: Int, _ green: Int, _ blue: Int) -> UIColor {
 /// one place to adjust the look.
 class AppAppearance {
   /// The blue color used in the ship
-  static let blue = RGB(101, 185, 240)
+  static let blue = RGB(54, 187, 245)
   /// The yellow color used in the ship
-  static let yellow = RGB(246, 205, 68)
+  static let yellow = RGB(255, 204, 0)
   /// The green color used in player shots
-  static let green = RGB(137, 198, 79)
+  static let green = RGB(112, 201, 54)
   /// The red color used for UFO shots
-  static let red = RGB(157, 66, 61)
+  static let red = RGB(172, 57, 57)
   /// The orange color used in the energy left bar when critical
-  static let orange = RGB(203, 94, 57)
+  static let orange = RGB(222, 83, 45)
   /// This color is from the background star field.  I also have it set in the
   /// LaunchScreen.storyboard, though I don't know of an automatic way to make what's
   /// here match what's there.
