@@ -124,7 +124,10 @@ class GameTutorialScene: BasicScene {
     self.shipColor = shipColor ?? "blue"
     super.init(size: size)
     name = "gameTutorialScene"
-    initGameArea(avoidSafeArea: true)
+    // Very wide aspect ratios are generally easier games.  4:3 is was the original
+    // intent, but some iPads are a bit wider (1.4ish), and I want full screen on
+    // those.
+    initGameArea(avoidSafeArea: true, maxAspectRatio: 1.5)
     initInfo()
     isUserInteractionEnabled = true
     physicsWorld.contactDelegate = self

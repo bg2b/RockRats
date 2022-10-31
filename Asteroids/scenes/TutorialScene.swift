@@ -136,7 +136,10 @@ class TutorialScene: GameTutorialScene {
     let tutorialStuff = SKNode()
     tutorialStuff.name = "tutorialStuff"
     tutorialStuff.setZ(.info)
-    gameArea.addChild(tutorialStuff)
+    // Note: tutorialStuff is not under gameArea, since I don't want the control
+    // display to get clipped by the playfield masking if playing on a device with
+    // wide aspect ratio
+    addChild(tutorialStuff)
     attributes = AttrStyles(fontName: AppAppearance.font, fontSize: 40)
     // Central label
     centralLabel = SKLabelNode()
@@ -192,8 +195,8 @@ class TutorialScene: GameTutorialScene {
     // The inactive controller is just an outline
     inactiveController = ControllerDisplay(withButtons: false)
     inactiveController.name = "inactiveController"
-    inactiveController.position = CGPoint(x: gameFrame.minX + inactiveController.size.width / 2 + 50,
-                                          y: gameFrame.minY + inactiveController.size.height / 2 + 50)
+    inactiveController.position = CGPoint(x: fullFrame.minX + inactiveController.controller.size.width / 2 + 50,
+                                          y: fullFrame.minY + inactiveController.controller.size.height / 2 + 50)
     inactiveController.isHidden = true
     controllerTutor.addChild(inactiveController)
     // The active controller shows buttons and is flashed as appropriate when
@@ -457,8 +460,9 @@ class TutorialScene: GameTutorialScene {
     cornerOffset += CGVector(dx: 0.5 * touchShapes[0].frame.width, dy: 0.5 * touchShapes[0].frame.height)
     // Add an amount for a slide
     cornerOffset += CGVector(dx: 0.5 * 1.25 * slideAmount, dy: 0.5 * 1.25 * slideAmount)
-    // Final start point
-    return CGPoint(x: gameFrame.minX, y: gameFrame.minY) + cornerOffset
+    // Final start point (note that this is not contained in the game area on devices
+    // with wide aspect ratios)
+    return CGPoint(x: fullFrame.minX, y: fullFrame.minY) + cornerOffset
   }
 
   /// Make the touch tutor show a tap-tap-tap gesture
