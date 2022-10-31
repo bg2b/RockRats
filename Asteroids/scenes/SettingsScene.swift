@@ -461,7 +461,7 @@ class SettingsScene: BasicScene {
   func prepareForSwitch() -> Bool {
     guard self.beginSceneSwitch() else { return false }
     removeAction(forKey: "skywriting")
-    if let fortuneNode = fortuneNode {
+    if let fortuneNode {
       fortuneNode.removeAction(forKey: "skywriting")
       fortuneNode.run(.sequence([.fadeOut(withDuration: 0.5), .wait(forDuration: 0.1), .removeFromParent()]))
       self.fortuneNode = nil

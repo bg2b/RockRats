@@ -108,7 +108,7 @@ struct GameScore: Equatable {
   func encode() -> [String: Any] {
     var result = [String: Any]()
     result["playerID"] = playerID
-    if let playerName = playerName {
+    if let playerName {
       result["playerName"] = playerName
     }
     result["points"] = points

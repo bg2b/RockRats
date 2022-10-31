@@ -220,7 +220,7 @@ class UFO: SKNode {
     addChild(ufo)
     // Make noise if requested.  UFOs in non-game scenes are currently silent, since
     // otherwise the constant whirring gets annoying
-    if let audio = audio {
+    if let audio {
       let engineSounds = audio.continuousAudio([SoundEffect.ufoEnginesBig, .ufoEnginesMed, .ufoEnginesSmall][typeIndex], at: self)
       engineSounds.playerNode.volume = 0
       engineSounds.playerNode.play()
@@ -439,7 +439,7 @@ class UFO: SKNode {
   func aimAt(_ object: SKNode, shotSpeed: CGFloat, bounds: CGRect?) -> CGFloat? {
     guard let body = object.physicsBody else { return nil }
     var p = object.position - position
-    if let bounds = bounds {
+    if let bounds {
       p = wrappedDisplacement(direct: p, bounds: bounds)
     }
     // Compute the amount of time needed for the UFO's shot to reach the target

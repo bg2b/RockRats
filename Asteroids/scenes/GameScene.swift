@@ -241,7 +241,7 @@ class GameScene: GameTutorialScene {
       .wait(forDuration: 0.25)
       ])
     let displayAction = fade ? growAndFade : grow
-    if let action = action {
+    if let action {
       centralDisplay.run(displayAction, completion: action)
     } else {
       centralDisplay.run(displayAction)

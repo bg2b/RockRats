@@ -287,7 +287,7 @@ class TutorialScene: GameTutorialScene {
     } else {
       let duration = 0.25
       toDoLabel.alpha = 0
-      if let toDo = toDo {
+      if let toDo {
         toDoLabel.attributedText = attributedText(toDo)
         toDoLabel.isHidden = false
         toDoLabel.run(.fadeIn(withDuration: duration))

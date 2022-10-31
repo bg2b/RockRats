@@ -225,7 +225,7 @@ class Button: SKNode {
   /// - Returns: `true` if the action is confirmed, `false` means abort the action
   func wasConfirmed() -> Bool {
     // No confirmDecoration => simple button, immediately confirmed
-    guard let confirmDecoration = confirmDecoration else { return true }
+    guard let confirmDecoration else { return true }
     if confirmDecoration.isHidden {
       // The button requires confirmation but the confirm state hasn't been shown
       return false
@@ -245,7 +245,7 @@ class Button: SKNode {
   /// `true` on the second touch.
   func requireConfirmation() {
     // No confirmDecoration => no need for confirmation
-    guard let confirmDecoration = confirmDecoration else { return }
+    guard let confirmDecoration else { return }
     // Show the confirm prompt and set a timer to switch back after a bit if there's
     // no confirmation.
     decorations[currentDecoration].isHidden = true

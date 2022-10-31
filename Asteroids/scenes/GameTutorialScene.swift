@@ -684,7 +684,7 @@ class GameTutorialScene: BasicScene {
       // and then pause and force-quit the scene (or for the tutorial scene to exit
       // automatically at the end).  I'm pretty sure everything would be OK even
       // without the weak self, but better safe than sorry.
-      guard let self = self else { return }
+      guard let self else { return }
       if blastFromThePast && !self.shouldEnableEffects {
         // Warping at a score ending in 79 (to honor Asteroid's 1979 release) turns
         // on retro mode

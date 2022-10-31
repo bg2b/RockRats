@@ -66,7 +66,7 @@ extension SKSpriteNode {
   /// Get the texture of a sprite node that must have one
   /// - Returns: The texture
   func requiredTexture() -> SKTexture {
-    guard let texture = texture else { fatalError("SpriteNode \(name ?? "<unknown name>") is missing a texture") }
+    guard let texture else { fatalError("SpriteNode \(name ?? "<unknown name>") is missing a texture") }
     return texture
   }
 }

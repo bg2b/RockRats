@@ -651,7 +651,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate, ControllerChangedDelegate {
   func moveFocus(direction: Int) {
     guard !buttons.isEmpty else { return }
     var index: Int
-    if let focusedButton = focusedButton {
+    if let focusedButton {
       focusedButton.unfocus()
       index = (buttons.firstIndex(of: focusedButton) ?? -direction) + direction
       index %= buttons.count
@@ -679,11 +679,11 @@ class BasicScene: SKScene, SKPhysicsContactDelegate, ControllerChangedDelegate {
   /// Set the focus on a specific button
   /// - Parameter button: The button to focus on, or `nil` for none
   func setFocus(_ button: Button?) {
-    if let focusedButton = focusedButton {
+    if let focusedButton {
       focusedButton.unfocus()
     }
     focusedButton = button
-    if let focusedButton = focusedButton {
+    if let focusedButton {
       focusedButton.focus()
     }
   }
@@ -696,24 +696,24 @@ class BasicScene: SKScene, SKPhysicsContactDelegate, ControllerChangedDelegate {
   /// - Parameter connected: `true` if a controller has connected
   func controllerChanged(connected: Bool) {
     if connected {
-      if let focusedButton = focusedButton {
+      if let focusedButton {
         focusedButton.focus()
       } else {
         focusedButton = defaultFocus
-        if let focusedButton = focusedButton {
+        if let focusedButton {
           focusedButton.focus()
         } else {
           focusNext()
         }
       }
-    } else if let focusedButton = focusedButton {
+    } else if let focusedButton {
       focusedButton.unfocus()
     }
   }
 
   /// Click on the focused button
   func selectMenuItem() {
-    if let focusedButton = focusedButton {
+    if let focusedButton {
       focusedButton.activate()
     }
   }
@@ -1366,7 +1366,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate, ControllerChangedDelegate {
   ///   - withFade: `true` means do a fade out/in, else just switch immediately
   ///   - getNextScene: A closure to return the incoming scene
   func switchScene(withFade: Bool, _ getNextScene: @escaping () -> BasicScene) {
-    guard let view = view else { fatalError("Transitioning scene has no view") }
+    guard let view else { fatalError("Transitioning scene has no view") }
     // The outgoing scene is either completely hidden by the outgoing transition or
     // is paused.  Any lag now won't be visible, so get the next scene.
     os_signpost(.begin, log: .poi, name: "scene creation", signpostID: self.signpostID)
@@ -1428,7 +1428,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate, ControllerChangedDelegate {
 
   /// When first calling `update` for a new scene, start its entry transition
   func doEntryTransition() {
-    if let entryTransition = entryTransition {
+    if let entryTransition {
       os_log("%{public}s doEntryTransition", log: .app, type: .debug, name!)
       // Make sure that the scene has a few frames to get going
       wait(for: 0.1) {

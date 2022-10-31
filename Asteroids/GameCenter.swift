@@ -27,7 +27,7 @@ extension GKPlayer {
 /// Convenience function for use in Game Center completion closures.  Shows a message
 /// and returns `false` if there was an error, else returns `true`.
 private func noError(_ error: Error?, in stage: String) -> Bool {
-  if let error = error {
+  if let error {
     os_log("Game Center interface %{public}s, %{public}s", log: .app, type: .error, stage, error.localizedDescription)
     return false
   } else {
@@ -142,7 +142,7 @@ class GameCenterInterface {
   func setAchievementIdentifiers(_ allAchievements: [GKAchievementDescription]?, error: Error?) {
     // I only need to set these once, since they're independent of the player
     if noError(error, in: "loading achievement IDs") {
-      guard let allAchievements = allAchievements else { return }
+      guard let allAchievements else { return }
       achievementIdentifiers = Set<String>(allAchievements.map { $0.identifier })
     }
   }
@@ -150,7 +150,7 @@ class GameCenterInterface {
   /// Request the achievements of the local player from Game Center
   func loadPlayerAchievements() {
     GKAchievement.loadAchievements { [weak self] playerAchievements, error in
-      guard let self = self else { return }
+      guard let self else { return }
       logError(error, in: "loading player achievements")
       playerAchievements?.forEach {
         self.playerAchievements[$0.identifier] = $0.percentComplete
@@ -167,7 +167,7 @@ class GameCenterInterface {
       // I got the value from the game center
       return result
     }
-    guard let achievementIdentifiers = achievementIdentifiers else {
+    guard let achievementIdentifiers else {
       // I don't know the valid achievements, so can't say anything
       return nil
     }
@@ -191,7 +191,7 @@ class GameCenterInterface {
     // reported to Game Center successfully when the game finishes.
     playerAchievements[identifier] = 100
     GKAchievement.report([achievement]) { [weak self] error in
-      guard let self = self else { return }
+      guard let self else { return }
       if !noError(error, in: "reporting achivement \(identifier)") {
         // I don't know how this could happen, but stick this in with the progress
         // achievements and hope that the flush after a game finishes manages to
@@ -245,7 +245,7 @@ class GameCenterInterface {
       achievements.append(achievement)
     }
     GKAchievement.report(achievements) { [weak self] error in
-      guard let self = self else { return }
+      guard let self else { return }
       // I'm not sure what can go wrong since Game Center is good about caching stuff
       // for retry transparently to us in case of network issues.  But anyway, I'll
       // leave playerAchievementsProgress alone if there is some error.  Maybe the
@@ -267,7 +267,7 @@ class GameCenterInterface {
   /// no way back.
   func resetAchievements() {
     GKAchievement.resetAchievements { [weak self] error in
-      guard let self = self else { return }
+      guard let self else { return }
       if noError(error, in: "resetting achievements") {
         self.playerAchievements.removeAll()
         self.playerAchievementsProgress.removeAll()
