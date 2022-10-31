@@ -40,8 +40,6 @@ class Controller {
   var extendedGamepad: GCExtendedGamepad?
   /// Desired bindings of buttons to actions (closures) for the current scene
   var buttonActions = [KeyPath<Controller, GCControllerButtonInput?>: () -> Void]()
-  /// If the controller has a home button, this holds it
-  var homeButton: GCControllerButtonInput?
   /// Buttons whose press handler was set
   var boundButtons = [BoundButton]()
   /// Who to inform if the controller changes
@@ -65,88 +63,30 @@ class Controller {
   // MARK: - Controller discovery
 
   /// `true` when a controller is connected
-  var connected: Bool { chosenController != nil}
+  var connected: Bool { chosenController != nil }
 
   /// Scan currently attached controllers, find one that's suitable, and bind to it
   @objc func findController() {
     // Remember the current binding
     let oldController = chosenController
-    // Scan for suitable controllers
-    chosenController = nil
-    extendedGamepad = nil
-    let controllers = GCController.controllers()
-    for controller in controllers where controller.extendedGamepad != nil {
-      // I can only use extended gamepad controllers
-      if controller.isAttachedToDevice {
-        // Always prefer a controller that's physically attached
-        chosenController = controller
-      } else {
-        // Otherwise just pick whatever comes first.  If the player doesn't want to
-        // use that, they can cut it off ;-)
-        chosenController = chosenController ?? controller
-      }
-    }
+    chosenController = GCController.current
     extendedGamepad = chosenController?.extendedGamepad
     if chosenController != oldController {
       unbindActions()
-      if let controller = chosenController {
-        os_log("Found %{public}s", log: .app, type: .debug, controller.vendorName ?? "unknown game controller")
+      if let chosenController {
+        os_log("Found %{public}s", log: .app, type: .debug, chosenController.vendorName ?? "unknown game controller")
       } else {
         os_log("No game controller found", log: .app, type: .debug)
-      }
-      // There's no home button field on the extended gamepad profile, so if the
-      // controller has one, I have to find it on my own.  I do that by watching all
-      // the controller events and grabbing the home button if the player presses it.
-      homeButton = nil
-      // I can only test this home button hack for controllers that I have.  Right
-      // now that's Playstation and Xbox controllers, but probably those will be the
-      // only common controllers anyway.
-      let vendor = chosenController?.vendorName ?? "unknown"
-      if vendor.hasPrefix("DUALSHOCK 4") || vendor.hasPrefix("Xbox") {
-        // Playstation and Xbox controllers have a home button, so watch for it
-        chosenController?.extendedGamepad?.valueChangedHandler = { [weak self] _, controllerElement in
-          self?.findHomeButton(controllerElement)
-        }
       }
       // Bind button press events to actions for the current controller
       bindActions()
       changedDelegate?.controllerChanged(connected: connected)
     }
     // If the controller supports the active LED mechanism, indicate the selected one
-    for controller in controllers {
-      if controller == chosenController {
-        controller.playerIndex = .index1
-      } else {
-        controller.playerIndex = .indexUnset
-      }
+    for controller in GCController.controllers() {
+      controller.playerIndex = .indexUnset
     }
-  }
-
-  /// A hack to find the controller's home button, if any
-  ///
-  /// This gets called from the controller's `valueChangedHandler` and watches
-  /// everything to see if there's a home button event
-  ///
-  /// - Parameter element: The element that was just activated on the controller
-  func findHomeButton(_ element: GCControllerElement) {
-    // This shouldn't be called if the home button has already been found, but whatevs
-    guard homeButton == nil else { return }
-    // Here is my very sophisticated code to determine if the element that was just
-    // activated is the home button...
-    if "\(element)".hasPrefix("Home Button") {
-      // Found it, no need to watch anymore
-      extendedGamepad?.valueChangedHandler = nil
-      homeButton = element as? GCControllerButtonInput
-      // Re-bind so that the later home button presses will automatically trigger the
-      // desired action
-      bindActions()
-      if let homeButton = homeButton, homeButton.isPressed {
-        // If the home button was just discovered then the binding wasn't set up
-        // before, so manually trigger whatever action is now bound to the home
-        // button
-        homeButton.pressedChangedHandler?(homeButton, 1, true)
-      }
-    }
+    chosenController?.playerIndex = .index1
   }
 
   // MARK: - Button actions
@@ -196,6 +136,31 @@ class Controller {
     boundButtons.removeAll()
   }
 
+  /// Find the physical buttons that are mapped to our standard controls
+  ///
+  /// The old button-based thrust controls used A and B for thrust, but now I've
+  /// switched to the left and right triggers.  If the user prefers the old setup,
+  /// they should configure the game controller in settings to map A to left trigger
+  /// and B to right trigger, plus put the fire button and hyperspace button
+  /// (normally A and B) on something else, say the shoulder buttons.  During the
+  /// tutorial I want to show whatever they should actually press, so I need to know
+  /// what physical buttons correspond to the standard action buttons.  E.g., if A
+  /// has been mapped to the left trigger (thrust forward) and the right shoulder has
+  /// been mapped to A (fire), then calling `getMappings(for: "Button A")` will
+  /// return a set containing `"Right Shoulder"`.  Note that there can be more than
+  /// one physical button mapped to the desired action.  The tutorial should show all
+  /// the possibilities.
+  ///
+  /// - Parameter button: The standard button for an action
+  /// - Returns: The set of physical buttons that will perform the action
+  func getMappings(for button: String) -> Set<String> {
+    guard let extendedGamepad else { return Set([button]) }
+    guard extendedGamepad.elements[button] != nil else {
+      fatalError("No element for button name \(button)")
+    }
+    return extendedGamepad.mappedPhysicalInputNames(forElementAlias: button)
+  }
+
   // MARK: - Joystick handling
 
   /// Convert a direction pad state into a `CGVector` as used by the game
@@ -203,8 +168,8 @@ class Controller {
                   _ path: KeyPath<GCExtendedGamepad, GCControllerDirectionPad>) -> CGVector {
     let stick = extendedGamepad[keyPath: path]
     if UserData.buttonThrust.value {
-      // User preference for A/B buttons to thrust
-      let thrust = CGFloat(extendedGamepad.buttonA.value - extendedGamepad.buttonB.value)
+      // User preference for triggers to thrust
+      let thrust = CGFloat(extendedGamepad.leftTrigger.value - extendedGamepad.rightTrigger.value)
       return CGVector(dx: CGFloat(stick.xAxis.value), dy: thrust)
     } else {
       // User preference for y-axis of stick to thrust
@@ -215,7 +180,7 @@ class Controller {
   /// Read the current joystick state
   /// - Returns: The direction of the stick, x-axis is rotation, positive y is forward thrust
   func joystick() -> CGVector {
-    guard let extendedGamepad = extendedGamepad else { return .zero }
+    guard let extendedGamepad else { return .zero }
     // I read both thumbstick and dpad so that the player can use whichever is most
     // comfortable for them.  Whichever one is moved is the one that gets returned
     let stick1 = asJoystick(extendedGamepad, \GCExtendedGamepad.dpad)

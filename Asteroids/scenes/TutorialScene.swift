@@ -12,7 +12,82 @@
 import SpriteKit
 import os.log
 
+/// Standard game pad button aliases and the graphics that they correspond to.  E.g.,
+/// the standard name for A is `"Button A"`, and to display it I want to use the
+/// `"ctrl_btnA"` sprite.  `"unknown"` is special; if I don't know how to display any
+/// of the aliases that have been mapped to the standard one, then ? will be shown.
+private let aliasToCtrl = [
+  "Button A": "btnA", "Button B": "btnB",
+  "Button X": "btnX", "Button Y": "btnY",
+  "Left Trigger": "ltrig", "Left Shoulder": "lshld",
+  "Right Trigger": "rtrig", "Right Shoulder": "rshld",
+  "Direction Pad Left": "left", "Direction Pad Right": "right",
+  "Direction Pad Up": "up", "Direction Pad Down": "down",
+  "Left Thumbstick Left": "left", "Left Thumbstick Right": "right",
+  "Left Thumbstick Up": "up", "Left Thumbstick Down": "down",
+  "unknown": "unknown"
+]
+
 // MARK: Teach the padawans, I must
+
+/// This is for showing an image of a controller plus some of the buttons (whatever
+/// they should press)
+class ControllerDisplay: SKNode {
+  /// The controller graphic, an outline with transparent areas where the buttons go
+  let controller: SKSpriteNode!
+  /// Dictionary mapping graphic names (e.g., `"ctrl_BtnA"`) to sprite nodes
+  var buttons: [String: SKNode]
+
+  required init(withButtons: Bool) {
+    controller = SKSpriteNode(imageNamed: "controller")
+    controller.name = "controller"
+    controller.position = .zero
+    buttons = [:]
+    if withButtons {
+      for (_, ctrl) in aliasToCtrl where buttons[ctrl] == nil {
+        let ctrlNode = SKSpriteNode(imageNamed: "ctrl_" + ctrl)
+        ctrlNode.position = .zero
+        // Button graphics (filled areas) go just behind the controller outline
+        ctrlNode.zPosition = -1
+        ctrlNode.isHidden = true
+        buttons[ctrl] = ctrlNode
+      }
+    }
+    super.init()
+    self.addChild(controller)
+    for (_, button) in buttons {
+      self.addChild(button)
+    }
+  }
+
+  required init(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented by ControllerDisplay")
+  }
+
+  /// Find the physical mappings for the normal control for an action and turn on all
+  /// the corresponding sprites
+  ///
+  /// - Parameter actionButton: The alias for the normal control (e.g., `"Button A"`)
+  func showControls(for actionButton: String) {
+    let aliases = Globals.controller.getMappings(for: actionButton)
+    for (_, button) in buttons {
+      button.isHidden = true
+    }
+    var anyShown = false
+    for alias in aliases {
+      // If I know how to display this mapping, turn on the corresponding sprite
+      if let ctrl = aliasToCtrl[alias], let button = buttons[ctrl] {
+        button.isHidden = false
+        anyShown = true
+      }
+    }
+    if !anyShown {
+      // Hopefully something is mapped to the needed control, but I don't know how to
+      // display it.  If they don't remember it, they could be stuck...
+      buttons["unknown"]!.isHidden = false
+    }
+  }
+}
 
 /// The tutorial scene
 ///
@@ -39,10 +114,10 @@ class TutorialScene: GameTutorialScene {
   var touchShapes = [SKNode]()
   /// Label for the gesture that the touch tutor is showing
   var touchLabel: SKLabelNode!
-  /// Controller sprite with nothing pressed
-  var inactiveController: SKSpriteNode!
-  /// Controller sprite with whatever buttons pressed
-  var activeController: SKSpriteNode!
+  /// Controller with nothing pressed
+  var inactiveController: ControllerDisplay!
+  /// Controller with some appropriate buttons pressed
+  var activeController: ControllerDisplay!
   /// Set to `true` after observing a hyperspace jump
   var hasJumped = false
   /// Counter for shots fired
@@ -108,17 +183,26 @@ class TutorialScene: GameTutorialScene {
       touchTutor.addChild(shape)
     }
     tutors.append(touchTutor)
-    // Controller tutor
+    // The controller tutor sets the overall transparency of the controller graphics
+    // display
     let controllerTutor = SKNode()
     controllerTutor.name = "controllerTutor"
+    controllerTutor.alpha = 0.5
     tutorialStuff.addChild(controllerTutor)
-    inactiveController = SKSpriteNode(imageNamed: "controller")
+    // The inactive controller is just an outline
+    inactiveController = ControllerDisplay(withButtons: false)
     inactiveController.name = "inactiveController"
     inactiveController.position = CGPoint(x: gameFrame.minX + inactiveController.size.width / 2 + 50,
                                           y: gameFrame.minY + inactiveController.size.height / 2 + 50)
-    inactiveController.alpha = 0.5
     inactiveController.isHidden = true
     controllerTutor.addChild(inactiveController)
+    // The active controller shows buttons and is flashed as appropriate when
+    // prompting the user to do something
+    activeController = ControllerDisplay(withButtons: true)
+    activeController.name = "activeController"
+    activeController.position = inactiveController.position
+    activeController.isHidden = true
+    controllerTutor.addChild(activeController)
     tutors.append(controllerTutor)
     // Initial visibility of tutors
     touchTutor.isHidden = Globals.controller.connected
@@ -292,15 +376,15 @@ class TutorialScene: GameTutorialScene {
   // MARK: - Touch tutor
 
   /// Stops the tutor once the player has done something successfully
-   func hideTutor() {
+  func hideTutor() {
     for shape in touchShapes {
       shape.removeAllActions()
       shape.isHidden = true
     }
     touchLabel.isHidden = true
-    activeController?.removeFromParent()
-    activeController = nil
     inactiveController.isHidden = true
+    activeController.removeAllActions()
+    activeController.isHidden = true
   }
 
   /// Show a success message, then perform an action after a short delay
@@ -378,8 +462,7 @@ class TutorialScene: GameTutorialScene {
   }
 
   /// Make the touch tutor show a tap-tap-tap gesture
-  /// - Parameters
-  ///   - position: Where to show the taps
+  /// - Parameter position: Where to show the taps
   func showTaps(position: CGPoint) {
     for shape in touchShapes {
       shape.isHidden = true
@@ -450,6 +533,8 @@ class TutorialScene: GameTutorialScene {
 
   // MARK: - Controller tutor
 
+  /// Swap the active and inactive controller visibilities to show buttons being
+  /// pressed and released
   func flipControllerAction() {
     inactiveController.isHidden = !inactiveController.isHidden
     activeController.isHidden = !inactiveController.isHidden
@@ -457,16 +542,13 @@ class TutorialScene: GameTutorialScene {
 
   /// Display an action on the game controller
   /// - Parameters:
-  ///   - imageName: The name of the image for the active controller
+  ///   - actionButton: The normal control for the action (e.g., "Button A")
   ///   - durations: The lengths of time between inactive/active flips
-  func showControllerAction(imageName: String, durations: [Double]) {
-    activeController = SKSpriteNode(imageNamed: imageName)
-    activeController.name = "activeController"
-    activeController.alpha = inactiveController.alpha
-    activeController.position = inactiveController.position
-    activeController.isHidden = true
-    tutors[1].addChild(activeController)
+  func showControllerAction(actionButton: String, durations: [Double]) {
     inactiveController.isHidden = false
+    // Turn on the buttons in the active controller to show whatever physical things
+    // map to the action
+    activeController.showControls(for: actionButton)
     let doFlip = SKAction.run { self.flipControllerAction() }
     var flips = [SKAction]()
     for duration in durations {
@@ -569,55 +651,53 @@ class TutorialScene: GameTutorialScene {
 
   /// Rotate left training
   func training1() {
-    showInstructions(["@Slide@ and @hold@", "Dpad/stick @left@"], toDo: "to @rotate left@", delay: instructionDelay) {
+    showInstructions(["@Slide@ and @hold@", "Use the @dpad/stick@"], toDo: "to @rotate left@", delay: instructionDelay) {
       let delta = CGVector(dx: -1.25 * self.slideAmount, dy: 0)
       self.showSlideAndHold(position: self.movementPosition(), moveBy: delta)
-      self.showControllerAction(imageName: "controllerleft", durations: [0.5, 3])
+      self.showControllerAction(actionButton: "Direction Pad Left", durations: [0.5, 3])
       self.observeStick(direction: CGVector(dx: -1, dy: 0), successes: 0, then: self.training2)
     }
   }
 
   /// Rotate right training
   func training2() {
-    showInstructions(["@Slide@ and @hold@", "Dpad/stick @right@"], toDo: "to @rotate right@", delay: instructionDelay) {
+    showInstructions(["@Slide@ and @hold@", "Use the @dpad/stick@"], toDo: "to @rotate right@", delay: instructionDelay) {
       let delta = CGVector(dx: 1.25 * self.slideAmount, dy: 0)
       self.showSlideAndHold(position: self.movementPosition(), moveBy: delta)
-      self.showControllerAction(imageName: "controllerright", durations: [0.5, 3])
+      self.showControllerAction(actionButton: "Direction Pad Right", durations: [0.5, 3])
       self.observeStick(direction: CGVector(dx: 1, dy: 0), successes: 0, then: self.training3)
     }
   }
 
   /// Thrust training
   func training3() {
-    let controllerMsg = UserData.buttonThrust.value ? "Button @A@ to" : "Dpad/stick @up@ to"
+    let controllerMsg = UserData.buttonThrust.value ? "@Press the button@ to" : "Use the @dpad/stick@ to"
     showInstructions(["@Slide@ and @hold@ to", controllerMsg], toDo: "@thrust forwards@", delay: instructionDelay) {
       let delta = CGVector(dx: 0, dy: 1.25 * self.slideAmount)
       self.showSlideAndHold(position: self.movementPosition(), moveBy: delta)
-      let controllerAction = UserData.buttonThrust.value ? "controllera" : "controllerup"
-      self.showControllerAction(imageName: controllerAction, durations: [0.5, 3])
+      let controllerAction = UserData.buttonThrust.value ? "Left Trigger" : "Direction Pad Up"
+      self.showControllerAction(actionButton: controllerAction, durations: [0.5, 3])
       self.observeStick(direction: CGVector(dx: 0, dy: 1), successes: 0, then: self.training4)
     }
   }
 
   /// Reverse thrust training
   func training4() {
-    let controllerMsg = UserData.buttonThrust.value ? "Button @B@ to" : "Dpad/stick @down@ to"
+    let controllerMsg = UserData.buttonThrust.value ? "@Press the button@ to" : "Use the @dpad/stick@ to"
     showInstructions(["@Slide@ and @hold@ to", controllerMsg], toDo: "@thrust backwards@", delay: instructionDelay) {
       let delta = CGVector(dx: 0, dy: -1.25 * self.slideAmount)
       self.showSlideAndHold(position: self.movementPosition(), moveBy: delta)
-      let controllerAction = UserData.buttonThrust.value ? "controllerb" : "controllerdown"
-      self.showControllerAction(imageName: controllerAction, durations: [0.5, 3])
+      let controllerAction = UserData.buttonThrust.value ? "Right Trigger" : "Direction Pad Down"
+      self.showControllerAction(actionButton: controllerAction, durations: [0.5, 3])
       self.observeStick(direction: CGVector(dx: 0, dy: -1), successes: 0, then: self.training5)
     }
   }
 
   /// Fire laser training
   func training5() {
-    let controllerMsg = UserData.buttonThrust.value ? "Button @R@ to" : "Buttons @A@ or @R@ to"
-    showInstructions(["@Tap@ to", controllerMsg], toDo: "@fire lasers@", delay: instructionDelay) {
+    showInstructions(["@Tap@ to", "@Press the button@ to"], toDo: "@fire lasers@", delay: instructionDelay) {
       self.showTaps(position: self.shootAndJumpPosition())
-      let controllerAction = UserData.buttonThrust.value ? "controllerrtrig" : "controllerartrig"
-      self.showControllerAction(imageName: controllerAction, durations: [1, 0.1, 0.1, 0.1, 0.1, 0.1])
+      self.showControllerAction(actionButton: "Button A", durations: [1, 0.1, 0.1, 0.1, 0.1, 0.1])
       self.shotsFired = 0
       self.observeShooting(then: self.training6)
     }
@@ -625,11 +705,9 @@ class TutorialScene: GameTutorialScene {
 
   /// Hyperspace jump training
   func training6() {
-    let controllerMsg = UserData.buttonThrust.value ? "Button @L@ to" : "Buttons @B@ or @L@ to"
-    showInstructions(["@Swipe@ to", controllerMsg], toDo: "@jump to hyperspace@", delay: instructionDelay) {
+    showInstructions(["@Swipe@ to", "@Press the button@ to"], toDo: "@jump to hyperspace@", delay: instructionDelay) {
       self.showSwipe(position: self.shootAndJumpPosition(), moveBy: CGVector(dx: 0, dy: 1.25 * self.slideAmount))
-      let controllerAction = UserData.buttonThrust.value ? "controllerltrig" : "controllerbltrig"
-      self.showControllerAction(imageName: controllerAction, durations: [1, 0.25])
+      self.showControllerAction(actionButton: "Button B", durations: [1, 0.25])
       self.hasJumped = false
       self.observeHyperspace(then: self.training7)
     }

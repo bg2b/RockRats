@@ -399,38 +399,21 @@ class GameTutorialScene: BasicScene {
 
   /// Bind controller buttons to actions
   ///
-  /// I account for most player preferences by just assigning multiple buttons for
-  /// each action.  The player can press whatever button they find convenient.
-  /// Thrust is the exception; there are different installed bindings when A/B are
-  /// assigned to thrust vs to fire/hyperspace.
+  /// Normal controls are left stick or dpad to turn and thrust, A to fire, B for
+  /// hyperspace.  There's an option to use the left and right triggers for thrust
+  /// instead of the dpad.  The menu button pauses and unpauses, and for easier
+  /// pressing X also does that.  When paused, A continues and B quits.  To remap
+  /// controls, the iOS game controller settings should be customized.
   func bindControllerPlayButtons() {
     Globals.controller.clearActions()
-    if UserData.buttonThrust.value {
-      // The player wants to use A/B for thrust, but when the game is paused these
-      // still correspond to continue/quit
-      Globals.controller.setAction(\Controller.extendedGamepad?.buttonA) { [weak self] in self?.continueIfPaused() }
-      Globals.controller.setAction(\Controller.extendedGamepad?.buttonB) { [weak self] in self?.quitIfPaused() }
-    } else {
-      // When thrust is via the joystick...
-      // Button A = fire and continue after pause
-      Globals.controller.setAction(\Controller.extendedGamepad?.buttonA) { [weak self] in _ = self?.fireButton(canUnpause: true) }
-      // Button B = hyperspace and quit after pause
-      Globals.controller.setAction(\Controller.extendedGamepad?.buttonB) { [weak self] in self?.hyperspaceButton(canQuit: true) }
-    }
-    // Right shoulder/trigger = fire
-    Globals.controller.setAction(\Controller.extendedGamepad?.rightTrigger) { [weak self] in _ = self?.fireButton() }
-    Globals.controller.setAction(\Controller.extendedGamepad?.rightShoulder) { [weak self] in _ = self?.fireButton() }
-    // Left shoulder/trigger = hyperspace
-    Globals.controller.setAction(\Controller.extendedGamepad?.leftTrigger) { [weak self] in self?.hyperspaceButton() }
-    Globals.controller.setAction(\Controller.extendedGamepad?.leftShoulder) { [weak self] in self?.hyperspaceButton() }
-    // Home/menu/option buttons pause and unpause.  I'll also throw in button X
-    // because I think that's easier to hit when in the middle of playing
+    // Button A = fire and continue after pause
+    Globals.controller.setAction(\Controller.extendedGamepad?.buttonA) { [weak self] in _ = self?.fireButton(canUnpause: true) }
+    // Button B = hyperspace and quit after pause
+    Globals.controller.setAction(\Controller.extendedGamepad?.buttonB) { [weak self] in self?.hyperspaceButton(canQuit: true) }
+    // The menu button pauses and unpauses.  I'll also throw in button X because I
+    // think that's easier to hit when in the middle of playing.
     Globals.controller.setAction(\Controller.extendedGamepad?.buttonX) { [weak self] in self?.pauseContinueButton() }
-    if #available(iOS 13, *) {
-      Globals.controller.setAction(\Controller.extendedGamepad?.buttonMenu) { [weak self] in self?.pauseContinueButton() }
-      Globals.controller.setAction(\Controller.extendedGamepad?.buttonOptions) { [weak self] in self?.pauseContinueButton() }
-    }
-    Globals.controller.setAction(\Controller.homeButton) { [weak self ] in self?.pauseContinueButton() }
+    Globals.controller.setAction(\Controller.extendedGamepad?.buttonMenu) { [weak self] in self?.pauseContinueButton() }
     Globals.controller.changedDelegate = self
   }
 
