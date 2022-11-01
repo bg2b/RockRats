@@ -44,26 +44,6 @@ class SettingsScene: BasicScene {
   /// The most recent fortunes
   var recentFortunes = Set<String>()
 
-  static func stackedLabels(_ lines: [String], fontColor: UIColor) -> SKNode {
-    let stack = SKNode()
-    let fontSize = CGFloat(30)
-    var nextY = CGFloat(0)
-    for line in lines {
-      let label = SKLabelNode(fontNamed: AppAppearance.font)
-      label.fontSize = fontSize
-      label.fontColor = fontColor
-      label.text = line
-      label.horizontalAlignmentMode = .center
-      label.verticalAlignmentMode = .center
-      label.position = CGPoint(x: 0, y: nextY)
-      nextY -= fontSize
-      stack.addChild(label)
-    }
-    let currentMidY = stack.calculateAccumulatedFrame().midY
-    stack.position = CGPoint(x: 0, y: -currentMidY)
-    return stack
-  }
-
   // MARK: - Initialization
 
   /// Create the stuff the for the settings scene
@@ -105,7 +85,7 @@ class SettingsScene: BasicScene {
     }
     var replayButtons = [Button]()
     for replayType in replayTypes {
-      let labelStack = SettingsScene.stackedLabels(["Replay", replayType], fontColor: AppAppearance.textColor)
+      let labelStack = stackedLabels(["Replay", replayType], fontColor: AppAppearance.textColor)
       let replayButton = Button(forNode: labelStack, size: buttonSize)
       replayButton.name = "replay" + replayType + "Button"
       replayButtons.append(replayButton)
@@ -123,8 +103,8 @@ class SettingsScene: BasicScene {
     for resetImage in resetButtonImages {
       let resetButton = Button(imageNamed: resetImage, imageColor: AppAppearance.dangerButtonColor, size: buttonSize)
       resetButton.name = resetImage + "Button"
-      resetButton.requiresConfirmation(SettingsScene.stackedLabels(["Confirm", "Reset"],
-                                                                   fontColor: AppAppearance.dangerButtonColor))
+      resetButton.requiresConfirmation(stackedLabels(["Confirm", "Reset"],
+                                                     fontColor: AppAppearance.dangerButtonColor))
       resetButtons.append(resetButton)
     }
     resetButtons[0].action = { [unowned self] in self.resetScores() }

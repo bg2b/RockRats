@@ -83,6 +83,7 @@
 		FDDCB1462364874D00FF9F1C /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDDCB1452364874D00FF9F1C /* CloudKit.framework */; };
 		FDDF488722D2A700006FB86F /* SpriteCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDDF488622D2A700006FB86F /* SpriteCache.swift */; };
 		FDE04B2D22D753240011A529 /* TextureCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE04B2C22D753240011A529 /* TextureCache.swift */; };
+		FDE4A10529108C070039FA8B /* LabelStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE4A10429108C070039FA8B /* LabelStack.swift */; };
 		FDF763A623C2412F0027FA2E /* Shaders.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDF763A523C2412F0027FA2E /* Shaders.swift */; };
 		FDF92B422322456900CC4DFE /* Hyperspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDF92B412322456900CC4DFE /* Hyperspace.swift */; };
 		FDF92B442322666600CC4DFE /* ufo_warpout.wav in Resources */ = {isa = PBXBuildFile; fileRef = FDF92B432322666600CC4DFE /* ufo_warpout.wav */; };
@@ -168,6 +169,7 @@
 		FDDCB1452364874D00FF9F1C /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		FDDF488622D2A700006FB86F /* SpriteCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteCache.swift; sourceTree = "<group>"; };
 		FDE04B2C22D753240011A529 /* TextureCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureCache.swift; sourceTree = "<group>"; };
+		FDE4A10429108C070039FA8B /* LabelStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelStack.swift; sourceTree = "<group>"; };
 		FDF763A523C2412F0027FA2E /* Shaders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shaders.swift; sourceTree = "<group>"; };
 		FDF92B412322456900CC4DFE /* Hyperspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hyperspace.swift; sourceTree = "<group>"; };
 		FDF92B432322666600CC4DFE /* ufo_warpout.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo_warpout.wav; sourceTree = "<group>"; };
@@ -272,6 +274,7 @@
 				FD79323D22D20FE600E7D336 /* GameViewController.swift */,
 				FDCF8CA422DA7296008EDFD1 /* Globals.swift */,
 				FDF92B412322456900CC4DFE /* Hyperspace.swift */,
+				FDE4A10429108C070039FA8B /* LabelStack.swift */,
 				FD3E02072333B1C20057A766 /* Logging.swift */,
 				FD46BD71231415B7008C1F99 /* Playfield.swift */,
 				FD4D53BF2306B47900718938 /* ReservesDisplay.swift */,
@@ -492,6 +495,7 @@
 				6506AD522340D3450006E8D6 /* UserData.swift in Sources */,
 				FDC6A7FC2334E054001A4774 /* EnergyBar.swift in Sources */,
 				FD96AE22233A52BD00D4CAFA /* TutorialScene.swift in Sources */,
+				FDE4A10529108C070039FA8B /* LabelStack.swift in Sources */,
 				FD0E046D23A560F000376E76 /* Alignment.swift in Sources */,
 				FD7AE4B2238401C100CAF082 /* CreditsScene.swift in Sources */,
 				FDD44F932336113F00C13609 /* AppAppearance.swift in Sources */,
