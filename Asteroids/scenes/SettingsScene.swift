@@ -95,7 +95,6 @@ class SettingsScene: BasicScene {
     if replayButtons.count >= 3 {
       replayButtons[2].action = { [unowned self] in self.replayConclusion() }
     }
-    let replayHstack = horizontalStack(nodes: replayButtons, minSpacing: buttonSpacing)
     buttons.append(contentsOf: replayButtons)
     // Resetting scores and achievements
     let resetButtonImages = ["resetscores", "resetgamecenter"]
@@ -114,16 +113,16 @@ class SettingsScene: BasicScene {
     if !Globals.gcInterface.enabled {
       resetAchievementsButton.disable()
     }
-    let resetHstack = horizontalStack(nodes: resetButtons, minSpacing: buttonSpacing)
+    let redoHstack = horizontalStack(nodes: replayButtons + resetButtons, minSpacing: buttonSpacing)
     buttons.append(contentsOf: resetButtons)
-    // Options like sound volume and control preferences
-    var optionButtons = [Button]()
+    // Sound controls
+    var soundButtons = [Button]()
     volumeButton = Button(imagesNamed: ["soundnone", "soundsmall", "soundmed", "soundbig"],
                           imageColor: AppAppearance.buttonColor, size: buttonSize)
     volumeButton.selectedValue = UserData.audioLevel.value
     volumeButton.makeSound = false
     volumeButton.action = { [unowned self] in self.setVolume() }
-    optionButtons.append(volumeButton)
+    soundButtons.append(volumeButton)
     heartbeatButton = Button(imagesNamed: ["heartbeatoff", "heartbeaton"],
                              imageColor: AppAppearance.buttonColor, size: buttonSize)
     heartbeatButton.selectedValue = UserData.heartbeatMuted.value ? 0 : 1
@@ -132,7 +131,7 @@ class SettingsScene: BasicScene {
     if volumeButton.selectedValue == 0 {
       heartbeatButton.disable()
     }
-    optionButtons.append(heartbeatButton)
+    soundButtons.append(heartbeatButton)
     ufoFadeButton = Button(imagesNamed: ["ufosoundcontinuous", "ufosoundchopped"],
                              imageColor: AppAppearance.buttonColor, size: buttonSize)
     ufoFadeButton.selectedValue = UserData.fadeUFOAudio.value ? 1 : 0
@@ -141,7 +140,11 @@ class SettingsScene: BasicScene {
     if volumeButton.selectedValue == 0 {
       ufoFadeButton.disable()
     }
-    optionButtons.append(ufoFadeButton)
+    soundButtons.append(ufoFadeButton)
+    let soundHstack = horizontalStack(nodes: soundButtons, minSpacing: buttonSpacing)
+    buttons.append(contentsOf: soundButtons)
+    // Other options
+    var optionButtons = [Button]()
     if Globals.controller.connected {
       // If there's a controller, show a preference for thrust using the stick or
       // dpad vs thrust on A/B buttons
@@ -181,7 +184,7 @@ class SettingsScene: BasicScene {
     }
     let optionsHstack = horizontalStack(nodes: optionButtons, minSpacing: buttonSpacing)
     buttons.append(contentsOf: optionButtons)
-    let vstack = verticalStack(nodes: [replayHstack, resetHstack, optionsHstack], minSpacing: buttonSpacing)
+    let vstack = verticalStack(nodes: [redoHstack, soundHstack, optionsHstack], minSpacing: buttonSpacing)
     let wantedMidY = 0.5 * (title.frame.minY + bottomHstack.calculateAccumulatedFrame().maxY)
     // Center verticalStack vertically at wantedMidY
     vstack.position = .zero
