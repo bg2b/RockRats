@@ -29,6 +29,8 @@ class SettingsScene: BasicScene {
   var heartbeatButton: Button!
   /// The UFO sound continous/fading button
   var ufoFadeButton: Button!
+  /// The button for selecting the initial wave
+  var startingWaveButton: Button!
   /// The show touches button
   var showTouchesButton: Button!
   /// Selector for setting thrust via controller joystick vs A/B buttons
@@ -145,6 +147,35 @@ class SettingsScene: BasicScene {
     buttons.append(contentsOf: soundButtons)
     // Other options
     var optionButtons = [Button]()
+    let maxStart = UserData.highestWaveCleared.value + 1
+    let startLabels = (0 ... maxStart).map { start in
+      if start == 0 {
+        let label = SKLabelNode(fontNamed: AppAppearance.font)
+        label.fontSize = 30
+        label.fontColor = AppAppearance.highlightTextColor
+        label.text = "FRENZY!"
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        label.zRotation = .pi / 8
+        return label as SKNode
+      } else {
+        return stackedLabels(["Start", "Wave \(start)"], fontColor: AppAppearance.buttonColor)
+      }
+    }
+    startingWaveButton = Button(forNodes: startLabels, size: buttonSize)
+    if maxStart == 1 {
+      // No choice but wave 1
+      startingWaveButton.selectedValue = 1
+      startingWaveButton.disable()
+    } else if UserData.startingWave.value == 0 {
+      // They want to start at the highest allowed wave
+      startingWaveButton.selectedValue = 0
+    } else {
+      // They've chosen a particular starting value
+      startingWaveButton.selectedValue = min(maxStart, UserData.startingWave.value)
+    }
+    startingWaveButton.action = { [unowned self] in self.selectStartingWave() }
+    optionButtons.append(startingWaveButton)
     if Globals.controller.connected {
       // If there's a controller, show a preference for thrust using the stick or
       // dpad vs thrust on A/B buttons
@@ -360,6 +391,11 @@ class SettingsScene: BasicScene {
     }
   }
 
+  /// Choose the starting wave
+  func selectStartingWave() {
+    UserData.startingWave.value = startingWaveButton.selectedValue
+  }
+
   /// Reset all local high scores
   func resetScores() {
     UserData.highScores.reset()
@@ -379,6 +415,13 @@ class SettingsScene: BasicScene {
       UserData.ufosDestroyedCounter.reset()
       UserData.asteroidsDestroyed.value = 0
       UserData.asteroidsDestroyedCounter.reset()
+      // Perhaps no real need to reset the maximum wave cleared since it does not
+      // affect any achievements directly, but whatevs.  Be sure to disable the wave
+      // select button and set it to start on wave 1 to be consistent.
+      UserData.highestWaveCleared.value = 0
+      UserData.highestWaveClearedCounter.reset()
+      startingWaveButton.selectedValue = 1
+      startingWaveButton.disable()
       // Setting these is perhaps pointless since if the user presses the ship style
       // button these will just get changed again.  But when actually starting a
       // game, the values will be ignored unless the appropriate achievements have

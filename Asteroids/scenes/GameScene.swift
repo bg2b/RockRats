@@ -43,6 +43,9 @@ let specialScores = [
 class GameScene: GameTutorialScene {
   /// The label showing the current score
   var scoreDisplay: SKLabelNode!
+  /// A label just below the score for showing the initial wave clearing bonus
+  /// (usually hidden)
+  var bonusDisplay: SKLabelNode!
   /// The currentTime in update when the player warped in (technically the last time
   /// before the ship appeared on the playfield, but whatevs)
   var lastWarpInTime = 0.0
@@ -81,6 +84,8 @@ class GameScene: GameTutorialScene {
   /// number that should have been awarded based on score is what triggers the
   /// awarding of an extra.
   var extraLivesAwarded = 0
+  /// The bonus they'll get if they clear the starting wave
+  var bonus = 0
   /// Becomes `true` when the game is over, used to supress wave spawning
   var gameOver = false
   /// The number of player lasers that have hit something without a miss, used for
@@ -97,11 +102,11 @@ class GameScene: GameTutorialScene {
 
   // MARK: - Initialization
 
-  /// Add score and central display to game area (lives display, energy bar, and
-  /// pause controls are added by the `super.initInfo()`)
+  /// Add score, bonus display, and central display to game area (lives display,
+  /// energy bar, and pause controls are added by the `super.initInfo()`)
   override func initInfo() {
     super.initInfo()
-    // Score and central display
+    // Score, bonus, and central display
     let moreInfo = SKNode()
     moreInfo.name = "moreInfo"
     moreInfo.setZ(.info)
@@ -113,6 +118,14 @@ class GameScene: GameTutorialScene {
     scoreDisplay.name = "score"
     scoreDisplay.position = CGPoint(x: gameFrame.midX, y: gameFrame.maxY - scoreDisplay.fontSize)
     moreInfo.addChild(scoreDisplay)
+    bonusDisplay = SKLabelNode(fontNamed: AppAppearance.font)
+    bonusDisplay.fontSize = scoreDisplay.fontSize
+    bonusDisplay.fontColor = AppAppearance.highlightTextColor
+    bonusDisplay.text = ""
+    bonusDisplay.name = "bonus"
+    bonusDisplay.isHidden = true
+    moreInfo.addChild(bonusDisplay)
+    bonusDisplay.position = scoreDisplay.position + CGPoint(x: 0, y: -bonusDisplay.fontSize)
     centralDisplay = SKLabelNode(fontNamed: AppAppearance.font)
     centralDisplay.fontSize = 100
     centralDisplay.fontColor = AppAppearance.highlightTextColor
@@ -300,12 +313,49 @@ class GameScene: GameTutorialScene {
     return 2
   }
 
+  /// Point value for a particular UFO type
+  func ufoPoints(_ type: UFOType) -> Int {
+    return [20, 50, 100][type.rawValue]
+  }
+
   /// How many points is a destroyed UFO worth?
   /// - Parameter ufo: The UFO that was hit
   /// - Returns: The point value
   func ufoPoints(_ ufo: SKNode) -> Int {
     guard let ufo = ufo as? UFO else { fatalError("The ufo doesn't have the UFO nature") }
-    return [20, 50, 100][ufo.type.rawValue]
+    return ufoPoints(ufo.type)
+  }
+
+  /// When the player is starting at a wave number that's higher than 1, they get a
+  /// bonus if they manage to clear it.  The bonus is an estimate of how many points
+  /// they'd get if they played all the lower waves.  E.g., if they start on wave 3
+  /// and clear it, they get a bonus that represents an approximate score for waves 1
+  /// and 2.
+  ///
+  /// This function sets the initial bonus, and as a side effect advances the wave
+  /// number to the desired starting value.  If the wave is cleared the bonus will be
+  /// added to their score, and then the bonus is reset to 0.
+  func setBonus(forWave wave: Int) {
+    bonus = 0
+    while Globals.gameConfig.waveNumber() + 1 < wave {
+      // The next wave would be cleared
+      Globals.gameConfig.nextWave()
+      // Asteroid points would be exact aside from UFOs shooting them on occasion
+      let numAsteroids = Globals.gameConfig.numAsteroids()
+      let asteroidScore = (2 + 2 * 5 + 4 * 10) * numAsteroids
+      // Weight UFO probabilities by point values to get the average number of points
+      // per UFO
+      var avgUfoScore = 0.0
+      let ufoChances = Globals.gameConfig.value(for: \.ufoChances)
+      for ufoType in UFOType.allCases {
+        avgUfoScore += ufoChances[ufoType.rawValue] * Double(ufoPoints(ufoType))
+      }
+      // This is a rough estimate of how many UFOs they'll encounter before they
+      // manage to destroy all the asteroids.  Empirically it's an underestimate for low
+      // waves when they might try to farm, but gets better by about wave 4 or 5.
+      let expectedUfos = Double(numAsteroids) / 2.5
+      bonus += asteroidScore + Int(expectedUfos * avgUfoScore)
+    }
   }
 
   /// Add some points to the player's score
@@ -317,25 +367,30 @@ class GameScene: GameTutorialScene {
   func addToScore(_ amount: Int) {
     score += amount
     let extraLivesEarned = score / Globals.gameConfig.extraLifeScore
-    if extraLivesEarned > extraLivesAwarded {
+    // If the amount being added is a bonus from clearing the initial wave, it can be
+    // large.  I want to report achievements for each multiple of extraLifeScore, but
+    // no matter how many levels they pass they only get one real extra life.
+    if extraLivesAwarded < extraLivesEarned {
       updateReserves(+1)
       audio.soundEffect(.extraLife)
-      extraLivesAwarded += 1
-      switch extraLivesEarned {
-      case 3:
-        reportAchievement(achievement: .spaceCadet)
-      case 4:
-        reportAchievement(achievement: .spaceScout)
-      case 5:
-        reportAchievement(achievement: .spaceRanger)
-      case 6:
-        reportRepeatableAchievement(achievement: .spaceAce)
-      case 8:
-        reportRepeatableAchievement(achievement: .galacticGuardian)
-      case 10:
-        reportRepeatableAchievement(achievement: .cosmicChampion)
-      default:
-        break
+      while extraLivesAwarded < extraLivesEarned {
+        extraLivesAwarded += 1
+        switch extraLivesAwarded {
+        case 3:
+          reportAchievement(achievement: .spaceCadet)
+        case 4:
+          reportAchievement(achievement: .spaceScout)
+        case 5:
+          reportAchievement(achievement: .spaceRanger)
+        case 6:
+          reportRepeatableAchievement(achievement: .spaceAce)
+        case 8:
+          reportRepeatableAchievement(achievement: .galacticGuardian)
+        case 10:
+          reportRepeatableAchievement(achievement: .cosmicChampion)
+        default:
+          break
+        }
       }
     }
     scoreDisplay.text = "\(score)"
@@ -361,6 +416,27 @@ class GameScene: GameTutorialScene {
     }
   }
 
+  /// Award a possible bonus for clearing the initial wave
+  func awardBonus() {
+    if bonus == 0 {
+      return
+    }
+    // They started on a wave higher than 1 and cleared it, give the bonus (which
+    // may in turn give an extra life)
+    os_log("Awarding bonus of %d", log: .app, type: .debug, bonus)
+    bonusDisplay.text = "Bonus +\(bonus)"
+    bonusDisplay.alpha = 1.0
+    bonusDisplay.isHidden = false
+    let fadeAndHide = SKAction.sequence([
+      .wait(forDuration: 1.5),
+      .fadeOut(withDuration: 0.5),
+      .hide()
+      ])
+    bonusDisplay.run(fadeAndHide)
+    addToScore(bonus)
+    bonus = 0
+  }
+
   // MARK: - Asteroid spawning
 
   /// When an asteroid is removed, check to see if I should start a new wave
@@ -368,6 +444,7 @@ class GameScene: GameTutorialScene {
     if asteroids.isEmpty && !gameOver {
       os_log("Last asteroid removed at %f, going to spawn a wave", log: .app, type: .debug, Globals.lastUpdateTime)
       os_signpost(.event, log: .poi, name: "Last asteroid removed", signpostID: signpostID)
+      awardBonus()
       normalHeartbeatRate()
       stopSpawningUFOs()
       betweenWaves = true
@@ -403,6 +480,11 @@ class GameScene: GameTutorialScene {
   /// Display the WAVE ## message, wait a bit, and then spawn asteroids
   func nextWave() {
     os_log("Next wave begins at %f", log: .app, type: .debug, Globals.lastUpdateTime)
+    let clearedWave = Globals.gameConfig.waveNumber()
+    if UserData.highestWaveCleared.value < clearedWave {
+      os_log("Highest wave cleared now %d", log: .app, type: .debug, clearedWave)
+      UserData.highestWaveCleared.value = clearedWave
+    }
     Globals.gameConfig.nextWave()
     ufosToAvenge = 0
     ufosKilledWithoutDying = 0
@@ -866,6 +948,16 @@ class GameScene: GameTutorialScene {
     super.didMove(to: view)
     Globals.gameConfig = loadGameConfig(forMode: "normal")
     Globals.gameConfig.currentWaveNumber = 0
+    // Assume the player wants to start at the highest possible wave...
+    var startWave = 999
+    if UserData.startingWave.value > 0 {
+      // No, a fixed value is desired...
+      startWave = min(startWave, UserData.startingWave.value)
+    }
+    // But they can only skip waves that they've cleared in the past
+    startWave = min(startWave, UserData.highestWaveCleared.value + 1)
+    os_log("Game starts at wave %d", log: .app, type: .debug, startWave)
+    setBonus(forWave: startWave)
     reservesRemaining = Globals.gameConfig.initialLives
     updateReserves(0)
     energyBar.fill()

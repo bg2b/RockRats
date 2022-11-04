@@ -260,6 +260,9 @@ class UserData {
   /// Color of the player's ship (ignored if the desired color isn't unlocked by
   /// spaceAce, galacticGuardian, or cosmicChampion)
   static var shipColor = DefaultsValue<String>(name: "shipColor", defaultValue: "blue")
+  /// Desired starting wave.  The player can skip any waves that they've cleared in
+  /// the past.  0 means start at the highest allowed wave.
+  static var startingWave = DefaultsValue<Int>(name: "startingWave", defaultValue: 1)
   /// Number of games played on this device
   static var gamesPlayed = DefaultsValue<Int>(name: "gamesPlayed", defaultValue: 0)
   /// Number of games played when a review was last requested
@@ -286,6 +289,8 @@ class UserData {
   static var ufosDestroyed = DefaultsValue<Int>(name: "ufosDestroyed", defaultValue: 0)
   /// A local-only copy of asteroidsDestroyedCounter that is updated during a game
   static var asteroidsDestroyed = DefaultsValue<Int>(name: "asteroidsDestroyed", defaultValue: 0)
+  /// A local-only copy of the highest wave cleared that is updated during a game
+  static var highestWaveCleared = DefaultsValue<Int>(name: "highestWaveCleared", defaultValue: 0)
   /// Mapping between player IDs and the total number of UFOs they've destroyed.
   /// Used for different levels of UFO destruction achievements (synced via iCloud)
   static var ufosDestroyedCounter = GameCounter(name: "ufosDestroyedCounter")
@@ -293,6 +298,9 @@ class UserData {
   /// Used for different levels of asteroid destruction achievements (synced via
   /// iCloud)
   static var asteroidsDestroyedCounter = GameCounter(name: "asteroidsDestroyedCounter")
+  /// Mapping between player IDs and the maximum wave they've cleared.  Used to
+  /// determine the maximum wave they're allowed to start on
+  static var highestWaveClearedCounter = GameCounter(name: "highestWaveClearedCounter")
 }
 
 /// Save a name to be displayed for the given player ID.  These are used by
@@ -319,7 +327,12 @@ func setCurrentPlayer(_ playerID: String, playerName: String) {
   os_log("Player is now %s, name %{public}s", log: .app, type: .debug, playerID, playerName)
   UserData.ufosDestroyed.value = UserData.ufosDestroyedCounter.value
   UserData.asteroidsDestroyed.value = UserData.asteroidsDestroyedCounter.value
-  os_log("UFO counter %d, asteroid counter %d", log: .app, type: .debug, UserData.ufosDestroyed.value, UserData.asteroidsDestroyed.value)
+  UserData.highestWaveCleared.value = UserData.highestWaveClearedCounter.value
+  os_log("UFO counter %d, asteroid counter %d, highest wave cleared %d",
+         log: .app, type: .debug,
+         UserData.ufosDestroyed.value,
+         UserData.asteroidsDestroyed.value,
+         UserData.highestWaveCleared.value)
   // Synchronize in case either local or iCloud was out-of-date.
   updateGameCounters()
 }
@@ -353,10 +366,12 @@ func updateGameCounters() {
   os_log("Updating game counters", log: .app, type: .debug)
   UserData.ufosDestroyedCounter.value = UserData.ufosDestroyed.value
   UserData.asteroidsDestroyedCounter.value = UserData.asteroidsDestroyed.value
+  UserData.highestWaveClearedCounter.value = UserData.highestWaveCleared.value
   // If by some chance the same person has been playing on another device, store the
   // new values back in the local counters.
   UserData.ufosDestroyed.value = UserData.ufosDestroyedCounter.value
   UserData.asteroidsDestroyed.value = UserData.asteroidsDestroyedCounter.value
+  UserData.highestWaveCleared.value = UserData.highestWaveClearedCounter.value
 }
 
 /// Reset the generation number for iCloud-synced stuff
@@ -366,4 +381,5 @@ func resetGenerations() {
   UserData.highScores.resetGeneration()
   UserData.ufosDestroyedCounter.resetGeneration()
   UserData.asteroidsDestroyedCounter.resetGeneration()
+  UserData.highestWaveClearedCounter.resetGeneration()
 }
