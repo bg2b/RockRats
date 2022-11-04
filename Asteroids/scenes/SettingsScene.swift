@@ -168,19 +168,20 @@ class SettingsScene: BasicScene {
     if achievementIsCompleted(.blastFromThePast) {
       shipStyles.append("shipretro")
     }
-    if shipStyles.count > 1 {
-      shipStyleButton = Button(imagesNamed: shipStyles, imageColor: .white, size: buttonSize)
-      if let retroIndex = shipStyles.firstIndex(of: "shipretro"), UserData.retroMode.value {
-        // The user has the retro mode preference set; show that selection
-        shipStyleButton.selectedValue = retroIndex
-      } else if let modernIndex = shipStyles.firstIndex(of: "shipmodern_\(UserData.shipColor.value)") {
-        // The user has picked some unlocked color
-        shipStyleButton.selectedValue = modernIndex
-      } else {
-        shipStyleButton.selectedValue = 0
-      }
-      shipStyleButton.action = { [unowned self] in self.selectShipStyle() }
-      optionButtons.append(shipStyleButton)
+    shipStyleButton = Button(imagesNamed: shipStyles, imageColor: .white, size: buttonSize)
+    if let retroIndex = shipStyles.firstIndex(of: "shipretro"), UserData.retroMode.value {
+      // The user has the retro mode preference set; show that selection
+      shipStyleButton.selectedValue = retroIndex
+    } else if let modernIndex = shipStyles.firstIndex(of: "shipmodern_\(UserData.shipColor.value)") {
+      // The user has picked some unlocked color
+      shipStyleButton.selectedValue = modernIndex
+    } else {
+      shipStyleButton.selectedValue = 0
+    }
+    shipStyleButton.action = { [unowned self] in self.selectShipStyle() }
+    optionButtons.append(shipStyleButton)
+    if shipStyles.count == 1 {
+      shipStyleButton.disable()
     }
     let optionsHstack = horizontalStack(nodes: optionButtons, minSpacing: buttonSpacing)
     buttons.append(contentsOf: optionButtons)
