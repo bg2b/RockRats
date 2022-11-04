@@ -71,6 +71,28 @@ class Button: SKNode {
     isUserInteractionEnabled = true
   }
 
+  /// Make a button around some other nodes and cycling when clicked
+  /// - Parameters:
+  ///   - nodes: The nodes to wrap
+  ///   - size: The desired (minimum) size of the button
+  convenience init(forNodes nodes: [SKNode], size: CGSize) {
+    self.init(around: nodes[0], minSize: size)
+    for node in nodes {
+      addChild(node)
+      node.isHidden = true
+    }
+    nodes[0].isHidden = false
+    decorations = nodes
+  }
+
+  /// Make a button around some other node
+  /// - Parameters:
+  ///   - node: The node to wrap
+  ///   - size: The desired (minimum) size of the button
+  convenience init(forNode node: SKNode, size: CGSize) {
+    self.init(forNodes: [node], size: size)
+  }
+
   /// Make a button displaying a series of images and cycling when clicked.
   /// - Parameters:
   ///   - imageNames: An array with names of the different images
@@ -85,10 +107,7 @@ class Button: SKNode {
       sprite.isHidden = true
       return sprite
     }
-    sprites[0].isHidden = false
-    self.init(around: sprites[0], minSize: size)
-    sprites.forEach { addChild($0) }
-    decorations = sprites
+    self.init(forNodes: sprites, size: size)
   }
 
   /// Make a button displaying an image
@@ -98,20 +117,6 @@ class Button: SKNode {
   ///   - size: The desired (minimum) size of the button
   convenience init(imageNamed imageName: String, imageColor: UIColor, size: CGSize) {
     self.init(imagesNamed: [imageName], imageColor: imageColor, size: size)
-  }
-
-  /// Make a button around some other node
-  ///
-  /// This is used currently just for stacking up two labels when a single-line text
-  /// is too wide to fit the button.
-  ///
-  /// - Parameters:
-  ///   - node: The node to wrap
-  ///   - size: The desired (minimum) size of the button
-  convenience init(forNode node: SKNode, size: CGSize) {
-    self.init(around: node, minSize: size)
-    addChild(node)
-    decorations.append(node)
   }
 
   /// Make a button displaying some text
@@ -127,9 +132,7 @@ class Button: SKNode {
     label.fontColor = AppAppearance.textColor
     label.horizontalAlignmentMode = .center
     label.verticalAlignmentMode = .center
-    self.init(around: label, minSize: size)
-    addChild(label)
-    decorations.append(label)
+    self.init(forNode: label, size: size)
   }
 
   required init(coder aDecoder: NSCoder) {
