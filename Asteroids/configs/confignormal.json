@@ -93,6 +93,15 @@
     },
     {
       "waveNumber": 15,
+      "ufoDodging": [16, 20, 16],
+      "ufoChances": [0, 0, 1],
+      "ufoShotAnticipation": [0.25, 0.4, 0.25],
+      "ufoAccuracy": [0.15, 0, 0.09],
+      "ufoMeanShotTime": [1.25, 0, 0.9],
+      "asteroidSpeedBoost": 1.35
+    },
+    {
+      "waveNumber": 17,
       "ufoDodging": [17, 21, 17],
       "ufoChances": [0, 0, 1],
       "ufoShotAnticipation": [0.25, 0.4, 0.25],
