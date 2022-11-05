@@ -65,6 +65,10 @@ class GameScene: GameTutorialScene {
   /// This is `true` in the interval between when the player dies to a UFO shot and
   /// when they respawn; used for the `bestServedCold` achievement
   var killedByUFO = false
+  /// Set to `true` when the player dies and they have no remaining ships.  If
+  /// something happens to get them an extra life, the respawn will award the Lazarus
+  /// achievement
+  var notDeadYet = false
   /// A fraction that multiples meanUFOTime, used to modulate the spawning rate
   /// according to circumstances
   var ufoSpawningRate = 0.0
@@ -387,6 +391,12 @@ class GameScene: GameTutorialScene {
     if extraLivesAwarded < extraLivesEarned {
       updateReserves(+1)
       audio.soundEffect(.extraLife)
+      if notDeadYet {
+        // The player had lost their last ship but something happened to give them a
+        // new one; welcome them back.
+        reportAchievement(achievement: .lazarus)
+        notDeadYet = false
+      }
       while extraLivesAwarded < extraLivesEarned {
         extraLivesAwarded += 1
         switch extraLivesAwarded {
@@ -712,6 +722,8 @@ class GameScene: GameTutorialScene {
     audio.soundEffect(.playerExplosion, at: player.position)
     addToPlayfield(player.explode())
     stopSpawningUFOs()
+    // Remember if this was the last ship for awarding possible Lazarus achievement
+    notDeadYet = (reservesRemaining == 0)
     playfield.changeSpeed(to: 0.25)
     // Lasers live for a bit less than a second.  If the player fires and immediately
     // dies, then due to the slow-motion effect that can get stretched to a bit less

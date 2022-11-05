@@ -40,6 +40,7 @@ enum Achievement: String, CaseIterable {
   case hideAndSeek = "hideAndSeek"
   case tooMuchTime = "tooMuchTime"
   case promoted = "promoted"
+  case lazarus = "lazarus"
   // Normal
   // The first non-hidden achievement should be useTheSource, since finding the set
   // of hidden achievements is done by iterating through the enum until useTheSource
