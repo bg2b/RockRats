@@ -28,6 +28,7 @@ let specialScores = [
   SpecialScore(score: 1701, display: "NCC-1701", achievement: .keepOnTrekking),
   SpecialScore(score: 1984, display: "I'm watching you", achievement: .bigBrother),
   SpecialScore(score: 2001, display: "A Space Oddity", achievement: .spaceOddity),
+  SpecialScore(score: 2101, display: "In A.D. 2101", achievement: .allYourBase),
   SpecialScore(score: 3720, display: "3720 to 1", achievement: .whatAreTheOdds)
 ]
 
@@ -358,6 +359,19 @@ class GameScene: GameTutorialScene {
     }
   }
 
+  /// All your base are belong to us
+  func allYourBase() {
+    let cat = SKSpriteNode(imageNamed: "cat")
+    playfield.addChild(cat)
+    cat.zPosition = -1
+    cat.alpha = 0.0
+    cat.run(.sequence([
+      .fadeAlpha(to: 0.25, duration: 0.5),
+      .wait(forDuration: 2.5),
+      .fadeOut(withDuration: 0.5),
+      .removeFromParent()]))
+  }
+
   /// Add some points to the player's score
   ///
   /// This routine also handles awarding of extra lives and reporting achievements
@@ -408,6 +422,9 @@ class GameScene: GameTutorialScene {
           // Then wait a bit more to make sure they've had time to notice the message.
           self.wait(for: 1.5) {
             if self.score == special.score {
+              if special.achievement == .allYourBase {
+                self.allYourBase()
+              }
               reportAchievement(achievement: special.achievement)
             }
           }

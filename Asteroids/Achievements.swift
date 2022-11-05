@@ -31,6 +31,7 @@ enum Achievement: String, CaseIterable {
   case score404 = "notFound"
   case littlePrince = "littlePrince"
   case spaceOddity = "spaceOddity"
+  case allYourBase = "allYourBase"
   case dontPanic = "dontPanic"
   case bigBrother = "bigBrother"
   case whatAreTheOdds = "whatAreTheOdds"
