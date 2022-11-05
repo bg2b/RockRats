@@ -481,6 +481,8 @@ class GameScene: GameTutorialScene {
     os_signpost(.event, log: .poi, name: "Spawn wave", signpostID: signpostID)
     if Globals.gameConfig.waveNumber() == 11 {
       reportAchievement(achievement: .spinalTap)
+    } else if Globals.gameConfig.waveNumber() == 16 {
+      reportAchievement(achievement: .sweet16)
     }
     // One Little Prince asteroid is allowed per wave; if one spawns, the
     // littlePrinceAllowed flag will be cleared so that another can't
