@@ -714,13 +714,12 @@ class GameScene: GameTutorialScene {
   ///
   /// There's a slow-motion effect so that the player can appreciate their demise in
   /// all its glory ;-).
-  func destroyPlayer() {
+  override func destroyPlayer() {
     if Globals.lastUpdateTime - lastWarpInTime <= 0.1 {
       reportAchievement(achievement: .rightPlaceWrongTime)
     }
+    super.destroyPlayer()
     ufosKilledWithoutDying = 0
-    audio.soundEffect(.playerExplosion, at: player.position)
-    addToPlayfield(player.explode())
     stopSpawningUFOs()
     // Remember if this was the last ship for awarding possible Lazarus achievement
     notDeadYet = (reservesRemaining == 0)

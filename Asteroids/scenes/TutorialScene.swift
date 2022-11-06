@@ -360,11 +360,9 @@ class TutorialScene: GameTutorialScene {
   }
 
   /// Boom...
-  func destroyPlayer() {
+  override func destroyPlayer() {
+    super.destroyPlayer()
     anyShipsDestroyed = true
-    let pieces = player.explode()
-    addToPlayfield(pieces)
-    audio.soundEffect(.playerExplosion)
     if reservesRemaining > 0 {
       if asteroids.isEmpty {
         // They destroyed the last asteroid by ramming, don't bother to respawn

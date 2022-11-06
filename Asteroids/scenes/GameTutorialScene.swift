@@ -502,7 +502,7 @@ class GameTutorialScene: BasicScene {
     cleanup()
   }
 
-  // MARK: - Spawning
+  // MARK: - Spawning and death
 
   /// Determine if a potential spawn point is safe from an asteroid track, accounting
   /// for possible wrapping
@@ -568,6 +568,15 @@ class GameTutorialScene: BasicScene {
   func updateReserves(_ amount: Int) {
     reservesRemaining += amount
     reservesDisplay.showReserves(reservesRemaining)
+  }
+
+  /// Make the player explode.  Subclasses should use this for the common effects
+  /// (sound, fragments, controller flashing, haptics, etc), but will need to
+  /// override with their own specific death handling.
+  func destroyPlayer() {
+    audio.soundEffect(.playerExplosion, at: player.position)
+    addToPlayfield(player.explode())
+    }
   }
 
   // MARK: - Player lasers
