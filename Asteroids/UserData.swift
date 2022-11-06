@@ -62,6 +62,9 @@ struct GameCounter {
     if localDate < globalDate {
       // Update generation
       UserDefaults.standard.set(globalDate, forKey: dateKey)
+    } else if globalDate < localDate {
+      // This shouldn't happen probably, unless maybe some sort of sync issue?
+      NSUbiquitousKeyValueStore.default.set(localDate, forKey: dateKey)
     }
     if localDict != result {
       UserDefaults.standard.set(result, forKey: name)
