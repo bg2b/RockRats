@@ -257,6 +257,8 @@ class UserData {
   static var showTouches = DefaultsValue<Bool>(name: "showTouches", defaultValue: true)
   /// `true` when thrust is using controller A/B buttons instead of joystick
   static var buttonThrust = DefaultsValue<Bool>(name: "buttonThrust", defaultValue: false)
+  /// `true` when haptics should be played
+  static var useHaptics = DefaultsValue<Bool>(name: "useHaptics", defaultValue: true)
   /// Retro mode preference (ignored if Game Center is disabled or the player does
   /// not have the blastFromThePast achievement)
   static var retroMode = DefaultsValue<Bool>(name: "retroMode", defaultValue: false)

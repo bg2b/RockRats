@@ -35,6 +35,8 @@ class SettingsScene: BasicScene {
   var showTouchesButton: Button!
   /// Selector for setting thrust via controller joystick vs A/B buttons
   var joystickThrustButton: Button!
+  /// Selector for enabling or disabling haptics
+  var hapticsButton: Button!
   /// Unlocked ship styles
   var shipStyles = [String]()
   /// Ship appearance button (chooses modern of various colors or retro)
@@ -176,6 +178,7 @@ class SettingsScene: BasicScene {
     }
     startingWaveButton.action = { [unowned self] in self.selectStartingWave() }
     optionButtons.append(startingWaveButton)
+    let hapticsIcon: String
     if Globals.controller.connected {
       // If there's a controller, show a preference for thrust using the stick or
       // dpad vs thrust on A/B buttons
@@ -184,6 +187,8 @@ class SettingsScene: BasicScene {
       joystickThrustButton.selectedValue = UserData.buttonThrust.value ? 1 : 0
       joystickThrustButton.action = { [unowned self] in self.toggleJoystickThrust() }
       optionButtons.append(joystickThrustButton)
+      // Use a controller icon on the haptics button
+      hapticsIcon = "controller"
     } else {
       // Show preference for touches displayed or not
       showTouchesButton = Button(imagesNamed: ["showtouchesoff", "showtoucheson"],
@@ -191,7 +196,19 @@ class SettingsScene: BasicScene {
       showTouchesButton.selectedValue = UserData.showTouches.value ? 1 : 0
       showTouchesButton.action = { [unowned self] in self.toggleShowTouches() }
       optionButtons.append(showTouchesButton)
+      // Use a device icon on the haptics button
+      hapticsIcon = "device"
     }
+    // Haptics button
+    hapticsButton = Button(imagesNamed: ["\(hapticsIcon)hapticsoff", "\(hapticsIcon)hapticson"],
+                           imageColor: AppAppearance.buttonColor, size: buttonSize)
+    hapticsButton.selectedValue = UserData.useHaptics.value ? 1 : 0
+    hapticsButton.action = { [unowned self] in self.toggleHaptics() }
+    if !Globals.haptics.enabled {
+      hapticsButton.selectedValue = 0
+      hapticsButton.disable()
+    }
+    optionButtons.append(hapticsButton)
     // Get the unlocked ship colors
     shipStyles = unlockedShipColors().map { "shipmodern_\($0)" }
     // This retro/modern selection is only available if the player has the
@@ -376,6 +393,14 @@ class SettingsScene: BasicScene {
   /// Toggle showing touches on/off
   func toggleJoystickThrust() {
     UserData.buttonThrust.value = (joystickThrustButton.selectedValue == 1)
+  }
+
+  /// Toggle haptics on/off
+  func toggleHaptics() {
+    UserData.useHaptics.value = (hapticsButton.selectedValue == 1)
+    if UserData.useHaptics.value {
+      Globals.haptics.explosion()
+    }
   }
 
   /// Choose the ship style

@@ -621,7 +621,9 @@ class GameTutorialScene: BasicScene {
     if let controllerExplode = controllerExplosion() {
       run(controllerExplode)
     }
-    Globals.haptics.explosion()
+    if Globals.haptics.enabled && UserData.useHaptics.value {
+      Globals.haptics.explosion()
+    }
   }
 
   // MARK: - Player lasers

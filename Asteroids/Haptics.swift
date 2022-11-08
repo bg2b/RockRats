@@ -20,6 +20,9 @@ class HapticsInterface {
   /// A haptic pattern for the player's ship being destroyed
   let explosionPattern: CHHapticPattern?
 
+  /// Are haptics available?
+  var enabled: Bool { engine != nil }
+
   /// Initialize the device haptics engine, if it's available.  Make any patterns
   /// that might be played.
   init() {
