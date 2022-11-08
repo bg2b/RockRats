@@ -45,6 +45,8 @@ class GameViewController: UIViewController {
       }
       Globals.gcInterface = GameCenterInterface(leaderboardNamesAndIDs: leaderboardNamesAndIDs,
                                                 presenter: { vc in Globals.menuScene.setGameCenterAuth(viewController: vc) })
+      // Look for a default haptics engine
+      Globals.haptics = HapticsInterface()
       // Show the intro on first launch, otherwise the main menu
       let toPresent = UserData.hasDoneIntro.value ? Globals.menuScene! : IntroScene(size: size, conclusion: false)
       os_log("viewDidLoad will present %{public}s", log: .app, type: .debug, toPresent.name!)
@@ -98,6 +100,8 @@ class GameViewController: UIViewController {
 extension Globals {
   /// The Game Center interface singleton
   static var gcInterface: GameCenterInterface!
+  /// The haptics singleton
+  static var haptics: HapticsInterface!
   /// Multiply by this to convert from points to game units
   static var ptsToGameUnits = CGFloat(1)
   /// The game's main menu scene

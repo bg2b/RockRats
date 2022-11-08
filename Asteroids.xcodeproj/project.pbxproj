@@ -47,6 +47,7 @@
 		FD537DD6231BE385003312B3 /* ufo_laser.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD537DD5231BE384003312B3 /* ufo_laser.wav */; };
 		FD61599B23E2751A00520243 /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FD61599A23E2751A00520243 /* GameController.framework */; };
 		FD6F23DE234357710083A913 /* ConformingCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD6F23DD234357710083A913 /* ConformingCache.swift */; };
+		FD75E8A5291825280058C77C /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD75E8A4291825280058C77C /* Haptics.swift */; };
 		FD7635B02354A410000543E7 /* GameCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD7635AF2354A410000543E7 /* GameCenter.swift */; };
 		FD7635B32354AE1A000543E7 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FD7635B22354AE1A000543E7 /* GameKit.framework */; };
 		FD79323622D20FE600E7D336 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD79323522D20FE600E7D336 /* AppDelegate.swift */; };
@@ -130,6 +131,7 @@
 		FD537DD5231BE384003312B3 /* ufo_laser.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ufo_laser.wav; sourceTree = "<group>"; };
 		FD61599A23E2751A00520243 /* GameController.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameController.framework; path = System/Library/Frameworks/GameController.framework; sourceTree = SDKROOT; };
 		FD6F23DD234357710083A913 /* ConformingCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConformingCache.swift; sourceTree = "<group>"; };
+		FD75E8A4291825280058C77C /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
 		FD7635AF2354A410000543E7 /* GameCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCenter.swift; sourceTree = "<group>"; };
 		FD7635B22354AE1A000543E7 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
 		FD79323222D20FE600E7D336 /* Rock Rats.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Rock Rats.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -273,6 +275,7 @@
 				FD40DE7D236C538B00544034 /* GameScore.swift */,
 				FD79323D22D20FE600E7D336 /* GameViewController.swift */,
 				FDCF8CA422DA7296008EDFD1 /* Globals.swift */,
+				FD75E8A4291825280058C77C /* Haptics.swift */,
 				FDF92B412322456900CC4DFE /* Hyperspace.swift */,
 				FDE4A10429108C070039FA8B /* LabelStack.swift */,
 				FD3E02072333B1C20057A766 /* Logging.swift */,
@@ -482,6 +485,7 @@
 				FDD831F222EDB50200CA4EC6 /* Explosions.swift in Sources */,
 				FDCF8CA322DA175F008EDFD1 /* CGHelpers.swift in Sources */,
 				FD4D53C02306B47900718938 /* ReservesDisplay.swift in Sources */,
+				FD75E8A5291825280058C77C /* Haptics.swift in Sources */,
 				FD96AE1C2339A93300D4CAFA /* TypeIn.swift in Sources */,
 				FD1B38A0234C904C00674161 /* CyclicCache.swift in Sources */,
 				FDCF8CA522DA7296008EDFD1 /* Globals.swift in Sources */,

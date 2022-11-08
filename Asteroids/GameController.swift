@@ -89,6 +89,8 @@ class Controller {
     chosenController?.playerIndex = .index1
     // Set a default color if there's a light
     setColor("ship")
+    // Haptics may get taken over by the controller
+    setHaptics()
   }
 
   // MARK: - Button actions
@@ -225,6 +227,21 @@ class Controller {
       }
     default:
       light.color = GCColor(red: 0, green: 0, blue: 1)
+    }
+  }
+
+  // MARK: - Haptics
+  func setHaptics() {
+    if let chosenController {
+      let engine = chosenController.haptics?.createEngine(withLocality: .default)
+      let onController = engine != nil || !chosenController.isAttachedToDevice
+      // If the controller has haptics, it takes over.  If it does not have haptics,
+      // then it still takes over if it's not attached to the device.  For an
+      // attached controller, I'll leave the device haptics enabled and hopefully
+      // they can still be felt.
+      Globals.haptics.setEngine(engine, onController: onController)
+    } else {
+      Globals.haptics.setEngine(nil, onController: false)
     }
   }
 }
