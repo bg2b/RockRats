@@ -627,6 +627,9 @@ class GameTutorialScene: BasicScene {
 
   // MARK: - Hyperspace jumps
 
+  /// Just for readability
+  var retroEnabled: Bool { shouldEnableEffects }
+
   /// Turn on/off the scene's special retro effects shader
   ///
   /// Turning on retro also changes the filter used in the game area when the scene
@@ -694,12 +697,12 @@ class GameTutorialScene: BasicScene {
       // automatically at the end).  I'm pretty sure everything would be OK even
       // without the weak self, but better safe than sorry.
       guard let self else { return }
-      if blastFromThePast && !self.shouldEnableEffects {
+      if blastFromThePast && !self.retroEnabled {
         // Warping at a score ending in 79 (to honor Asteroid's 1979 release) turns
         // on retro mode
         self.setRetroMode(enabled: true)
         reportAchievement(achievement: .blastFromThePast)
-      } else if backToTheFuture && self.shouldEnableEffects {
+      } else if backToTheFuture && self.retroEnabled {
         // Warping at a score ending in 88 (MPH) when in retro mode deactivates retro
         // and goes Back to the Future
         self.setRetroMode(enabled: false)
