@@ -217,7 +217,7 @@ class TutorialScene: GameTutorialScene {
   ///   - size: The size of the scene
   init(size: CGSize) {
     os_log("TutorialScene init", log: .app, type: .debug)
-    super.init(size: size, shipColor: nil)
+    super.init(size: size, shipColor: UserData.shipColor.value)
     name = "tutorialScene"
     initTutorial()
     // This is needed to set the pausing blur shader

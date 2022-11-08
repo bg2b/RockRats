@@ -389,6 +389,7 @@ class SettingsScene: BasicScene {
       assert(parts.count == 2)
       UserData.shipColor.value = String(parts[1])
     }
+    Globals.controller.setColor("ship")
   }
 
   /// Choose the starting wave

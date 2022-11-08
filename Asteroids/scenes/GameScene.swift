@@ -203,11 +203,7 @@ class GameScene: GameTutorialScene {
   /// - Parameter size: The size of the scene
   init(size: CGSize) {
     os_log("GameScene init", log: .app, type: .debug)
-    var shipColor: String?
-    if unlockedShipColors().contains(UserData.shipColor.value) {
-      shipColor = UserData.shipColor.value
-    }
-    super.init(size: size, shipColor: shipColor)
+    super.init(size: size, shipColor: UserData.shipColor.value)
     name = "gameScene"
     initRetroShader()
     onlyRetro = true

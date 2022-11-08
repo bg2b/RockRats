@@ -121,7 +121,14 @@ class GameTutorialScene: BasicScene {
   /// Make a game or tutorial scene of a given size
   /// - Parameter size: The size of the scene
   init(size: CGSize, shipColor: String?) {
-    self.shipColor = shipColor ?? "blue"
+    var shipColor = shipColor ?? "blue"
+    if !unlockedShipColors().contains(shipColor) {
+      // If I'm here, it's because Game Center was at some point available, various
+      // colors were unlocked, and they chose some non-blue color.  But now Game
+      // Center isn't available so there's only really blue.
+      shipColor = "blue"
+    }
+    self.shipColor = shipColor
     super.init(size: size)
     name = "gameTutorialScene"
     // Very wide aspect ratios are generally easier games.  4:3 is was the original
@@ -398,6 +405,9 @@ class GameTutorialScene: BasicScene {
     if !gamePaused {
       doPause()
     }
+    if connected {
+      controllerToShipColor()
+    }
   }
 
   /// Bind controller buttons to actions
@@ -417,6 +427,7 @@ class GameTutorialScene: BasicScene {
     // think that's easier to hit when in the middle of playing.
     Globals.controller.setAction(\Controller.extendedGamepad?.buttonX) { [weak self] in self?.pauseContinueButton() }
     Globals.controller.setAction(\Controller.extendedGamepad?.buttonMenu) { [weak self] in self?.pauseContinueButton() }
+    controllerToShipColor()
     Globals.controller.changedDelegate = self
   }
 
@@ -433,6 +444,37 @@ class GameTutorialScene: BasicScene {
     } else {
       return joystickDirection
     }
+  }
+
+  /// If a controller is in use, return an action for a player explosion on the
+  /// controller
+  func controllerExplosion() -> SKAction? {
+    if !Globals.controller.connected {
+      return nil
+    }
+    // About 1 second total time for the flashing
+    let hold = 0.17
+    let yellow = SKAction.sequence([
+      .run { Globals.controller.setColor("yellow") },
+      .wait(forDuration: hold)
+      ])
+    let altColor = shipColor == "orange" ? "red" : "orange"
+    let alternate = SKAction.sequence([
+      .run { Globals.controller.setColor(altColor) },
+      .wait(forDuration: hold)
+      ])
+    let flash = SKAction.repeat(.sequence([yellow, alternate]), count: 3)
+    let shipCol = SKAction.run { [weak self] in self?.controllerToShipColor() }
+    return .sequence([flash, shipCol])
+  }
+
+  /// Set the game controller to diplay the ship's color
+  func controllerToShipColor() {
+    // Don't use "ship" here, since that's based on the stored preferences.  Those
+    // might have been set based on Game Center achievements (some ship colors being
+    // unlocked) when Game Center is disabled now, or a preference for retro mode and
+    // they've since warped at 88 MPH during this game.
+    Globals.controller.setColor(retroEnabled ? "white" : shipColor)
   }
 
   // MARK: - Pause, continue, and quit
@@ -576,6 +618,8 @@ class GameTutorialScene: BasicScene {
   func destroyPlayer() {
     audio.soundEffect(.playerExplosion, at: player.position)
     addToPlayfield(player.explode())
+    if let controllerExplode = controllerExplosion() {
+      run(controllerExplode)
     }
   }
 
@@ -664,6 +708,7 @@ class GameTutorialScene: BasicScene {
     setRetroFilter(enabled: enabled)
     player.setAppearance(to: enabled ? .retro : .modern)
     reservesDisplay.retroMode = enabled
+    controllerToShipColor()
     if !enabled {
       onlyRetro = false
     }

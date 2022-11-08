@@ -87,6 +87,8 @@ class Controller {
       controller.playerIndex = .indexUnset
     }
     chosenController?.playerIndex = .index1
+    // Set a default color if there's a light
+    setColor("ship")
   }
 
   // MARK: - Button actions
@@ -189,6 +191,40 @@ class Controller {
       return stick2
     } else {
       return stick1
+    }
+  }
+
+  // MARK: - Color
+
+  /// Set the light on the chosen controller (if it exists) to a color.  I based this
+  /// on a Dual Shock 4 light.  Nominally the controller's light can be set to some
+  /// RGB value, but trying to match `AppAppearance` colors is pointless.  I've
+  /// instead just picked very saturated colors according to some names.
+  /// - Parameter color: The desired color name
+  func setColor(_ color: String) {
+    guard let light = chosenController?.light else { return }
+    switch color {
+    case "blue":
+      light.color = GCColor(red: 0, green: 0, blue: 1)
+    case "green":
+      light.color = GCColor(red: 0, green: 1, blue: 0)
+    case "red":
+      light.color = GCColor(red: 1, green: 0, blue: 0)
+    case "orange":
+      light.color = GCColor(red: 1, green: 0.3, blue: 0)
+    case "yellow":
+      light.color = GCColor(red: 1, green: 1, blue: 0)
+    case "white":
+      light.color = GCColor(red: 1, green: 1, blue: 1)
+    case "ship":
+      // Choose based on ship color selection preference
+      if UserData.retroMode.value {
+        setColor("white")
+      } else {
+        setColor(UserData.shipColor.value)
+      }
+    default:
+      light.color = GCColor(red: 0, green: 0, blue: 1)
     }
   }
 }

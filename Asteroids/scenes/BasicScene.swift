@@ -1451,6 +1451,9 @@ class BasicScene: SKScene, SKPhysicsContactDelegate, ControllerChangedDelegate {
     Globals.conformingPhysicsCache.stats()
     Globals.asteroidSplitEffectsCache.stats()
     Globals.sounds.stats()
+    // If they died in a game and then rage quit then the controller light might have
+    // been in the middle of flashing, so go back to the standard color
+    Globals.controller.setColor("ship")
   }
 
   /// Subclasses should override this if needed
