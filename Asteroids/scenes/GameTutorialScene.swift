@@ -22,8 +22,10 @@ import os.log
 /// resuming/quitting, and the special retro mode (though retro mode never gets
 /// enabled in the tutorial).
 class GameTutorialScene: BasicScene {
-  /// Set to true when the pause button is pressed
+  /// Set to `true` when the pause button is pressed
   var gamePaused = false
+  /// Is pausing allowed?  Becomes `false` when going to scene switch at the end of a game
+  var pauseAllowed = true
   /// The touch control to pause the game
   var pauseButton: Touchable!
   /// The button to continue the game (usually hidden)
@@ -378,6 +380,11 @@ class GameTutorialScene: BasicScene {
 
   /// Action for a button to pause or continue the game
   func pauseContinueButton() {
+    // This can be invoked either by an on-screen pause button or by a button on the
+    // game controller.  If disablePause() has been called (preventing a scene
+    // transition), the on-screen button isn't available to press.  Make sure that
+    // the controller can't activate this either.
+    guard pauseAllowed else { return }
     if gamePaused {
       doContinue()
     } else {
@@ -527,7 +534,7 @@ class GameTutorialScene: BasicScene {
   /// the `doQuit` should not be called
   func disablePause() {
     assert(continueButton.isHidden && quitButton.isHidden)
-    pauseButton.isUserInteractionEnabled = false
+    pauseAllowed = false
     pauseButton.run(.sequence([.fadeOut(withDuration: 0.25), .hide()]))
   }
 
