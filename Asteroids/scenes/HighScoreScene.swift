@@ -124,8 +124,8 @@ func abbreviatedName(_ playerName: String) -> String {
 /// This is automatically shown at the end of a game, and can also be invoked from
 /// the main menu.
 class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
-  /// The button that invokes Game Center, if that's enabled
-  var gcButton: Button!
+  /// The buttons that invoke Game Center, if that's enabled
+  var gcButtons = [Button]()
   /// This is `true` when I'm presenting the view controller supplied by Game Center
   /// with achievements and high scores
   var showingGCVC = false
@@ -262,19 +262,23 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
     let menuButton = Button(imageNamed: "homebutton", imageColor: AppAppearance.buttonColor, size: buttonSize)
     menuButton.action = { [unowned self] in self.mainMenu() }
     // Go the the Game Center interface
-    gcButton = Button(imageNamed: "gamecenter", imageColor: AppAppearance.yellow, size: buttonSize)
-    // Popping up the Game Center view controller pauses the scene, so the sound
-    // would get cut off
-    gcButton.makeSound = false
-    gcButton.action = { [unowned self] in self.showGameCenter() }
-    // The Game Center button might need to be disabled
-    if !Globals.gcInterface.enabled {
-      gcButton.disable()
+    for gcIcon in ["gamecenter", "highscoresbutton"] {
+      let gcButton = Button(imageNamed: gcIcon, imageColor: AppAppearance.yellow, size: buttonSize)
+      gcButtons.append(gcButton)
+      // Popping up the Game Center view controller pauses the scene, so the sound
+      // would get cut off
+      gcButton.makeSound = false
+      let gcType: GKGameCenterViewControllerState = gcIcon == "gamecenter" ? .achievements : .leaderboards
+      gcButton.action = { [unowned self] in self.showGameCenter(gcType) }
+      // The Game Center button might need to be disabled
+      if !Globals.gcInterface.enabled {
+        gcButton.disable()
+      }
     }
     // If the Game Center state changes, I have to change the button's
     // enabled/disabled state too.
     NotificationCenter.default.addObserver(self, selector: #selector(gcStateChanged), name: .authenticationChanged, object: nil)
-    buttons = [menuButton, playButton, gcButton]
+    buttons = [menuButton, playButton] + gcButtons
     defaultFocus = playButton
     let bottomHstack = horizontalStack(nodes: buttons, minSpacing: buttonSpacing)
     bottomHstack.position = CGPoint(x: bottomHstack.position.x,
@@ -403,15 +407,15 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
 
   // MARK: - Game Center
 
-  /// The Game Center status has changed, so update `gcButton`'s enabled/disabled
+  /// The Game Center status has changed, so update `gcButtons` enabled/disabled
   /// state to match
   /// - Parameter notification: A notification indicating what happened
   @objc func gcStateChanged(_ notification: Notification) {
     os_log("High score scene got notification of Game Center state change", log: .app, type: .debug)
     if notification.object as? Bool ?? false {
-      gcButton.enable()
+      gcButtons.forEach { $0.enable() }
     } else {
-      gcButton.disable()
+      gcButtons.forEach { $0.disable() }
     }
   }
 
@@ -419,13 +423,13 @@ class HighScoreScene: BasicScene, GKGameCenterControllerDelegate {
   override var forcePause: Bool { showingGCVC }
 
   /// Display the view controller from Game Center with leaderboards and achievements
-  func showGameCenter() {
+  func showGameCenter(_ state: GKGameCenterViewControllerState) {
     guard let rootVC = view?.window?.rootViewController, Globals.gcInterface.enabled else {
       os_log("Can't show Game Center", log: .app, type: .error)
       return
     }
     os_log("HighScoreScene will show Game Center", log: .app, type: .debug)
-    let gcvc = GKGameCenterViewController(state: .achievements)
+    let gcvc = GKGameCenterViewController(state: state)
     gcvc.gameCenterDelegate = self
     isPaused = true
     showingGCVC = true
