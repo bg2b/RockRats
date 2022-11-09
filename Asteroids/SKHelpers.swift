@@ -58,6 +58,14 @@ extension SKNode {
     guard let body = physicsBody else { fatalError("Node \(name ?? "<unknown name>") is missing a physics body") }
     return body
   }
+
+  /// Find the scene coordinates of a node
+  /// - Returns: The scene coordinates
+  func positionInScene() -> CGPoint {
+    guard let parent else { fatalError("Node \(name ?? "<unknown name>") has no parent") }
+    guard let scene else { fatalError("Node \(name ?? "<unknown name>")  has no scene") }
+    return scene.convert(position, from: parent)
+  }
 }
 
 // MARK: - SKSpriteNode helpers

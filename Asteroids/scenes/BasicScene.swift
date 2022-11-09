@@ -688,6 +688,71 @@ class BasicScene: SKScene, SKPhysicsContactDelegate, ControllerChangedDelegate {
     }
   }
 
+  /// Move the focus up or down in the array of buttons.  The approach is to find the
+  /// current button's row, then consider all buttons that are just above or below.
+  /// The new focus button is chosen so as to be as close as possible horizontally.
+  /// If no unique button is closest horizontally, prefer buttons that are closer to
+  /// the center.  And if distance to center are about the same, prefer left.
+  /// - Parameter direction: 1 for moving up, -1 for moving down
+  func focusVertical(direction: Int) {
+    // Make sure there's a focused button
+    guard !buttons.isEmpty, let currentFocus = focusedButton else { return }
+    // Find unique ys and sort
+    let ys = Array(Set(buttons.map { $0.positionInScene().y })).sorted()
+    // If only one row of buttons, don't do anything
+    guard ys.count > 1 else { return }
+    // Where's the current focus?
+    let currentPosition = currentFocus.positionInScene()
+    // Which row is that?
+    let currentRow = ys.firstIndex(of: currentPosition.y)!
+    // What's the desired row (wrapping around top to bottom)?
+    var targetRow = currentRow + direction
+    if targetRow >= ys.count {
+      targetRow -= ys.count
+    } else if targetRow < 0 {
+      targetRow += ys.count
+    }
+    // Finally I know which y is wanted
+    let targetY = ys[targetRow]
+    // Scan for best target...
+    var bestTarget: (Button, CGPoint)?
+    for button in buttons {
+      guard button.enabled else { continue }
+      let buttonPosition = button.positionInScene()
+      guard buttonPosition.y == targetY else { continue }
+      // This button is enabled and on the desired row...
+      if let currentBest = bestTarget {
+        // There's already a potential target.  Compare x distance to the current
+        // focus position
+        let thisDeltaX = abs(buttonPosition.x - currentPosition.x)
+        let bestDeltaX = abs(currentBest.1.x - currentPosition.x)
+        if thisDeltaX < 0.9 * bestDeltaX {
+          // This is a closer target
+          bestTarget = (button, buttonPosition)
+        } else if 0.9 * thisDeltaX < bestDeltaX {
+          // It's about the same distance, check for distance from center
+          let thisCenterX = abs(buttonPosition.x)
+          let bestCenterX = abs(currentBest.1.x)
+          if thisCenterX < 0.9 * bestCenterX ||
+              (0.9 * thisCenterX < bestCenterX && buttonPosition.x < currentBest.1.x) {
+            // Either this button is closer to the center, or it's about the same
+            // distance but to the left
+            bestTarget = (button, buttonPosition)
+          }
+        }
+      } else {
+        // I haven't found any other potential target yet
+        bestTarget = (button, buttonPosition)
+      }
+    }
+    if let target = bestTarget?.0 {
+      // Success!
+      currentFocus.unfocus()
+      target.focus()
+      focusedButton = target
+    }
+  }
+
   /// Default method to handle a controller change
   ///
   /// This either removes the focus from all buttons when the controller disconnects,
@@ -725,6 +790,8 @@ class BasicScene: SKScene, SKPhysicsContactDelegate, ControllerChangedDelegate {
     Globals.controller.setAction(\Controller.extendedGamepad?.buttonA) { [weak self] in _ = self?.selectMenuItem() }
     Globals.controller.setAction(\Controller.extendedGamepad?.dpad.left) { [weak self] in self?.focusPrevious() }
     Globals.controller.setAction(\Controller.extendedGamepad?.dpad.right) { [weak self] in self?.focusNext() }
+    Globals.controller.setAction(\Controller.extendedGamepad?.dpad.up) { [weak self] in self?.focusVertical(direction: 1) }
+    Globals.controller.setAction(\Controller.extendedGamepad?.dpad.down) { [weak self] in self?.focusVertical(direction: -1) }
     if Globals.controller.connected {
       setFocus(defaultFocus)
     } else {
