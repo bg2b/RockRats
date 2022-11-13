@@ -354,7 +354,7 @@ class GameScene: GameTutorialScene {
       // This is a rough estimate of how many UFOs they'll encounter before they
       // manage to destroy all the asteroids.  Empirically it's an underestimate for low
       // waves when they might try to farm, but gets better by about wave 4 or 5.
-      let expectedUfos = Double(numAsteroids) / 2.5
+      let expectedUfos = min(Double(numAsteroids) / 2.5, 3)
       bonus += asteroidScore + Int(expectedUfos * avgUfoScore)
     }
   }
