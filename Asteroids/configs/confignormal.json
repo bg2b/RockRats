@@ -108,6 +108,14 @@
       "ufoAccuracy": [0.1, 0, 0.075],
       "ufoMeanShotTime": [1, 0, 0.75],
       "asteroidSpeedBoost": 1.4
+    },
+    {
+      "waveNumber": 18,
+      "meanUFOTime": 15
+    },
+    {
+      "waveNumber": 19,
+      "meanUFOTime": 10
     }
   ]
 }
