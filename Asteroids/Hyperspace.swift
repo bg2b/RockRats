@@ -149,16 +149,21 @@ extension Globals {
   static let fanFoldShaders = ShaderCache { fanFoldShader(forTexture: $0) }
 }
 
-func precompileHyperspaceShaders() {
+func precompileHyperspaceShaders() -> [(SKTexture, SKShader)] {
+  var result = [(SKTexture, SKShader)]()
   for imageName in ["ship_blue", "ship_green", "ship_red", "ship_orange", "retroship"] {
     let texture = Globals.textureCache.findTexture(imageNamed: imageName)
-    _ = Globals.swirlInShaders.getShader(texture: texture)
-    _ = Globals.swirlOutShaders.getShader(texture: texture)
+    let swirlIn = Globals.swirlInShaders.getShader(texture: texture)
+    result.append((texture, swirlIn))
+    let swirlOut = Globals.swirlOutShaders.getShader(texture: texture)
+    result.append((texture, swirlOut))
   }
   for imageName in ["ufo_green", "ufo_blue", "ufo_red", "developers"] {
     let texture = Globals.textureCache.findTexture(imageNamed: imageName)
-    _ = Globals.fanFoldShaders.getShader(texture: texture)
+    let fanFold = Globals.fanFoldShaders.getShader(texture: texture)
+    result.append((texture, fanFold))
   }
+  return result
 }
 
 // MARK: - Create hyperspace effects

@@ -1512,6 +1512,7 @@ class BasicScene: SKScene, SKPhysicsContactDelegate, ControllerChangedDelegate {
   /// Subclasses should override this to do stuff like start a new game
   override func didMove(to view: SKView) {
     os_log("%{public}s didMove to view", log: .app, type: .debug, name!)
+    precompileShaders()
     Globals.textureCache.stats()
     Globals.spriteCache.stats()
     Globals.explosionCache.stats()
@@ -1527,6 +1528,29 @@ class BasicScene: SKScene, SKPhysicsContactDelegate, ControllerChangedDelegate {
   override func willMove(from view: SKView) {
     os_log("%s willMove from view", log: .app, type: .debug, name!)
     removeAllActions()
+  }
+
+  // MARK: - Shader precompilation
+
+  /// Force compilation of shaders that can otherwise cause noticeable lag.  The
+  /// documentation seems to suggest that just making an `SKShader` with the
+  /// appropriate source should suffice, but it does not appear to be correct.  Once
+  /// a scene has moved to the view, the view can be used to render the appropriate
+  /// nodes, which will force the compilation.  Since this happens before the scene
+  /// really gets going, it's not really visible.
+  func precompileShaders() {
+    guard Globals.shadersNeedCompilation, let view else { return }
+    os_log("Precompiling shaders", log: .app, type: .debug)
+    for texturesAndShaders in precompileHyperspaceShaders() {
+      let node = SKSpriteNode(texture: texturesAndShaders.0)
+      node.shader = texturesAndShaders.1
+      _ = view.texture(from: node)
+    }
+    for node in preloadSkywritingCaches() {
+      _ = view.texture(from: node)
+    }
+    os_log("Shader compilation finished", log: .app, type: .debug)
+    Globals.shadersNeedCompilation = false
   }
 
   // MARK: - Main update loop
@@ -1574,4 +1598,8 @@ class BasicScene: SKScene, SKPhysicsContactDelegate, ControllerChangedDelegate {
   override func didFinishUpdate() {
     os_signpost(.end, log: .poi, name: "3_physics", signpostID: signpostID)
   }
+}
+
+extension Globals {
+  static var shadersNeedCompilation = true
 }

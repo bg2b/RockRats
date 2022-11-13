@@ -1010,7 +1010,8 @@ let skywritingCharacterCaches: [SkywritingCharacterCache] = {
 }()
 
 /// Load skywriting column caches with most of what will be needed
-func preloadSkywritingCaches() {
+func preloadSkywritingCaches() -> [SKNode] {
+  var result = [SKNode]()
   for cache in skywritingCharacterCaches {
     // One of everything
     for (char, _) in skywritingFont {
@@ -1024,8 +1025,10 @@ func preloadSkywritingCaches() {
     for char in letters.lowercased() {
       _ = cache.getCharacter(char)
     }
+    result.append(cache.getCharacter("A"))
     cache.stats()
   }
+  return result
 }
 
 // MARK: - Skywriting
