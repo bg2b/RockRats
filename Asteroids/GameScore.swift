@@ -121,11 +121,12 @@ struct GameScore: Equatable {
 /// - Parameters:
 ///   - score1: The first score
 ///   - score2: The second score
-/// - Returns: `true` means same player ID, same points, very close date
+/// - Returns: `true` means same points, very close date
 func sameScore(_ score1: GameScore, _ score2: GameScore) -> Bool {
-  // The date on different returns from Game Center seems to get munged a little,
-  // so allow some slack when comparing.
-  return score1.playerID == score2.playerID &&
-    score1.points == score2.points &&
-    abs(score1.date - score2.date) <= 1
+  // The date on different returns from Game Center seems to get munged a little, so
+  // allow some slack when comparing.  Originally I was also checking playerID, but I
+  // think Game Center also tweaks those a little between leaderboards, maybe some
+  // privacy something?  I found that on the daily and weekly leaderboards, I'd get
+  // what was obviously the same score but with different IDs.
+  return score1.points == score2.points && abs(score1.date - score2.date) <= 1
 }
