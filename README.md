@@ -1,4 +1,25 @@
-# Rock Rats #
+# Rock Rats
+
+## Updates for version 1.2.0
+
+- Selectable starting wave for faster-paced games
+\
+If the starting wave is cleared, there's a bonus that makes scores are comparable with
+starting from wave 1.  However, you get at most one extra life while skipping.
+- Official game controller support
+\
+Rock Rats uses the standard iOS controller support now, so remapping of controls can
+be done from settings
+- Haptics support (on iPhone or via a game controller)
+- Weekly and daily recurring leaderboards
+- A few new achievements
+- Play area limited to at most 3:2 aspect ratio
+\
+This makes scores more comparable between iPad and iPhone
+- Updates for iOS 15+, removal of dependence on deprecated functionality
+- A few minor tweaks and bug fixes
+
+## Description
 
 This is a joint project with [Footkick72](https://github.com/Footkick72), our first iOS
 game, released on the App Store as [Rock Rats](https://apps.apple.com/app/id1481795281).
